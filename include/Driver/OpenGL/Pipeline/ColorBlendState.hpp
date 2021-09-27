@@ -2,7 +2,7 @@
 * @Author: gpinchon
 * @Date:   2021-09-26 00:00:00
 * @Last Modified by:   gpinchon
-* @Last Modified time: 2021-09-26 19:30:29
+* @Last Modified time: 2021-09-27 22:56:42
 */
 #pragma once
 
@@ -10,11 +10,10 @@
 
 #include <Driver/OpenGL/Blend.hpp>
 #include <Driver/OpenGL/Logic.hpp>
+
 #include <GL/glew.h>
 
 #include <array>
-#include <functional>
-#include <stdexcept>
 
 namespace OCRA::Pipeline::ColorBlendState {
 struct Impl {
@@ -30,15 +29,15 @@ struct Impl {
             , alphaBlendOperation(GetGLOperation(a_AttachmentState.alphaBlendOperation))
         {
         }
-        bool enable { false }; //is blending enabled ?
-        GLenum srcColorBlendFactor { GL_ONE };
-        GLenum dstColorBlendFactor { GL_ZERO };
-        GLenum colorBlendOperation { GL_FUNC_ADD };
-        GLenum srcAlphaBlendFactor { GL_ONE };
-        GLenum dstAlphaBlendFactor { GL_ZERO };
-        GLenum alphaBlendOperation { GL_FUNC_ADD };
-        Blend::ColorMask colorMask { Blend::R | Blend::G | Blend::B | Blend::A };
-        void operator()(const Uint8& a_index) const
+        bool enable; //is blending enabled ?
+        GLenum srcColorBlendFactor;
+        GLenum dstColorBlendFactor;
+        GLenum colorBlendOperation;
+        GLenum srcAlphaBlendFactor;
+        GLenum dstAlphaBlendFactor;
+        GLenum alphaBlendOperation;
+        Blend::ColorMask colorMask;
+        void operator()(const Uint8& a_index) const noexcept
         {
             enable ? glEnablei(GL_BLEND, a_index) : glDisablei(GL_BLEND, a_index);
             glBlendFuncSeparatei(
@@ -71,12 +70,12 @@ struct Impl {
         }())
     {
     }
-    const bool logicOpEnable { false };
-    const GLenum logicOp { GL_COPY };
+    const bool logicOpEnable;
+    const GLenum logicOp;
     const Info::BlendConstants blendConstants;
-    const Uint8 attachementCount { 0 };
-    const std::array<AttachmentState, FrameBuffer::MaxColorAttachments> attachments {};
-    void operator()(void) const
+    const Uint8 attachementCount;
+    const std::array<AttachmentState, FrameBuffer::MaxColorAttachments> attachments;
+    void operator()(void) const noexcept
     {
         logicOpEnable ? glEnable(GL_COLOR_LOGIC_OP) : glDisable(GL_COLOR_LOGIC_OP);
         glLogicOp(logicOp);
@@ -90,7 +89,7 @@ struct Impl {
     }
 };
 //compiles the specified Color Blend State into a callback
-inline auto Compile(const Info& a_Info)
+inline auto Compile(const Device::Handle& a_Device, const Info& a_Info)
 {
     return Impl(a_Info);
 }

@@ -4,6 +4,7 @@
 * @Last Modified by:   gpinchon
 * @Last Modified time: 2021-09-26 14:28:36
 */
+#pragma once
 
 #include <Compare.hpp>
 #include <Stencil.hpp>

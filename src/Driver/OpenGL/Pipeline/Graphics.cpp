@@ -11,8 +11,10 @@
 #include <map>
 #include <vector>
 
+#include <Driver/OpenGL/Pipeline/DepthStencilState.hpp>
 #include <Driver/OpenGL/Pipeline/ColorBlendState.hpp>
 #include <Driver/OpenGL/Pipeline/ShaderStage.hpp>
+
 #include <GL/glew.h>
 
 namespace OCRA::Pipeline::Graphics {
@@ -24,6 +26,7 @@ struct Impl {
     Info info;
     GLuint shaderProgram { 0 };
     std::function<void()> colorBlendState;
+    std::function<void()> depthStencilState;
 };
 static Handle s_CurrentHandle = 0;
 static std::map<Handle, Impl> s_GraphicsPipelines;
@@ -32,7 +35,8 @@ Handle Create(const Device::Handle& a_Device, const Info& a_Info)
     Impl impl;
     impl.info = a_Info;
     impl.shaderProgram = ShaderStage::Compile(a_Device, a_Info.shaderStage);
-    impl.colorBlendState = ColorBlendState::Compile(a_Info.colorBlendState);
+    impl.colorBlendState = ColorBlendState::Compile(a_Device, a_Info.colorBlendState);
+    impl.depthStencilState = DepthStencilState::Compile(a_Device, a_Info.depthStencilState);
     ++s_CurrentHandle;
     s_GraphicsPipelines[s_CurrentHandle] = impl;
     return s_CurrentHandle;
