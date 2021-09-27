@@ -44,9 +44,14 @@ set (CMAKE_CXX_FLAGS_RELEASE "-Ox")
 
 if (RenderingAPI STREQUAL "OpenGL")
 set(OCRA_HEADER_FILES ${OCRA_HEADER_FILES}
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Driver/OpenGL/Blend.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Driver/OpenGL/Compare.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Driver/OpenGL/Logic.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Driver/OpenGL/Stencil.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Driver/OpenGL/Pipeline/ShaderStage.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Driver/OpenGL/Pipeline/ColorBlendState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Driver/OpenGL/Pipeline/VertexInputState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Driver/OpenGL/Pipeline/DepthStencilState.hpp
 )
 set(OCRA_SOURCE_FILES ${OCRA_SOURCE_FILES}
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Driver/OpenGL/Queue.cpp

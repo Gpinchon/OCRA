@@ -6,41 +6,47 @@
 */
 #pragma once
 
+#include <Logic.hpp>
+
+#include <stdexcept>
+
+#include <GL/glew.h>
+
 namespace OCRA::Logic {
-static inline auto GetGLLogicOperation(const Logic::Operation& a_Operation)
+static inline auto GetGLOperation(const Operation& a_Operation)
 {
     switch (a_Operation) {
-    case Logic::Operation::Clear:
+    case Operation::Clear:
         return GL_CLEAR;
-    case Logic::Operation::And:
+    case Operation::And:
         return GL_AND;
-    case Logic::Operation::AndReverse:
+    case Operation::AndReverse:
         return GL_AND_REVERSE;
-    case Logic::Operation::Copy:
+    case Operation::Copy:
         return GL_COPY;
-    case Logic::Operation::AndInverted:
+    case Operation::AndInverted:
         return GL_AND_INVERTED;
-    case Logic::Operation::NoOp:
+    case Operation::NoOp:
         return GL_NOOP;
-    case Logic::Operation::Xor:
+    case Operation::Xor:
         return GL_XOR;
-    case Logic::Operation::Or:
+    case Operation::Or:
         return GL_OR;
-    case Logic::Operation::Nor:
+    case Operation::Nor:
         return GL_NOR;
-    case Logic::Operation::Equivalent:
+    case Operation::Equivalent:
         return GL_EQUIV;
-    case Logic::Operation::Invert:
+    case Operation::Invert:
         return GL_INVERT;
-    case Logic::Operation::OrReverse:
+    case Operation::OrReverse:
         return GL_OR_REVERSE;
-    case Logic::Operation::CopyInverted:
+    case Operation::CopyInverted:
         return GL_COPY_INVERTED;
-    case Logic::Operation::OrInverted:
+    case Operation::OrInverted:
         return GL_OR_INVERTED;
-    case Logic::Operation::Nand:
+    case Operation::Nand:
         return GL_NAND;
-    case Logic::Operation::Set:
+    case Operation::Set:
         return GL_SET;
     default:
         throw std::runtime_error("Unknown Logic Operation");

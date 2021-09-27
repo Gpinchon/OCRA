@@ -9,9 +9,17 @@
 #include <Handle.hpp>
 #include <Pipeline/VertexInputState.hpp>
 
+#include <GL/glew.h>
 #include <functional>
 
 namespace OCRA::Pipeline::VertexInputState {
+struct Impl {
+};
 //compiles the specified Vertex Input State into a callback
-std::function<void()> Compile(const Device::Handle& a_Device, const Info& a_Info);
+inline auto Compile(const Device::Handle& a_Device, const Info& a_Info) {
+
+	glVertexAttribBinding(
+		GLuint attribindex,
+		GLuint bindingindex);
+}
 }

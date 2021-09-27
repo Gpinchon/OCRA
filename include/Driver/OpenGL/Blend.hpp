@@ -2,72 +2,74 @@
 * @Author: gpinchon
 * @Date:   2021-09-26 16:43:43
 * @Last Modified by:   gpinchon
-* @Last Modified time: 2021-09-26 16:44:21
+* @Last Modified time: 2021-09-27 19:48:31
 */
 #pragma once
+
+#include <Blend.hpp>
 
 #include <GL/glew.h>
 
 #include <stdexcept>
 
 namespace OCRA::Blend {
-static inline auto GetGLBlendOperation(const Blend::Operation& a_Operation)
+static inline auto GetGLOperation(const Operation& a_Operation)
 {
     switch (a_Operation) {
-    case Blend::Operation::Add:
+    case Operation::Add:
         return GL_FUNC_ADD;
-    case Blend::Operation::Substract:
+    case Operation::Substract:
         return GL_FUNC_SUBTRACT;
-    case Blend::Operation::ReverseSubstract:
+    case Operation::ReverseSubstract:
         return GL_FUNC_REVERSE_SUBTRACT;
-    case Blend::Operation::Min:
+    case Operation::Min:
         return GL_MIN;
-    case Blend::Operation::Max:
+    case Operation::Max:
         return GL_MAX;
     default:
         throw std::runtime_error("Unknown Blend Operation");
     }
 }
-static inline auto GetGLBlendFactor(const Blend::Factor& a_Factor)
+static inline auto GetGLFactor(const Factor& a_Factor)
 {
     switch (a_Factor) {
-    case Blend::Factor::Zero:
+    case Factor::Zero:
         return GL_ZERO;
-    case Blend::Factor::One:
+    case Factor::One:
         return GL_ONE;
-    case Blend::Factor::SrcColor:
+    case Factor::SrcColor:
         return GL_SRC_COLOR;
-    case Blend::Factor::OneMinusSrcColor:
+    case Factor::OneMinusSrcColor:
         return GL_ONE_MINUS_SRC_COLOR;
-    case Blend::Factor::DstColor:
+    case Factor::DstColor:
         return GL_DST_COLOR;
-    case Blend::Factor::OneMinusDstColor:
+    case Factor::OneMinusDstColor:
         return GL_ONE_MINUS_DST_COLOR;
-    case Blend::Factor::SrcAlpha:
+    case Factor::SrcAlpha:
         return GL_SRC_ALPHA;
-    case Blend::Factor::OneMinusSrcAlpha:
+    case Factor::OneMinusSrcAlpha:
         return GL_ONE_MINUS_SRC_ALPHA;
-    case Blend::Factor::DstAlpha:
+    case Factor::DstAlpha:
         return GL_DST_ALPHA;
-    case Blend::Factor::OneMinusDstAlpha:
+    case Factor::OneMinusDstAlpha:
         return GL_ONE_MINUS_DST_ALPHA;
-    case Blend::Factor::ConstantColor:
+    case Factor::ConstantColor:
         return GL_CONSTANT_COLOR;
-    case Blend::Factor::OneMinusConstantColor:
+    case Factor::OneMinusConstantColor:
         return GL_ONE_MINUS_CONSTANT_COLOR;
-    case Blend::Factor::ConstantAlpha:
+    case Factor::ConstantAlpha:
         return GL_CONSTANT_ALPHA;
-    case Blend::Factor::OneMinusConstantAlpha:
+    case Factor::OneMinusConstantAlpha:
         return GL_ONE_MINUS_CONSTANT_ALPHA;
-    case Blend::Factor::SrcAlphaSaturate:
+    case Factor::SrcAlphaSaturate:
         return GL_SRC_ALPHA_SATURATE;
-    case Blend::Factor::Src1Color:
+    case Factor::Src1Color:
         return GL_SRC1_COLOR;
-    case Blend::Factor::OneMinusSrc1Color:
+    case Factor::OneMinusSrc1Color:
         return GL_ONE_MINUS_SRC1_COLOR;
-    case Blend::Factor::Src1Alpha:
+    case Factor::Src1Alpha:
         return GL_SRC1_ALPHA;
-    case Blend::Factor::OneMinusSrc1Alpha:
+    case Factor::OneMinusSrc1Alpha:
         return GL_ONE_MINUS_SRC1_ALPHA;
     default:
         throw std::runtime_error("Unknown Blend Factor");
