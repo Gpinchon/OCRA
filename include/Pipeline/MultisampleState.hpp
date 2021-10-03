@@ -7,23 +7,16 @@
 #pragma once
 
 #include <Scalar.hpp>
+#include <Sample.hpp>
+
+#include <array>
 
 namespace OCRA::Pipeline::MultisampleState {
-enum class Sample {
-    Count1 = 1,
-    Count2 = 2,
-    Count4 = 4,
-    Count8 = 8,
-    Count16 = 16,
-    Count32 = 32,
-    Count64 = 64,
-    MaxValue
-};
 struct Info {
-    Sample rasterizationSamples { Sample::Count1 };
+    Sample::Count rasterizationSamples { Sample::Count::Count1 };
     bool sampleShadingEnable { false };
     float minSampleShading { 1 };
-    Uint32 sampleMasks[32]; //sampleMask size == rasterizationSamples / 32
+    std::array<Uint32, 32> sampleMasks; //sampleMask size == rasterizationSamples / 32
     bool alphaToCoverageEnable { false };
     bool alphaToOneEnable { false };
 };

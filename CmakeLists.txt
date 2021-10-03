@@ -1,34 +1,10 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.19)
 cmake_policy(SET CMP0074 NEW)
 
 project(OCRA LANGUAGES CXX)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(CMAKE_CXX_STANDARD 17)
-
-include(FetchContent)
-
-FetchContent_Declare(
-  GLEW
-  GIT_REPOSITORY  https://github.com/Perlmint/glew-cmake.git
-  GIT_TAG     glew-cmake-2.2.0
-)
-
-FetchContent_GetProperties(GLEW)
-if(NOT GLEW_POPULATED)
-  FetchContent_Populate(GLEW)
-  message(STATUS "Fetched GLEW to ${glew_SOURCE_DIR}")
-  option(ONLY_LIBS "Do not build executables" ON)
-  option(glew-cmake_BUILD_STATIC "Build the static glew library" ON)
-  option(glew-cmake_BUILD_SHARED "Build the shared glew library" OFF)
-  add_subdirectory(${glew_SOURCE_DIR} ${glew_BINARY_DIR})
-  add_library(GLEW::glew_s ALIAS libglew_static)
-  add_library(GLEW::GLEW ALIAS libglew_static)
-  set_target_properties(libglew_static PROPERTIES FOLDER "3rdparty")
-  set(GLEW_FOUND 1)
-  set(GLEW_INCLUDE_DIR ${glew_SOURCE_DIR}/include)
-  set(GLEW_LIBRARIES GLEW::glew GLEW::glew_s)
-endif()
 
 #[[Rendering API]]
 set(RenderingAPI "OpenGL" CACHE STRING
@@ -42,30 +18,7 @@ set (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -DDEBUG_M
 set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG_MOD")
 set (CMAKE_CXX_FLAGS_RELEASE "-Ox")
 
-if (RenderingAPI STREQUAL "OpenGL")
-set(OCRA_HEADER_FILES ${OCRA_HEADER_FILES}
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Driver/OpenGL/Blend.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Driver/OpenGL/Compare.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Driver/OpenGL/Logic.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Driver/OpenGL/Stencil.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Driver/OpenGL/Pipeline/ShaderStage.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Driver/OpenGL/Pipeline/ColorBlendState.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Driver/OpenGL/Pipeline/VertexInputState.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Driver/OpenGL/Pipeline/DepthStencilState.hpp
-)
-set(OCRA_SOURCE_FILES ${OCRA_SOURCE_FILES}
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Driver/OpenGL/Queue.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Driver/OpenGL/ViewPort.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Driver/OpenGL/Buffer/Buffer.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Driver/OpenGL/Buffer/View.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Driver/OpenGL/Image/Image.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Driver/OpenGL/Image/View.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Driver/OpenGL/Pipeline/Graphics.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Driver/OpenGL/Shader/Module.cpp
-)
-endif (RenderingAPI STREQUAL "OpenGL")
-
-set(OCRA_HEADER_FILES ${OCRA_HEADER_FILES}
+set(OCRA_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Blend.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Compare.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Context.hpp
@@ -82,8 +35,6 @@ set(OCRA_HEADER_FILES ${OCRA_HEADER_FILES}
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Stencil.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/ViewPort.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Window.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Buffer/Buffer.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Buffer/View.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Descriptor/Descriptor.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Descriptor/Layout/Binding.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Descriptor/Layout/Layout.hpp
@@ -107,17 +58,21 @@ set(OCRA_HEADER_FILES ${OCRA_HEADER_FILES}
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Shader/Module.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/State/Clear.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/State/Draw.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Vertex/Array.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Vertex/Buffer.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Vertex/Elements.hpp
 )
 
-add_library(OCRA STATIC ${OCRA_SOURCE_FILES} ${OCRA_HEADER_FILES})
-
+add_library(OCRA STATIC ${OCRA_HEADER_FILES})
+set_target_properties(OCRA PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories(OCRA PUBLIC
   "${CMAKE_CURRENT_SOURCE_DIR}/include"
 )
 
-target_link_libraries(OCRA PUBLIC GLEW::GLEW)
+if (RenderingAPI STREQUAL "OpenGL")
+add_subdirectory(Driver/OpenGL)
+add_library(OCRA::Impl ALIAS OCRAImpl)
+target_link_libraries(OCRA PUBLIC OCRA::Impl)
+endif (RenderingAPI STREQUAL "OpenGL")
 
 if(MSVC_IDE)
   set(CMAKE_DEBUG_POSTFIX "d")
@@ -141,5 +96,4 @@ if(MSVC_IDE)
   # Run macro
   GroupSources(src)
   GroupSources(include)
-  #GroupSources(shaders)
 endif()

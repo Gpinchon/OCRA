@@ -7,27 +7,49 @@
 
 #pragma once
 
+#include <Handle.hpp>
 #include <Scalar.hpp>
 
-#include <vector>
+#include <array>
 
 namespace OCRA::Pipeline::VertexInputState {
+struct AttributeDescription {
+    struct Format { //specifies the organization of an array's attribute
+        enum class Type {
+            Unknown = -1,
+            Float32,
+            Float16,
+            Int32,
+            Uint32,
+            Int16,
+            Uint16,
+            Int8,
+            Uint8,
+            MaxValue
+        } type{ Type::Unknown };
+        Uint32 relativeOffset{ 0 }; //distance between elements in buffer
+        Uint8 valuesPerVertex{ 0 }; //number of values per vertex
+        bool normalized{ false };
+    } format;
+    Uint8 bindingIndex{ 0 }; //BindingDescription index
+};
 struct BindingDescription {
-    Uint32 location { 0 }; //location in the shader
-    Uint32 binding { 0 }; //binding point
-    Uint32 stride { 0 }; //byte stride
+    Vertex::Buffer::Handle buffer{ 0 };
+    Int32 offset{ 0 }; //starting index in the array
+    Uint32 stride{ 0 }; //byte stride
     enum class InputRate {
         Vertex, //use vertex attribute
         Instance //use instance index
-    } inputRate { InputRate::Vertex }; //source of the data
-};
-struct AttributeDescription {
-    Uint32 location { 0 }; //shaderlocation of this attribute
-    Uint32 binding { 0 }; //binding number this attribute takes its data from
-    Uint32 offset { 0 }; //byte offset relative to start
+    } inputRate{ InputRate::Vertex }; //source of the data
 };
 struct Info {
-    std::vector<BindingDescription> vertexBindingDescriptions;
-    std::vector<AttributeDescription> vertexAttributeDescriptions;
+    static constexpr auto MaxAttributes = 32;
+    static constexpr auto MaxBindings = 32;
+    Uint64 primitiveRestartIndex{ 0 };
+    Uint8 attributeDescriptionCount{ 0 };
+    std::array<AttributeDescription, MaxAttributes> attributeDescriptions;
+    Uint8 bindingDescriptionCount{ 0 };
+    std::array<BindingDescription, MaxBindings> bindingDescriptions;
+	Vertex::Elements::Handle vertexElements;
 };
 }

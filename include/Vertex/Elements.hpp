@@ -23,5 +23,5 @@ struct Info {
     } format;
     Uint64 count { 0 };
     Buffer::Handle buffer { 0 };
-}
+};
 }

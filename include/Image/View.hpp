@@ -8,6 +8,7 @@
 
 #include <Handle.hpp>
 #include <Image/Format.hpp>
+#include <Component.hpp>
 #include <Scalar.hpp>
 
 namespace OCRA::Image::View {
@@ -19,7 +20,7 @@ enum class Type {
     Unknown = -1,
     View1D,
     View2D,
-    view3D,
+    View3D,
     ViewCube,
     View1DArray,
     View2DArray,
@@ -31,6 +32,7 @@ struct Info {
     Type type { Type::Unknown };
     Image::Handle image { 0 };
     Image::Format format { Image::Format::Unknown };
+	Component::Mapping components {};
     SubRange subRange {};
 };
 }

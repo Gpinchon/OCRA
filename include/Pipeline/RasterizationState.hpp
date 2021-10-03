@@ -14,6 +14,7 @@ enum class PolygonMode {
     MaxValue
 };
 enum class CullMode {
+	None,
     Front,
     Back,
     FrontAndBack,

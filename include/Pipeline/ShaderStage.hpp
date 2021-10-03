@@ -22,7 +22,7 @@ constexpr StageFlag AllGraphics = 0b111000; //Vertex | Geometry | Fragment
 constexpr StageFlag All = 0b111111;
 struct Info {
     StageFlag stage { None };
-    Shader::Module::Handle module;
-    std::string name;
+    Shader::Module::Handle module{ 0 };
+    std::string name{ "" };
 };
 }

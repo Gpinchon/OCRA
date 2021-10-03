@@ -48,10 +48,12 @@ HANDLE(Image::Sampler);
 HANDLE(Image::View);
 HANDLE(Buffer);
 HANDLE(Vertex::Array);
+HANDLE(Vertex::Buffer);
 HANDLE(Vertex::Elements);
 HANDLE(Shader::Module);
 HANDLE(Pipeline::Graphics);
 HANDLE(State::Draw);
 HANDLE(State::Clear);
 HANDLE(Pass);
+HANDLE(ViewPort);
 }

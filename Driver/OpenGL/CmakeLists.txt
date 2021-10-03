@@ -1,0 +1,85 @@
+cmake_minimum_required(VERSION 3.19)
+cmake_policy(SET CMP0074 NEW)
+project(OCRAImpl LANGUAGES CXX)
+
+include(FetchContent)
+
+FetchContent_Declare(
+  GLEW
+  GIT_REPOSITORY  https://github.com/Perlmint/glew-cmake.git
+  GIT_TAG     glew-cmake-2.2.0
+)
+
+FetchContent_GetProperties(GLEW)
+if(NOT GLEW_POPULATED)
+  FetchContent_Populate(GLEW)
+  message(STATUS "Fetched GLEW to ${glew_SOURCE_DIR}")
+  option(ONLY_LIBS "Do not build executables" ON)
+  option(glew-cmake_BUILD_STATIC "Build the static glew library" ON)
+  option(glew-cmake_BUILD_SHARED "Build the shared glew library" OFF)
+  add_subdirectory(${glew_SOURCE_DIR} ${glew_BINARY_DIR})
+  add_library(GLEW::glew_s ALIAS libglew_static)
+  add_library(GLEW::GLEW ALIAS libglew_static)
+  set_target_properties(libglew_static PROPERTIES FOLDER "3rdparty")
+  set(GLEW_FOUND 1)
+  set(GLEW_INCLUDE_DIR ${glew_SOURCE_DIR}/include)
+  set(GLEW_LIBRARIES GLEW::glew GLEW::glew_s)
+endif()
+set(OCRA_IMPL_HEADER_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Blend.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Compare.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Logic.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Stencil.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Image/Format.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/ColorBlendState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/DepthStencilState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/MultisampleState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/RasterizationState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/ShaderStage.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/TessellationState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/VertexInputState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/ViewPortState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Vertex/Buffer.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Vertex/VAOPool.hpp
+)
+set(OCRA_IMPL_SOURCE_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Queue.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/ViewPort.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Image/Image.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Image/View.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/Graphics.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/VertexInputState.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Shader/Module.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Vertex/Buffer.cpp
+)
+add_library(OCRAImpl ${OCRA_IMPL_SOURCE_FILES} ${OCRA_IMPL_HEADER_FILES})
+target_include_directories(OCRAImpl PRIVATE
+  "${CMAKE_CURRENT_SOURCE_DIR}/include"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../../include"
+)
+target_link_libraries(OCRAImpl PUBLIC GLEW::GLEW)
+
+if(MSVC_IDE)
+  set(CMAKE_DEBUG_POSTFIX "d")
+  # Macro to preserve source files hierarchy in the IDE
+  macro(GroupSources curdir)
+    file(GLOB children RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/${curdir} ${CMAKE_CURRENT_SOURCE_DIR}/${curdir}/*)
+  
+    foreach(child ${children})
+      if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${curdir}/${child})
+        GroupSources(${curdir}/${child})
+      else()
+        string(REPLACE "/" "\\" groupname ${curdir})
+        string(REPLACE "src" "Sources" groupname ${groupname})
+        string(REPLACE "include" "Includes" groupname ${groupname})
+        #string(REPLACE "shaders" "Shaders" groupname ${groupname})
+        source_group(${groupname} FILES ${CMAKE_CURRENT_SOURCE_DIR}/${curdir}/${child})
+      endif()
+    endforeach()
+  endmacro()
+  
+  # Run macro
+  GroupSources(src)
+  GroupSources(include)
+  GroupSources(../../include)
+endif()
