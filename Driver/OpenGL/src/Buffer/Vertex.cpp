@@ -10,6 +10,7 @@
 
 #include <map>
 
+#include <GL/Buffer/Vertex.hpp>
 #include <GL/Buffer/Buffer.hpp>
 #include <GL/Buffer/Transfer.hpp>
 #include <GL/glew.h>
