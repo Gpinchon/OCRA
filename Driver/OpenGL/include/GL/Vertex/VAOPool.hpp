@@ -10,13 +10,9 @@
 #include <Pipeline/VertexInputState.hpp>
 #include <Scalar.hpp>
 
-#include <array>
-#include <limits>
-#include <memory>
-#include <queue>
-#include <set>
 #include <stdexcept>
 
+#include <GL/ObjectPool.hpp>
 #include <GL/Pipeline/VertexInputState.hpp>
 #include <GL/glew.h>
 
@@ -91,7 +87,6 @@ struct VAO {
     }
     Info info;
     GLuint handle { 0 };
-    Uint64 refCount { 0 };
 };
 static inline bool operator!=(const AttributeDescription::Format& a_lAttribFormat, const AttributeDescription::Format& a_rAttribFormat) noexcept
 {
@@ -112,12 +107,21 @@ static inline bool operator!=(const BindingDescription& a_lBinding, const Bindin
         || a_lBinding.stride != a_rBinding.stride
         || a_lBinding.inputRate != a_rBinding.inputRate;
 }
+static inline bool operator!=(const IndexBufferDescription::Format& a_lFormat, const IndexBufferDescription::Format& a_rFormat) noexcept
+{
+    return a_lFormat.type != a_rFormat.type;
+}
+static inline bool operator!=(const IndexBufferDescription& a_lBinding, const IndexBufferDescription& a_rBinding) noexcept
+{
+    return a_lBinding.buffer != a_rBinding.buffer
+        || a_lBinding.format != a_rBinding.format;
+}
 static inline bool operator!=(const Info& a_lInfo, const Info& a_rInfo) noexcept
 {
     return a_lInfo.primitiveRestartIndex != a_rInfo.primitiveRestartIndex
         || a_lInfo.attributeDescriptionCount != a_rInfo.attributeDescriptionCount
         || a_lInfo.bindingDescriptionCount != a_rInfo.bindingDescriptionCount
-        || a_lInfo.vertexElements != a_rInfo.vertexElements
+        || a_lInfo.indexBufferDescription != a_rInfo.indexBufferDescription
         || [a_lInfo, a_rInfo]() {
                for (auto attribIndex = 0u; attribIndex < a_lInfo.attributeDescriptionCount; ++attribIndex) {
                    if (a_lInfo.attributeDescriptions.at(attribIndex) != a_rInfo.attributeDescriptions.at(attribIndex))
@@ -137,79 +141,19 @@ static inline bool operator==(const Info& a_lInfo, const Info& a_rInfo) noexcept
 {
     return !(a_lInfo != a_rInfo);
 }
-struct VAOPool {
-    typedef Uint16 IndexType;
-    static constexpr auto MaxVAOs = std::numeric_limits<IndexType>::max();
-    struct Reference {
-        Reference(VAOPool& a_VAOPool, Int32 a_VAOIndex)
-            : vaoPool(a_VAOPool.controlBlock)
-            , vaoIndex(a_VAOIndex)
-        {
-            if (!vaoPool.expired())
-                (*vaoPool.lock())->Ref(vaoIndex);
-        }
-        ~Reference()
-        {
-            if (!vaoPool.expired())
-                (*vaoPool.lock())->Unref(vaoIndex);
-        }
-        VAO* Get() const
-        {
-            if (!vaoPool.expired())
-                return (*vaoPool.lock())->Get(vaoIndex);
-            return nullptr;
-        }
-        VAO* operator->() const
-        {
-            return Get();
-        }
-        std::weak_ptr<VAOPool*> vaoPool;
-        Int32 vaoIndex { -1 };
-    };
-
-    VAOPool()
-        : controlBlock(new VAOPool*(this))
-    {
-        for (auto i = 0u; i < MaxVAOs; ++i)
-            freeIndices.push(MaxVAOs);
-    }
-    Reference FindSimilar(const Info& a_Info) noexcept
+struct VAOPool : public ObjectPool<VAO>
+{
+    inline Reference FindSimilar(const Info& a_Info) noexcept
     {
         for (auto& vaoIndex : usedIndices) {
-            if (vaoArray.at(vaoIndex).info == a_Info)
+            if (objectArray.at(vaoIndex).info == a_Info)
                 return Reference(*this, vaoIndex);
         }
         return Reference(*this, -1);
     }
-    Reference FindFree() noexcept
-    {
-        auto vaoIndex { freeIndices.front() };
-        usedIndices.insert(vaoIndex);
-        freeIndices.pop();
-        return Reference(*this, vaoIndex);
+    inline virtual void ReleaseObject(IndexType a_Index) override {
+        objectArray.at(a_Index).Reset();
+        ObjectPool<VAO>::ReleaseObject(a_Index);
     }
-    void Ref(IndexType a_VAOIndex)
-    {
-        ++vaoArray.at(a_VAOIndex).refCount;
-    }
-    void Unref(IndexType a_VAOIndex)
-    {
-        auto& vao { vaoArray.at(a_VAOIndex) };
-        if (vao.refCount > 0)
-            --vao.refCount;
-        if (vao.refCount == 0) {
-            vao.Reset();
-            freeIndices.push(a_VAOIndex);
-            usedIndices.erase(a_VAOIndex);
-        }
-    }
-    VAO* Get(IndexType a_VAOIndex)
-    {
-        return &vaoArray.at(a_VAOIndex);
-    }
-    std::array<VAO, MaxVAOs> vaoArray;
-    std::queue<IndexType> freeIndices;
-    std::set<IndexType> usedIndices;
-    std::shared_ptr<VAOPool*> controlBlock;
 };
 }
