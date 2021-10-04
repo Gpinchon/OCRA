@@ -35,6 +35,7 @@ set(OCRA_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Stencil.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/ViewPort.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Window.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Buffer/Vertex.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Descriptor/Descriptor.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Descriptor/Layout/Binding.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Descriptor/Layout/Layout.hpp
@@ -50,16 +51,14 @@ set(OCRA_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/InputAssemblyState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/MultisampleState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/RasterizationState.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/ShaderStage.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/ShaderStageState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/TessellationState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/VertexInputState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/ViewPortState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Primitive/Topology.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Shader/Module.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Shader/Stage.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/State/Clear.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/State/Draw.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Vertex/Buffer.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Vertex/Elements.hpp
 )
 
 add_library(OCRA STATIC ${OCRA_HEADER_FILES})
