@@ -25,10 +25,10 @@ struct Impl {
     {
         auto vao { vaoRef.Get() };
         glBindVertexArray(vao->handle);
-        if (vao->info.vertexElements == 0)
+        if (vao->info.indexBufferDescription.buffer == 0)
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         else
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Buffer::Vertex::GetGLHandle(a_Device, vao->info.vertexElements));
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Buffer::Vertex::GetGLHandle(a_Device, vao->info.indexBufferDescription.buffer));
         glPrimitiveRestartIndex(vao->info.primitiveRestartIndex);
     }
     VAOPool::Reference vaoRef;

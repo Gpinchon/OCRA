@@ -43,17 +43,17 @@ struct BindingDescription {
     } inputRate{ InputRate::Vertex }; //source of the data
 };
 struct IndexBufferDescription {
-	struct Format { //specifies the organization of an element buffer
+    struct Format { //specifies the organization of an element buffer
         enum class Type {
             Unknown,
             Uint8,
             Uint16,
             Uint32,
             MaxValue
-        } type { Type::Unknown };
+        } type{ Type::Unknown };
     } format;
-	Buffer::Vertex::Handle vertexElements{ 0 };
-}
+    Buffer::Vertex::Handle buffer{ 0 };
+};
 struct Info {
     static constexpr auto MaxAttributes = 32;
     static constexpr auto MaxBindings = 32;
