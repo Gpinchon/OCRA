@@ -1,15 +1,18 @@
 /*
 * @Author: gpinchon
-* @Date:   2021-09-26 00:00:00
+* @Date:   2021-10-04 20:17:52
 * @Last Modified by:   gpinchon
-* @Last Modified time: 2021-09-26 14:25:45
+* @Last Modified time: 2021-10-04 20:24:58
 */
 #pragma once
 
 #include <Handle.hpp>
 #include <Scalar.hpp>
 
-namespace OCRA::Pipeline::ShaderStage {
+#include <vector>
+#include <bitset>
+
+namespace OCRA::Shader::Stage {
 typedef std::bitset<6> StageFlag;
 constexpr StageFlag None = 0b000000;
 constexpr StageFlag Vertex = 0b100000;
@@ -20,9 +23,19 @@ constexpr StageFlag TessControl = 0b000010;
 constexpr StageFlag TessEval = 0b000001;
 constexpr StageFlag AllGraphics = 0b111000; //Vertex | Geometry | Fragment
 constexpr StageFlag All = 0b111111;
+enum class Stage {
+    None,
+    Vertex,
+    Geometry,
+    Fragment,
+    Compute,
+    TessControl,
+    TessEval,
+    MaxValue
+};
 struct Info {
-    StageFlag stage { None };
-    Shader::Module::Handle module{ 0 };
-    std::string name{ "" };
+    Stage stage { Stage::None };
+    std::vector<char> code;
+    std::string name { "" };
 };
 }
