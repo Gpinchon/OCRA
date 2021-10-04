@@ -6,25 +6,22 @@
 */
 
 #include <Scalar.hpp>
-#include <Vertex/Buffer.hpp>
+#include <Buffer/Vertex.hpp>
 
 #include <map>
 
+#include <GL/Buffer/Buffer.hpp>
+#include <GL/Buffer/Transfer.hpp>
 #include <GL/glew.h>
 
-namespace OCRA::Vertex::Buffer {
-struct Impl {
+namespace OCRA::Buffer::Vertex {
+struct Impl : public Buffer::Impl {
 	Impl(const Device::Handle& a_Device, const Info& a_Info)
 		: info(a_Info)
 	{
-		glCreateBuffers(1, &handle);
 		glNamedBufferStorage(handle, info.size, nullptr, 0);
 	}
-	~Impl() {
-		glDeleteBuffers(1, &handle);
-	}
 	const Info info;
-	GLuint handle{ 0 };
 };
 static Handle s_CurrentHandle = 0;
 static std::map<Handle, Impl> s_VertexBuffers;
@@ -41,6 +38,20 @@ void Destroy(const Device::Handle& a_Device, const Handle& a_Handle)
 const Info& GetInfo(const Device::Handle& a_Device, const Handle& a_Handle)
 {
 	return s_VertexBuffers.at(a_Handle).info;
+}
+void ReadFrom(const Device::Handle& a_Device, const Handle& a_Handle, const Buffer::Transfer::Handle& a_Buffer, Uint64 a_ReadOffset, Uint64 a_WriteOffset, Uint64 a_Size)
+{
+	glCopyNamedBufferSubData(
+		Buffer::Transfer::GetGLHandle(a_Device, a_Buffer),
+		Buffer::Vertex::GetGLHandle(a_Device, a_Handle),
+		a_ReadOffset, a_WriteOffset, a_Size);
+}
+void WriteTo(const Device::Handle& a_Device, const Handle& a_Handle, const Buffer::Transfer::Handle& a_Buffer, Uint64 a_ReadOffset, Uint64 a_WriteOffset, Uint64 a_Size)
+{
+	glCopyNamedBufferSubData(
+		Buffer::Vertex::GetGLHandle(a_Device, a_Handle),
+		Buffer::Transfer::GetGLHandle(a_Device, a_Buffer),
+		a_ReadOffset, a_WriteOffset, a_Size);
 }
 unsigned GetGLHandle(const Device::Handle& a_Device, const Handle& a_Handle)
 {

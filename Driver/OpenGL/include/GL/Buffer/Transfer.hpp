@@ -8,6 +8,7 @@
 
 #include <Handle.hpp>
 
-namespace OCRA::Vertex::Buffer {
+namespace OCRA::Buffer::Transfer
+{
 unsigned GetGLHandle(const Device::Handle& a_Device, const Handle& a_Handle);
 }

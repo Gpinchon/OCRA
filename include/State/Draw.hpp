@@ -17,8 +17,6 @@ struct Info {
         Pipeline::RasterizationState::Handle rasterizationState;
     } parameters;
     Pipeline::Graphics::Handle graphicsPipeline;
-    Vertex::Array::Handle vertexArray;
-    Vertex::Elements::Handle vertexElements;
     Uint8 descriptorCount { 0 };
     Descriptor::Handle descriptors[MaxDescriptors];
 };

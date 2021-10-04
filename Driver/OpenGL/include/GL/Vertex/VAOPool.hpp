@@ -84,7 +84,7 @@ struct VAO {
             glVertexArrayVertexBuffer(
                 handle,
                 attribute.bindingIndex,
-                Vertex::Buffer::GetGLHandle(a_Device, binding.buffer),
+                Buffer::Vertex::GetGLHandle(a_Device, binding.buffer),
                 binding.offset,
                 binding.stride);
         }

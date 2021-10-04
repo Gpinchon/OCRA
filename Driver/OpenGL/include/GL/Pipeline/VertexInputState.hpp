@@ -11,7 +11,7 @@
 
 #include <map>
 
-#include <GL/Vertex/Buffer.hpp>
+#include <GL/Buffer/Vertex.hpp>
 #include <GL/Vertex/VAOPool.hpp>
 #include <GL/glew.h>
 
@@ -28,7 +28,7 @@ struct Impl {
         if (vao->info.vertexElements == 0)
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         else
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Vertex::Buffer::GetGLHandle(a_Device, vao->info.vertexElements));
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Buffer::Vertex::GetGLHandle(a_Device, vao->info.vertexElements));
         glPrimitiveRestartIndex(vao->info.primitiveRestartIndex);
     }
     VAOPool::Reference vaoRef;

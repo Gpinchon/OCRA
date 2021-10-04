@@ -7,10 +7,8 @@
 #pragma once
 
 #include <Handle.hpp>
-#include <Scalar.hpp>
 
-namespace OCRA::Vertex::Buffer {
-struct Info {
-	Uint64 size;
-};
+namespace OCRA::Buffer::Vertex
+{
+unsigned GetGLHandle(const Device::Handle& a_Device, const Handle& a_Handle);
 }
