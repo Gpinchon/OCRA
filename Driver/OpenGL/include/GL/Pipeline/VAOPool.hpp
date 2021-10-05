@@ -151,7 +151,7 @@ struct VAOPool : public ObjectPool<VAO>
         return Reference(*this, -1);
     }
     inline virtual void ReleaseObject(IndexType a_Index) override {
-        Get(vaoIndex).Reset();
+        Get(a_Index).Reset();
         ObjectPool<VAO>::ReleaseObject(a_Index);
     }
 };

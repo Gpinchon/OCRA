@@ -57,7 +57,7 @@ struct IndexBufferDescription {
 struct Info {
     static constexpr auto MaxAttributes = 32;
     static constexpr auto MaxBindings = 32;
-    Uint64 primitiveRestartIndex{ 0 };
+    Uint32 primitiveRestartIndex{ 0 };
     Uint8 attributeDescriptionCount{ 0 };
     std::array<AttributeDescription, MaxAttributes> attributeDescriptions;
     Uint8 bindingDescriptionCount{ 0 };

@@ -15,6 +15,6 @@ namespace OCRA::Pipeline::ShaderPipelineState {
 constexpr auto MaxStages = 6;
 struct Info {
 	Uint8 stageCount{ 0 };
-    std::array<Shader::Stage::Handle, MaxStages> stages;
+	std::array<Shader::Stage::Handle, MaxStages> stages{ 0 };
 };
 }

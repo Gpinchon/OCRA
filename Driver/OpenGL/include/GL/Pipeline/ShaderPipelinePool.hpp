@@ -44,8 +44,8 @@ struct ShaderPipeline
 };
 static inline bool operator==(const Info& a_lInfo, const Info& a_rInfo) noexcept
 {
-	if (a_lInfo.stagesCount != a_rInfo.stagesCount) return false;
-	for (auto i = 0u; i < a_lInfo.stagesCount; ++i)
+	if (a_lInfo.stageCount != a_rInfo.stageCount) return false;
+	for (auto i = 0u; i < a_lInfo.stageCount; ++i)
 	{
 		if (a_lInfo.stages.at(i) != a_rInfo.stages.at(i)) return false;
 	}

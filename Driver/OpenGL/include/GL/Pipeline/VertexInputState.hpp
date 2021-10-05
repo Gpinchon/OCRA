@@ -16,7 +16,7 @@
 namespace OCRA::Pipeline::VertexInputState {
 //compiles the specified Vertex Input State into a callback
 struct Compile {
-    Compile(const Device::Handle& a_Device, const Info& a_Info):
+    Compile(const Device::Handle& a_Device, const Info& a_Info);
     void operator()(const Device::Handle& a_Device)
     {
         auto vao { vaoRef.Get() };
@@ -27,6 +27,6 @@ struct Compile {
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Buffer::Vertex::GetGLHandle(a_Device, vao->info.indexBufferDescription.buffer));
         glPrimitiveRestartIndex(vao->info.primitiveRestartIndex);
     }
-    VAOPool::Reference vaoRef;
+    const VAOPool::Reference vaoRef;
 };
 }

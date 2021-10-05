@@ -9,7 +9,7 @@
 #include <Pipeline/ShaderPipelineState.hpp>
 
 #include <GL/Pipeline/ShaderPipelineState.hpp>
-#include <GL/Shader/ShaderPipelinePool.hpp>
+#include <GL/Pipeline/ShaderPipelinePool.hpp>
 #include <GL/glew.h>
 
 #include <stdexcept>

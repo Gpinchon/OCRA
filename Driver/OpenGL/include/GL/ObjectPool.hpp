@@ -20,6 +20,7 @@ typedef Uint16 IndexType;
 template <typename T, IndexType MaxObjects = std::numeric_limits<IndexType>::max()>
 struct ObjectPool {
     struct Reference {
+        Reference() = default;
         Reference(ObjectPool& a_Pool, Int32 a_Index)
             : pool(a_Pool.controlBlock)
             , index(a_Index)
@@ -89,7 +90,7 @@ struct ObjectPool {
     {
         return objectArray.at(a_VAOIndex);
     }
-    std::array<Uint32, MaxObjects> objectRef;
+    std::array<Uint32, MaxObjects> objectRef{ 0 };
     std::array<T, MaxObjects> objectArray;
     std::queue<IndexType> freeIndices;
     std::set<IndexType> usedIndices;
