@@ -9,10 +9,12 @@
 #include <Handle.hpp>
 #include <Scalar.hpp>
 
-#include <vector>
+#include <array>
 
-namespace OCRA::Pipeline::ShaderStageState {
+namespace OCRA::Pipeline::ShaderPipelineState {
+constexpr auto MaxStages = 6;
 struct Info {
-    std::vector<Shader::Stage::Handle> stages;
+	Uint8 stageCount{ 0 };
+    std::array<Shader::Stage::Handle, MaxStages> stages;
 };
 }

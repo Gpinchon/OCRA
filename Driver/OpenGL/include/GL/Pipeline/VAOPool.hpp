@@ -8,13 +8,12 @@
 
 #include <Handle.hpp>
 #include <Pipeline/VertexInputState.hpp>
-#include <Scalar.hpp>
+
+#include <GL/Buffer/Vertex.hpp>
+#include <GL/ObjectPool.hpp>
+#include <GL/glew.h>
 
 #include <stdexcept>
-
-#include <GL/ObjectPool.hpp>
-#include <GL/Pipeline/VertexInputState.hpp>
-#include <GL/glew.h>
 
 namespace OCRA::Pipeline::VertexInputState {
 static inline GLenum GetGLFormatType(const AttributeDescription::Format::Type& a_Type)
@@ -49,18 +48,18 @@ struct VAO {
     {
         glDeleteVertexArrays(1, &handle);
     }
-    inline void Reset()
+    inline void Reset() noexcept
     {
         info = {};
-        for (Uint8 attribIndex = 0; attribIndex < info.MaxAttributes; ++attribIndex)
+        for (auto attribIndex = 0u; attribIndex < info.MaxAttributes; ++attribIndex)
             glDisableVertexArrayAttrib(
                 handle,
                 attribIndex);
     }
-    inline void Set(const Device::Handle& a_Device, const Info& a_Info) noexcept
+    inline void Set(const Device::Handle& a_Device, const Info& a_Info)
     {
         info = info;
-        for (Uint8 attribIndex = 0; attribIndex < info.attributeDescriptionCount; ++attribIndex) {
+        for (auto attribIndex = 0u; attribIndex < info.attributeDescriptionCount; ++attribIndex) {
             const auto& attribute { info.attributeDescriptions.at(attribIndex) };
             glEnableVertexArrayAttrib(
                 handle,
@@ -146,13 +145,13 @@ struct VAOPool : public ObjectPool<VAO>
     inline Reference FindSimilar(const Info& a_Info) noexcept
     {
         for (auto& vaoIndex : usedIndices) {
-            if (objectArray.at(vaoIndex).info == a_Info)
+            if (Get(vaoIndex).info == a_Info)
                 return Reference(*this, vaoIndex);
         }
         return Reference(*this, -1);
     }
     inline virtual void ReleaseObject(IndexType a_Index) override {
-        objectArray.at(a_Index).Reset();
+        Get(vaoIndex).Reset();
         ObjectPool<VAO>::ReleaseObject(a_Index);
     }
 };

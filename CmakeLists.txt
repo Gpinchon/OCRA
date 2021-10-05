@@ -51,7 +51,7 @@ set(OCRA_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/InputAssemblyState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/MultisampleState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/RasterizationState.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/ShaderStageState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/ShaderPipelineState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/TessellationState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/VertexInputState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/ViewPortState.hpp

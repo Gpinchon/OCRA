@@ -13,6 +13,7 @@
 #include <memory>
 #include <queue>
 #include <set>
+#include <stdexcept>
 
 namespace OCRA {
 typedef Uint16 IndexType;
@@ -23,25 +24,25 @@ struct ObjectPool {
             : pool(a_Pool.controlBlock)
             , index(a_Index)
         {
-            if (!pool.expired())
+            if (!pool.expired() && index >= 0)
                 (*pool.lock())->Ref(index);
         }
         Reference(const Reference& a_Other)
             : pool(a_Other.pool)
             , index(a_Other.index)
         {
-            if (!pool.expired())
+            if (!pool.expired() && index >= 0)
                 (*pool.lock())->Ref(index);
         }
         ~Reference()
         {
-            if (!pool.expired())
+            if (!pool.expired() && index >= 0)
                 (*pool.lock())->Unref(index);
         }
         T* Get() const
         {
-            if (!pool.expired())
-                return (*pool.lock())->Get(index);
+            if (!pool.expired() && index >= 0)
+                return &(*pool.lock())->Get(index);
             return nullptr;
         }
         T* operator->() const
@@ -79,12 +80,14 @@ struct ObjectPool {
         auto& refCount{ objectRef.at(a_Index) };
         if (refCount > 0)
             --refCount;
+		else
+			throw std::runtime_error("Attempted to unref released object");
         if (refCount == 0)
             ReleaseObject(a_Index);
     }
-    inline T* Get(IndexType a_VAOIndex)
+    inline T& Get(IndexType a_VAOIndex)
     {
-        return &objectArray.at(a_VAOIndex);
+        return objectArray.at(a_VAOIndex);
     }
     std::array<Uint32, MaxObjects> objectRef;
     std::array<T, MaxObjects> objectArray;

@@ -12,7 +12,7 @@
 #include <Pipeline/InputAssemblyState.hpp>
 #include <Pipeline/MultisampleState.hpp>
 #include <Pipeline/RasterizationState.hpp>
-#include <Pipeline/ShaderStageState.hpp>
+#include <Pipeline/ShaderPipelineState.hpp>
 #include <Pipeline/TessellationState.hpp>
 #include <Pipeline/VertexInputState.hpp>
 #include <Pipeline/ViewPortState.hpp>
@@ -33,7 +33,7 @@ namespace OCRA::Pipeline::Graphics {
 struct Info { //describes a graphics pipeline with each stage
 	Pass::Handle renderPass{ 0 }; //a handle to a previously created render pass
 	Int8 subPass{ -1 }; //-1 means no subpass
-    ShaderStageState::Info shaderStageState;
+    ShaderPipelineState::Info shaderPipelineState;
     ColorBlendState::Info colorBlendState;
     DepthStencilState::Info depthStencilState;
     InputAssemblyState::Info inputAssemblyState;

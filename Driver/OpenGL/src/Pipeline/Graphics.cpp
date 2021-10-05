@@ -14,7 +14,7 @@
 #include <GL/Pipeline/ColorBlendState.hpp>
 #include <GL/Pipeline/DepthStencilState.hpp>
 #include <GL/Pipeline/MultisampleState.hpp>
-#include <GL/Pipeline/ShaderStageState.hpp>
+#include <GL/Pipeline/ShaderPipelineState.hpp>
 #include <GL/Pipeline/TessellationState.hpp>
 #include <GL/Pipeline/ViewPortState.hpp>
 #include <GL/Pipeline/VertexInputState.hpp>
@@ -25,19 +25,19 @@ namespace OCRA::Pipeline::Graphics {
 struct Impl {
 	Impl(const Device::Handle& a_Device, const Info& a_Info)
 	: info(a_Info)
-	, shaderStageState(ShaderStageState::Compile(a_Device, a_Info.shaderStageState))
 	, colorBlendState(ColorBlendState::Compile(a_Device, a_Info.colorBlendState))
 	, depthStencilState(DepthStencilState::Compile(a_Device, a_Info.depthStencilState))
 	, multisampleState(MultisampleState::Compile(a_Device, a_Info.multiSampleState))
+	, shaderPipelineState(ShaderPipelineState::Compile(a_Device, a_Info.shaderPipelineState))
 	, tessellationState(TessellationState::Compile(a_Device, a_Info.tessellationState))
 	, viewportState(ViewPortState::Compile(a_Device, a_Info.viewPortState))
 	, vertexInputState(VertexInputState::Compile(a_Device, a_Info.vertexInputState))
 	{}
     const Info info;
-    const std::function<void(const Device::Handle&)> shaderStageState;
     const std::function<void(const Device::Handle&)> colorBlendState;
     const std::function<void(const Device::Handle&)> depthStencilState;
 	const std::function<void(const Device::Handle&)> multisampleState;
+	const std::function<void(const Device::Handle&)> shaderPipelineState;
 	const std::function<void(const Device::Handle&)> tessellationState;
 	const std::function<void(const Device::Handle&)> viewportState;
 	const std::function<void(const Device::Handle&)> vertexInputState;

@@ -9,18 +9,14 @@
 #include <Handle.hpp>
 #include <Pipeline/VertexInputState.hpp>
 
-#include <map>
-
 #include <GL/Buffer/Vertex.hpp>
-#include <GL/Vertex/VAOPool.hpp>
+#include <GL/Pipeline/VAOPool.hpp>
 #include <GL/glew.h>
 
 namespace OCRA::Pipeline::VertexInputState {
-struct Impl {
-    Impl(const Device::Handle& a_Device, VAOPool::Reference& a_VAOReference)
-        : vaoRef(a_VAOReference)
-    {
-    }
+//compiles the specified Vertex Input State into a callback
+struct Compile {
+    Compile(const Device::Handle& a_Device, const Info& a_Info):
     void operator()(const Device::Handle& a_Device)
     {
         auto vao { vaoRef.Get() };
@@ -33,6 +29,4 @@ struct Impl {
     }
     VAOPool::Reference vaoRef;
 };
-//compiles the specified Vertex Input State into a callback
-Impl Compile(const Device::Handle& a_Device, const Info& a_Info);
 }
