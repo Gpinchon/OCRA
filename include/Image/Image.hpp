@@ -2,7 +2,7 @@
 * @Author: gpinchon
 * @Date:   2021-09-26 00:00:00
 * @Last Modified by:   gpinchon
-* @Last Modified time: 2021-09-26 14:28:20
+* @Last Modified time: 2021-10-06 19:39:36
 */
 #pragma once
 
@@ -10,6 +10,8 @@
 #include <Handle.hpp>
 #include <Image/Format.hpp>
 #include <Scalar.hpp>
+
+#include <bitset>
 
 namespace OCRA::Image {
 //Image Info specs

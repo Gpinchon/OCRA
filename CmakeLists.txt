@@ -43,6 +43,7 @@ set(OCRA_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Image/Filter.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Image/Format.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Image/Image.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Image/Operations.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Image/Sampler.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Image/View.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/ColorBlendState.hpp

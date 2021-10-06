@@ -33,6 +33,8 @@ set(OCRA_IMPL_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Stencil.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Buffer/Vertex.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Image/Format.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Image/Image.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Image/View.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/ColorBlendState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/DepthStencilState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/MultisampleState.hpp
