@@ -21,7 +21,7 @@ namespace OCRA::Image {
 struct Impl {
     Impl(const Device::Handle& a_Device, const Info& a_Info)
         : info(a_Info)
-        , internalFormat(GetGLFormat(a_Info.format))
+        , internalFormat(GetGLSizedFormat(a_Info.format))
     {
         glGenTextures(1, &handle);
         ;

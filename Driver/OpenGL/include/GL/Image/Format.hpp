@@ -276,7 +276,7 @@ inline auto GetGLDataType(const Format& format)
     case Format::Stencil8:
         return GL_UNSIGNED_BYTE;
     case Format::DXT5_RGBA:
-        return std::runtime_error("Incorrect Image Format");
+        throw std::runtime_error("Incorrect Image Format");
     default:
         throw std::runtime_error("Unknow Image Format");
     }

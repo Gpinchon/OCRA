@@ -6,6 +6,7 @@
 */
 
 #include <Handle.hpp>
+#include <Buffer/Transfer.hpp>
 
 #include <map>
 
@@ -31,7 +32,7 @@ struct Impl : public Buffer::Impl {
 			accessFlags);
 	}
 	const Info info;
-	GLbitfield accessFlags{ 0 }:
+	GLbitfield accessFlags{ 0 };
 };
 static Handle s_CurrentHandle = 0;
 static std::map<Handle, Impl> s_TransferBuffers;
@@ -49,9 +50,13 @@ const Info& GetInfo(const Device::Handle& a_Device, const Handle& a_Handle)
 {
     return s_TransferBuffers.at(a_Handle).info;
 }
+unsigned GetGLHandle(const Device::Handle& a_Device, const Handle& a_Handle)
+{
+	return s_TransferBuffers.at(a_Handle).handle;
+}
 void* Map(const Device::Handle& a_Device, const Handle& a_Handle, Uint64 offset, Uint64 size)
 {
-	auto buffer{ s_TransferBuffers.at(a_Handle) };
+	const auto &buffer{ s_TransferBuffers.at(a_Handle) };
 	return glMapNamedBufferRange(
 			buffer.handle,
 			offset,

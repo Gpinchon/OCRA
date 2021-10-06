@@ -35,6 +35,7 @@ set(OCRA_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Stencil.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/ViewPort.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Window.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Buffer/Transfer.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Buffer/Vertex.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Descriptor/Descriptor.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Descriptor/Layout/Binding.hpp
