@@ -34,9 +34,14 @@ struct BufferCopy {
     Offset3D imageOffset;
     Extent3D imageExtent;
 };
-void ReadFromBuffer(
+void CopyBufferToImage(
     const Device::Handle& a_Device,
     const Buffer::Transfer::Handle& a_srcBuffer,
     const Image::Handle& a_dstImage,
+    const std::vector<BufferCopy>& a_Regions);
+void CopyImageToBuffer(
+    const Device::Handle& a_Device,
+    const Buffer::Transfer::Handle& a_DstBuffer,
+    const Image::Handle& a_SrcImage,
     const std::vector<BufferCopy>& a_Regions);
 }

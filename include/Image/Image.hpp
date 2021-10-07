@@ -39,9 +39,4 @@ struct Info {
     Uint16 mipLevels { 0 }, arrayLayers { 0 };
     bool fixedSampleLocations { false };
 };
-void ReadFromBuffer(
-    const Device::Handle& a_Device,
-    const Buffer::Transfer::Handle& a_SrcBuffer,
-    const Image::Handle& a_DstImage,
-    const std::vector<BufferCopy>& a_Regions)
 }
