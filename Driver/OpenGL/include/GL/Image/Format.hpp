@@ -13,6 +13,11 @@
 #include <GL/glew.h>
 
 namespace OCRA::Image {
+inline auto IsCompressedFormat(const Format& format)
+{
+	return format == Format::S3TC_DXT5_RGBA
+		|| format == Format::S3TC_DXT5_SRGBA;
+}
 inline auto GetGLSizedFormat(const Format& format)
 {
     switch (format) {
@@ -126,8 +131,10 @@ inline auto GetGLSizedFormat(const Format& format)
         return GL_DEPTH32F_STENCIL8;
     case Format::Stencil8:
         return GL_STENCIL_INDEX8;
-    case Format::DXT5_RGBA:
+    case Format::S3TC_DXT5_RGBA:
         return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+	case Format::S3TC_DXT5_SRGBA:
+        return GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
     default:
         throw std::runtime_error("Unknow Image Format");
     }
@@ -183,8 +190,10 @@ inline auto GetGLUnsizedFormat(const Format& format)
     case Format::Int16_NormalizedRGBA:
     case Format::Float16_RGBA:
     case Format::Float32_RGBA:
-    case Format::DXT5_RGBA:
         return GL_RGBA;
+	case Format::S3TC_DXT5_RGBA:
+	case Format::S3TC_DXT5_SRGBA:
+		return GL_COMPRESSED_RGBA;
     case Format::Uint8_RGBA:
     case Format::Int8_RGBA:
     case Format::Uint16_RGBA:
@@ -275,7 +284,8 @@ inline auto GetGLDataType(const Format& format)
         return GL_FLOAT_32_UNSIGNED_INT_24_8_REV;
     case Format::Stencil8:
         return GL_UNSIGNED_BYTE;
-    case Format::DXT5_RGBA:
+    case Format::S3TC_DXT5_RGBA:
+	case Format::S3TC_DXT5_SRGBA:
         throw std::runtime_error("Incorrect Image Format");
     default:
         throw std::runtime_error("Unknow Image Format");

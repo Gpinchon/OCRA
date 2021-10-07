@@ -16,12 +16,23 @@
 #include <GL/glew.h>
 
 namespace OCRA::Buffer::Vertex {
-struct Impl : public Buffer::Impl {
+struct Impl
+{
 	Impl(const Device::Handle& a_Device, const Info& a_Info)
-		: info(a_Info)
+		: device(a_Device)
+		, info(a_Info)
 	{
-		glNamedBufferStorage(handle, info.size, nullptr, 0);
+		Buffer::Info bufferInfo;
+		bufferInfo.size = a_Info.size;
+		bufferInfo.flags = 0; //vertex buffer is pure GPU memory
+		bufferHandle = Buffer::Create(a_Device, bufferInfo);
 	}
+	~Impl()
+	{
+		Buffer::Destroy(device, bufferHandle);
+	}
+	Device::Handle device;
+	Buffer::Handle bufferHandle;
 	const Info info;
 };
 static Handle s_CurrentHandle = 0;
@@ -29,7 +40,7 @@ static std::map<Handle, Impl> s_VertexBuffers;
 Handle Create(const Device::Handle& a_Device, const Info& a_Info)
 {
 	++s_CurrentHandle;
-	s_VertexBuffers.emplace(s_CurrentHandle, Impl(a_Device, a_Info));
+	s_VertexBuffers.emplace(s_CurrentHandle, { a_Device, a_Info });
 	return s_CurrentHandle;
 }
 void Destroy(const Device::Handle& a_Device, const Handle& a_Handle)
@@ -40,22 +51,37 @@ const Info& GetInfo(const Device::Handle& a_Device, const Handle& a_Handle)
 {
 	return s_VertexBuffers.at(a_Handle).info;
 }
-void ReadFrom(const Device::Handle& a_Device, const Handle& a_Handle, const Buffer::Transfer::Handle& a_Buffer, Uint64 a_ReadOffset, Uint64 a_WriteOffset, Uint64 a_Size)
+Buffer::Handle GetBufferHandle(const Device::Handle& a_Device, const Handle& a_Handle)
 {
-	glCopyNamedBufferSubData(
-		Buffer::Transfer::GetGLHandle(a_Device, a_Buffer),
-		Buffer::Vertex::GetGLHandle(a_Device, a_Handle),
-		a_ReadOffset, a_WriteOffset, a_Size);
+	return s_VertexBuffers.at(a_Handle).bufferHandle;
 }
-void WriteTo(const Device::Handle& a_Device, const Handle& a_Handle, const Buffer::Transfer::Handle& a_Buffer, Uint64 a_ReadOffset, Uint64 a_WriteOffset, Uint64 a_Size)
+void ReadFrom(
+	const Device::Handle& a_Device,
+	const Buffer::Vertex::Handle& a_DstVBO,
+	const Buffer::Transfer::Handle& a_SrcTransferBuffer,
+	Uint64 a_ReadOffset, Uint64 a_WriteOffset, Uint64 a_Size)
 {
-	glCopyNamedBufferSubData(
-		Buffer::Vertex::GetGLHandle(a_Device, a_Handle),
-		Buffer::Transfer::GetGLHandle(a_Device, a_Buffer),
-		a_ReadOffset, a_WriteOffset, a_Size);
+	CopyOperation copy;
+	copy.srcBuffer = Buffer::Transfer::GetBufferHandle(a_Device, a_SrcTransferBuffer);
+	copy.dstBuffer = Buffer::Vertex::GetBufferHandle(a_Device, a_DstVBO);
+	copy.readOffset = a_ReadOffset;
+	copy.writeOffset = a_WriteOffset;
+	copy.size = a_WriteOffset;
+	Buffer::Copy(a_Device, copy);
 }
-unsigned GetGLHandle(const Device::Handle& a_Device, const Handle& a_Handle)
+void WriteTo(
+	const Device::Handle& a_Device,
+	const Buffer::Vertex::Handle& a_SrcVBO,
+	const Buffer::Transfer::Handle& a_DstTransferBuffer,
+	Uint64 a_ReadOffset, Uint64 a_WriteOffset, Uint64 a_Size)
 {
-	return s_VertexBuffers.at(a_Handle).handle;
+	CopyOperation copy;
+	copy.srcBuffer = Buffer::Vertex::GetBufferHandle(a_Device, a_SrcVBO);
+	copy.dstBuffer = Buffer::Transfer::GetBufferHandle(a_Device, a_DstTransferBuffer);
+	copy.readOffset = a_ReadOffset;
+	copy.writeOffset = a_WriteOffset;
+	copy.size = a_WriteOffset;
+	Buffer::Copy(a_Device, copy);
 }
+
 }

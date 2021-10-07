@@ -9,6 +9,7 @@
 #include <Handle.hpp>
 #include <Pipeline/VertexInputState.hpp>
 
+#include <GL/Buffer/Buffer.hpp>
 #include <GL/Buffer/Vertex.hpp>
 #include <GL/ObjectPool.hpp>
 #include <GL/glew.h>
@@ -76,10 +77,12 @@ struct VAO {
                 handle,
                 attribIndex,
                 attribute.bindingIndex);
+			auto bufferHandle{ Buffer::Vertex::GetBuffeHandle(a_Device, binding.buffer) };
+			auto bufferGLHandle{ Buffer::GetGLHandle(a_Device, bufferHandle) };
             glVertexArrayVertexBuffer(
                 handle,
                 attribute.bindingIndex,
-                Buffer::Vertex::GetGLHandle(a_Device, binding.buffer),
+                bufferGLHandle,
                 binding.offset,
                 binding.stride);
         }

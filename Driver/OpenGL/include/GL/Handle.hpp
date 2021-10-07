@@ -8,9 +8,7 @@
 
 #include <Handle.hpp>
 
-#include <GL/Handle.hpp>
-
-namespace OCRA::Buffer::Vertex
+namespace OCRA
 {
-Buffer::Handle GetBufferHandle(const Device::Handle& a_Device, const Handle& a_Handle);
+HANDLE(Buffer);
 }

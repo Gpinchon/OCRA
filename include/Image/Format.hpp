@@ -107,7 +107,8 @@ enum class Format {
     /// <summary>
     /// Compressed pixel types
     /// </summary>
-    DXT5_RGBA,
+    S3TC_DXT5_RGBA,
+	S3TC_DXT5_SRGBA,
     MaxValue
 };
 }

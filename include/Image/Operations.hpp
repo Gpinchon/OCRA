@@ -20,15 +20,16 @@ struct SubresourceLayers {
     static constexpr AspectFlags Color = 0b100;
     static constexpr AspectFlags Depth = 0b010;
     static constexpr AspectFlags Stencil = 0b001;
-    AspectFlags aspectMask;
-    Uint32 mipLevel;
-    Uint32 baseArrayLayer;
-    Uint32 layerCount;
+	static constexpr AspectFlags All = 0b111;
+    AspectFlags aspectMask{ All };
+    Uint32 mipLevel{ 0 };
+    Uint32 baseArrayLayer{ 0 };
+    Uint32 layerCount{ 0 };
 };
 struct BufferCopy {
-    Uint64 bufferOffset;
-    Uint32 bufferRowLength;
-    Uint32 bufferImageHeight;
+    Uint64 bufferOffset{ 0 };
+    Uint32 bufferRowLength{ 0 };
+    Uint32 bufferImageHeight{ 0 };
     SubresourceLayers imageSubresource;
     Offset3D imageOffset;
     Extent3D imageExtent;

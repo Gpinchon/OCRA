@@ -7,6 +7,7 @@
 #pragma once
 
 #include <Handle.hpp>
+#include <Buffer/Range.hpp>
 
 #include <bitset>
 
@@ -19,8 +20,20 @@ constexpr AccessFlag ReadWrite = 0b11;
 struct Info
 {
 	Uint64 size{ 0 }; //specifies the size of the transfer buffer
-	AccessFlag accessFlag{ ReadWrite }; //specified wether the transfer buffer is used to read, write or both
+	AccessFlag accessFlag{ ReadWrite }; //specified wether the transfer buffer is used to read, write or both to GPU memory
 };
-void* Map(const Device::Handle& a_Device, const Handle& a_Handle, Uint64 offset, Uint64 size);
+struct MapOperation
+{
+	Buffer::Transfer::Handle buffer;
+	Range range;
+	AccessFlag flags{ ReadWrite };
+}
+struct FlushOperation
+{
+	Buffer::Transfer::Handle buffer;
+	Range range;
+}
+void *Map(const Device::Handle& a_Device, const MapOperation& a_MapOperation);
+void Flush(const Device::Handle& a_Device, const FlushOperation& a_FlushOperation);
 void Unmap(const Device::Handle& a_Device, const Handle& a_Handle);
 }

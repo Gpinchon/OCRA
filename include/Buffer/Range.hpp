@@ -8,9 +8,12 @@
 
 #include <Handle.hpp>
 
-#include <GL/Handle.hpp>
+#include <bitset>
 
-namespace OCRA::Buffer::Vertex
+namespace OCRA::Buffer
 {
-Buffer::Handle GetBufferHandle(const Device::Handle& a_Device, const Handle& a_Handle);
+struct Range
+{
+	Uint64 offset{ 0 }, size{ 0 };
+};
 }
