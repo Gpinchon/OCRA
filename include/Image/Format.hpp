@@ -13,17 +13,17 @@ enum class Format {
     /// <summary>
     /// Normalized Uint8 pixel types
     /// </summary>
-    Uint8_NormalizedR,
-    Uint8_NormalizedRG,
-    Uint8_NormalizedRGB,
-    Uint8_NormalizedRGBA,
+    Uint8_Normalized_R,
+    Uint8_Normalized_RG,
+    Uint8_Normalized_RGB,
+    Uint8_Normalized_RGBA,
     /// <summary>
     /// Normalized Int8 pixel types
     /// </summary>
-    Int8_NormalizedR,
-    Int8_NormalizedRG,
-    Int8_NormalizedRGB,
-    Int8_NormalizedRGBA,
+    Int8_Normalized_R,
+    Int8_Normalized_RG,
+    Int8_Normalized_RGB,
+    Int8_Normalized_RGBA,
     /// <summary>
     /// Unnormalized Uint8 pixel types
     /// </summary>
@@ -41,17 +41,17 @@ enum class Format {
     /// <summary>
     /// Normalized Uint16 pixel types
     /// </summary>
-    Uint16_NormalizedR,
-    Uint16_NormalizedRG,
-    Uint16_NormalizedRGB,
-    Uint16_NormalizedRGBA,
+    Uint16_Normalized_R,
+    Uint16_Normalized_RG,
+    Uint16_Normalized_RGB,
+    Uint16_Normalized_RGBA,
     /// <summary>
     /// Normalized Int16 pixel types
     /// </summary>
-    Int16_NormalizedR,
-    Int16_NormalizedRG,
-    Int16_NormalizedRGB,
-    Int16_NormalizedRGBA,
+    Int16_Normalized_R,
+    Int16_Normalized_RG,
+    Int16_Normalized_RGB,
+    Int16_Normalized_RGBA,
     /// <summary>
     /// Unnormalized Uint16 pixel types
     /// </summary>
@@ -94,16 +94,14 @@ enum class Format {
     /// <summary>
     /// Depth pixel types
     /// </summary>
-    Depth16,
-    Depth24,
-    Depth32,
-    Depth32F,
+    Uint16_Normalized_Depth,
+    Float32_Depth,
     /// <summary>
     /// Depth/Stencil pixel types
     /// </summary>
-    Depth24_Stencil8,
-    Depth32F_Stencil8,
-    Stencil8,
+    Uint24_Normalized_Depth_Uint8_Stencil,
+    Float32_Normalized_Depth_Uint8_Stencil,
+    Uint8_Stencil,
     /// <summary>
     /// Compressed pixel types
     /// </summary>

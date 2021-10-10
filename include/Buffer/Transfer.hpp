@@ -27,12 +27,12 @@ struct MapOperation
 	Buffer::Transfer::Handle buffer;
 	Range range;
 	AccessFlag flags{ ReadWrite };
-}
+};
 struct FlushOperation
 {
 	Buffer::Transfer::Handle buffer;
 	Range range;
-}
+};
 void *Map(const Device::Handle& a_Device, const MapOperation& a_MapOperation);
 void Flush(const Device::Handle& a_Device, const FlushOperation& a_FlushOperation);
 void Unmap(const Device::Handle& a_Device, const Handle& a_Handle);

@@ -28,7 +28,7 @@ struct MapOperation
 {
 	Buffer::Handle buffer{ 0 };
 	Range range;
-	GLbitfield flags;
+	GLbitfield flags{ 0 };
 };
 struct FlushOperation
 {

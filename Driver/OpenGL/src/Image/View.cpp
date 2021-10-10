@@ -49,7 +49,7 @@ struct Impl {
 			handle,
 			GetGLType(a_Info.type),
 			Image::GetGLHandle(a_Device, a_Info.image),
-			Image::GetGLFormat(a_Info.format),
+			Image::GetGLSizedFormat(a_Info.format),
 			a_Info.subRange.baseMipLevel,
 			a_Info.subRange.levelCount,
 			a_Info.subRange.baseArrayLayer,

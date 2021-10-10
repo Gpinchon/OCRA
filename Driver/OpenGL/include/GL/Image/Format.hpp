@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include <Image/Image.hpp>
+#include <Image/Format.hpp>
 
 #include <stdexcept>
 
@@ -21,21 +21,21 @@ inline auto IsCompressedFormat(const Format& format)
 inline auto GetGLSizedFormat(const Format& format)
 {
     switch (format) {
-    case Format::Uint8_NormalizedR:
+    case Format::Uint8_Normalized_R:
         return GL_R8;
-    case Format::Uint8_NormalizedRG:
+    case Format::Uint8_Normalized_RG:
         return GL_RG8;
-    case Format::Uint8_NormalizedRGB:
+    case Format::Uint8_Normalized_RGB:
         return GL_RGB8;
-    case Format::Uint8_NormalizedRGBA:
+    case Format::Uint8_Normalized_RGBA:
         return GL_RGBA8;
-    case Format::Int8_NormalizedR:
+    case Format::Int8_Normalized_R:
         return GL_R8_SNORM;
-    case Format::Int8_NormalizedRG:
+    case Format::Int8_Normalized_RG:
         return GL_RG8_SNORM;
-    case Format::Int8_NormalizedRGB:
+    case Format::Int8_Normalized_RGB:
         return GL_RGB8_SNORM;
-    case Format::Int8_NormalizedRGBA:
+    case Format::Int8_Normalized_RGBA:
         return GL_RGBA8_SNORM;
     case Format::Uint8_R:
         return GL_R8UI;
@@ -53,21 +53,21 @@ inline auto GetGLSizedFormat(const Format& format)
         return GL_RGB8I;
     case Format::Int8_RGBA:
         return GL_RGBA8I;
-    case Format::Uint16_NormalizedR:
+    case Format::Uint16_Normalized_R:
         return GL_R16;
-    case Format::Uint16_NormalizedRG:
+    case Format::Uint16_Normalized_RG:
         return GL_RG16;
-    case Format::Uint16_NormalizedRGB:
+    case Format::Uint16_Normalized_RGB:
         return GL_RGB16;
-    case Format::Uint16_NormalizedRGBA:
+    case Format::Uint16_Normalized_RGBA:
         return GL_RGBA16;
-    case Format::Int16_NormalizedR:
+    case Format::Int16_Normalized_R:
         return GL_R16_SNORM;
-    case Format::Int16_NormalizedRG:
+    case Format::Int16_Normalized_RG:
         return GL_RG16_SNORM;
-    case Format::Int16_NormalizedRGB:
+    case Format::Int16_Normalized_RGB:
         return GL_RGB16_SNORM;
-    case Format::Int16_NormalizedRGBA:
+    case Format::Int16_Normalized_RGBA:
         return GL_RGBA16_SNORM;
     case Format::Uint16_R:
         return GL_R16UI;
@@ -117,19 +117,15 @@ inline auto GetGLSizedFormat(const Format& format)
         return GL_RGB32F;
     case Format::Float32_RGBA:
         return GL_RGBA32F;
-    case Format::Depth16:
+    case Format::Uint16_Normalized_Depth:
         return GL_DEPTH_COMPONENT16;
-    case Format::Depth24:
-        return GL_DEPTH_COMPONENT24;
-    case Format::Depth32:
-        return GL_DEPTH_COMPONENT32;
-    case Format::Depth32F:
+    case Format::Float32_Depth:
         return GL_DEPTH_COMPONENT32F;
-    case Format::Depth24_Stencil8:
+    case Format::Uint24_Normalized_Depth_Uint8_Stencil:
         return GL_DEPTH24_STENCIL8;
-    case Format::Depth32F_Stencil8:
+    case Format::Float32_Normalized_Depth_Uint8_Stencil:
         return GL_DEPTH32F_STENCIL8;
-    case Format::Stencil8:
+    case Format::Uint8_Stencil:
         return GL_STENCIL_INDEX8;
     case Format::S3TC_DXT5_RGBA:
         return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
@@ -139,13 +135,13 @@ inline auto GetGLSizedFormat(const Format& format)
         throw std::runtime_error("Unknow Image Format");
     }
 }
-inline auto GetGLUnsizedFormat(const Format& format)
+inline auto GetGLDataFormat(const Format& format)
 {
     switch (format) {
-    case Format::Uint8_NormalizedR:
-    case Format::Int8_NormalizedR:
-    case Format::Uint16_NormalizedR:
-    case Format::Int16_NormalizedR:
+    case Format::Uint8_Normalized_R:
+    case Format::Int8_Normalized_R:
+    case Format::Uint16_Normalized_R:
+    case Format::Int16_Normalized_R:
     case Format::Float16_R:
     case Format::Float32_R:
         return GL_RED;
@@ -156,10 +152,10 @@ inline auto GetGLUnsizedFormat(const Format& format)
     case Format::Uint8_R:
     case Format::Int8_R:
         return GL_RED_INTEGER;
-    case Format::Uint8_NormalizedRG:
-    case Format::Int8_NormalizedRG:
-    case Format::Uint16_NormalizedRG:
-    case Format::Int16_NormalizedRG:
+    case Format::Uint8_Normalized_RG:
+    case Format::Int8_Normalized_RG:
+    case Format::Uint16_Normalized_RG:
+    case Format::Int16_Normalized_RG:
     case Format::Float16_RG:
     case Format::Float32_RG:
         return GL_RG;
@@ -170,10 +166,10 @@ inline auto GetGLUnsizedFormat(const Format& format)
     case Format::Uint32_RG:
     case Format::Int32_RG:
         return GL_RG_INTEGER;
-    case Format::Uint8_NormalizedRGB:
-    case Format::Int8_NormalizedRGB:
-    case Format::Uint16_NormalizedRGB:
-    case Format::Int16_NormalizedRGB:
+    case Format::Uint8_Normalized_RGB:
+    case Format::Int8_Normalized_RGB:
+    case Format::Uint16_Normalized_RGB:
+    case Format::Int16_Normalized_RGB:
     case Format::Float16_RGB:
     case Format::Float32_RGB:
         return GL_RGB;
@@ -184,10 +180,10 @@ inline auto GetGLUnsizedFormat(const Format& format)
     case Format::Uint32_RGB:
     case Format::Int32_RGB:
         return GL_RGB_INTEGER;
-    case Format::Uint8_NormalizedRGBA:
-    case Format::Int8_NormalizedRGBA:
-    case Format::Uint16_NormalizedRGBA:
-    case Format::Int16_NormalizedRGBA:
+    case Format::Uint8_Normalized_RGBA:
+    case Format::Int8_Normalized_RGBA:
+    case Format::Uint16_Normalized_RGBA:
+    case Format::Int16_Normalized_RGBA:
     case Format::Float16_RGBA:
     case Format::Float32_RGBA:
         return GL_RGBA;
@@ -201,15 +197,13 @@ inline auto GetGLUnsizedFormat(const Format& format)
     case Format::Uint32_RGBA:
     case Format::Int32_RGBA:
         return GL_RGBA_INTEGER;
-    case Format::Depth16:
-    case Format::Depth24:
-    case Format::Depth32:
-    case Format::Depth32F:
+    case Format::Uint16_Normalized_Depth:
+    case Format::Float32_Depth:
         return GL_DEPTH_COMPONENT;
-    case Format::Depth24_Stencil8:
-    case Format::Depth32F_Stencil8:
+    case Format::Uint24_Normalized_Depth_Uint8_Stencil:
+    case Format::Float32_Normalized_Depth_Uint8_Stencil:
         return GL_DEPTH_STENCIL;
-    case Format::Stencil8:
+    case Format::Uint8_Stencil:
         return GL_STENCIL_INDEX;
     default:
         throw std::runtime_error("Unknow Image Format");
@@ -218,49 +212,47 @@ inline auto GetGLUnsizedFormat(const Format& format)
 inline auto GetGLDataType(const Format& format)
 {
     switch (format) {
-    case Format::Uint8_NormalizedR:
+    case Format::Uint8_Normalized_R:
     case Format::Uint8_R:
-    case Format::Uint8_NormalizedRG:
+    case Format::Uint8_Normalized_RG:
     case Format::Uint8_RG:
-    case Format::Uint8_NormalizedRGB:
+    case Format::Uint8_Normalized_RGB:
     case Format::Uint8_RGB:
-    case Format::Uint8_NormalizedRGBA:
+    case Format::Uint8_Normalized_RGBA:
     case Format::Uint8_RGBA:
         return GL_UNSIGNED_BYTE;
-    case Format::Int8_NormalizedR:
+    case Format::Int8_Normalized_R:
     case Format::Int8_R:
-    case Format::Int8_NormalizedRG:
+    case Format::Int8_Normalized_RG:
     case Format::Int8_RG:
-    case Format::Int8_NormalizedRGB:
+    case Format::Int8_Normalized_RGB:
     case Format::Int8_RGB:
-    case Format::Int8_NormalizedRGBA:
+    case Format::Int8_Normalized_RGBA:
     case Format::Int8_RGBA:
         return GL_BYTE;
-    case Format::Uint16_NormalizedR:
+    case Format::Uint16_Normalized_R:
     case Format::Uint16_R:
-    case Format::Uint16_NormalizedRG:
+    case Format::Uint16_Normalized_RG:
     case Format::Uint16_RG:
-    case Format::Uint16_NormalizedRGB:
+    case Format::Uint16_Normalized_RGB:
     case Format::Uint16_RGB:
-    case Format::Uint16_NormalizedRGBA:
+    case Format::Uint16_Normalized_RGBA:
     case Format::Uint16_RGBA:
-    case Format::Depth16:
+    case Format::Uint16_Normalized_Depth:
         return GL_UNSIGNED_SHORT;
-    case Format::Int16_NormalizedR:
+    case Format::Int16_Normalized_R:
     case Format::Int16_R:
-    case Format::Int16_NormalizedRG:
+    case Format::Int16_Normalized_RG:
     case Format::Int16_RG:
-    case Format::Int16_NormalizedRGB:
+    case Format::Int16_Normalized_RGB:
     case Format::Int16_RGB:
-    case Format::Int16_NormalizedRGBA:
+    case Format::Int16_Normalized_RGBA:
     case Format::Int16_RGBA:
         return GL_SHORT;
     case Format::Uint32_R:
     case Format::Uint32_RG:
     case Format::Uint32_RGB:
     case Format::Uint32_RGBA:
-    case Format::Depth24:
-    case Format::Depth32:
         return GL_UNSIGNED_INT;
     case Format::Int32_R:
     case Format::Int32_RG:
@@ -276,17 +268,18 @@ inline auto GetGLDataType(const Format& format)
     case Format::Float32_RG:
     case Format::Float32_RGB:
     case Format::Float32_RGBA:
-    case Format::Depth32F:
+    case Format::Float32_Depth:
         return GL_FLOAT;
-    case Format::Depth24_Stencil8:
+    case Format::Uint24_Normalized_Depth_Uint8_Stencil:
         return GL_UNSIGNED_INT_24_8;
-    case Format::Depth32F_Stencil8:
+    case Format::Float32_Normalized_Depth_Uint8_Stencil:
         return GL_FLOAT_32_UNSIGNED_INT_24_8_REV;
-    case Format::Stencil8:
+    case Format::Uint8_Stencil:
         return GL_UNSIGNED_BYTE;
     case Format::S3TC_DXT5_RGBA:
+        return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 	case Format::S3TC_DXT5_SRGBA:
-        throw std::runtime_error("Incorrect Image Format");
+        return GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
     default:
         throw std::runtime_error("Unknow Image Format");
     }

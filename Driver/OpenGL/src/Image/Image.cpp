@@ -21,7 +21,7 @@
 
 namespace OCRA::Image {
 struct Impl;
-using TransferFunction = std::function<void(const Device::Handle&, const std::vector<BufferCopy>&, const Impl&)>;
+using TransferFunction = std::function<void(const Device::Handle&, const BufferCopy&, const Impl&)>;
 
 extern TransferFunction CompressedDownload;
 extern TransferFunction UncompressedDownload;
@@ -39,9 +39,9 @@ struct Impl {
     Impl(const Device::Handle& a_Device, const Info& a_Info)
         : info(a_Info)
         , internalFormat(GetGLSizedFormat(a_Info.format))
-        , unsizedFormat(GetGLUnsizedFormat(a_Info.format))
+        , dataFormat(GetGLDataFormat(a_Info.format))
+        , dataType(GetGLDataType(a_Info.format))
     {
-        dataType = 0;
         glGenTextures(1, &handle);
         auto isCompressed { IsCompressedFormat(a_Info.format) };
         Download = isCompressed ? CompressedDownload : UncompressedDownload;
@@ -49,11 +49,12 @@ struct Impl {
         {
         case Image::Info::Type::Image1D:
             Upload = isCompressed ? Compressed1DUpload : Uncompressed1DUpload;
+            break;
         case Image::Info::Type::Image2D:
             Upload = isCompressed ? Compressed2DUpload : Uncompressed2DUpload;
+            break;
         case Image::Info::Type::Image3D:
             Upload = isCompressed ? Compressed3DUpload : Uncompressed3DUpload;
-        default:
             break;
         }
         if (a_Info.samples == Info::Samples::Samples1) {
@@ -120,8 +121,8 @@ struct Impl {
     }
     GLuint handle { 0 };
     const GLenum internalFormat;
-    GLenum dataType;
-    const GLenum unsizedFormat;
+    const GLenum dataType;
+    const GLenum dataFormat;
     const Info info;
     TransferFunction Upload;
     TransferFunction Download;
@@ -147,6 +148,14 @@ unsigned GetGLHandle(const Device::Handle& a_Device, const Handle& a_Handle)
 {
     return s_Images.at(a_Handle).handle;
 }
+
+void CheckValidCopy(const BufferCopy& a_Copy, const Impl& a_Image)
+{
+    assert(a_Copy.imageOffset.x + a_Copy.imageExtent.width  < a_Image.info.extent.width);
+    assert(a_Copy.imageOffset.y + a_Copy.imageExtent.height < a_Image.info.extent.height);
+    assert(a_Copy.imageOffset.z + a_Copy.imageExtent.depth  < a_Image.info.extent.depth);
+    assert(a_Copy.imageSubresource.level < a_Image.info.mipLevels);
+}
 void CopyBufferToImage(
     const Device::Handle& a_Device,
     const Buffer::Transfer::Handle& a_SrcBuffer,
@@ -156,7 +165,10 @@ void CopyBufferToImage(
     auto &image = s_Images.at(a_DstImage);
     auto bufferHandle{ Buffer::Transfer::GetBufferHandle(a_Device, a_SrcBuffer) };
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, Buffer::GetGLHandle(a_Device, bufferHandle));
-    image.Upload(a_Device, a_Regions, image);
+    for (const auto& copy : a_Regions) {
+        CheckValidCopy(copy, image);
+        image.Upload(a_Device, copy, image);
+    }
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 }
 
@@ -169,150 +181,122 @@ void CopyImageToBuffer(
     auto& image = s_Images.at(a_SrcImage);
     auto bufferHandle{ Buffer::Transfer::GetBufferHandle(a_Device, a_DstBuffer) };
     glBindBuffer(GL_PIXEL_PACK_BUFFER, Buffer::GetGLHandle(a_Device, bufferHandle));
-    image.Download(a_Device, a_Regions, image);
+    for (const auto& copy : a_Regions) {
+        CheckValidCopy(copy, image);
+        image.Download(a_Device, copy, image);
+    }
     glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 }
 }
 
 #define BUFFER_OFFSET(i) ((char*)NULL + (i))
 
-OCRA::Image::TransferFunction OCRA::Image::UncompressedDownload = [](const Device::Handle& a_Device, const std::vector<BufferCopy>& a_Regions, const Impl& a_Image) {
-    for (const auto& copy : a_Regions) {
-        assert(copy.imageOffset.x < a_Image.info.extent.width);
-        assert(copy.imageOffset.y < a_Image.info.extent.height);
-        glGetTextureSubImage(
-            a_Image.handle,
-            copy.imageSubresource.mipLevel,
-            copy.imageOffset.x,
-            copy.imageOffset.y,
-            copy.imageOffset.z,
-            copy.imageExtent.width,
-            copy.imageExtent.height,
-            copy.imageExtent.depth,
-            a_Image.unsizedFormat,
-            a_Image.dataType,
-            copy.bufferRowLength * copy.bufferImageHeight,
-            BUFFER_OFFSET(copy.bufferOffset));
-    }
+namespace OCRA::Image {
+OCRA::Image::TransferFunction OCRA::Image::UncompressedDownload = [](const Device::Handle& a_Device, const BufferCopy& a_Copy, const Impl& a_Image) {
+    glGetTextureSubImage(
+        a_Image.handle,
+        a_Copy.imageSubresource.level,
+        a_Copy.imageOffset.x,
+        a_Copy.imageOffset.y,
+        a_Copy.imageOffset.z,
+        a_Copy.imageExtent.width,
+        a_Copy.imageExtent.height,
+        a_Copy.imageExtent.depth,
+        a_Image.dataFormat,
+        a_Image.dataType,
+        a_Copy.bufferRowLength * a_Copy.bufferImageHeight,
+        BUFFER_OFFSET(a_Copy.bufferOffset));
 };
 
-OCRA::Image::TransferFunction OCRA::Image::CompressedDownload = [](const Device::Handle& a_Device, const std::vector<BufferCopy>& a_Regions, const Impl& a_Image) {
-    for (const auto& copy : a_Regions) {
-        assert(copy.imageOffset.x < a_Image.info.extent.width);
-        assert(copy.imageOffset.y < a_Image.info.extent.height);
-        glGetCompressedTextureSubImage(
-            a_Image.handle,
-            copy.imageSubresource.mipLevel,
-            copy.imageOffset.x,
-            copy.imageOffset.y,
-            copy.imageOffset.z,
-            copy.imageExtent.width,
-            copy.imageExtent.height,
-            copy.imageExtent.depth,
-            copy.bufferRowLength * copy.bufferImageHeight,
-            BUFFER_OFFSET(copy.bufferOffset));
-    }
+OCRA::Image::TransferFunction OCRA::Image::CompressedDownload = [](const Device::Handle& a_Device, const BufferCopy& a_Copy, const Impl& a_Image) {
+    glGetCompressedTextureSubImage(
+        a_Image.handle,
+        a_Copy.imageSubresource.level,
+        a_Copy.imageOffset.x,
+        a_Copy.imageOffset.y,
+        a_Copy.imageOffset.z,
+        a_Copy.imageExtent.width,
+        a_Copy.imageExtent.height,
+        a_Copy.imageExtent.depth,
+        a_Copy.bufferRowLength * a_Copy.bufferImageHeight,
+        BUFFER_OFFSET(a_Copy.bufferOffset));
 };
 
-OCRA::Image::TransferFunction OCRA::Image::Compressed1DUpload = [](const Device::Handle& a_Device, const std::vector<BufferCopy>& a_Regions, const Impl& a_Image) {
-    for (const auto& copy : a_Regions) {
-        assert(copy.imageOffset.x < a_Image.info.extent.width);
-        assert(copy.imageOffset.y < a_Image.info.extent.height);
-        glCompressedTextureSubImage1D(
-            a_Image.handle,
-            copy.imageSubresource.mipLevel,
-            copy.imageOffset.x,
-            copy.imageExtent.width,
-            a_Image.internalFormat,
-            copy.bufferRowLength * copy.bufferImageHeight,
-            BUFFER_OFFSET(copy.bufferOffset));
-    }
+OCRA::Image::TransferFunction OCRA::Image::Compressed1DUpload = [](const Device::Handle& a_Device, const BufferCopy& a_Copy, const Impl& a_Image) {
+    glCompressedTextureSubImage1D(
+        a_Image.handle,
+        a_Copy.imageSubresource.level,
+        a_Copy.imageOffset.x,
+        a_Copy.imageExtent.width,
+        a_Image.internalFormat,
+        a_Copy.bufferRowLength * a_Copy.bufferImageHeight,
+        BUFFER_OFFSET(a_Copy.bufferOffset));
 };
 
-OCRA::Image::TransferFunction OCRA::Image::Uncompressed1DUpload = [](const Device::Handle& a_Device, const std::vector<BufferCopy>& a_Regions, const Impl& a_Image) {
-    for (const auto& copy : a_Regions) {
-        assert(copy.imageOffset.x < a_Image.info.extent.width);
-        assert(copy.imageOffset.y < a_Image.info.extent.height);
-        glTextureSubImage1D(
-            a_Image.handle,
-            copy.imageSubresource.mipLevel,
-            copy.imageOffset.x,
-            copy.imageExtent.width,
-            a_Image.internalFormat,
-            a_Image.dataType,
-            BUFFER_OFFSET(copy.bufferOffset));
-    }
+OCRA::Image::TransferFunction OCRA::Image::Compressed2DUpload = [](const Device::Handle& a_Device, const BufferCopy& a_Copy, const Impl& a_Image) {
+    glCompressedTextureSubImage2D(
+        a_Image.handle,
+        a_Copy.imageSubresource.level,
+        a_Copy.imageOffset.x,
+        a_Copy.imageOffset.y,
+        a_Copy.imageExtent.width,
+        a_Copy.imageExtent.height,
+        a_Image.internalFormat,
+        a_Copy.bufferRowLength * a_Copy.bufferImageHeight,
+        BUFFER_OFFSET(a_Copy.bufferOffset));
 };
 
-OCRA::Image::TransferFunction OCRA::Image::Compressed2DUpload = [](const Device::Handle& a_Device, const std::vector<BufferCopy>& a_Regions, const Impl& a_Image) {
-    for (const auto& copy : a_Regions) {
-        assert(copy.imageOffset.x < a_Image.info.extent.width);
-        assert(copy.imageOffset.y < a_Image.info.extent.height);
-        glCompressedTextureSubImage2D(
-            a_Image.handle,
-            copy.imageSubresource.mipLevel,
-            copy.imageOffset.x,
-            copy.imageOffset.y,
-            copy.imageExtent.width,
-            copy.imageExtent.height,
-            a_Image.internalFormat,
-            copy.bufferRowLength * copy.bufferImageHeight,
-            BUFFER_OFFSET(copy.bufferOffset));
-    }
+OCRA::Image::TransferFunction OCRA::Image::Compressed3DUpload = [](const Device::Handle& a_Device, const BufferCopy& a_Copy, const Impl& a_Image) {
+    glCompressedTextureSubImage3D(
+        a_Image.handle,
+        a_Copy.imageSubresource.level,
+        a_Copy.imageOffset.x,
+        a_Copy.imageOffset.y,
+        a_Copy.imageOffset.z,
+        a_Copy.imageExtent.width,
+        a_Copy.imageExtent.height,
+        a_Copy.imageExtent.depth,
+        a_Image.internalFormat,
+        a_Copy.bufferRowLength * a_Copy.bufferImageHeight,
+        BUFFER_OFFSET(a_Copy.bufferOffset));
 };
 
-OCRA::Image::TransferFunction OCRA::Image::Uncompressed2DUpload = [](const Device::Handle& a_Device, const std::vector<BufferCopy>& a_Regions, const Impl& a_Image) {
-    for (const auto& copy : a_Regions) {
-        assert(copy.imageOffset.x < a_Image.info.extent.width);
-        assert(copy.imageOffset.y < a_Image.info.extent.height);
+OCRA::Image::TransferFunction OCRA::Image::Uncompressed1DUpload = [](const Device::Handle& a_Device, const BufferCopy& a_Copy, const Impl& a_Image) {
+    glTextureSubImage1D(
+        a_Image.handle,
+        a_Copy.imageSubresource.level,
+        a_Copy.imageOffset.x,
+        a_Copy.imageExtent.width,
+        a_Image.dataFormat,
+        a_Image.dataType,
+        BUFFER_OFFSET(a_Copy.bufferOffset));
+};
+
+OCRA::Image::TransferFunction OCRA::Image::Uncompressed2DUpload = [](const Device::Handle& a_Device, const BufferCopy& a_Copy, const Impl& a_Image) {
         glTextureSubImage2D(
             a_Image.handle,
-            copy.imageSubresource.mipLevel,
-            copy.imageOffset.x,
-            copy.imageOffset.y,
-            copy.imageExtent.width,
-            copy.imageExtent.height,
-            a_Image.internalFormat,
+            a_Copy.imageSubresource.level,
+            a_Copy.imageOffset.x,
+            a_Copy.imageOffset.y,
+            a_Copy.imageExtent.width,
+            a_Copy.imageExtent.height,
+            a_Image.dataFormat,
             a_Image.dataType,
-            BUFFER_OFFSET(copy.bufferOffset));
-    }
+            BUFFER_OFFSET(a_Copy.bufferOffset));
 };
 
-OCRA::Image::TransferFunction OCRA::Image::Compressed3DUpload = [](const Device::Handle& a_Device, const std::vector<BufferCopy>& a_Regions, const Impl& a_Image) {
-    for (const auto& copy : a_Regions) {
-        assert(copy.imageOffset.x < a_Image.info.extent.width);
-        assert(copy.imageOffset.y < a_Image.info.extent.height);
-        assert(copy.imageOffset.z < a_Image.info.extent.depth);
-        glCompressedTextureSubImage3D(
-            a_Image.handle,
-            copy.imageSubresource.mipLevel,
-            copy.imageOffset.x,
-            copy.imageOffset.y,
-            copy.imageOffset.z,
-            copy.imageExtent.width,
-            copy.imageExtent.height,
-            copy.imageExtent.depth,
-            a_Image.internalFormat,
-            copy.bufferRowLength * copy.bufferImageHeight,
-            BUFFER_OFFSET(copy.bufferOffset));
-    }
+OCRA::Image::TransferFunction OCRA::Image::Uncompressed3DUpload = [](const Device::Handle& a_Device, const BufferCopy& a_Copy, const Impl& a_Image) {
+    glTextureSubImage3D(
+        a_Image.handle,
+        a_Copy.imageSubresource.level,
+        a_Copy.imageOffset.x,
+        a_Copy.imageOffset.y,
+        a_Copy.imageOffset.z,
+        a_Copy.imageExtent.width,
+        a_Copy.imageExtent.height,
+        a_Copy.imageExtent.depth,
+        a_Image.dataFormat,
+        a_Image.dataType,
+        BUFFER_OFFSET(a_Copy.bufferOffset));
 };
-
-OCRA::Image::TransferFunction OCRA::Image::Uncompressed3DUpload = [](const Device::Handle& a_Device, const std::vector<BufferCopy>& a_Regions, const Impl& a_Image) {
-    for (const auto& copy : a_Regions) {
-        assert(copy.imageOffset.x < a_Image.info.extent.width);
-        assert(copy.imageOffset.y < a_Image.info.extent.height);
-        glTextureSubImage3D(
-            a_Image.handle,
-            copy.imageSubresource.mipLevel,
-            copy.imageOffset.x,
-            copy.imageOffset.y,
-            copy.imageOffset.z,
-            copy.imageExtent.width,
-            copy.imageExtent.height,
-            copy.imageExtent.depth,
-            a_Image.internalFormat,
-            a_Image.dataType,
-            BUFFER_OFFSET(copy.bufferOffset));
-    }
-};
+}

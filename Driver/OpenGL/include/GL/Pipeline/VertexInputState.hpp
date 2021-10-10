@@ -20,11 +20,12 @@ struct Compile {
     void operator()(const Device::Handle& a_Device)
     {
         auto vao { vaoRef.Get() };
+        auto buffer{ Buffer::Vertex::GetBufferHandle(a_Device, vao->info.indexBufferDescription.buffer) };
         glBindVertexArray(vao->handle);
         if (vao->info.indexBufferDescription.buffer == 0)
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         else
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Buffer::Vertex::GetGLHandle(a_Device, vao->info.indexBufferDescription.buffer));
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Buffer::GetGLHandle(a_Device, buffer));
         glPrimitiveRestartIndex(vao->info.primitiveRestartIndex);
     }
     const VAOPool::Reference vaoRef;
