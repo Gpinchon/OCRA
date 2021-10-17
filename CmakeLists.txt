@@ -27,7 +27,7 @@ set(OCRA_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/FrameBuffer.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Handle.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Logic.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Pass.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/RenderPass.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Queue.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Rect2D.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Scalar.hpp
@@ -37,6 +37,11 @@ set(OCRA_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Window.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Buffer/Transfer.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Buffer/Vertex.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/BufferBinding.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/CommandBuffer.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/Draw.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/Image.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/VertexBuffer.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Descriptor/Descriptor.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Descriptor/Layout/Binding.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Descriptor/Layout/Layout.hpp
@@ -44,7 +49,6 @@ set(OCRA_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Image/Filter.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Image/Format.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Image/Image.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Image/Operations.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Image/Sampler.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Image/View.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/ColorBlendState.hpp

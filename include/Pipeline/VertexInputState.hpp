@@ -45,7 +45,7 @@ struct BindingDescription {
 };
 struct IndexBufferDescription {
     struct Format { //specifies the organization of an element buffer
-        IndexType type{ IndexType::None };
+        Buffer::Vertex::IndexType type{ Buffer::Vertex::IndexType::None };
     } format;
     Buffer::Vertex::Handle buffer{ 0 };
 };

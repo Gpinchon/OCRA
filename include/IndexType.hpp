@@ -6,7 +6,7 @@
 */
 #pragma once
 
-namespace OCRA
+namespace OCRA::Buffer::Vertex
 {
 enum class IndexType {
 	None,

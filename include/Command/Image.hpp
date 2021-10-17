@@ -1,8 +1,8 @@
 /*
 * @Author: gpinchon
-* @Date:   2021-10-06 19:37:06
+* @Date:   2021-09-26 00:00:00
 * @Last Modified by:   gpinchon
-* @Last Modified time: 2021-10-06 19:43:12
+* @Last Modified time: 2021-09-26 14:26:36
 */
 #pragma once
 
@@ -12,9 +12,8 @@
 #include <Offset3D.hpp>
 #include <Scalar.hpp>
 
-#include <vector>
-
-namespace OCRA::Image {
+namespace OCRA::Command
+{
 struct SubresourceLayers {
     /*
     * //TODO support aspect copy for OGL
@@ -24,7 +23,7 @@ struct SubresourceLayers {
     */
     Uint32 level{ 0 }; //indicates the base level (mipmap or array layer) used for the copy
 };
-struct BufferCopy {
+struct BufferImageCopy {
     Uint64 bufferOffset{ 0 };
     Uint32 bufferRowLength{ 0 };
     Uint32 bufferImageHeight{ 0 };
@@ -33,13 +32,13 @@ struct BufferCopy {
     Extent3D imageExtent;
 };
 void CopyBufferToImage(
-    const Device::Handle& a_Device,
+    const CommandBuffer::Handle& a_CommandBuffer,
     const Buffer::Transfer::Handle& a_srcBuffer,
     const Image::Handle& a_dstImage,
-    const std::vector<BufferCopy>& a_Regions);
+    const std::vector<BufferImageCopy>& a_Regions);
 void CopyImageToBuffer(
-    const Device::Handle& a_Device,
+    const CommandBuffer::Handle& a_CommandBuffer,
     const Buffer::Transfer::Handle& a_DstBuffer,
     const Image::Handle& a_SrcImage,
-    const std::vector<BufferCopy>& a_Regions);
+    const std::vector<BufferImageCopy>& a_Regions);
 }
