@@ -2,17 +2,18 @@
 * @Author: gpinchon
 * @Date:   2021-09-26 00:00:00
 * @Last Modified by:   gpinchon
-* @Last Modified time: 2021-09-26 14:27:03
+* @Last Modified time: 2021-09-26 14:26:36
 */
 #pragma once
 
+#include <ClearValue.hpp>
+#include <Framebuffer.hpp>
 #include <Handle.hpp>
 #include <Image/Format.hpp>
+#include <Pipeline/BindPoint.hpp>
+#include <Rect2D.hpp>
 #include <Sample.hpp>
 #include <Scalar.hpp>
-#include <Pipeline/BindPoint.hpp>
-
-#include <vector>
 
 #include <array>
 
@@ -23,7 +24,8 @@ enum class Layout {
 };
 }
 
-namespace OCRA::Pass {
+namespace OCRA::RenderPass
+{
 struct AttachmentDescription {
 	enum class LoadOperation {
 		DontCare, Load, Clear,
@@ -79,4 +81,20 @@ struct Info {
 	Uint8 dependencyCount{ 0 };
 	std::array<SubPassDependency, MaxDependencies> dependencies;
 };
+struct BeginInfo
+{
+	RenderPass::Handle renderPass{ 0 };
+	Framebuffer::Handle framebuffer{ 0 };
+	Rect2D renderArea;
+	Uint8 clearValueCount{ 0 };
+	std::array<ClearValue, Framebuffer::MaxColorAttachments> clearValues;
+};
+enum class SubPassContents
+{
+	Inline, SecondaryCommandBuffers
+};
+Handle Create(const Device::Handle& a_Device, const Info& a_Info);
+void Destroy(const Handle& a_RenderPass);
+void Begin(const CommandBuffer::Handle& a_CommandBuffer, const BeginInfo& a_BeginInfo);
+void End(const CommandBuffer::Handle& a_CommandBuffer);
 }

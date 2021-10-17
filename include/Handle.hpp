@@ -38,6 +38,7 @@ namespace Device {
     Handle Create(const Info& a_Info);
     void Destroy(const Handle& a_Handle);
 }
+HANDLE(CommandBuffer);
 HANDLE(Descriptor);
 HANDLE(Descriptor::Layout);
 HANDLE(Descriptor::Layout::Binding);
@@ -52,6 +53,6 @@ HANDLE(Pipeline::Graphics);
 HANDLE(Shader::Stage);
 HANDLE(State::Draw);
 HANDLE(State::Clear);
-HANDLE(Pass);
+HANDLE(RenderPass);
 HANDLE(ViewPort);
 }

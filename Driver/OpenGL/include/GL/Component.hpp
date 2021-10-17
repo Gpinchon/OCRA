@@ -14,12 +14,12 @@ namespace OCRA::Component {
 inline GLenum GetGLSwizzle(const Swizzle& a_Swizzle, const GLenum& a_SwizzleComponent) {
 	switch (a_Swizzle)
 	{
-	case Swizzle::Identity: {
+	case Swizzle::Identity:
 		if (a_SwizzleComponent == GL_TEXTURE_SWIZZLE_R) return GL_RED;
 		else if (a_SwizzleComponent == GL_TEXTURE_SWIZZLE_G) return GL_GREEN;
 		else if (a_SwizzleComponent == GL_TEXTURE_SWIZZLE_B) return GL_BLUE;
 		else if (a_SwizzleComponent == GL_TEXTURE_SWIZZLE_A) return GL_ALPHA;
-	}
+		break;
 	case Swizzle::Zero:
 		return GL_ZERO;
 	case Swizzle::One:
@@ -33,8 +33,10 @@ inline GLenum GetGLSwizzle(const Swizzle& a_Swizzle, const GLenum& a_SwizzleComp
 	case Swizzle::A:
 		return GL_ALPHA;
 	default:
-		throw std::runtime_error("Unknown Swizzle Type");
+		break;
 	}
+	throw std::runtime_error("Unknown Swizzle Type");
+	return 0;
 }
 struct GLSwizzleMask
 {

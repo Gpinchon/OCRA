@@ -77,7 +77,7 @@ struct VAO {
                 handle,
                 attribIndex,
                 attribute.bindingIndex);
-			auto bufferHandle{ Buffer::Vertex::GetBuffeHandle(a_Device, binding.buffer) };
+			auto bufferHandle{ Buffer::Vertex::GetBufferHandle(a_Device, binding.buffer) };
 			auto bufferGLHandle{ Buffer::GetGLHandle(a_Device, bufferHandle) };
             glVertexArrayVertexBuffer(
                 handle,

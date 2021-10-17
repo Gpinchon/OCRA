@@ -21,7 +21,7 @@ struct Impl
 		: device(a_Device)
 		, info(a_Info)
 	{
-		GLbitfield accessFlags;
+		GLbitfield accessFlags = 0;
 		if (info.accessFlag == Read)
 			accessFlags = GL_MAP_READ_BIT;
 		else if (info.accessFlag == Write)
@@ -42,24 +42,24 @@ struct Impl
 	const Info info;
 };
 static Handle s_CurrentHandle = 0;
-static std::map<Handle, Info> s_TransferBuffers;
+static std::map<Handle, Impl> s_TransferBuffers;
 Handle Create(const Device::Handle& a_Device, const Info& a_Info)
 {
 	++s_CurrentHandle;
-	s_TransferBuffers.emplace(s_CurrentHandle, { a_Device, a_Info };
+	s_TransferBuffers.emplace(s_CurrentHandle, Impl(a_Device, a_Info));
 	return s_CurrentHandle;
 }
-Handle Destroy(const Device::Handle& a_Device, const Handle& a_Handle)
+void Destroy(const Device::Handle& a_Device, const Handle& a_Handle)
 {
 	s_TransferBuffers.erase(a_Handle);
 }
 const Info& GetInfo(const Device::Handle& a_Device, const Handle& a_Handle)
 {
-	return s_TransferBuffers.at(a_Handle);
+	return s_TransferBuffers.at(a_Handle).info;
 }
 Buffer::Handle GetBufferHandle(const Device::Handle& a_Device, const Handle& a_Handle)
 {
-	return s_VertexBuffers.at(a_Handle).bufferHandle;
+	return s_TransferBuffers.at(a_Handle).bufferHandle;
 }
 void* Map(const Device::Handle& a_Device, const MapOperation& a_MapOperation)
 {

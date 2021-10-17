@@ -16,15 +16,13 @@
 
 namespace OCRA::Image {
 struct SubresourceLayers {
-    typedef std::bitset<3> AspectFlags;
-    static constexpr AspectFlags Color = 0b100;
-    static constexpr AspectFlags Depth = 0b010;
-    static constexpr AspectFlags Stencil = 0b001;
-	static constexpr AspectFlags All = 0b111;
-    AspectFlags aspectMask{ All };
-    Uint32 mipLevel{ 0 };
-    Uint32 baseArrayLayer{ 0 };
-    Uint32 layerCount{ 0 };
+    /*
+    * //TODO support aspect copy for OGL
+    enum class Aspect {
+        Unknown = -1, Color, Depth, Stencil, DepthStencil, MaxValue
+    } aspect{ Aspect::Unknown };
+    */
+    Uint32 level{ 0 }; //indicates the base level (mipmap or array layer) used for the copy
 };
 struct BufferCopy {
     Uint64 bufferOffset{ 0 };

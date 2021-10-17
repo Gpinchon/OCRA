@@ -9,6 +9,7 @@
 
 #include <Handle.hpp>
 #include <Scalar.hpp>
+#include <IndexType.hpp>
 
 #include <array>
 
@@ -44,13 +45,7 @@ struct BindingDescription {
 };
 struct IndexBufferDescription {
     struct Format { //specifies the organization of an element buffer
-        enum class Type {
-            Unknown,
-            Uint8,
-            Uint16,
-            Uint32,
-            MaxValue
-        } type{ Type::Unknown };
+        IndexType type{ IndexType::None };
     } format;
     Buffer::Vertex::Handle buffer{ 0 };
 };

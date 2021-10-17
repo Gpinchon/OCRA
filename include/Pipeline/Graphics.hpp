@@ -31,7 +31,7 @@ struct Info {
 
 namespace OCRA::Pipeline::Graphics {
 struct Info { //describes a graphics pipeline with each stage
-	Pass::Handle renderPass{ 0 }; //a handle to a previously created render pass
+	RenderPass::Handle renderPass{ 0 }; //a handle to a previously created render pass
 	Int8 subPass{ -1 }; //-1 means no subpass
     ShaderPipelineState::Info shaderPipelineState;
     ColorBlendState::Info colorBlendState;
