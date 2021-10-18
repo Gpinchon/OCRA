@@ -38,7 +38,11 @@ namespace Device {
     Handle Create(const Info& a_Info);
     void Destroy(const Handle& a_Handle);
 }
-HANDLE(CommandBuffer);
+namespace Command::Buffer {
+    typedef HandleType Handle;
+    Handle Create(const Device::Handle& a_Device);
+    void Destroy(const Device::Handle& a_Device, const Handle& a_Handle);
+}
 HANDLE(Descriptor);
 HANDLE(Descriptor::Layout);
 HANDLE(Descriptor::Layout::Binding);

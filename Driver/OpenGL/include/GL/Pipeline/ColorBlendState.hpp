@@ -74,7 +74,7 @@ struct Compile {
     const Info::BlendConstants blendConstants;
     const Uint8 attachementCount;
     const std::array<AttachmentState, FrameBuffer::MaxColorAttachments> attachments;
-    void operator()(const Device::Handle& a_Device) const noexcept
+    void operator()() const noexcept
     {
         logicOpEnable ? glEnable(GL_COLOR_LOGIC_OP) : glDisable(GL_COLOR_LOGIC_OP);
         glLogicOp(logicOp);

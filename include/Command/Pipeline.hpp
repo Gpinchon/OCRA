@@ -9,10 +9,11 @@
 #include <Handle.hpp>
 #include <Pipeline/BindingPoint.hpp>
 
-namespace OCRA::Command
+namespace OCRA::Command::Pipeline
 {
-void BindPipeline(
-	const CommandBuffer::Handle& a_CommandBuffer,
+//Bind the specified Pipeline to the specified Command Buffer at the specified Binding Point
+void Bind(
+	const Command::Buffer::Handle& a_CommandBuffer,
 	const Pipeline::BindingPoint& a_BindingPoint,
 	const Pipeline::Handle& a_Pipeline);
 }

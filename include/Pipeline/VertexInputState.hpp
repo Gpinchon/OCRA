@@ -10,44 +10,28 @@
 #include <Handle.hpp>
 #include <Scalar.hpp>
 #include <IndexType.hpp>
+#include <VertexType.hpp>
 
 #include <array>
 
 namespace OCRA::Pipeline::VertexInputState {
 struct AttributeDescription {
-    struct Format { //specifies the organization of an array's attribute
-        enum class Type {
-            Unknown = -1,
-            Float32,
-            Float16,
-            Int32,
-            Uint32,
-            Int16,
-            Uint16,
-            Int8,
-            Uint8,
-            MaxValue
-        } type{ Type::Unknown };
-        Uint32 relativeOffset{ 0 }; //distance between elements in buffer
-        Uint8 valuesPerVertex{ 0 }; //number of values per vertex
-        bool normalized{ false };
-    } format;
-    Uint8 bindingIndex{ 0 }; //BindingDescription index
+    struct Format {
+		Uint8 size{ 0 }; //Number of components per vertex
+		VertexType type{ VertexType::None }; //Type of data of each components
+		bool normalized{ false };
+	};
+	Uint8 binding{ 0 }; //BindingDescription index
+    Uint32 location{ 0 }; //Location in the shader for this attribute
+    Uint32 offset{ 0 }; 
 };
 struct BindingDescription {
-    Buffer::Vertex::Handle buffer{ 0 };
-    Int32 offset{ 0 }; //starting index in the array
+	Uint32 binding{ 0 }; //index inside the BindVertexBuffers Command
     Uint32 stride{ 0 }; //byte stride
     enum class InputRate {
         Vertex, //use vertex attribute
         Instance //use instance index
     } inputRate{ InputRate::Vertex }; //source of the data
-};
-struct IndexBufferDescription {
-    struct Format { //specifies the organization of an element buffer
-        Buffer::Vertex::IndexType type{ Buffer::Vertex::IndexType::None };
-    } format;
-    Buffer::Vertex::Handle buffer{ 0 };
 };
 struct Info {
     static constexpr auto MaxAttributes = 32;
@@ -57,6 +41,5 @@ struct Info {
     std::array<AttributeDescription, MaxAttributes> attributeDescriptions;
     Uint8 bindingDescriptionCount{ 0 };
     std::array<BindingDescription, MaxBindings> bindingDescriptions;
-	IndexBufferDescription indexBufferDescription;
 };
 }

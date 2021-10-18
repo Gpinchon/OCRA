@@ -39,7 +39,7 @@ Handle Create(const Device::Handle& a_Device, const Info& a_Info)
 }
 void Destroy(const Device::Handle& a_Device, const Handle& a_Handle)
 {
-	s_Buffers.erase(s_CurrentHandle);
+	s_Buffers.erase(a_Handle);
 }
 const Info& GetInfo(const Device::Handle& a_Device, const Handle& a_Handle)
 {

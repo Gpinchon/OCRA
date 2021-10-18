@@ -6,7 +6,6 @@
 */
 #pragma once
 
-#include <ClearValue.hpp>
 #include <Framebuffer.hpp>
 #include <Handle.hpp>
 #include <Image/Format.hpp>
@@ -81,20 +80,4 @@ struct Info {
 	Uint8 dependencyCount{ 0 };
 	std::array<SubPassDependency, MaxDependencies> dependencies;
 };
-struct BeginInfo
-{
-	RenderPass::Handle renderPass{ 0 };
-	Framebuffer::Handle framebuffer{ 0 };
-	Rect2D renderArea;
-	Uint8 clearValueCount{ 0 };
-	std::array<ClearValue, Framebuffer::MaxColorAttachments> clearValues;
-};
-enum class SubPassContents
-{
-	Inline, SecondaryCommandBuffers
-};
-Handle Create(const Device::Handle& a_Device, const Info& a_Info);
-void Destroy(const Handle& a_RenderPass);
-void Begin(const CommandBuffer::Handle& a_CommandBuffer, const BeginInfo& a_BeginInfo);
-void End(const CommandBuffer::Handle& a_CommandBuffer);
 }

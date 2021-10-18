@@ -8,11 +8,16 @@
 
 namespace OCRA
 {
-enum class IndexType {
+enum class VertexType {
 	None,
-	Uint8,
-	Uint16,
+	Float32,
+	Float16,
+	Int32,
 	Uint32,
+	Int16,
+	Uint16,
+	Int8,
+	Uint8,
 	MaxValue
 };
 }

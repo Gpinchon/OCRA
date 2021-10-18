@@ -32,12 +32,12 @@ struct BufferImageCopy {
     Extent3D imageExtent;
 };
 void CopyBufferToImage(
-    const CommandBuffer::Handle& a_CommandBuffer,
+    const Command::Buffer::Handle& a_CommandBuffer,
     const Buffer::Transfer::Handle& a_srcBuffer,
     const Image::Handle& a_dstImage,
     const std::vector<BufferImageCopy>& a_Regions);
 void CopyImageToBuffer(
-    const CommandBuffer::Handle& a_CommandBuffer,
+    const Command::Buffer::Handle& a_CommandBuffer,
     const Buffer::Transfer::Handle& a_DstBuffer,
     const Image::Handle& a_SrcImage,
     const std::vector<BufferImageCopy>& a_Regions);
