@@ -72,7 +72,7 @@ struct Compile {
     const StencilOpState back;
     const GLfloat minDepthBounds;
     const GLfloat maxDepthBounds;
-    void operator()(const Device::Handle& a_Device) const
+    void operator()() const
     {
         glDepthMask(depthWriteEnable);
         glDepthFunc(depthCompareOp);

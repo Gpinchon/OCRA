@@ -51,7 +51,7 @@ const Info& GetInfo(const Device::Handle& a_Device, const Handle& a_Handle)
 {
 	return s_VertexBuffers.at(a_Handle).info;
 }
-Buffer::Handle GetBufferHandle(const Device::Handle& a_Device, const Handle& a_Handle)
+Buffer::Handle GetBufferHandle(const Handle& a_Handle)
 {
 	return s_VertexBuffers.at(a_Handle).bufferHandle;
 }
@@ -62,8 +62,8 @@ void ReadFrom(
 	Uint64 a_ReadOffset, Uint64 a_WriteOffset, Uint64 a_Size)
 {
 	CopyOperation copy;
-	copy.srcBuffer = Buffer::Transfer::GetBufferHandle(a_Device, a_SrcTransferBuffer);
-	copy.dstBuffer = Buffer::Vertex::GetBufferHandle(a_Device, a_DstVBO);
+	copy.srcBuffer = Buffer::Transfer::GetBufferHandle(a_SrcTransferBuffer);
+	copy.dstBuffer = Buffer::Vertex::GetBufferHandle(a_DstVBO);
 	copy.readOffset = a_ReadOffset;
 	copy.writeOffset = a_WriteOffset;
 	copy.size = a_WriteOffset;
@@ -76,8 +76,8 @@ void WriteTo(
 	Uint64 a_ReadOffset, Uint64 a_WriteOffset, Uint64 a_Size)
 {
 	CopyOperation copy;
-	copy.srcBuffer = Buffer::Vertex::GetBufferHandle(a_Device, a_SrcVBO);
-	copy.dstBuffer = Buffer::Transfer::GetBufferHandle(a_Device, a_DstTransferBuffer);
+	copy.srcBuffer = Buffer::Vertex::GetBufferHandle(a_SrcVBO);
+	copy.dstBuffer = Buffer::Transfer::GetBufferHandle(a_DstTransferBuffer);
 	copy.readOffset = a_ReadOffset;
 	copy.writeOffset = a_WriteOffset;
 	copy.size = a_WriteOffset;

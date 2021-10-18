@@ -31,6 +31,8 @@ set(OCRA_IMPL_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Logic.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/ObjectPool.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Stencil.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/VertexType.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Buffer/Buffer.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Buffer/Transfer.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Buffer/Vertex.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Image/Format.hpp
@@ -38,6 +40,7 @@ set(OCRA_IMPL_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Image/View.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/ColorBlendState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/DepthStencilState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/Graphics.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/MultisampleState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/RasterizationState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/ShaderPipelinePool.hpp

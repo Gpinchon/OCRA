@@ -45,7 +45,7 @@ const Info& GetInfo(const Device::Handle& a_Device, const Handle& a_Handle)
 {
     return s_Buffers.at(a_Handle).info;
 }
-unsigned GetGLHandle(const Device::Handle& a_Device, const Handle& a_Handle)
+unsigned GetGLHandle(const Handle& a_Handle)
 {
 	return s_Buffers.at(a_Handle).handle;
 }

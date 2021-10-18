@@ -20,10 +20,10 @@ struct AttributeDescription {
 		Uint8 size{ 0 }; //Number of components per vertex
 		VertexType type{ VertexType::None }; //Type of data of each components
 		bool normalized{ false };
-	};
+	} format;
+    Uint32 offset{ 0 };
 	Uint8 binding{ 0 }; //BindingDescription index
     Uint32 location{ 0 }; //Location in the shader for this attribute
-    Uint32 offset{ 0 }; 
 };
 struct BindingDescription {
 	Uint32 binding{ 0 }; //index inside the BindVertexBuffers Command

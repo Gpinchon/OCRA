@@ -12,19 +12,12 @@
 
 namespace OCRA::Pipeline::Graphics
 {
-struct BufferBindings {
+struct VertexBufferBindings {
 	static constexpr auto MaxVertexBuffers = 32;
-	struct {
-		Buffer::Vertex::Handle indexBuffer;
-		Uint64 offset;
-		IndexType indexType;
-	} IBO;
-	struct {
-		Uint32 firstBinding;
-		Uint32 bindingCount;
-		std::array<Buffer::Vertex::Handle, MaxVertexBuffers> vertexBuffers;
-		std::array<Uint64, MaxVertexBuffers> offsets;
-	} VBO;
+	Uint32 firstBinding;
+	Uint32 bindingCount;
+	std::array<Buffer::Vertex::Handle, MaxVertexBuffers> vertexBuffers;
+	std::array<Uint64, MaxVertexBuffers> offsets;
 };
-std::function<void()> CompileCommand(const Handle& a_Handle, const BufferBindings& a_BufferBindings);
+std::function<void()> CompileCommand(const Handle& a_Handle, const VertexBufferBindings& a_BufferBindings);
 }

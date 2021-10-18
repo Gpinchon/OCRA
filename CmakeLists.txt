@@ -33,12 +33,13 @@ set(OCRA_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Scalar.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/ScissorTest.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Stencil.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/VertexType.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/ViewPort.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Window.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Buffer/Transfer.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Buffer/Vertex.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/BufferBinding.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/CommandBuffer.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/Buffer.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/Draw.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/Image.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/VertexBuffer.hpp

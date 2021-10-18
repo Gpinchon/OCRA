@@ -13,7 +13,7 @@ struct Compile {
 	    : patchControlPoints(a_Info.patchControlPoints)
 	{}
 	const GLuint patchControlPoints;
-	void operator()(const Device::Handle& a_Device)
+	void operator()()
 	{
 		glPatchParameteri(GL_PATCH_VERTICES, patchControlPoints);
 	}

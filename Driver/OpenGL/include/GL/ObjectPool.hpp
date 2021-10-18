@@ -29,17 +29,15 @@ struct ObjectPool {
                 (*pool.lock())->Ref(index);
         }
         Reference(const Reference& a_Other)
-            : pool(a_Other.pool)
-            , index(a_Other.index)
         {
-            if (!pool.expired() && index >= 0)
-                (*pool.lock())->Ref(index);
+            *this = a_Other;
         }
         ~Reference()
         {
             if (!pool.expired() && index >= 0)
                 (*pool.lock())->Unref(index);
         }
+
         T* Get() const
         {
             if (!pool.expired() && index >= 0)
@@ -49,6 +47,16 @@ struct ObjectPool {
         T* operator->() const
         {
             return Get();
+        }
+        Reference& operator=(const Reference& a_Other)
+        {
+            if (!pool.expired() && index >= 0)
+                (*pool.lock())->UnRef(index);
+            pool = a_Other.pool;
+            index = a_Other.index;
+            if (!pool.expired() && index >= 0)
+                (*pool.lock())->Ref(index);
+            return *this;
         }
         std::weak_ptr<ObjectPool<T, MaxObjects>*> pool;
         Int32 index{ -1 };

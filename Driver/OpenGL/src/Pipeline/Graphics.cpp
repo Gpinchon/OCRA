@@ -20,6 +20,9 @@
 #include <GL/Pipeline/Graphics.hpp>
 
 #include <GL/glew.h>
+#include <GL/Buffer/Vertex.hpp>
+#include <GL/Buffer/Buffer.hpp>
+#include <GL/VertexType.hpp>
 
 namespace OCRA::Pipeline::Graphics {
 struct Impl {
@@ -32,7 +35,7 @@ struct Impl {
 	, tessellationState(TessellationState::Compile(a_Device, a_Info.tessellationState))
 	, viewportState(ViewPortState::Compile(a_Device, a_Info.viewPortState))
 	{}
-	void operator()()
+	void operator()() const
 	{
 		colorBlendState();
 		depthStencilState();
@@ -79,46 +82,39 @@ struct GLBufferBindings {
 		std::array<Uint64, MaxVertexBuffers> offsets;
 	} VBO;
 };
-std::function<void()> CompileCommand(const Handle& a_Handle, const BufferBindings& a_BufferBindings)
+std::function<void()> CompileCommand(const Handle& a_Handle, const VertexBufferBindings& a_BufferBindings)
 {
 	const auto& impl{ s_GraphicsPipelines.at(a_Handle) };
 	const auto& info{ impl.info.vertexInputState };
-	GLBufferBindings bindings;
-	bindings.VBO.offsets = a_BufferBindings.VBO.offsets;
-	bindings.VBO.firstBinding = a_BufferBindings.VBO.firstBinding;
-	bindings.VBO.bindingCount = a_BufferBindings.VBO.bindingCount;
-	for (auto vboIndex = a_BufferBindings.VBO.firstBinding; vboIndex < a_BufferBindings.VBO.bindingCount; ++vboIndex) {
-		auto bufferHandle{ Buffer::Vertex::GetBufferHandle(a_Device, binding.buffer) };
-		bindings.VBO.vertexBuffers.at(vboIndex) = Buffer::GetGLHandle(a_Device, bufferHandle);
-	}
-	return [info = info, bindings = bindings](){
+	return [impl = impl, info = info, bindings = a_BufferBindings](){
 		impl();
-		for (auto attribIndex = 0u; attribIndex < info.attributeDescriptionCount; ++attribIndex) {
+		for (auto attribIndex = 0u; attribIndex < info.attributeDescriptionCount; ++attribIndex)
+		{
             const auto& attribute { info.attributeDescriptions.at(attribIndex) };
-            /*glEnableVertexArrayAttrib(
-                handle,
-                attribIndex);
-            glVertexArrayAttribFormat(
-                handle,
-                attribIndex,
-                attribute.format.valuesPerVertex,
-                GetGLFormatType(attribute.format.type),
-                attribute.format.normalized,
-                attribute.format.relativeOffset);*/
-            const auto& binding { info.bindingDescriptions.at(attribute.bindingIndex) };
-            /*glVertexArrayAttribBinding(
-                handle,
-                attribIndex,
-                attribute.bindingIndex);*/
-			auto bufferHandle{ Buffer::Vertex::GetBufferHandle(a_Device, binding.buffer) };
-			auto bufferGLHandle{ Buffer::GetGLHandle(a_Device, bufferHandle) };
-            /*glVertexArrayVertexBuffer(
-                handle,
-                attribute.bindingIndex,
-                bufferGLHandle,
-                binding.offset,
-                binding.stride);*/
+			glVertexAttribFormat(
+				attribute.location,
+				attribute.format.size,
+				GetGLVertexFormat(attribute.format.type),
+				attribute.format.normalized,
+				attribute.offset);
+			glVertexAttribBinding(
+				attribute.location,
+				attribute.binding);
+
         }
+		for (auto i = 0u; i < bindings.bindingCount; ++i)
+		{
+			const auto bindingIndex{ i + bindings.firstBinding };
+			const auto& binding{ info.bindingDescriptions.at(bindingIndex) };
+			const auto& buffer{ bindings.vertexBuffers.at(i) };
+			const auto& offset{ bindings.offsets.at(i) };
+			const auto bufferHandle{ OCRA::Buffer::Vertex::GetBufferHandle(buffer) };
+			glBindVertexBuffer(
+				binding.binding,
+				Buffer::GetGLHandle(bufferHandle),
+				offset,
+				binding.stride);
+		}
 	};
 }
 }

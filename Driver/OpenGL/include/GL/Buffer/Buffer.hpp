@@ -38,7 +38,7 @@ struct FlushOperation
 Handle Create(const Device::Handle& a_Device, const Info& a_Info);
 void Destroy(const Device::Handle& a_Device, const Handle& a_Handle);
 const Info& GetInfo(const Device::Handle& a_Device, const Handle& a_Handle);
-unsigned GetGLHandle(const Device::Handle& a_Device, const Handle& a_Handle);
+unsigned GetGLHandle(const Handle& a_Handle);
 void* Map(const Device::Handle& a_Device, const MapOperation& a_MapOperation);
 void Flush(const Device::Handle& a_Device, const FlushOperation& a_FlushOperation);
 void Unmap(const Device::Handle& a_Device, const Handle& a_Handle);

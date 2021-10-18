@@ -60,7 +60,7 @@ struct Compile {
 	const std::array<Rect<GLfloat>, MaxViewPorts> viewPorts;
 	const std::array<DepthRange, MaxViewPorts> viewPortsDepthRange;
 	const std::array<Rect<GLint>, MaxViewPorts> scissors;
-	void operator()(const Device::Handle& a_Device) noexcept
+	void operator()() noexcept
 	{
 		glViewportArrayv(
 		    0, //first

@@ -12,5 +12,5 @@
 
 namespace OCRA::Buffer::Transfer
 {
-Buffer::Handle GetBufferHandle(const Device::Handle& a_Device, const Handle& a_Handle);
+Buffer::Handle GetBufferHandle(const Handle& a_Handle);
 }
