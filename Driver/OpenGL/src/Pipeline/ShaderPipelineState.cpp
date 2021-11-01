@@ -27,6 +27,6 @@ Compile::Compile(const Device::Handle& a_Device, const Info& a_Info)
         shaderPipeline->Set(a_Device, a_Info);
 		shaderPipelineRef = shaderPipeline;
     }
-    else throw std::runtime_error("No more free Pipeline");
+    else throw std::runtime_error("No more free Shader Pipeline");
 }
 }

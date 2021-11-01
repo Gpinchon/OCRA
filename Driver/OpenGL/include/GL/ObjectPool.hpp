@@ -16,17 +16,17 @@
 #include <stdexcept>
 
 namespace OCRA {
-typedef Uint16 IndexType;
-template <typename T, IndexType MaxObjects = std::numeric_limits<IndexType>::max()>
+template <typename T, typename IndexType = Uint16, IndexType MaxObjects = std::numeric_limits<IndexType>::max()>
 struct ObjectPool {
+    typedef ObjectPool<T, IndexType, MaxObjects> ObjectPoolType;
     struct Reference {
         Reference() = default;
         Reference(ObjectPool& a_Pool, Int32 a_Index)
             : pool(a_Pool.controlBlock)
             , index(a_Index)
         {
-            if (!pool.expired() && index >= 0)
-                (*pool.lock())->Ref(index);
+            if (Valid())
+                GetPool()->Ref(index);
         }
         Reference(const Reference& a_Other)
         {
@@ -34,14 +34,16 @@ struct ObjectPool {
         }
         ~Reference()
         {
-            if (!pool.expired() && index >= 0)
-                (*pool.lock())->Unref(index);
+            if (Valid())
+                GetPool()->Unref(index);
         }
-
+        bool Valid() const {
+            return !pool.expired() && index >= 0;
+        }
         T* Get() const
         {
-            if (!pool.expired() && index >= 0)
-                return &(*pool.lock())->Get(index);
+            if (Valid())
+                return &GetPool()->Get(index);
             return nullptr;
         }
         T* operator->() const
@@ -50,20 +52,23 @@ struct ObjectPool {
         }
         Reference& operator=(const Reference& a_Other)
         {
-            if (!pool.expired() && index >= 0)
-                (*pool.lock())->UnRef(index);
+            if (Valid())
+                GetPool()->UnRef(index);
             pool = a_Other.pool;
             index = a_Other.index;
-            if (!pool.expired() && index >= 0)
-                (*pool.lock())->Ref(index);
+            if (Valid())
+                GetPool()->Ref(index);
             return *this;
         }
-        std::weak_ptr<ObjectPool<T, MaxObjects>*> pool;
+        ObjectPool* GetPool() {
+            return *pool.lock();
+        }
+        std::weak_ptr<ObjectPoolType*> pool;
         Int32 index{ -1 };
     };
 
     ObjectPool()
-        : controlBlock(new ObjectPool<T, MaxObjects>*(this))
+        : controlBlock(new ObjectPoolType*(this))
     {
         for (auto i = 0u; i < MaxObjects; ++i)
             freeIndices.push(i);
@@ -102,6 +107,6 @@ struct ObjectPool {
     std::array<T, MaxObjects> objectArray;
     std::queue<IndexType> freeIndices;
     std::set<IndexType> usedIndices;
-    std::shared_ptr<ObjectPool<T, MaxObjects> *> controlBlock;
+    std::shared_ptr<ObjectPoolType *> controlBlock;
 };
 }

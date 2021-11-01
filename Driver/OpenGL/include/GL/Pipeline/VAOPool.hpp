@@ -12,34 +12,12 @@
 #include <GL/Buffer/Buffer.hpp>
 #include <GL/Buffer/Vertex.hpp>
 #include <GL/ObjectPool.hpp>
+#include <GL/VertexType.hpp>
 #include <GL/glew.h>
 
 #include <stdexcept>
 
 namespace OCRA::Pipeline::VertexInputState {
-static inline GLenum GetGLFormatType(const AttributeDescription::Format::Type& a_Type)
-{
-    switch (a_Type) {
-    case AttributeDescription::Format::Type::Float32:
-        return GL_FLOAT;
-    case AttributeDescription::Format::Type::Float16:
-        return GL_HALF_FLOAT;
-    case AttributeDescription::Format::Type::Int32:
-        return GL_INT;
-    case AttributeDescription::Format::Type::Uint32:
-        return GL_UNSIGNED_INT;
-    case AttributeDescription::Format::Type::Int16:
-        return GL_SHORT;
-    case AttributeDescription::Format::Type::Uint16:
-        return GL_UNSIGNED_SHORT;
-    case AttributeDescription::Format::Type::Int8:
-        return GL_BYTE;
-    case AttributeDescription::Format::Type::Uint8:
-        return GL_UNSIGNED_BYTE;
-    default:
-        throw std::runtime_error("Unknown Attribute Format Type");
-    }
-}
 struct VAO {
     VAO()
     {
@@ -64,27 +42,18 @@ struct VAO {
             const auto& attribute { info.attributeDescriptions.at(attribIndex) };
             glEnableVertexArrayAttrib(
                 handle,
-                attribIndex);
+                attribute.location);
             glVertexArrayAttribFormat(
                 handle,
-                attribIndex,
-                attribute.format.valuesPerVertex,
-                GetGLFormatType(attribute.format.type),
+                attribute.location,
+                attribute.format.size,
+                GetGLVertexType(attribute.format.type),
                 attribute.format.normalized,
-                attribute.format.relativeOffset);
-            const auto& binding { info.bindingDescriptions.at(attribute.bindingIndex) };
+                attribute.offset);
             glVertexArrayAttribBinding(
                 handle,
-                attribIndex,
-                attribute.bindingIndex);
-			auto bufferHandle{ Buffer::Vertex::GetBufferHandle(a_Device, binding.buffer) };
-			auto bufferGLHandle{ Buffer::GetGLHandle(a_Device, bufferHandle) };
-            glVertexArrayVertexBuffer(
-                handle,
-                attribute.bindingIndex,
-                bufferGLHandle,
-                binding.offset,
-                binding.stride);
+                attribute.location,
+                attribute.binding);
         }
     }
     Info info;
@@ -155,7 +124,7 @@ struct VAOPool : public ObjectPool<VAO>
     }
     inline virtual void ReleaseObject(IndexType a_Index) override {
         Get(a_Index).Reset();
-        ObjectPool<VAO>::ReleaseObject(a_Index);
+        ObjectPoolType::ReleaseObject(a_Index);
     }
 };
 }

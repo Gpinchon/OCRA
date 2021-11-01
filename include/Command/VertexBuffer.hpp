@@ -25,17 +25,4 @@ void WriteTo(
 	const OCRA::Buffer::Vertex::Handle& a_SrcVBO,
 	const OCRA::Buffer::Transfer::Handle& a_DstTransferBuffer,
 	Uint64 a_ReadOffset, Uint64 a_WriteOffset, Uint64 a_Size);
-//Bind specified Vertex Buffer to Indices of Graphics Pipeline currently bound to this Command Buffer
-void BindIndexBuffer(
-	const Command::Buffer::Handle& a_CommandBuffer,
-	const OCRA::Buffer::Vertex::Handle& a_IndexBuffer,
-	const Uint64 offset,
-	const IndexType indexType);
-//Bind specified Vertex Buffers to Graphics Pipeline currently bound to this Command Buffer
-void BindVertexBuffers(
-	const Command::Buffer::Handle& a_CommandBuffer,
-	const Uint32 firstBinding,
-	const Uint32 bindingCount,
-	const std::vector<OCRA::Buffer::Vertex::Handle>& a_VertexBuffers,
-	const std::vector<Uint64> a_Offsets);
 }

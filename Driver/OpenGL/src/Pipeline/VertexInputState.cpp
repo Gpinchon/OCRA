@@ -17,17 +17,18 @@
 namespace OCRA::Pipeline::VertexInputState {
 static std::map<Device::Handle, VAOPool> s_VAOs;
 Compile::Compile(const Device::Handle& a_Device, const Info& a_Info)
-    : vaoRef([a_Device, a_Info]{
-    auto& vaoPool{ s_VAOs[a_Device] };
-    if (auto vao{ vaoPool.FindSimilar(a_Info) }; vao.Get() != nullptr) //try to find a similar VAO
-        return vao;
-    else if (auto vao{ vaoPool.FindFree() }; vao.Get() != nullptr) //we couldn't find similar VAO, try to find free VAO
-    {
-        vao->Set(a_Device, a_Info);
-        return vao;
-    }
-    else throw std::runtime_error("No more free VAO");
-    }())
+    : primitiveRestartIndex(a_Info.primitiveRestartIndex)
+    , vaoRef([a_Device, a_Info]{
+        auto& vaoPool{ s_VAOs[a_Device] };
+        if (auto vao{ vaoPool.FindSimilar(a_Info) }; vao.Get() != nullptr) //try to find a similar VAO
+            return vao;
+        else if (auto vao{ vaoPool.FindFree() }; vao.Get() != nullptr) //we couldn't find similar VAO, try to find free VAO
+        {
+            vao->Set(a_Device, a_Info);
+            return vao;
+        }
+        else throw std::runtime_error("No more free VAO");
+        }())
 {
 }
 }

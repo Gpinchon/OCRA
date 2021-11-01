@@ -15,19 +15,15 @@
 
 namespace OCRA::Pipeline::VertexInputState {
 //compiles the specified Vertex Input State into a callback
+//only the Vertex Attributes are compiled here, Vertex Bindings are compiled by Command::RenderPass::CompileGraphicStates
 struct Compile {
     Compile(const Device::Handle& a_Device, const Info& a_Info);
-    void operator()(const Device::Handle& a_Device)
+    void operator()(void)
     {
-        /*auto vao { vaoRef.Get() };
-        auto buffer{ Buffer::Vertex::GetBufferHandle(a_Device, vao->info.indexBufferDescription.buffer) };
-        glBindVertexArray(vao->handle);
-        if (vao->info.indexBufferDescription.buffer == 0)
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-        else
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Buffer::GetGLHandle(a_Device, buffer));
-        glPrimitiveRestartIndex(vao->info.primitiveRestartIndex);*/
+        glPrimitiveRestartIndex(primitiveRestartIndex);
+        glBindVertexArray(VAORef->handle);
     }
-    const VAOPool::Reference vaoRef;
+    const VAOPool::Reference VAORef;
+    const Uint32 primitiveRestartIndex;
 };
 }

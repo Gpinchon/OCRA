@@ -17,25 +17,15 @@
 #include <GL/Pipeline/ShaderPipelineState.hpp>
 #include <GL/Pipeline/TessellationState.hpp>
 #include <GL/Pipeline/ViewPortState.hpp>
+#include <GL/Pipeline/VertexInputState.hpp>
 #include <GL/Pipeline/Graphics.hpp>
-
-#include <GL/glew.h>
-#include <GL/Buffer/Vertex.hpp>
-#include <GL/Buffer/Buffer.hpp>
-#include <GL/VertexType.hpp>
 
 namespace OCRA::Pipeline::Graphics {
 struct Impl {
 	Impl(const Device::Handle& a_Device, const Info& a_Info)
 	: info(a_Info)
-	, colorBlendState(ColorBlendState::Compile(a_Device, a_Info.colorBlendState))
-	, depthStencilState(DepthStencilState::Compile(a_Device, a_Info.depthStencilState))
-	, multisampleState(MultisampleState::Compile(a_Device, a_Info.multiSampleState))
-	, shaderPipelineState(ShaderPipelineState::Compile(a_Device, a_Info.shaderPipelineState))
-	, tessellationState(TessellationState::Compile(a_Device, a_Info.tessellationState))
-	, viewportState(ViewPortState::Compile(a_Device, a_Info.viewPortState))
 	{}
-	void operator()() const
+	void operator()(void) const
 	{
 		colorBlendState();
 		depthStencilState();
@@ -43,14 +33,31 @@ struct Impl {
 		shaderPipelineState();
 		tessellationState();
 		viewportState();
+		vertexInputState();
+	}
+	std::function<void()> Compile(const Device::Handle& a_Device) {
+		if (!compiled)
+		{
+			colorBlendState = ColorBlendState::Compile(a_Device, a_Info.colorBlendState);
+			depthStencilState = DepthStencilState::Compile(a_Device, a_Info.depthStencilState);
+			multisampleState = MultisampleState::Compile(a_Device, a_Info.multiSampleState);
+			shaderPipelineState = ShaderPipelineState::Compile(a_Device, a_Info.shaderPipelineState)
+			tessellationState = TessellationState::Compile(a_Device, a_Info.tessellationState);
+			viewportState = ViewPortState::Compile(a_Device, a_Info.viewPortState);
+			vertexInputState = VertexInputState::Compile(a_Device, a_Info.vertexInputState);
+			compiled = true;
+		}
+		return *this;
 	}
     const Info info;
-    const std::function<void()> colorBlendState;
-    const std::function<void()> depthStencilState;
-	const std::function<void()> multisampleState;
-	const std::function<void()> shaderPipelineState;
-	const std::function<void()> tessellationState;
-	const std::function<void()> viewportState;
+    bool compiled = false;
+    std::function<void()> colorBlendState;
+    std::function<void()> depthStencilState;
+	std::function<void()> multisampleState;
+	std::function<void()> shaderPipelineState;
+	std::function<void()> tessellationState;
+	std::function<void()> viewportState;
+	std::function<void()> vertexInputState;
 };
 static Handle s_CurrentHandle = 0;
 static std::map<Handle, Impl> s_GraphicsPipelines;
@@ -68,53 +75,8 @@ const Info& GetInfo(const Device::Handle& a_Device, const Handle& a_Handle)
 {
     return s_GraphicsPipelines.at(a_Handle).info;
 }
-struct GLBufferBindings {
-	static constexpr auto MaxVertexBuffers = 32;
-	struct {
-		GLuint indexBuffer;
-		Uint64 offset;
-		IndexType indexType;
-	} IBO;
-	struct {
-		Uint32 firstBinding;
-		Uint32 bindingCount;
-		std::array<GLuint, MaxVertexBuffers> vertexBuffers;
-		std::array<Uint64, MaxVertexBuffers> offsets;
-	} VBO;
-};
-std::function<void()> CompileCommand(const Handle& a_Handle, const VertexBufferBindings& a_BufferBindings)
+std::function<void()> Compile(const Device::Handle& a_Device, const Handle& a_GraphicsPipeline)
 {
-	const auto& impl{ s_GraphicsPipelines.at(a_Handle) };
-	const auto& info{ impl.info.vertexInputState };
-	return [impl = impl, info = info, bindings = a_BufferBindings](){
-		impl();
-		for (auto attribIndex = 0u; attribIndex < info.attributeDescriptionCount; ++attribIndex)
-		{
-            const auto& attribute { info.attributeDescriptions.at(attribIndex) };
-			glVertexAttribFormat(
-				attribute.location,
-				attribute.format.size,
-				GetGLVertexFormat(attribute.format.type),
-				attribute.format.normalized,
-				attribute.offset);
-			glVertexAttribBinding(
-				attribute.location,
-				attribute.binding);
-
-        }
-		for (auto i = 0u; i < bindings.bindingCount; ++i)
-		{
-			const auto bindingIndex{ i + bindings.firstBinding };
-			const auto& binding{ info.bindingDescriptions.at(bindingIndex) };
-			const auto& buffer{ bindings.vertexBuffers.at(i) };
-			const auto& offset{ bindings.offsets.at(i) };
-			const auto bufferHandle{ OCRA::Buffer::Vertex::GetBufferHandle(buffer) };
-			glBindVertexBuffer(
-				binding.binding,
-				Buffer::GetGLHandle(bufferHandle),
-				offset,
-				binding.stride);
-		}
-	};
+	return s_GraphicsPipelines.at(a_GraphicsPipeline).Compile(a_Device);
 }
 }

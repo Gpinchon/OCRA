@@ -14,9 +14,9 @@
 
 namespace OCRA
 {
-static inline auto GetGLVertexFormat(const VertexType& a_VertexFormat)
+static inline auto GetGLVertexType(const VertexType& a_VertexType)
 {
-	switch (a_VertexFormat)
+	switch (a_VertexType)
 	{
 	case OCRA::VertexType::None:
 		return GL_NONE;

@@ -4,13 +4,20 @@
 * @Last Modified by:   gpinchon
 * @Last Modified time: 2021-09-26 14:26:36
 */
-#pragma once
+
+/////TODO : REDO THIS SHIT !!!
 
 #include <Handle.hpp>
 #include <Command/RenderPass.hpp>
+#include <RenderPass.hpp>
+#include <FrameBuffer.hpp>
+
+#include <GL/IndexType.hpp>
+#include <GL/RenderPass.hpp>
 
 #include <functional>
 #include <array>
+#include <mutex>
 
 namespace OCRA::Command::Buffer
 {
@@ -20,24 +27,27 @@ struct Impl
 	void Reset()
 	{
 		commandsCount = 0;
+		renderPass = {};
 	}
 	void StartRecording()
 	{
 		Reset();
-		recording = true;
+		recording.lock();
 	}
-	PushCommand(const CallBack& a_Command)
+	void PushCommand(const CallBack& a_Command)
 	{
 		commands.at(commandsCount) = a_Command;
 		++commandsCount;
 	}
 	void EndRecording()
 	{
-		recording = false;
+		recording.unlock();
 	}
-	bool recording{ false };
 	Uint32 commandsCount{ 0 };
 	std::array<CallBack, 1024> commands;
+	std::map<RenderPass::Handle, RenderPass> renderPassList;
+	RenderPass::Handle currentRenderPass{ 0 };
+	std::mutex recording;
 }
 struct TemporaryState
 {
@@ -73,22 +83,55 @@ void End(const Handle& a_CommandBuffer)
 }
 }
 
-#include <RenderPass.hpp>
-#include <FrameBuffer.hpp>
-
-namespace OCRA::Command::RenderPass
-{
+namespace OCRA::Command {
 //Begin Render Pass recording
-void Begin(const Command::Buffer::Handle& a_CommandBuffer, const BeginInfo& a_BeginInfo, const SubPassContents& a_SubPassContents)
+void BeginRenderPass(const Command::Buffer::Handle& a_CommandBuffer, const RenderPassBeginInfo& a_BeginInfo, const SubPassContents& a_SubPassContents)
 {
-	auto renderPassInfo{ RenderPass::GetInfo(a_BeginInfo.renderPass) };
-	auto frameBufferInfo{ FrameBuffer::GetInfo(a_BeginInfo.framebuffer) };
-	
-	Buffer::Get(a_CommandBuffer).renderPass = a_BeginInfo;
+	auto& commandBuffer{ Buffer::Get(a_CommandBuffer) };
+	auto& commandBufferRP{ commandBuffer.renderPassList[a_BeginInfo.renderPass] };
+	commandBuffer.currentRenderPass = a_BeginInfo.renderPass;
+	commandBufferRP.StartRecording(a_BeginInfo);
 }
 //End Render Pass recording
-void End(const Command::Buffer::Handle& a_CommandBuffer)
+void EndRenderPass(const Command::Buffer::Handle& a_CommandBuffer)
 {
-	
+	auto& commandBuffer{ Buffer::Get(a_CommandBuffer) };
+	auto& commandBufferRP{ commandBuffer.renderPassList[a_BeginInfo.renderPass] };
+	commandBuffer.currentRenderPass = 0;
+	commandBufferRP.EndRecording();
+}
+
+//Bind specified Vertex Buffer to Render Pass currently bound to this Command Buffer
+void BindIndexBuffer(
+	const Command::Buffer::Handle& a_CommandBuffer,
+	const OCRA::Buffer::Vertex::Handle& a_IndexBuffer,
+	const Uint64 a_Offset,
+	const IndexType a_IndexType)
+{
+	auto& commandBuffer{ Buffer::Get(a_CommandBuffer) };
+	auto& commandBufferRP{ commandBuffer.renderPassList[commandBuffer.currentRenderPass] };
+	const auto& bufferHandle{ Buffer::Vertex::GetBufferHandle(a_IndexBuffer) };
+	commandBufferRP.indexBuffer.buffer = Buffer::GetGLHandle(bufferHandle);
+	commandBufferRP.indexBuffer.offset = offset;
+	commandBufferRP.indexBuffer.indexType = GetGLIndexType(a_IndexType);
+}
+//Bind specified Vertex Buffers to Render Pass currently bound to this Command Buffer
+void BindVertexBuffers(
+	const Command::Buffer::Handle& a_CommandBuffer,
+	const Uint32 firstBinding,
+	const Uint32 bindingCount,
+	const std::vector<OCRA::Buffer::Vertex::Handle>& a_VertexBuffers,
+	const std::vector<Uint64>& a_Offsets)
+{
+	auto& commandBuffer{ Buffer::Get(a_CommandBuffer) };
+	auto& commandBufferRP{ commandBuffer.renderPassList[commandBuffer.currentRenderPass] };
+	commandBufferRP.vertexBinding.firstBinding = firstBinding;
+	commandBufferRP.vertexBinding.bindingCount = bindingCount;
+	for (auto index = 0u; index < bindingCount; ++index)
+	{
+		const auto& bufferHandle{ Buffer::Vertex::GetBufferHandle(a_VertexBuffers.at(index)) };
+		commandBufferRP.vertexBinding.vertexBuffers.at(index) = Buffer::GetGLHandle(bufferHandle);
+		commandBufferRP.vertexBinding.offsets.at(index) = a_Offsets.at(index);
+	}
 }
 }

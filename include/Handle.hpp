@@ -10,13 +10,13 @@
 
 typedef Uint32 HandleType;
 
-#define HANDLE(name)                                                                 \
-    namespace name {                                                                 \
-        typedef HandleType Handle;                                                   \
-        struct Info;                                                                 \
-        Handle Create(const Device::Handle& a_Device, const Info& a_Info);           \
-        void Destroy(const Device::Handle& a_Device, const Handle& a_Handle);        \
-        const Info& GetInfo(const Device::Handle& a_Device, const Handle& a_Handle); \
+#define HANDLE(name)                                                            \
+    namespace name {                                                            \
+        typedef HandleType Handle;                                              \
+        struct Info;                                                            \
+        Handle Create(const Device::Handle& a_Device, const Info& a_Info);      \
+        void Destroy(const Device::Handle& a_Device, const Handle& a_Handle);   \
+        const Info& GetInfo(const Handle& a_Handle);                            \
     }
 
 namespace OCRA {
