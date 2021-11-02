@@ -10,5 +10,6 @@
 
 namespace OCRA::Pipeline::Graphics
 {
+void ApplyGraphicsStates(const Device::Handle& a_Device, const Handle& a_GraphicsPipeline);
 std::function<void()> Compile(const Device::Handle& a_Device, const Handle& a_GraphicsPipeline);
 }

@@ -56,11 +56,11 @@ void Destroy(const Device::Handle& a_Device, const Handle& a_Handle)
 {
     s_Stages.erase(a_Handle);
 }
-const Info& GetInfo(const Device::Handle& a_Device, const Handle& a_Handle)
+const Info& GetInfo(const Handle& a_Handle)
 {
     return s_Stages.at(a_Handle).info;
 }
-unsigned GetGLHandle(const Device::Handle& a_Device, const Handle& a_Handle)
+unsigned GetGLHandle(const Handle& a_Handle)
 {
     return s_Stages.at(a_Handle).handle;
 }

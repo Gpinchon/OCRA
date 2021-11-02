@@ -9,13 +9,14 @@
 #include <Handle.hpp>
 #include <Pipeline/Graphics.hpp>
 #include <Command/RenderPass.hpp>
+#include <Pipeline/BindingPoint.hpp>
 
 #include <GL/Pipeline/Graphics.hpp>
-#include <GL/glew.hpp>
 
 #include <cassert>
 #include <functional>
-#include <mutex>
+
+#include <GL/glew.h>
 
 namespace OCRA::Command
 {
@@ -33,57 +34,14 @@ struct IndexBufferBinding {
 };
 struct RenderPass
 {
-	void StartRecording(const RenderPassBeginInfo& a_BeginInfo)
-	{
-		recording.lock();
-		beginInfo = a_BeginInfo;
-	}
-	void EndRecording()
-	{
-		recording.unlock();
-	}
 	std::function<void()> CompileGraphicStates(const Device::Handle& a_Device) {
-		if (!compiled)
-		{
-			assert(graphicsPipeline != 0);
-			auto graphicsPipelineState = Pipeline::Graphics::Compile(a_Device, graphicsPipeline);
-			const auto& graphicsPipelineInfo{ Pipeline::Graphics::GetInfo(graphicsPipeline) };
-			const auto& vertexInputInfo{ graphicsPipelineInfo.vertexInputState };
-			auto vertexBindingState = [vertexBinding = vertexBinding, bindingDescriptions = vertexInputInfo.bindingDescriptions](){
-				for (auto i = 0u; i < vertexBinding.bindingCount; ++i)
-				{
-					const auto bindingIndex{ i + vertexBinding.firstBinding };
-					const auto& binding{ bindingDescriptions.at(bindingIndex) };
-					const auto& buffer{ vertexBinding.vertexBuffers.at(i) };
-					const auto& offset{ vertexBinding.offsets.at(i) };
-					/*glVertexArrayVertexBuffer(
-		                handle,
-		                binding.binding,
-		                buffer,
-		                offset,
-		                binding.stride);*/
-					glBindVertexBuffer(
-						binding.binding,
-						buffer,
-						offset,
-						binding.stride);
-				}
-			};
-			compiled = true;
-		}
-		return [graphicsPipelineState = graphicsPipelineState, vertexBindingState = vertexBindingState](){
-			graphicsPipelineState();
-			vertexBindingState();
-		};
+		const auto graphicsPipeline{ pipelines.at(size_t(Pipeline::BindingPoint::Graphics)) };
+		if(graphicsPipeline == 0) return;
+		return Pipeline::Graphics::Compile(a_Device, graphicsPipeline);
 	}
-	std::function<void()> CompileDrawingCommands(const Device::Handle& a_Device) {
-
-	}
-	bool compiled{ false };
 	RenderPassBeginInfo beginInfo;
-	Pipeline::Graphics::Handle graphicsPipeline{ 0 };
-	VertexBufferBindings vertexBinding;
+	std::array<Pipeline::Handle, size_t(Pipeline::BindingPoint::MaxValue)> pipelines{ 0 };
+	VertexBufferBinding vertexBinding;
 	IndexBufferBinding indexBuffer;
-	std::mutex recording;
 };
 }

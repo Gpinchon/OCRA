@@ -18,7 +18,7 @@ namespace OCRA::Pipeline::VertexInputState {
 //only the Vertex Attributes are compiled here, Vertex Bindings are compiled by Command::RenderPass::CompileGraphicStates
 struct Compile {
     Compile(const Device::Handle& a_Device, const Info& a_Info);
-    void operator()(void)
+    void operator()(void) const noexcept
     {
         glPrimitiveRestartIndex(primitiveRestartIndex);
         glBindVertexArray(VAORef->handle);

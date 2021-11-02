@@ -24,7 +24,7 @@ Compile::Compile(const Device::Handle& a_Device, const Info& a_Info)
 		shaderPipelineRef = shaderPipeline;
     else if (auto shaderPipeline { shaderPipelinesPool.FindFree() }; shaderPipeline.Get() != nullptr) //we couldn't find similar Pipeline, try to find free Pipeline
 	{
-        shaderPipeline->Set(a_Device, a_Info);
+        shaderPipeline->Set(a_Info);
 		shaderPipelineRef = shaderPipeline;
     }
     else throw std::runtime_error("No more free Shader Pipeline");

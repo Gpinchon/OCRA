@@ -18,7 +18,7 @@ namespace OCRA::Pipeline::VertexInputState {
 static std::map<Device::Handle, VAOPool> s_VAOs;
 Compile::Compile(const Device::Handle& a_Device, const Info& a_Info)
     : primitiveRestartIndex(a_Info.primitiveRestartIndex)
-    , vaoRef([a_Device, a_Info]{
+    , VAORef([a_Device, a_Info]{
         auto& vaoPool{ s_VAOs[a_Device] };
         if (auto vao{ vaoPool.FindSimilar(a_Info) }; vao.Get() != nullptr) //try to find a similar VAO
             return vao;

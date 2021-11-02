@@ -16,7 +16,7 @@ namespace OCRA
 {
 static inline auto GetGLIndexType(const IndexType& a_IndexType)
 {
-	switch (a_VertexFormat)
+	switch (a_IndexType)
 	{
 	case IndexType::None:
 		return GL_NONE;

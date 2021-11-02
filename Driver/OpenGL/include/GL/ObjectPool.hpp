@@ -19,6 +19,7 @@ namespace OCRA {
 template <typename T, typename IndexType = Uint16, IndexType MaxObjects = std::numeric_limits<IndexType>::max()>
 struct ObjectPool {
     typedef ObjectPool<T, IndexType, MaxObjects> ObjectPoolType;
+    typedef IndexType IndexType;
     struct Reference {
         Reference() = default;
         Reference(ObjectPool& a_Pool, Int32 a_Index)
@@ -53,14 +54,14 @@ struct ObjectPool {
         Reference& operator=(const Reference& a_Other)
         {
             if (Valid())
-                GetPool()->UnRef(index);
+                GetPool()->Unref(index);
             pool = a_Other.pool;
             index = a_Other.index;
             if (Valid())
                 GetPool()->Ref(index);
             return *this;
         }
-        ObjectPool* GetPool() {
+        ObjectPool* GetPool() const {
             return *pool.lock();
         }
         std::weak_ptr<ObjectPoolType*> pool;

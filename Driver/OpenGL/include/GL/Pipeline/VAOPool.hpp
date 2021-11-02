@@ -62,37 +62,27 @@ struct VAO {
 static inline bool operator!=(const AttributeDescription::Format& a_lAttribFormat, const AttributeDescription::Format& a_rAttribFormat) noexcept
 {
     return a_lAttribFormat.type != a_rAttribFormat.type
-        || a_lAttribFormat.relativeOffset != a_rAttribFormat.relativeOffset
-        || a_lAttribFormat.valuesPerVertex != a_rAttribFormat.valuesPerVertex
+        || a_lAttribFormat.size != a_rAttribFormat.size
         || a_lAttribFormat.normalized != a_rAttribFormat.normalized;
 }
 static inline bool operator!=(const AttributeDescription& a_lAttrib, const AttributeDescription& a_rAttrib) noexcept
 {
-    return a_lAttrib.bindingIndex != a_rAttrib.bindingIndex
+    return a_lAttrib.offset != a_rAttrib.offset
+        || a_lAttrib.binding != a_rAttrib.binding
+        || a_lAttrib.location != a_rAttrib.location
         || a_lAttrib.format != a_rAttrib.format;
 }
 static inline bool operator!=(const BindingDescription& a_lBinding, const BindingDescription& a_rBinding) noexcept
 {
-    return a_lBinding.buffer != a_rBinding.buffer
-        || a_lBinding.offset != a_rBinding.offset
+    return a_lBinding.binding != a_rBinding.binding
         || a_lBinding.stride != a_rBinding.stride
         || a_lBinding.inputRate != a_rBinding.inputRate;
-}
-static inline bool operator!=(const IndexBufferDescription::Format& a_lFormat, const IndexBufferDescription::Format& a_rFormat) noexcept
-{
-    return a_lFormat.type != a_rFormat.type;
-}
-static inline bool operator!=(const IndexBufferDescription& a_lBinding, const IndexBufferDescription& a_rBinding) noexcept
-{
-    return a_lBinding.buffer != a_rBinding.buffer
-        || a_lBinding.format != a_rBinding.format;
 }
 static inline bool operator!=(const Info& a_lInfo, const Info& a_rInfo) noexcept
 {
     return a_lInfo.primitiveRestartIndex != a_rInfo.primitiveRestartIndex
         || a_lInfo.attributeDescriptionCount != a_rInfo.attributeDescriptionCount
         || a_lInfo.bindingDescriptionCount != a_rInfo.bindingDescriptionCount
-        || a_lInfo.indexBufferDescription != a_rInfo.indexBufferDescription
         || [a_lInfo, a_rInfo]() {
                for (auto attribIndex = 0u; attribIndex < a_lInfo.attributeDescriptionCount; ++attribIndex) {
                    if (a_lInfo.attributeDescriptions.at(attribIndex) != a_rInfo.attributeDescriptions.at(attribIndex))

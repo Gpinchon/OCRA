@@ -52,7 +52,7 @@ struct AttachmentReference {
 };
 
 struct SubPassDescription {
-	constexpr auto MaxAttachments = 32;
+	constexpr static auto MaxAttachments = 32;
 	Pipeline::BindPoint pipelineBindPoint{ Pipeline::BindPoint::Unknown };
 	Uint8 inputAttachmentCount{ 0 };
 	std::array<AttachmentReference, MaxAttachments> inputAttachments;
@@ -63,16 +63,16 @@ struct SubPassDescription {
 	//describes attachments not used by this subpass but whose content must pe preserved
 	Uint8 preserveAttachmentCount{ 0 };
 	std::array<AttachmentReference, MaxAttachments> preserveAttachments;
-}
+};
 
 struct SubPassDependency {
 	Int8 srcSubPass{ -1 };
 	Int8 dstSubPass{ -1 };
-}
+};
 
 struct Info {
-	constexpr auto MaxAttachments = 32;
-	constexpr auto MaxDependencies = 64;
+	constexpr static auto MaxAttachments = 32;
+	constexpr static auto MaxDependencies = 64;
 	Uint8 attachmentCount{ 0 };
 	std::array<AttachmentDescription, MaxAttachments> attachments;
 	Uint8 subpassCount{ 0 };

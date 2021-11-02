@@ -35,6 +35,7 @@ set(OCRA_IMPL_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Buffer/Buffer.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Buffer/Transfer.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Buffer/Vertex.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Command/RenderPass.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Image/Format.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Image/Image.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Image/View.hpp
@@ -56,6 +57,7 @@ set(OCRA_IMPL_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/ViewPort.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Buffer/Transfer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Buffer/Vertex.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Buffer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Image/Image.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Image/View.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/Graphics.cpp

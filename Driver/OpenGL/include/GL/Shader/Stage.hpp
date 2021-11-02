@@ -34,5 +34,5 @@ static inline auto GetGLStage(const Stage& a_Stage)
 		throw std::runtime_error("Unknown Shader Type");
 	}
 }
-unsigned GetGLHandle(const Device::Handle& a_Device, const Handle& a_Handle);
+unsigned GetGLHandle(const Handle& a_Handle);
 }

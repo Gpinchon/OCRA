@@ -12,6 +12,7 @@ enum class BindingPoint
 {
 	Graphics,
 	Compute,
-	RayTracing //might be unavailable
+	RayTracing, //might be unavailable
+	MaxValue
 };
 }

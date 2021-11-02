@@ -2,7 +2,7 @@
 * @Author: gpinchon
 * @Date:   2021-09-26 00:00:00
 * @Last Modified by:   gpinchon
-* @Last Modified time: 2021-09-26 15:03:53
+* @Last Modified time: 2021-11-01 14:14:17
 */
 #include <Handle.hpp>
 #include <Pipeline/Graphics.hpp>
@@ -13,51 +13,52 @@
 
 #include <GL/Pipeline/ColorBlendState.hpp>
 #include <GL/Pipeline/DepthStencilState.hpp>
+#include <GL/Pipeline/Graphics.hpp>
 #include <GL/Pipeline/MultisampleState.hpp>
 #include <GL/Pipeline/ShaderPipelineState.hpp>
 #include <GL/Pipeline/TessellationState.hpp>
-#include <GL/Pipeline/ViewPortState.hpp>
 #include <GL/Pipeline/VertexInputState.hpp>
-#include <GL/Pipeline/Graphics.hpp>
+#include <GL/Pipeline/ViewPortState.hpp>
 
 namespace OCRA::Pipeline::Graphics {
 struct Impl {
-	Impl(const Device::Handle& a_Device, const Info& a_Info)
-	: info(a_Info)
-	{}
-	void operator()(void) const
-	{
-		colorBlendState();
-		depthStencilState();
-		multisampleState();
-		shaderPipelineState();
-		tessellationState();
-		viewportState();
-		vertexInputState();
-	}
-	std::function<void()> Compile(const Device::Handle& a_Device) {
-		if (!compiled)
-		{
-			colorBlendState = ColorBlendState::Compile(a_Device, a_Info.colorBlendState);
-			depthStencilState = DepthStencilState::Compile(a_Device, a_Info.depthStencilState);
-			multisampleState = MultisampleState::Compile(a_Device, a_Info.multiSampleState);
-			shaderPipelineState = ShaderPipelineState::Compile(a_Device, a_Info.shaderPipelineState)
-			tessellationState = TessellationState::Compile(a_Device, a_Info.tessellationState);
-			viewportState = ViewPortState::Compile(a_Device, a_Info.viewPortState);
-			vertexInputState = VertexInputState::Compile(a_Device, a_Info.vertexInputState);
-			compiled = true;
-		}
-		return *this;
-	}
+    Impl(const Device::Handle& a_Device, const Info& a_Info)
+        : info(a_Info)
+    {
+    }
+    std::function<void()> Compile(const Device::Handle& a_Device)
+    {
+        auto colorBlendState = ColorBlendState::Compile(a_Device, info.colorBlendState);
+        auto depthStencilState = DepthStencilState::Compile(a_Device, info.depthStencilState);
+        auto multisampleState = MultisampleState::Compile(a_Device, info.multiSampleState);
+        auto shaderPipelineState = ShaderPipelineState::Compile(a_Device, info.shaderPipelineState);
+        auto tessellationState = TessellationState::Compile(a_Device, info.tessellationState);
+        auto viewportState = ViewPortState::Compile(a_Device, info.viewPortState);
+        auto vertexInputState = VertexInputState::Compile(a_Device, info.vertexInputState);
+        return [colorBlendState = colorBlendState,
+                depthStencilState = depthStencilState,
+                multisampleState = multisampleState,
+                shaderPipelineState = shaderPipelineState,
+                tessellationState = tessellationState,
+                viewportState = viewportState,
+                vertexInputState = vertexInputState]() {
+            colorBlendState();
+            depthStencilState();
+            multisampleState();
+            shaderPipelineState();
+            tessellationState();
+            viewportState();
+            vertexInputState();
+        };
+    }
+    void ApplyGraphicsStates(const Device::Handle& a_Device)
+    {
+        if (!compiled) applyGraphicsStatesCB = Compile(a_Device);
+        applyGraphicsStatesCB();
+    }
     const Info info;
-    bool compiled = false;
-    std::function<void()> colorBlendState;
-    std::function<void()> depthStencilState;
-	std::function<void()> multisampleState;
-	std::function<void()> shaderPipelineState;
-	std::function<void()> tessellationState;
-	std::function<void()> viewportState;
-	std::function<void()> vertexInputState;
+    bool compiled{ false };
+    std::function<void()> applyGraphicsStatesCB;
 };
 static Handle s_CurrentHandle = 0;
 static std::map<Handle, Impl> s_GraphicsPipelines;
@@ -77,6 +78,10 @@ const Info& GetInfo(const Device::Handle& a_Device, const Handle& a_Handle)
 }
 std::function<void()> Compile(const Device::Handle& a_Device, const Handle& a_GraphicsPipeline)
 {
-	return s_GraphicsPipelines.at(a_GraphicsPipeline).Compile(a_Device);
+    return s_GraphicsPipelines.at(a_GraphicsPipeline).Compile(a_Device);
+}
+void ApplyGraphicsStates(const Device::Handle& a_Device, const Handle& a_GraphicsPipeline)
+{
+    s_GraphicsPipelines.at(a_GraphicsPipeline).ApplyGraphicsStates(a_Device);
 }
 }

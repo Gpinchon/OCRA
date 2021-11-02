@@ -29,7 +29,7 @@ struct Compile {
 	std::array<GLbitfield, 32> sampleMasks;
 	GLboolean alphaToCoverageEnable;
 	GLboolean alphaToOneEnable;
-	void operator()(void)
+	void operator()(void) const
 	{
 		sampleShadingEnable ? glEnable(GL_SAMPLE_SHADING) : glDisable(GL_SAMPLE_SHADING);
 		glMinSampleShading(minSampleShading);

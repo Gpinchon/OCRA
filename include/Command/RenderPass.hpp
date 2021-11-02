@@ -10,16 +10,21 @@
 #include <Rect2D.hpp>
 #include <FrameBuffer.hpp>
 #include <ClearValue.hpp>
+#include <Pipeline/BindingPoint.hpp>
+#include <IndexType.hpp>
+
+#include <array>
+#include <vector>
 
 namespace OCRA::Command
 {
 struct RenderPassBeginInfo
 {
-	RenderPass::Handle renderPass{ 0 };
+	OCRA::RenderPass::Handle renderPass{ 0 };
 	FrameBuffer::Handle framebuffer{ 0 };
 	Rect2D renderArea;
 	Uint8 clearValueCount{ 0 };
-	std::array<ClearValue, Framebuffer::MaxColorAttachments> clearValues;
+	std::array<ClearValue, OCRA::FrameBuffer::MaxColorAttachments> clearValues;
 };
 enum class SubPassContents
 {
