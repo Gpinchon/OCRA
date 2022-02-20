@@ -16,6 +16,10 @@
 namespace OCRA::Pipeline::ShaderPipelineState {
 struct ShaderPipeline
 {
+	ShaderPipeline()
+	{
+		glGenProgramPipelines(1, &handle);
+	}
 	~ShaderPipeline()
 	{
 		glDeleteProgramPipelines(1, &handle);
@@ -25,10 +29,9 @@ struct ShaderPipeline
         info = {};
         glUseProgramStages(handle, 0, GL_ALL_SHADER_BITS);
     }
-	inline void Set(const Info& a_Info)
+	inline void Set(const Device::Handle& a_Device, const Info& a_Info)
 	{
 		info = a_Info;
-		if (handle == 0) glGenProgramPipelines(1, &handle);
 		for (auto i = 0u; i < info.stageCount; ++i) {
 			const auto& stageHandle{ info.stages.at(i) };
 			const auto& stageInfo{ Shader::Stage::GetInfo(stageHandle) };

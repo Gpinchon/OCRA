@@ -6,7 +6,7 @@
 */
 #include <Handle.hpp>
 #include <Image/Image.hpp>
-#include <Image/Operations.hpp>
+#include <Command/Image.hpp>
 
 #include <cassert>
 #include <functional>
@@ -21,7 +21,7 @@
 
 namespace OCRA::Image {
 struct Impl;
-using TransferFunction = std::function<void(const Device::Handle&, const BufferCopy&, const Impl&)>;
+using TransferFunction = std::function<void(const Device::Handle&, const Command::BufferImageCopy&, const Impl&)>;
 
 extern TransferFunction CompressedDownload;
 extern TransferFunction UncompressedDownload;
@@ -136,6 +136,10 @@ Handle Create(const Device::Handle& a_Device, const Info& a_Info)
     s_Images.emplace(s_CurrentHandle, Impl(a_Device, a_Info));
     return s_CurrentHandle;
 }
+auto& Get(const Handle& a_Handle)
+{
+    return s_Images.at(a_Handle);
+}
 void Destroy(const Device::Handle& a_Device, const Handle& a_Handle)
 {
     s_Images.erase(a_Handle);
@@ -148,8 +152,11 @@ unsigned GetGLHandle(const Device::Handle& a_Device, const Handle& a_Handle)
 {
     return s_Images.at(a_Handle).handle;
 }
+}
 
-void CheckValidCopy(const BufferCopy& a_Copy, const Impl& a_Image)
+namespace OCRA::Command
+{
+void CheckValidCopy(const BufferImageCopy& a_Copy, const Image::Impl& a_Image)
 {
     assert(a_Copy.imageOffset.x + a_Copy.imageExtent.width  < a_Image.info.extent.width);
     assert(a_Copy.imageOffset.y + a_Copy.imageExtent.height < a_Image.info.extent.height);
@@ -158,13 +165,13 @@ void CheckValidCopy(const BufferCopy& a_Copy, const Impl& a_Image)
 }
 void CopyBufferToImage(
     const Device::Handle& a_Device,
-    const Buffer::Transfer::Handle& a_SrcBuffer,
+    const OCRA::Buffer::Transfer::Handle& a_SrcBuffer,
     const Image::Handle& a_DstImage,
-    const std::vector<BufferCopy>& a_Regions)
+    const std::vector<Command::BufferImageCopy>& a_Regions)
 {
-    auto &image = s_Images.at(a_DstImage);
-    auto bufferHandle{ Buffer::Transfer::GetBufferHandle(a_Device, a_SrcBuffer) };
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, Buffer::GetGLHandle(a_Device, bufferHandle));
+    auto &image = Image::Get(a_DstImage);
+    auto bufferHandle{ OCRA::Buffer::Transfer::GetBufferHandle(a_SrcBuffer) };
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, OCRA::Buffer::GetGLHandle(bufferHandle));
     for (const auto& copy : a_Regions) {
         CheckValidCopy(copy, image);
         image.Upload(a_Device, copy, image);
@@ -174,13 +181,13 @@ void CopyBufferToImage(
 
 void CopyImageToBuffer(
     const Device::Handle& a_Device,
-    const Buffer::Transfer::Handle& a_DstBuffer,
+    const OCRA::Buffer::Transfer::Handle& a_DstBuffer,
     const Image::Handle& a_SrcImage,
-    const std::vector<BufferCopy>& a_Regions)
+    const std::vector<Command::BufferImageCopy>& a_Regions)
 {
-    auto& image = s_Images.at(a_SrcImage);
-    auto bufferHandle{ Buffer::Transfer::GetBufferHandle(a_Device, a_DstBuffer) };
-    glBindBuffer(GL_PIXEL_PACK_BUFFER, Buffer::GetGLHandle(a_Device, bufferHandle));
+    auto& image = Image::Get(a_SrcImage);
+    auto bufferHandle{ OCRA::Buffer::Transfer::GetBufferHandle(a_DstBuffer) };
+    glBindBuffer(GL_PIXEL_PACK_BUFFER, OCRA::Buffer::GetGLHandle(bufferHandle));
     for (const auto& copy : a_Regions) {
         CheckValidCopy(copy, image);
         image.Download(a_Device, copy, image);
@@ -192,7 +199,7 @@ void CopyImageToBuffer(
 #define BUFFER_OFFSET(i) ((char*)NULL + (i))
 
 namespace OCRA::Image {
-OCRA::Image::TransferFunction OCRA::Image::UncompressedDownload = [](const Device::Handle& a_Device, const BufferCopy& a_Copy, const Impl& a_Image) {
+OCRA::Image::TransferFunction OCRA::Image::UncompressedDownload = [](const Device::Handle& a_Device, const Command::BufferImageCopy& a_Copy, const Impl& a_Image) {
     glGetTextureSubImage(
         a_Image.handle,
         a_Copy.imageSubresource.level,
@@ -208,7 +215,7 @@ OCRA::Image::TransferFunction OCRA::Image::UncompressedDownload = [](const Devic
         BUFFER_OFFSET(a_Copy.bufferOffset));
 };
 
-OCRA::Image::TransferFunction OCRA::Image::CompressedDownload = [](const Device::Handle& a_Device, const BufferCopy& a_Copy, const Impl& a_Image) {
+OCRA::Image::TransferFunction OCRA::Image::CompressedDownload = [](const Device::Handle& a_Device, const Command::BufferImageCopy& a_Copy, const Impl& a_Image) {
     glGetCompressedTextureSubImage(
         a_Image.handle,
         a_Copy.imageSubresource.level,
@@ -222,7 +229,7 @@ OCRA::Image::TransferFunction OCRA::Image::CompressedDownload = [](const Device:
         BUFFER_OFFSET(a_Copy.bufferOffset));
 };
 
-OCRA::Image::TransferFunction OCRA::Image::Compressed1DUpload = [](const Device::Handle& a_Device, const BufferCopy& a_Copy, const Impl& a_Image) {
+OCRA::Image::TransferFunction OCRA::Image::Compressed1DUpload = [](const Device::Handle& a_Device, const Command::BufferImageCopy& a_Copy, const Impl& a_Image) {
     glCompressedTextureSubImage1D(
         a_Image.handle,
         a_Copy.imageSubresource.level,
@@ -233,7 +240,7 @@ OCRA::Image::TransferFunction OCRA::Image::Compressed1DUpload = [](const Device:
         BUFFER_OFFSET(a_Copy.bufferOffset));
 };
 
-OCRA::Image::TransferFunction OCRA::Image::Compressed2DUpload = [](const Device::Handle& a_Device, const BufferCopy& a_Copy, const Impl& a_Image) {
+OCRA::Image::TransferFunction OCRA::Image::Compressed2DUpload = [](const Device::Handle& a_Device, const Command::BufferImageCopy& a_Copy, const Impl& a_Image) {
     glCompressedTextureSubImage2D(
         a_Image.handle,
         a_Copy.imageSubresource.level,
@@ -246,7 +253,7 @@ OCRA::Image::TransferFunction OCRA::Image::Compressed2DUpload = [](const Device:
         BUFFER_OFFSET(a_Copy.bufferOffset));
 };
 
-OCRA::Image::TransferFunction OCRA::Image::Compressed3DUpload = [](const Device::Handle& a_Device, const BufferCopy& a_Copy, const Impl& a_Image) {
+OCRA::Image::TransferFunction OCRA::Image::Compressed3DUpload = [](const Device::Handle& a_Device, const Command::BufferImageCopy& a_Copy, const Impl& a_Image) {
     glCompressedTextureSubImage3D(
         a_Image.handle,
         a_Copy.imageSubresource.level,
@@ -261,7 +268,7 @@ OCRA::Image::TransferFunction OCRA::Image::Compressed3DUpload = [](const Device:
         BUFFER_OFFSET(a_Copy.bufferOffset));
 };
 
-OCRA::Image::TransferFunction OCRA::Image::Uncompressed1DUpload = [](const Device::Handle& a_Device, const BufferCopy& a_Copy, const Impl& a_Image) {
+OCRA::Image::TransferFunction OCRA::Image::Uncompressed1DUpload = [](const Device::Handle& a_Device, const Command::BufferImageCopy& a_Copy, const Impl& a_Image) {
     glTextureSubImage1D(
         a_Image.handle,
         a_Copy.imageSubresource.level,
@@ -272,7 +279,7 @@ OCRA::Image::TransferFunction OCRA::Image::Uncompressed1DUpload = [](const Devic
         BUFFER_OFFSET(a_Copy.bufferOffset));
 };
 
-OCRA::Image::TransferFunction OCRA::Image::Uncompressed2DUpload = [](const Device::Handle& a_Device, const BufferCopy& a_Copy, const Impl& a_Image) {
+OCRA::Image::TransferFunction OCRA::Image::Uncompressed2DUpload = [](const Device::Handle& a_Device, const Command::BufferImageCopy& a_Copy, const Impl& a_Image) {
         glTextureSubImage2D(
             a_Image.handle,
             a_Copy.imageSubresource.level,
@@ -285,7 +292,7 @@ OCRA::Image::TransferFunction OCRA::Image::Uncompressed2DUpload = [](const Devic
             BUFFER_OFFSET(a_Copy.bufferOffset));
 };
 
-OCRA::Image::TransferFunction OCRA::Image::Uncompressed3DUpload = [](const Device::Handle& a_Device, const BufferCopy& a_Copy, const Impl& a_Image) {
+OCRA::Image::TransferFunction OCRA::Image::Uncompressed3DUpload = [](const Device::Handle& a_Device, const Command::BufferImageCopy& a_Copy, const Impl& a_Image) {
     glTextureSubImage3D(
         a_Image.handle,
         a_Copy.imageSubresource.level,

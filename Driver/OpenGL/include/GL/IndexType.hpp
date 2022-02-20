@@ -14,7 +14,7 @@
 
 namespace OCRA
 {
-static inline auto GetGLIndexType(const IndexType& a_IndexType)
+static inline GLenum GetGLIndexType(const IndexType& a_IndexType)
 {
 	switch (a_IndexType)
 	{

@@ -41,8 +41,8 @@ set(OCRA_IMPL_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Image/View.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/ColorBlendState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/DepthStencilState.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/Graphics.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/MultisampleState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/Pipeline.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/RasterizationState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/ShaderPipelinePool.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/ShaderPipelineState.hpp
@@ -61,6 +61,7 @@ set(OCRA_IMPL_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Image/Image.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Image/View.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/Graphics.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/Pipeline.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/ShaderPipelineState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/VertexInputState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Shader/Stage.cpp

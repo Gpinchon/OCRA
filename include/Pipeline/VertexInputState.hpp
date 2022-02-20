@@ -21,8 +21,8 @@ struct AttributeDescription {
 		VertexType type{ VertexType::None }; //Type of data of each components
 		bool normalized{ false };
 	} format;
-    Uint32 offset{ 0 };
-	Uint8 binding{ 0 }; //BindingDescription index
+    Uint32 offset{ 0 }; //(Relative offset) the distance between elements in the buffer
+	Uint8 binding{ 0 }; //The binding number this attribute takes its data from
     Uint32 location{ 0 }; //Location in the shader for this attribute
 };
 struct BindingDescription {

@@ -9,6 +9,6 @@
 #include <Handle.hpp>
 
 namespace OCRA::Queue {
-void PushPass(const Device::Handle& a_Device, const Pass::Handle& a_Pass);
-void FlushPass(const Device::Handle& a_Device, const Pass::Handle& a_Pass);
+void PushPass(const Device::Handle& a_Device, const RenderPass::Handle& a_Pass);
+void FlushPass(const Device::Handle& a_Device, const RenderPass::Handle& a_Pass);
 }

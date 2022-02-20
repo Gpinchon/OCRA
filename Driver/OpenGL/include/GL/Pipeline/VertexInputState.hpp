@@ -10,20 +10,29 @@
 #include <Pipeline/VertexInputState.hpp>
 
 #include <GL/Buffer/Vertex.hpp>
-#include <GL/Pipeline/VAOPool.hpp>
+#include <GL/VertexType.hpp>
 #include <GL/glew.h>
 
 namespace OCRA::Pipeline::VertexInputState {
 //compiles the specified Vertex Input State into a callback
 //only the Vertex Attributes are compiled here, Vertex Bindings are compiled by Command::RenderPass::CompileGraphicStates
-struct Compile {
-    Compile(const Device::Handle& a_Device, const Info& a_Info);
-    void operator()(void) const noexcept
-    {
-        glPrimitiveRestartIndex(primitiveRestartIndex);
-        glBindVertexArray(VAORef->handle);
-    }
-    const VAOPool::Reference VAORef;
-    const Uint32 primitiveRestartIndex;
-};
+auto Compile(const Device::Handle& a_Device, const Info& a_Info)
+{
+    return [info = a_Info](){
+        glPrimitiveRestartIndex(info.primitiveRestartIndex);
+        for (auto attribIndex = 0u; attribIndex < info.attributeDescriptionCount; ++attribIndex) {
+            const auto& attribute { info.attributeDescriptions.at(attribIndex) };
+            glEnableVertexAttribArray(attribute.location);
+            glVertexAttribFormat(
+                attribute.location,
+                attribute.format.size,
+                GetGLVertexType(attribute.format.type),
+                attribute.format.normalized,
+                attribute.offset);
+            glVertexAttribBinding(
+                attribute.location,
+                attribute.binding);
+        }
+    };
+}
 }

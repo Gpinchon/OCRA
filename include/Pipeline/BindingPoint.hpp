@@ -10,6 +10,7 @@ namespace OCRA::Pipeline
 {
 enum class BindingPoint
 {
+	Unknown = -1,
 	Graphics,
 	Compute,
 	RayTracing, //might be unavailable

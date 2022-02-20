@@ -14,56 +14,50 @@
 #include <GL/glew.h>
 
 namespace OCRA::Pipeline::ViewPortState {
-struct Compile {
-	template<typename T>
-	struct Rect {
-		Rect() = default;
-		Rect(const Rect2D& a_Info)
-		: x(a_Info.offset.x)
-		, y(a_Info.offset.y)
-		, w(a_Info.extent.width)
-		, h(a_Info.extent.height)
-		{}
-		T x, y; //left, bottom
-		T w, h; //width, height
-	};
-	struct DepthRange {
-		DepthRange() = default;
-		DepthRange(const ViewPort::Info& a_Info)
-		: near(a_Info.minDepth)
-		, far(a_Info.maxDepth)
-		{}
-		GLdouble near, far;
-	};
-	Compile(const Device::Handle& a_Device, const Info& a_Info)
-	    : viewPortsCount(a_Info.viewPortsCount)
-		, viewPorts([a_Info](){
-			std::array<Rect<GLfloat>, MaxViewPorts> vp;
-			for (auto i = 0u; i < a_Info.viewPortsCount; ++i)
-				vp.at(i) = Rect<GLfloat>(a_Info.viewPorts.at(i).rect);
-			return vp;
-		}())
-		, viewPortsDepthRange([a_Info](){
-			std::array<DepthRange, MaxViewPorts> vp;
-			for (auto i = 0u; i < a_Info.viewPortsCount; ++i)
-				vp.at(i) = DepthRange(a_Info.viewPorts.at(i));
-			return vp;
-		}())
-		, scissors([a_Info](){
-			std::array<Rect<GLint>, MaxViewPorts> vp;
-			for (auto i = 0u; i < a_Info.viewPortsCount; ++i)
-				vp.at(i) = Rect<GLint>(a_Info.scissors.at(i));
-			return vp;
-		}())
+template<typename T>
+struct Rect {
+	Rect() = default;
+	Rect(const Rect2D& a_Info)
+	: x(a_Info.offset.x)
+	, y(a_Info.offset.y)
+	, w(a_Info.extent.width)
+	, h(a_Info.extent.height)
 	{}
-	const Uint8 viewPortsCount;
-	const std::array<Rect<GLfloat>, MaxViewPorts> viewPorts;
-	const std::array<DepthRange, MaxViewPorts> viewPortsDepthRange;
-	const std::array<Rect<GLint>, MaxViewPorts> scissors;
-	void operator()(void) const noexcept
-	{
+	T x, y; //left, bottom
+	T w, h; //width, height
+};
+struct DepthRange {
+	DepthRange() = default;
+	DepthRange(const ViewPort::Info& a_Info)
+	: near(a_Info.minDepth)
+	, far(a_Info.maxDepth)
+	{}
+	GLdouble near, far;
+};
+inline auto Compile(const Device::Handle& a_Device, const Info& a_Info)
+{
+	const auto viewPortsCount(a_Info.viewPortsCount);
+	const auto viewPorts([a_Info]() {
+		std::array<Rect<GLfloat>, MaxViewPorts> vp;
+		for (auto i = 0u; i < a_Info.viewPortsCount; ++i)
+			vp.at(i) = Rect<GLfloat>(a_Info.viewPorts.at(i).rect);
+		return vp;
+	}());
+	const auto viewPortsDepthRange([a_Info]() {
+		std::array<DepthRange, MaxViewPorts> vp;
+		for (auto i = 0u; i < a_Info.viewPortsCount; ++i)
+			vp.at(i) = DepthRange(a_Info.viewPorts.at(i));
+		return vp;
+	}());
+	const auto scissors([a_Info]() {
+		std::array<Rect<GLint>, MaxViewPorts> vp;
+		for (auto i = 0u; i < a_Info.viewPortsCount; ++i)
+			vp.at(i) = Rect<GLint>(a_Info.scissors.at(i));
+		return vp;
+	}());
+	return [viewPortsCount, viewPorts, viewPortsDepthRange, scissors]() {
 		glViewportArrayv(
-		    0, //first
+			0, //first
 			viewPortsCount,
 			(GLfloat*)viewPorts.data());
 		glDepthRangeArrayv(
@@ -74,6 +68,6 @@ struct Compile {
 			0,
 			viewPortsCount,
 			(GLint*)scissors.data());
-	}
-};
+	};
+}
 }

@@ -9,7 +9,7 @@
 #include <Framebuffer.hpp>
 #include <Handle.hpp>
 #include <Image/Format.hpp>
-#include <Pipeline/BindPoint.hpp>
+#include <Pipeline/BindingPoint.hpp>
 #include <Rect2D.hpp>
 #include <Sample.hpp>
 #include <Scalar.hpp>
@@ -53,7 +53,7 @@ struct AttachmentReference {
 
 struct SubPassDescription {
 	constexpr static auto MaxAttachments = 32;
-	Pipeline::BindPoint pipelineBindPoint{ Pipeline::BindPoint::Unknown };
+	Pipeline::BindingPoint pipelineBindPoint{ Pipeline::BindingPoint::Unknown };
 	Uint8 inputAttachmentCount{ 0 };
 	std::array<AttachmentReference, MaxAttachments> inputAttachments;
 	Uint8 colorAttachmentCount{ 0 };
@@ -80,4 +80,10 @@ struct Info {
 	Uint8 dependencyCount{ 0 };
 	std::array<SubPassDependency, MaxDependencies> dependencies;
 };
+Uint8 GetAttachmentCount(const Handle& a_RenderPass);
+const AttachmentDescription& GetAttachment(const Handle& a_RenderPass, Uint8 a_AttachmentIndex);
+Uint8 GetSubpassCount(const Handle& a_RenderPass);
+const SubPassDescription& GetSubpass(const Handle& a_RenderPass, Uint8 a_SubPassIndex);
+Uint8 GetDependencyCount(const Handle& a_RenderPass);
+const SubPassDependency& GetDependency(const Handle& a_RenderPass, Uint8 a_DependencyIndex);
 }

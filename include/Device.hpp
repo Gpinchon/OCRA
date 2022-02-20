@@ -12,5 +12,5 @@ namespace OCRA::Device {
 struct Info {
     Context::Handle context;
 };
-void RenderPass(const Device::Handle& a_Device, const Pass::Handle& a_Pass);
+void RenderPass(const Device::Handle& a_Device, const RenderPass::Handle& a_Pass);
 }

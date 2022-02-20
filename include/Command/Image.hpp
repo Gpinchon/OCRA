@@ -33,12 +33,12 @@ struct BufferImageCopy {
 };
 void CopyBufferToImage(
     const Command::Buffer::Handle& a_CommandBuffer,
-    const Buffer::Transfer::Handle& a_srcBuffer,
+    const OCRA::Buffer::Transfer::Handle& a_srcBuffer,
     const Image::Handle& a_dstImage,
     const std::vector<BufferImageCopy>& a_Regions);
 void CopyImageToBuffer(
     const Command::Buffer::Handle& a_CommandBuffer,
-    const Buffer::Transfer::Handle& a_DstBuffer,
+    const OCRA::Buffer::Transfer::Handle& a_DstBuffer,
     const Image::Handle& a_SrcImage,
     const std::vector<BufferImageCopy>& a_Regions);
 }

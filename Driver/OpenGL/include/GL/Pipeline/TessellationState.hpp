@@ -8,14 +8,10 @@
 #include <Pipeline/TessellationState.hpp>
 
 namespace OCRA::Pipeline::TessellationState {
-struct Compile {
-	Compile(const Device::Handle& a_Device, const Info& a_Info)
-	    : patchControlPoints(a_Info.patchControlPoints)
-	{}
-	const GLuint patchControlPoints;
-	void operator()(void) const
-	{
+inline auto Compile(const Device::Handle& a_Device, const Info& a_Info)
+{
+	return [patchControlPoints = a_Info.patchControlPoints]() {
 		glPatchParameteri(GL_PATCH_VERTICES, patchControlPoints);
-	}
-};
+	};
+}
 }

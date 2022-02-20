@@ -15,8 +15,7 @@ namespace OCRA::Pipeline::ShaderPipelineState {
 //compiles the specified stages into a program
 struct Compile {
 	Compile(const Device::Handle& a_Device, const Info& a_Info);
-	void operator()(void) const
-	{
+	void operator()() const noexcept {
 		glBindProgramPipeline(shaderPipelineRef->handle);
 	}
 	ShaderPipelinePool::Reference shaderPipelineRef;

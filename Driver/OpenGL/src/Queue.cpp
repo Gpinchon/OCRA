@@ -13,7 +13,7 @@
 
 namespace OCRA::Queue {
 struct Impl {
-    typedef std::queue<Pass::Handle> PassQueue;
+    typedef std::queue<RenderPass::Handle> PassQueue;
     std::map<Device::Handle, PassQueue> passQueue;
     std::mutex lock;
 };
@@ -22,7 +22,7 @@ auto& GetQueue()
     static Impl queue;
     return queue;
 }
-void PushPass(const Device::Handle& a_Device, const Pass::Handle& a_Pass)
+void PushPass(const Device::Handle& a_Device, const RenderPass::Handle& a_Pass)
 {
     const std::lock_guard<std::mutex> lock(GetQueue().lock);
     GetQueue().passQueue[a_Device].push(a_Pass);

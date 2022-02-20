@@ -54,10 +54,6 @@ HANDLE(Image::View);
 HANDLE(Buffer::Transfer);
 HANDLE(Buffer::Vertex);
 HANDLE(Pipeline);
-namespace Pipeline::Graphics {
-    struct Info;
-    const Info& GetInfo(const Pipeline::Handle& a_Handle);
-}
 HANDLE(Shader::Stage);
 HANDLE(State::Draw);
 HANDLE(State::Clear);
