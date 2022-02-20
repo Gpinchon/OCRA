@@ -1,0 +1,105 @@
+cmake_minimum_required(VERSION 3.19)
+cmake_policy(SET CMP0074 NEW)
+
+project(OCRA LANGUAGES CXX)
+
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+set(CMAKE_CXX_STANDARD 17)
+
+#[[Rendering API]]
+set(RenderingAPI "OpenGL" CACHE STRING
+  "Rendering API used at compile-time")
+set(RenderingAPIValues
+  "OpenGL;Vulkan;DirectX")
+set_property(CACHE RenderingAPI PROPERTY STRINGS ${RenderingAPIValues})
+add_compile_definitions(RENDERINGAPI=${RenderingAPI})
+
+set (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -DDEBUG_MOD")
+set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG_MOD")
+set (CMAKE_CXX_FLAGS_RELEASE "-Ox")
+
+set(OCRA_HEADER_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Blend.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Compare.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Context.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Device.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Extent3D.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/FrameBuffer.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Handle.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Logic.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/RenderPass.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Queue.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Rect2D.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Scalar.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/ScissorTest.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Stencil.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/VertexType.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/ViewPort.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Window.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Buffer/Transfer.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Buffer/Vertex.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/BufferBinding.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/Buffer.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/Draw.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/Image.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/VertexBuffer.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Descriptor/Descriptor.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Descriptor/Layout/Binding.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Descriptor/Layout/Layout.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Image/Descriptor.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Image/Filter.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Image/Format.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Image/Image.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Image/Sampler.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Image/View.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/ColorBlendState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/DepthStencilState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/Graphics.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/InputAssemblyState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/MultisampleState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/RasterizationState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/ShaderPipelineState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/TessellationState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/VertexInputState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/ViewPortState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Primitive/Topology.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Shader/Stage.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/State/Clear.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/State/Draw.hpp
+)
+
+add_library(OCRA STATIC ${OCRA_HEADER_FILES})
+set_target_properties(OCRA PROPERTIES LINKER_LANGUAGE CXX)
+target_include_directories(OCRA PUBLIC
+  "${CMAKE_CURRENT_SOURCE_DIR}/include"
+)
+
+if (RenderingAPI STREQUAL "OpenGL")
+add_subdirectory(Driver/OpenGL)
+add_library(OCRA::Impl ALIAS OCRAImpl)
+target_link_libraries(OCRA PUBLIC OCRA::Impl)
+endif (RenderingAPI STREQUAL "OpenGL")
+
+if(MSVC_IDE)
+  set(CMAKE_DEBUG_POSTFIX "d")
+  # Macro to preserve source files hierarchy in the IDE
+  macro(GroupSources curdir)
+    file(GLOB children RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/${curdir} ${CMAKE_CURRENT_SOURCE_DIR}/${curdir}/*)
+  
+    foreach(child ${children})
+      if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${curdir}/${child})
+        GroupSources(${curdir}/${child})
+      else()
+        string(REPLACE "/" "\\" groupname ${curdir})
+        string(REPLACE "src" "Sources" groupname ${groupname})
+        string(REPLACE "include" "Includes" groupname ${groupname})
+        #string(REPLACE "shaders" "Shaders" groupname ${groupname})
+        source_group(${groupname} FILES ${CMAKE_CURRENT_SOURCE_DIR}/${curdir}/${child})
+      endif()
+    endforeach()
+  endmacro()
+  
+  # Run macro
+  GroupSources(src)
+  GroupSources(include)
+endif()
