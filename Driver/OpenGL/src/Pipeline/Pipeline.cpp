@@ -20,7 +20,8 @@ Handle Create(const Device::Handle& a_Device, std::function<Base*()> a_Allocator
 void Destroy(const Device::Handle& a_Device, const Handle& a_Handle) {
 	s_Pipelines.erase(a_Handle);
 }
-std::function<void()> Compile(const Device::Handle& a_Device, const Handle& a_Pipeline) {
-	return Get(a_Pipeline).Compile(a_Device);
+void Execute(const Device::Handle& a_Device, const Handle& a_Handle, Command::Buffer::ExecutionState& a_ExecutionState)
+{
+	Get(a_Pipeline).Execute(a_Device, a_Handle, a_ExecutionState);
 }
 }

@@ -6,6 +6,7 @@
 */
 #pragma once
 
+#include <Common/Vec4.hpp>
 #include <Blend.hpp>
 #include <FrameBuffer.hpp>
 #include <Logic.hpp>
@@ -28,8 +29,6 @@ struct Info {
     Logic::Operation logicOp{ Logic::Operation::Copy }; //see glLogicOp
     Uint8 attachementCount { 0 };
     std::array<AttachmentState, FrameBuffer::MaxColorAttachments> attachments;
-    struct BlendConstants {
-        float R { 0 }, G { 0 }, B { 0 }, A { 0 };
-    } blendConstants;
+    Vec4 blendConstants;
 };
 }

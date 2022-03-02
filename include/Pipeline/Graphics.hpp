@@ -9,6 +9,7 @@
 #include <Handle.hpp>
 #include <Pipeline/ColorBlendState.hpp>
 #include <Pipeline/DepthStencilState.hpp>
+#include <Pipeline/DynamicState.hpp>
 #include <Pipeline/InputAssemblyState.hpp>
 #include <Pipeline/MultisampleState.hpp>
 #include <Pipeline/RasterizationState.hpp>
@@ -17,17 +18,6 @@
 #include <Pipeline/VertexInputState.hpp>
 #include <Pipeline/ViewPortState.hpp>
 #include <Scalar.hpp>
-
-#include <vector>
-
-//TODO decide if this is relevant
-namespace OCRA::Pipeline::DynamicState {
-enum class DynamicState {
-};
-struct Info {
-    std::vector<DynamicState> dynamicStates;
-};
-}
 
 namespace OCRA::Pipeline::Graphics {
 struct Info { //describes a graphics pipeline with each stage

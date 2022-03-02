@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include <Rect2D.hpp>
+#include <Common/Rect2D.hpp>
 #include <ViewPort.hpp>
 #include <Scalar.hpp>
 
@@ -17,6 +17,6 @@ constexpr auto MaxViewPorts = 64;
 struct Info {
 	Uint8 viewPortsCount{ 0 };
     std::array<ViewPort::Info, MaxViewPorts> viewPorts;
-    std::array<Rect2D, MaxViewPorts> scissors;
+    std::array<Rect2D<Int32>, MaxViewPorts> scissors;
 };
 }

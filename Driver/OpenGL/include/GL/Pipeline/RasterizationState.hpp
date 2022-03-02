@@ -70,40 +70,31 @@ static inline auto GetGLFrontFace(const FrontFace& a_FrontFace)
 		throw std::runtime_error("Unknown Front Face");
 	}
 }
-struct Compile {
-	Compile(const Device::Handle& a_Device, const Info& a_Info)
-	    : rasterizerDiscardEnable(a_Info.rasterizerDiscardEnable)
-		, depthClampEnable(a_Info.depthClampEnable)
-		, depthBiasEnable(a_Info.depthBiasEnable)
-		, depthBiasConstantFactor(a_Info.depthBiasConstantFactor)
-		, depthBiasClamp(a_Info.depthBiasClamp)
-		, depthBiasSlopeFactor(a_Info.depthBiasSlopeFactor)
-		, lineWidth(a_Info.depthBiasSlopeFactor)
-		, polygonOffsetMode(GetGLPolygonOffsetMode(a_Info.polygonMode));
-		, polygonMode(GetGLPolygonMode(a_Info.polygonMode))
-		, cullMode(GetGLCullMode(a_Info.cullMode))
-		, frontFace(GetGLFrontFace(a_Info.frontFace))
-	{}
-	const GLboolean rasterizerDiscardEnable;
-    const GLboolean depthClampEnable;
-    const GLboolean depthBiasEnable;
-    const GLfloat depthBiasConstantFactor;
-    const GLfloat depthBiasClamp;
-    const GLfloat depthBiasSlopeFactor;
-    const GLfloat lineWidth;
-	const GLenum polygonOffsetMode;
-	const GLenum polygonMode;
-	const GLenum cullMode;
-	const GLenum frontFace;
-	void operator()(void) {
-		rasterizerDiscardEnable ? glEnable(GL_RASTERIZER_DISCARD) : glDisable(GL_RASTERIZER_DISCARD);
+inline auto Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info& a_DynamicState)
+{
+	const auto dynamicRasterizerDiscardEnable(a_DynamicState.Contains(DynamicState::State::RasterizerDiscardEnable));
+	const auto dynamicLineWidth(a_DynamicState.Contains(DynamicState::State::LineWidth));
+	const auto rasterizerDiscardEnable(a_Info.rasterizerDiscardEnable);
+	const auto depthClampEnable(a_Info.depthClampEnable);
+	const auto depthBiasEnable(a_Info.depthBiasEnable);
+	const auto depthBiasConstantFactor(a_Info.depthBiasConstantFactor);
+	const auto depthBiasClamp(a_Info.depthBiasClamp);
+	const auto depthBiasSlopeFactor(a_Info.depthBiasSlopeFactor);
+	const auto lineWidth(a_Info.depthBiasSlopeFactor);
+	const auto polygonOffsetMode(GetGLPolygonOffsetMode(a_Info.polygonMode));;
+	const auto polygonMode(GetGLPolygonMode(a_Info.polygonMode));
+	const auto cullMode(GetGLCullMode(a_Info.cullMode));
+	const auto frontFace(GetGLFrontFace(a_Info.frontFace));
+	return [=](Command::Buffer::ExecutionState& a_ExecutionState){
+		const auto bRasterizerDiscardEnable = dynamicRasterizerDiscardEnable ? a_ExecutionState.dynamicStates.rasterizerDiscardEnable : rasterizerDiscardEnable;
+		bRasterizerDiscardEnable ? glEnable(GL_RASTERIZER_DISCARD) : glDisable(GL_RASTERIZER_DISCARD);
 		depthClampEnable ? glEnable(GL_DEPTH_CLAMP) : glDisable(GL_DEPTH_CLAMP);
 		depthBiasEnable ? glEnable(polygonOffsetMode) : glDisable(polygonOffsetMode);
 		glPolygonOffsetClamp(
 			depthBiasConstantFactor,
 			depthBiasSlopeFactor,
 			depthBiasClamp);
-		glLineWidth(lineWidth);
+		glLineWidth(dynamicLineWidth ? a_ExecutionState.dynamicStates.lineWidth : lineWidth);
 		glPolygonMode(
 			GL_FRONT_AND_BACK,
 			polygonMode);
@@ -113,10 +104,10 @@ struct Compile {
 		}
 		else glDisable(GL_CULL_FACE);
 		glFrontFace(frontFace);
-	}
-};
+	};
+}
 static inline auto Default(const Device::Handle& a_Device)
 {
-	return Compile(a_Device, {});
+	return Compile(a_Device, {}, {});
 }
 }

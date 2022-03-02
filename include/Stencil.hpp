@@ -6,6 +6,9 @@
 */
 #pragma once
 
+#include <Scalar.hpp>
+#include <Compare.hpp>
+
 namespace OCRA::Stencil {
 enum class Operation {
     Keep = 0,
@@ -17,5 +20,14 @@ enum class Operation {
     IncrementAndWrap = 6,
     DecrementAndWrap = 7,
     MaxValue
+};
+struct OpState {
+    Operation failOp { Operation::Keep }; //the operation to be realized when stencil test FAILS
+    Operation passOp { Operation::Keep }; //the operation to be realized when stencil test PASSES
+    Operation depthFailOp { Operation::Keep }; //the operation to be realized when stencil test PASSES but depth test FAILS
+    Compare::Operation compareOp{ Compare::Operation ::Always };
+    Uint32 compareMask { 1 }; //a mask that is ANDed with ref and the buffer's content
+    Uint32 writeMask { 1 }; //a mask that is ANDed with the stencil value about to be written to the buffer
+    Uint32 reference { 0 }; //the reference value used in comparison.
 };
 }

@@ -29,7 +29,6 @@ set(OCRA_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Logic.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/RenderPass.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Queue.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Rect2D.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Scalar.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/ScissorTest.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Stencil.hpp
@@ -38,6 +37,12 @@ set(OCRA_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Window.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Buffer/Transfer.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Buffer/Vertex.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Vec.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Vec2.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Vec3.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Vec4.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Rect.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Rect2D.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/BufferBinding.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/Buffer.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/Draw.hpp

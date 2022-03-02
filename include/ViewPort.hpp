@@ -6,12 +6,13 @@
 */
 #pragma once
 
-#include <Rect2D.hpp>
+#include <Common/Rect2D.hpp>
+#include <Common/DepthBounds.hpp>
 #include <Scalar.hpp>
 
 namespace OCRA::ViewPort {
 struct Info {
-    Rect2D rect;
-    float minDepth { 0 }, maxDepth { 0 };
+    Rect2D      rect;
+    DepthBounds depthBounds;
 };
 }

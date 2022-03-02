@@ -13,8 +13,12 @@
 
 #include <GL/glew.h>
 
+namespace OCRA::Pipeline::DynamicState {
+struct Info;
+}
+
 namespace OCRA::Pipeline::MultisampleState {
-const auto Compile(const Device::Handle& a_Device, const Info& a_Info)
+const auto Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info&)
 {
 	return [
 		sampleShadingEnable = a_Info.sampleShadingEnable,

@@ -7,7 +7,9 @@
 #pragma once
 
 #include <Pipeline/ColorBlendState.hpp>
+#include <Pipeline/DynamicState.hpp>
 
+#include <GL/Command/Buffer/ExecutionState.hpp>
 #include <GL/Blend.hpp>
 #include <GL/Logic.hpp>
 #include <GL/glew.h>
@@ -48,29 +50,46 @@ inline const auto Compile(const ColorBlendState::AttachmentState& a_AttachmentSt
             Blend::None != (colorMask & Blend::A));
     };
 }
-inline const auto Compile(const Device::Handle& a_Device, const Info& a_Info) {
+inline const auto Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info& a_DynamicState) {
     const auto attachments([a_Info] {
         std::array<std::function<void()>, FrameBuffer::MaxColorAttachments> attachments;
-        for (Uint8 buf = 0; buf < a_Info.attachementCount; ++buf)
-            attachments.at(buf) = Compile(a_Info.attachments.at(buf), buf);
+        for (Uint8 index = 0; index < a_Info.attachementCount; ++index)
+            attachments.at(index) = Compile(a_Info.attachments.at(index), index);
         return attachments;
     }());
-    return [
-        logicOpEnable(a_Info.logicOpEnable),
-        logicOp(GetGLOperation(a_Info.logicOp)),
-        blendConstants(a_Info.blendConstants),
-        attachementCount(a_Info.attachementCount),
-        attachments(attachments)
-    ]() {
-        logicOpEnable ? glEnable(GL_COLOR_LOGIC_OP) : glDisable(GL_COLOR_LOGIC_OP);
-        glLogicOp(logicOp);
-        glBlendColor(
-            blendConstants.R,
-            blendConstants.G,
-            blendConstants.B,
-            blendConstants.A);
-        for (Uint8 buf = 0; buf < attachementCount; ++buf) attachments.at(buf)();
-    };
+    if (a_DynamicState.Contains(DynamicState::State::BlendConstants)) //use dynamic blend constants
+        return [
+            logicOpEnable(a_Info.logicOpEnable),
+            logicOp(GetGLOperation(a_Info.logicOp)),
+            blendConstants(a_Info.blendConstants),
+            attachementCount(a_Info.attachementCount),
+            attachments(attachments)
+        ](Command::Buffer::ExecutionState& a_ExecutionState) {
+            logicOpEnable ? glEnable(GL_COLOR_LOGIC_OP) : glDisable(GL_COLOR_LOGIC_OP);
+            glLogicOp(logicOp);
+            glBlendColor(
+                a_ExecutionState.dynamicStates.blendConstants.r,
+                a_ExecutionState.dynamicStates.blendConstants.g,
+                a_ExecutionState.dynamicStates.blendConstants.b,
+                a_ExecutionState.dynamicStates.blendConstants.a);
+            for (Uint8 buf = 0; buf < attachementCount; ++buf) attachments.at(buf)();
+        };
+    else return [
+            logicOpEnable(a_Info.logicOpEnable),
+            logicOp(GetGLOperation(a_Info.logicOp)),
+            blendConstants(a_Info.blendConstants),
+            attachementCount(a_Info.attachementCount),
+            attachments(attachments)
+        ](Command::Buffer::ExecutionState&) {
+            logicOpEnable ? glEnable(GL_COLOR_LOGIC_OP) : glDisable(GL_COLOR_LOGIC_OP);
+            glLogicOp(logicOp);
+            glBlendColor(
+                blendConstants.r,
+                blendConstants.g,
+                blendConstants.b,
+                blendConstants.a);
+            for (Uint8 buf = 0; buf < attachementCount; ++buf) attachments.at(buf)();
+        };
 }
 inline auto Default(const Device::Handle& a_Device)
 {

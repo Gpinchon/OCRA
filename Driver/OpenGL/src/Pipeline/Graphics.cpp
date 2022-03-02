@@ -25,26 +25,32 @@ struct Impl : Base {
 	Impl(const Device::Handle& a_Device, const Info& a_Info)
 	: info(a_Info)
 	{}
-	virtual std::function<void()> Compile(const Device::Handle& a_Device) override
+	virtual void Execute(const Device::Handle& a_Device, const Handle& a_Handle, Command::Buffer::ExecutionState& a_ExecutionState) override
+	{
+		Compile(a_Device)(a_ExecutionState);
+	}
+	void Compile(const Device::Handle& a_Device)
 	{
 		if (!compiled)
 		{
 			callback = [
-				colorBlendState = ColorBlendState::Compile(a_Device, info.colorBlendState),
-				depthStencilState = DepthStencilState::Compile(a_Device, info.depthStencilState),
-				multisampleState = MultisampleState::Compile(a_Device, info.multiSampleState),
-				shaderPipelineState = ShaderPipelineState::Compile(a_Device, info.shaderPipelineState),
-				tessellationState = TessellationState::Compile(a_Device, info.tessellationState),
-				viewportState = ViewPortState::Compile(a_Device, info.viewPortState),
-				vertexInputState = VertexInputState::Compile(a_Device, info.vertexInputState)
-			](){
-				colorBlendState();
-				depthStencilState();
-				multisampleState();
-				shaderPipelineState();
-				tessellationState();
-				viewportState();
-				vertexInputState();
+				colorBlendState = ColorBlendState::Compile(a_Device, info.colorBlendState, info.dynamicState),
+				depthStencilState = DepthStencilState::Compile(a_Device, info.depthStencilState, info.dynamicState),
+				multisampleState = MultisampleState::Compile(a_Device, info.multiSampleState, info.dynamicState),
+				rasterizationState = RasterizationState::Compile(a_Device, info.shaderPipelineState, info.dynamicState),
+				shaderPipelineState = ShaderPipelineState::Compile(a_Device, info.shaderPipelineState, info.dynamicState),
+				tessellationState = TessellationState::Compile(a_Device, info.tessellationState, info.dynamicState),
+				viewportState = ViewPortState::Compile(a_Device, info.viewPortState, info.dynamicState),
+				vertexInputState = VertexInputState::Compile(a_Device, info.vertexInputState, info.dynamicState)
+			](Command::Buffer::ExecutionState& a_ExecutionState){
+				colorBlendState(a_ExecutionState);
+				depthStencilState(a_ExecutionState);
+				multisampleState(a_ExecutionState);
+				rasterizationState(a_ExecutionState);
+				shaderPipelineState(a_ExecutionState);
+				tessellationState(a_ExecutionState);
+				viewportState(a_ExecutionState);
+				vertexInputState(a_ExecutionState);
 			};
 			compiled = true;
 		}
@@ -52,7 +58,7 @@ struct Impl : Base {
 	}
     const Info info;
 	bool compiled{ false };
-    std::function<void()> callback;
+    std::function<void(Command::Buffer::ExecutionState&)> callback;
 };
 Handle Create(const Device::Handle& a_Device, const Info& a_Info) {
 	return Pipeline::Create(a_Device, [a_Device, a_Info]() { return new Impl(a_Device, a_Info); });

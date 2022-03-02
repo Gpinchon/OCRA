@@ -15,10 +15,10 @@
 #include <Pipeline/BindingPoint.hpp>
 
 #include <GL/IndexType.hpp>
-#include <GL/Command/RenderPass.hpp>
 #include <GL/IndexType.hpp>
 #include <GL/Buffer/Vertex.hpp>
 #include <GL/Buffer/Buffer.hpp>
+#include <GL/Command/ExecutionState.hpp>
 
 #include <functional>
 #include <array>
@@ -34,12 +34,7 @@ enum class State {
 struct Impl
 {
 	Impl() {};
-	struct ExecutionState {
-		bool				once{ false };
-		RenderPass			renderPass{};
-		Uint32				subpassIndex{ 0 };
-		std::array<Pipeline::Handle, size_t(Pipeline::BindingPoint::MaxValue)> pipelineState{};
-	};
+	
 	typedef std::function<void(Impl::ExecutionState&)> CallBack;
 	void Reset()
 	{
