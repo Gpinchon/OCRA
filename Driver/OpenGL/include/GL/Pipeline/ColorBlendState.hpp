@@ -50,7 +50,7 @@ inline const auto Compile(const ColorBlendState::AttachmentState& a_AttachmentSt
             Blend::None != (colorMask & Blend::A));
     };
 }
-inline const auto Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info& a_DynamicState) {
+inline const std::function<void(Command::Buffer::ExecutionState&)> Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info& a_DynamicState) {
     const auto attachments([a_Info] {
         std::array<std::function<void()>, FrameBuffer::MaxColorAttachments> attachments;
         for (Uint8 index = 0; index < a_Info.attachementCount; ++index)
@@ -93,6 +93,6 @@ inline const auto Compile(const Device::Handle& a_Device, const Info& a_Info, co
 }
 inline auto Default(const Device::Handle& a_Device)
 {
-    return Compile(a_Device, {});
+    return Compile(a_Device, {}, {});
 }
 }

@@ -10,7 +10,7 @@
 #include <Handle.hpp>
 #include <Image/Format.hpp>
 #include <Pipeline/BindingPoint.hpp>
-#include <Rect2D.hpp>
+#include <Common/Rect2D.hpp>
 #include <Sample.hpp>
 #include <Scalar.hpp>
 

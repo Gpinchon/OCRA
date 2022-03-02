@@ -16,19 +16,39 @@
 namespace OCRA::Pipeline::ViewPortState {
 inline auto Compile(const Device::Handle& a_Device, const Info& a_Info)
 {
-	return [info = a_Info]() {
+	const auto viewportsRects = [=]() {
+		std::vector<Rect2D> vec;
+		for (auto i = 0; i < a_Info.viewPortsCount; ++i)
+			vec.push_back(a_Info.viewPorts.at(i).rect);
+		return vec;
+	}();
+	const auto viewportsDepthRanges = [=]() {
+		std::vector<DepthBounds<GLdouble>> vec;
+		for (auto i = 0; i < a_Info.viewPortsCount; ++i)
+			vec.push_back(a_Info.viewPorts.at(i).depthBounds);
+		return vec;
+	}();
+	const auto viewportsScissors = [=]() {
+		std::vector<Rect<2, GLint>> vec;
+		for (auto i = 0; i < a_Info.viewPortsCount; ++i)
+			vec.push_back(a_Info.scissors.at(i));
+		return vec;
+	}();
+	return [
+		viewportsRects, viewportsDepthRanges, viewportsScissors
+	]() {
 		glViewportArrayv(
 			0, //first
-			a_Info.viewPortsCount,
-			&a_Info.viewPorts.front().rect.offset.x);
+			viewportsRects.size(),
+			&viewportsRects.front().offset.x);
 		glDepthRangeArrayv(
 			0, //first
-			a_Info.viewPortsCount,
-			&a_Info.viewPorts.front().depthBounds.near);
+			viewportsDepthRanges.size(),
+			&viewportsDepthRanges.front().min);
 		glScissorArrayv(
 			0,
-			a_Info.viewPortsCount,
-			&a_Info.scissors.offset.x);
+			viewportsScissors.size(),
+			&viewportsScissors.front().offset.x);
 	};
 }
 }

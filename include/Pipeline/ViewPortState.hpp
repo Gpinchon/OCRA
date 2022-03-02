@@ -17,6 +17,6 @@ constexpr auto MaxViewPorts = 64;
 struct Info {
 	Uint8 viewPortsCount{ 0 };
     std::array<ViewPort::Info, MaxViewPorts> viewPorts;
-    std::array<Rect2D<Int32>, MaxViewPorts> scissors;
+    std::array<Rect<2, Int32>, MaxViewPorts> scissors;
 };
 }

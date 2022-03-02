@@ -25,36 +25,36 @@ struct Impl : Base {
 	Impl(const Device::Handle& a_Device, const Info& a_Info)
 	: info(a_Info)
 	{}
-	virtual void Execute(const Device::Handle& a_Device, const Handle& a_Handle, Command::Buffer::ExecutionState& a_ExecutionState) override
-	{
-		Compile(a_Device)(a_ExecutionState);
-	}
-	void Compile(const Device::Handle& a_Device)
+	auto Compile(const Device::Handle& a_Device)
 	{
 		if (!compiled)
 		{
 			callback = [
 				colorBlendState = ColorBlendState::Compile(a_Device, info.colorBlendState, info.dynamicState),
-				depthStencilState = DepthStencilState::Compile(a_Device, info.depthStencilState, info.dynamicState),
-				multisampleState = MultisampleState::Compile(a_Device, info.multiSampleState, info.dynamicState),
-				rasterizationState = RasterizationState::Compile(a_Device, info.shaderPipelineState, info.dynamicState),
-				shaderPipelineState = ShaderPipelineState::Compile(a_Device, info.shaderPipelineState, info.dynamicState),
-				tessellationState = TessellationState::Compile(a_Device, info.tessellationState, info.dynamicState),
-				viewportState = ViewPortState::Compile(a_Device, info.viewPortState, info.dynamicState),
-				vertexInputState = VertexInputState::Compile(a_Device, info.vertexInputState, info.dynamicState)
+					depthStencilState = DepthStencilState::Compile(a_Device, info.depthStencilState, info.dynamicState),
+					multisampleState = MultisampleState::Compile(a_Device, info.multiSampleState, info.dynamicState),
+					rasterizationState = RasterizationState::Compile(a_Device, info.shaderPipelineState, info.dynamicState),
+					shaderPipelineState = ShaderPipelineState::Compile(a_Device, info.shaderPipelineState, info.dynamicState),
+					tessellationState = TessellationState::Compile(a_Device, info.tessellationState, info.dynamicState),
+					viewportState = ViewPortState::Compile(a_Device, info.viewPortState, info.dynamicState),
+					vertexInputState = VertexInputState::Compile(a_Device, info.vertexInputState, info.dynamicState)
 			](Command::Buffer::ExecutionState& a_ExecutionState){
-				colorBlendState(a_ExecutionState);
-				depthStencilState(a_ExecutionState);
-				multisampleState(a_ExecutionState);
-				rasterizationState(a_ExecutionState);
-				shaderPipelineState(a_ExecutionState);
-				tessellationState(a_ExecutionState);
-				viewportState(a_ExecutionState);
-				vertexInputState(a_ExecutionState);
-			};
-			compiled = true;
+					colorBlendState(a_ExecutionState);
+					depthStencilState(a_ExecutionState);
+					multisampleState(a_ExecutionState);
+					rasterizationState(a_ExecutionState);
+					shaderPipelineState(a_ExecutionState);
+					tessellationState(a_ExecutionState);
+					viewportState(a_ExecutionState);
+					vertexInputState(a_ExecutionState);
+				};
+				compiled = true;
 		}
 		return callback;
+	}
+	virtual void Execute(const Device::Handle& a_Device, const Handle& a_Handle, Command::Buffer::ExecutionState& a_ExecutionState) override
+	{
+		Compile(a_Device)(a_ExecutionState);
 	}
     const Info info;
 	bool compiled{ false };

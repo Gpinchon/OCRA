@@ -35,7 +35,7 @@ enum class State {
 };
 struct Info {
     std::list<State> dynamicStates;
-    bool Contains(const State a_DynamicState) {
+    inline bool Contains(const State a_DynamicState) const {
         return std::find(dynamicStates.begin(), dynamicStates.end(), a_DynamicState) != dynamicStates.end();
     }
 };

@@ -13,6 +13,6 @@
 namespace OCRA::ViewPort {
 struct Info {
     Rect2D      rect;
-    DepthBounds depthBounds;
+    DepthBounds<double> depthBounds;
 };
 }

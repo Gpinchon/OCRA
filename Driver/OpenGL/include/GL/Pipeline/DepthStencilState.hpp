@@ -45,10 +45,10 @@ inline void ApplyStencilOP(const GLenum& face, const Stencil::OpState& stencilOP
         failOp, passOp, depthFailOp, compareOp,
         stencilOP.compareMask, stencilOP.writeMask, stencilOP.reference);
 };
-inline const auto CompileStencilOp(const GLenum& face, const StencilOpState& a_StencilOpState, const DynamicState::Info& a_DynamicState)
+inline const std::function<void(Command::Buffer::ExecutionState&)> CompileStencilOp(const GLenum& face, const Stencil::OpState& a_StencilOpState, const DynamicState::Info& a_DynamicState)
 {
     if (a_DynamicState.Contains(DynamicState::State::StencilOP)) {
-        return [](Command::Buffer::ExecutionState& a_ExecutionState) {
+        return [=](Command::Buffer::ExecutionState& a_ExecutionState) {
             ApplyStencilOP(
                 face,
                 face == GL_BACK ? a_ExecutionState.dynamicStates.backStencilOP : a_ExecutionState.dynamicStates.frontStencilOP
@@ -56,6 +56,7 @@ inline const auto CompileStencilOp(const GLenum& face, const StencilOpState& a_S
         };
     }
     else return [
+        face,
         failOp(GetGLOperation(a_StencilOpState.failOp)),
         passOp(GetGLOperation(a_StencilOpState.passOp)),
         depthFailOp(GetGLOperation(a_StencilOpState.depthFailOp)),
@@ -73,19 +74,19 @@ inline const auto CompileStencilOp(const GLenum& face, const StencilOpState& a_S
 }
 inline const auto Compile(const Device::Handle& a_Device, const DepthStencilState::Info& a_Info, const DynamicState::Info& a_DynamicState)
 {
-    const auto depthTestEnable(a_Info.depthTestEnable),;
-    const auto depthWriteEnable(a_Info.depthWriteEnable),;
-    const auto depthCompareOp(GetGLOperation(a_Info.depthCompareOp)),;
-    const auto depthBoundsTestEnable(a_Info.depthBoundsTestEnable),;
-    const auto stencilTestEnable(a_Info.stencilTestEnable),;
-    const auto front = CompileStencilOp(GL_FRONT, a_Info.frontStencilOpState, a_DynamicState),;
-    const auto back = CompileStencilOp(GL_BACK, a_Info.backStencilOpState, a_DynamicState),;
-    const auto depthBounds(a_Info.depthBounds),;
-    const auto dynamicDepthTestEnable(a_DynamicState.Contains(DynamicState::State::DepthTestEnable)),;
-    const auto dynamicDepthWriteEnable(a_DynamicState.Contains(DynamicState::State::DepthWriteEnable)),;
-    const auto dynamicDepthCompareOP(a_DynamicState.Contains(DynamicState::State::DepthCompareOP)),;
-    const auto dynamicDepthBoundsTestEnable(a_DynamicState.Contains(DynamicState::State::DepthBoundsTestEnable)),;
-    const auto dynamicStencilTestEnable(a_DynamicState.Contains(DynamicState::State::StencilTestEnable)),;
+    const auto depthTestEnable(a_Info.depthTestEnable);
+    const auto depthWriteEnable(a_Info.depthWriteEnable);
+    const auto depthCompareOp(GetGLOperation(a_Info.depthCompareOp));
+    const auto depthBoundsTestEnable(a_Info.depthBoundsTestEnable);
+    const auto stencilTestEnable(a_Info.stencilTestEnable);
+    const auto front = CompileStencilOp(GL_FRONT, a_Info.frontStencilOpState, a_DynamicState);
+    const auto back = CompileStencilOp(GL_BACK, a_Info.backStencilOpState, a_DynamicState);
+    const auto depthBounds(a_Info.depthBounds);
+    const auto dynamicDepthTestEnable(a_DynamicState.Contains(DynamicState::State::DepthTestEnable));
+    const auto dynamicDepthWriteEnable(a_DynamicState.Contains(DynamicState::State::DepthWriteEnable));
+    const auto dynamicDepthCompareOP(a_DynamicState.Contains(DynamicState::State::DepthCompareOP));
+    const auto dynamicDepthBoundsTestEnable(a_DynamicState.Contains(DynamicState::State::DepthBoundsTestEnable));
+    const auto dynamicStencilTestEnable(a_DynamicState.Contains(DynamicState::State::StencilTestEnable));
     const auto dynamicDepthBounds(a_DynamicState.Contains(DynamicState::State::DepthBounds));
     return [=](Command::Buffer::ExecutionState& a_ExecutionState) {
         const auto bDepthTestEnable{ dynamicDepthTestEnable ? a_ExecutionState.dynamicStates.depthTestEnable : depthTestEnable };

@@ -18,7 +18,7 @@
 #include <GL/IndexType.hpp>
 #include <GL/Buffer/Vertex.hpp>
 #include <GL/Buffer/Buffer.hpp>
-#include <GL/Command/ExecutionState.hpp>
+#include <GL/Command/Buffer/ExecutionState.hpp>
 
 #include <functional>
 #include <array>
@@ -133,14 +133,14 @@ namespace OCRA::Command {
 //Begin Render Pass recording
 void BeginRenderPass(const Command::Buffer::Handle& a_CommandBuffer, const RenderPassBeginInfo& a_BeginInfo, const SubPassContents& a_SubPassContents)
 {
-	Buffer::Get(a_CommandBuffer).PushCommand([beginInfo = a_BeginInfo](Buffer::Impl::ExecutionState& executionState){
+	Buffer::Get(a_CommandBuffer).PushCommand([beginInfo = a_BeginInfo](Buffer::ExecutionState& executionState){
 		executionState.renderPass.beginInfo = beginInfo;
 	});
 }
 //End Render Pass recording
 void EndRenderPass(const Command::Buffer::Handle& a_CommandBuffer)
 {
-	Buffer::Get(a_CommandBuffer).PushCommand([](Buffer::Impl::ExecutionState& executionState){
+	Buffer::Get(a_CommandBuffer).PushCommand([](Buffer::ExecutionState& executionState){
 		executionState.renderPass = {};
 		executionState.subpassIndex = 0;
 	});
@@ -151,7 +151,7 @@ void ExecuteCommands(
 {
 	Buffer::Get(a_CommandBuffer).PushCommand([
 		commandBuffer = a_SecondaryCommandBuffer
-	](Buffer::Impl::ExecutionState& executionState) {
+	](Buffer::ExecutionState& executionState) {
 		Buffer::Get(commandBuffer).SubmitSecondary(executionState);
 	});
 }
@@ -163,7 +163,7 @@ void BindPipeline(
 	Buffer::Get(a_CommandBuffer).PushCommand([
 		bindingPoint = size_t(a_BindingPoint),
 		pipeline = a_Pipeline
-	](Buffer::Impl::ExecutionState& executionState){
+	](Buffer::ExecutionState& executionState){
 		executionState.pipelineState.at(bindingPoint) = pipeline;
 	});
 }
@@ -180,7 +180,7 @@ void BindIndexBuffer(
 		buffer = OCRA::Buffer::GetGLHandle(bufferHandle),
 		offset = a_Offset,
 		type = GetGLIndexType(a_IndexType)
-	](Buffer::Impl::ExecutionState& executionState){
+	](Buffer::ExecutionState& executionState){
 		executionState.renderPass.indexBufferBinding = { buffer, offset, type };
 		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer);
 	});
@@ -202,7 +202,7 @@ void BindVertexBuffers(
 			binding = firstBinding + index,
 			buffer = OCRA::Buffer::GetGLHandle(bufferHandle),
 			offset = a_Offsets.at(index)
-		](Buffer::Impl::ExecutionState& executionState){
+		](Buffer::ExecutionState& executionState){
 			executionState.renderPass.vertexInputBindings.at(binding) = {buffer, offset};
 		});
 	}

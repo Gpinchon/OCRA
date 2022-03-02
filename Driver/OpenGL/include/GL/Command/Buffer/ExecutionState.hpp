@@ -3,7 +3,10 @@
 #include <Handle.hpp>
 #include <Scalar.hpp>
 #include <Pipeline/BindingPoint.hpp>
+#include <Command/RenderPass.hpp>
 #include <Common/DepthBounds.hpp>
+#include <Common/Rect2D.hpp>
+#include <Common/Vec4.hpp>
 #include <Compare.hpp>
 #include <Stencil.hpp>
 
@@ -14,17 +17,18 @@
 namespace OCRA::Command::Buffer
 {
 struct DynamicStates {
-	constexpr auto MaxViewPorts = 64;
-	std::array<Rect<GLfloat>, MaxViewPorts> viewport;
-	std::array<Rect<GLint>, MaxViewPorts> scissor;
-	Vec4<GLfloat> blendConstants{ 0, 0, 0, 0 };
+	static constexpr auto MaxViewPorts = 64;
+	std::array<Rect<2, GLfloat>, MaxViewPorts> viewport;
+	std::array<Rect<2, GLint>, MaxViewPorts> scissor;
+	Vec<4, GLfloat> blendConstants{ 0, 0, 0, 0 };
 	GLfloat lineWidth{ 0.f };
 	GLfloat depthBiasConstantFactor{ 0.f };
 	GLfloat depthBiasClamp{ 0.f };
 	GLfloat depthBiasSlopeFactor{ 0.f };
-	DepthBounds depthBounds{ 0, 0 };
+	DepthBounds<double> depthBounds{ 0, 0 };
 	bool depthTestEnable { true };
     bool depthWriteEnable { true };
+	bool depthBoundsTestEnable{ true };
     Compare::Operation depthCompareOp { Compare::Operation::Less };
     bool stencilTestEnable { false };
     bool rasterizerDiscardEnable { false };

@@ -7,7 +7,7 @@
 #pragma once
 
 #include <Handle.hpp>
-#include <Rect2D.hpp>
+#include <Common/Rect2D.hpp>
 #include <FrameBuffer.hpp>
 #include <ClearValue.hpp>
 #include <Pipeline/BindingPoint.hpp>

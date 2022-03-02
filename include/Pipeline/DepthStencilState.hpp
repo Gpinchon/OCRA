@@ -19,6 +19,6 @@ struct Info {
     bool stencilTestEnable { false };
     Stencil::OpState frontStencilOpState;
     Stencil::OpState backStencilOpState;
-    DepthBounds depthBounds{ 0, 1 };
+    DepthBounds<double> depthBounds{ 0, 1 };
 };
 }
