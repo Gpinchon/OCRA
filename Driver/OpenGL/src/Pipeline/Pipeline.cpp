@@ -22,6 +22,6 @@ void Destroy(const Device::Handle& a_Device, const Handle& a_Handle) {
 }
 void Execute(const Device::Handle& a_Device, const Handle& a_Handle, Command::Buffer::ExecutionState& a_ExecutionState)
 {
-	Get(a_Pipeline).Execute(a_Device, a_Handle, a_ExecutionState);
+	Get(a_Handle).Execute(a_Device, a_Handle, a_ExecutionState);
 }
 }

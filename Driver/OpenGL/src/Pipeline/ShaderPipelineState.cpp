@@ -17,7 +17,7 @@
 
 namespace OCRA::Pipeline::ShaderPipelineState {
 static std::map<Device::Handle, ShaderPipelinePool> s_ShaderPipelinesPools;
-Compile::Compile(const Device::Handle& a_Device, const Info& a_Info)
+Compile::Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info&)
 {
 	auto& shaderPipelinesPool { s_ShaderPipelinesPools[a_Device] };
 	if (auto shaderPipeline { shaderPipelinesPool.FindSimilar(a_Info) }; shaderPipeline.Get() != nullptr) //try to find a similar Pipeline

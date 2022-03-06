@@ -38,7 +38,7 @@ static inline auto GetGLOperation(const Operation& a_Operation) {
 	}
 }
 struct GLOpState {
-	GLOpState(const OpState& a_OpState)
+	GLOpState(const OpState& a_OpState = {})
 	: failOp(GetGLOperation(a_OpState.failOp))
 	, passOp(GetGLOperation(a_OpState.passOp))
 	, depthFailOp(GetGLOperation(a_OpState.depthFailOp))
@@ -47,12 +47,12 @@ struct GLOpState {
 	, writeMask(a_OpState.writeMask)
 	, reference(a_OpState.reference)
 	{}
-    GLenum failOp { GL_KEEP }; //the operation to be realized when stencil test FAILS
-    GLenum passOp { GL_KEEP }; //the operation to be realized when stencil test PASSES
-    GLenum depthFailOp { GL_KEEP }; //the operation to be realized when stencil test PASSES but depth test FAILS
-    GLenum compareOp { GL_ALWAYS };
-    Uint32 compareMask { 1 }; //a mask that is ANDed with ref and the buffer's content
-    Uint32 writeMask { 1 }; //a mask that is ANDed with the stencil value about to be written to the buffer
-    Uint32 reference { 0 }; //the reference value used in comparison.
+    GLenum failOp; //the operation to be realized when stencil test FAILS
+    GLenum passOp; //the operation to be realized when stencil test PASSES
+    GLenum depthFailOp; //the operation to be realized when stencil test PASSES but depth test FAILS
+    GLenum compareOp;
+    Uint32 compareMask; //a mask that is ANDed with ref and the buffer's content
+    Uint32 writeMask; //a mask that is ANDed with the stencil value about to be written to the buffer
+    Uint32 reference; //the reference value used in comparison.
 };
 }

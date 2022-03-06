@@ -19,8 +19,8 @@
 
 namespace OCRA::Pipeline::ColorBlendState {
 struct GLAttachmentState {
-    GLAttachmentState(const AttachmentState& a_AttachmentState)
-    : enable(a_AttachmentState.enable),
+    GLAttachmentState(const AttachmentState& a_AttachmentState = {})
+    : enable(a_AttachmentState.enable)
     , srcColorBlendFactor(GetGLFactor(a_AttachmentState.srcColorBlendFactor))
     , dstColorBlendFactor(GetGLFactor(a_AttachmentState.dstColorBlendFactor))
     , colorBlendOperation(GetGLOperation(a_AttachmentState.colorBlendOperation))
@@ -29,14 +29,14 @@ struct GLAttachmentState {
     , alphaBlendOperation(GetGLOperation(a_AttachmentState.alphaBlendOperation))
     , colorMask(a_AttachmentState.colorMask)
     {}
-    bool enable { false }; //is blending enabled ?
-    GLenum srcColorBlendFactor { GL_ONE };
-    GLenum dstColorBlendFactor { GL_ZERO };
-    GLenum colorBlendOperation { GL_FUNC_ADD };
-    GLenum srcAlphaBlendFactor { GL_ONE };
-    GLenum dstAlphaBlendFactor { GL_ZERO };
-    GLenum alphaBlendOperation { GL_FUNC_ADD };
-    GLenum colorMask { Blend::R | Blend::G | Blend::B | Blend::A }; //color mask used for writing to this attachment
+    bool enable; //is blending enabled ?
+    GLenum srcColorBlendFactor;
+    GLenum dstColorBlendFactor;
+    GLenum colorBlendOperation;
+    GLenum srcAlphaBlendFactor;
+    GLenum dstAlphaBlendFactor;
+    GLenum alphaBlendOperation;
+    Blend::ColorMask colorMask; //color mask used for writing to this attachment
 };
 inline const auto Compile(const AttachmentState& a_AttachmentState, const Uint8& a_Index)
 {
@@ -64,13 +64,13 @@ inline const auto Compile(const AttachmentState& a_AttachmentState, const Uint8&
     };
 }
 inline const std::function<void(Command::Buffer::ExecutionState&)> Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info& a_DynamicState) {
-    const auto attachments([a_Info] {
+    const auto attachments = [a_Info] {
         std::vector<std::function<void()>> attachments;
         attachments.reserve(a_Info.attachementCount);
         for (Uint8 index = 0; index < a_Info.attachementCount; ++index)
             attachments.push_back(Compile(a_Info.attachments.at(index), index));
         return attachments;
-    }());
+    }();
     if (a_DynamicState.Contains(DynamicState::State::BlendConstants)) //use dynamic blend constants
         return [
             logicOpEnable(a_Info.logicOpEnable),

@@ -7,10 +7,16 @@
 
 #include <Pipeline/TessellationState.hpp>
 
+namespace OCRA::Pipeline::DynamicState {
+struct Info;
+}
+
+
+
 namespace OCRA::Pipeline::TessellationState {
-inline auto Compile(const Device::Handle& a_Device, const Info& a_Info)
+inline auto Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info&)
 {
-	return [patchControlPoints = a_Info.patchControlPoints]() {
+	return [patchControlPoints = a_Info.patchControlPoints](Command::Buffer::ExecutionState&) {
 		glPatchParameteri(GL_PATCH_VERTICES, patchControlPoints);
 	};
 }

@@ -12,13 +12,12 @@
 #include <GL/Command/Buffer/ExecutionState.hpp>
 #include <GL/Compare.hpp>
 #include <GL/Stencil.hpp>
-
 #include <GL/glew.h>
 
 namespace OCRA::Pipeline::DepthStencilState {
 inline void ApplyStencilOP(
     const GLenum& a_Face,
-    const GLOpState& a_GLOpState
+    const Stencil::GLOpState& a_GLOpState
 ) {
     glStencilOpSeparate(
         a_Face,
@@ -46,7 +45,7 @@ inline const std::function<void(Command::Buffer::ExecutionState&)> CompileStenci
     }
     else return [
         face(a_Face),
-        stencilOp(GLOpState(a_OpState))
+        stencilOp(Stencil::GLOpState(a_OpState))
     ](Command::Buffer::ExecutionState&) {
         ApplyStencilOP(face, stencilOp);
     };
@@ -72,7 +71,7 @@ inline const auto Compile(const Device::Handle& a_Device, const DepthStencilStat
         const auto bDepthWriteEnable = dynamicDepthWriteEnable ? a_ExecutionState.dynamicStates.depthWriteEnable : depthWriteEnable;
         const auto bDepthBoundsTestEnable = dynamicDepthBoundsTestEnable ? a_ExecutionState.dynamicStates.depthBoundsTestEnable : depthBoundsTestEnable;
         const auto sDepthBounds = dynamicDepthBounds ? a_ExecutionState.dynamicStates.depthBounds : depthBounds;
-        const auto eDepthCompareOp = dynamicDepthCompareOP ? GetGLOperation(a_ExecutionState.dynamicStates.depthCompareOp) : depthCompareOp;
+        const auto eDepthCompareOp = dynamicDepthCompareOP ? a_ExecutionState.dynamicStates.depthCompareOp : depthCompareOp;
         const auto bStencilTestEnable = dynamicStencilTestEnable ? a_ExecutionState.dynamicStates.stencilTestEnable : stencilTestEnable;
         bDepthTestEnable ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
         bDepthBoundsTestEnable ? glEnable(GL_DEPTH_BOUNDS_TEST_EXT) : glDisable(GL_DEPTH_BOUNDS_TEST_EXT);

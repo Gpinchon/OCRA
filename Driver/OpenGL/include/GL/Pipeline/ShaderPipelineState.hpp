@@ -11,11 +11,19 @@
 #include <GL/Pipeline/ShaderPipelinePool.hpp>
 #include <GL/glew.h>
 
+namespace OCRA::Pipeline::DynamicState {
+struct Info;
+}
+
+namespace OCRA::Command::Buffer {
+struct ExecutionState;
+}
+
 namespace OCRA::Pipeline::ShaderPipelineState {
 //compiles the specified stages into a program
 struct Compile {
-	Compile(const Device::Handle& a_Device, const Info& a_Info);
-	void operator()() const noexcept {
+	Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info&);
+	void operator()(Command::Buffer::ExecutionState&) const noexcept {
 		glBindProgramPipeline(shaderPipelineRef->handle);
 	}
 	ShaderPipelinePool::Reference shaderPipelineRef;

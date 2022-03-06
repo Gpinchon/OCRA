@@ -12,6 +12,7 @@
 #include <GL/Pipeline/DepthStencilState.hpp>
 #include <GL/Pipeline/InputAssemblyState.hpp>
 #include <GL/Pipeline/MultisampleState.hpp>
+#include <GL/Pipeline/RasterizationState.hpp>
 #include <GL/Pipeline/ShaderPipelineState.hpp>
 #include <GL/Pipeline/TessellationState.hpp>
 #include <GL/Pipeline/ViewPortState.hpp>
@@ -32,7 +33,7 @@ struct Impl : Base {
 				depthStencilState = DepthStencilState::Compile(a_Device, info.depthStencilState, info.dynamicState),
 				inputAssemblyState = InputAssemblyState::Compile(a_Device, info.inputAssemblyState, info.dynamicState),
 				multisampleState = MultisampleState::Compile(a_Device, info.multisampleState, info.dynamicState),
-				rasterizationState = RasterizationState::Compile(a_Device, info.shaderPipelineState, info.dynamicState),
+				rasterizationState = RasterizationState::Compile(a_Device, info.rasterizationState, info.dynamicState),
 				shaderPipelineState = ShaderPipelineState::Compile(a_Device, info.shaderPipelineState, info.dynamicState),
 				tessellationState = TessellationState::Compile(a_Device, info.tessellationState, info.dynamicState),
 				viewportState = ViewPortState::Compile(a_Device, info.viewPortState, info.dynamicState),

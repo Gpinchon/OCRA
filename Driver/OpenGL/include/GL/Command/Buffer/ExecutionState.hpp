@@ -11,6 +11,7 @@
 #include <Stencil.hpp>
 #include <ViewPort.hpp>
 
+#include <GL/Stencil.hpp>
 #include <GL/glew.h>
 
 #include <array>
@@ -21,7 +22,7 @@ constexpr auto MaxViewPorts = 64;
 constexpr auto MaxScissors = 64;
 struct DynamicStates {
 	Uint8 viewPortsCount { 0 };
-	std::array<ViewPort, MaxViewPorts> viewPorts;
+	std::array<ViewPort::Info, MaxViewPorts> viewPorts;
 	Uint8 scissorsCount { 0 };
 	std::array<Rect<2, GLint>, MaxScissors> scissors;
 	Vec<4, GLfloat> blendConstants{ 0, 0, 0, 0 };
@@ -30,9 +31,10 @@ struct DynamicStates {
 	GLfloat depthBiasSlopeFactor{ 0.f };
 	GLfloat depthBiasClamp{ 0.f };
 	DepthBounds<double> depthBounds{ 0, 0 };
+	bool depthBiasEnable{ false };
 	bool depthTestEnable { true };
     bool depthWriteEnable { true };
-	bool depthBoundsTestEnable { true };
+	bool depthBoundsTestEnable { false };
     GLenum depthCompareOp { GL_LESS };
     bool stencilTestEnable { false };
     bool rasterizerDiscardEnable { false };

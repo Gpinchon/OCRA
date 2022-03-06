@@ -17,6 +17,10 @@ namespace OCRA::Pipeline::DynamicState {
 struct Info;
 }
 
+namespace OCRA::Command::Buffer {
+struct ExecutionState;
+}
+
 namespace OCRA::Pipeline::MultisampleState {
 const auto Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info&)
 {
@@ -27,7 +31,7 @@ const auto Compile(const Device::Handle& a_Device, const Info& a_Info, const Dyn
 		alphaToCoverageEnable = a_Info.alphaToCoverageEnable,
 		alphaToOneEnable = a_Info.alphaToOneEnable,
 		rasterizationSamples = Uint8(a_Info.rasterizationSamples)
-	]() {
+	](Command::Buffer::ExecutionState&) {
 		sampleShadingEnable ? glEnable(GL_SAMPLE_SHADING) : glDisable(GL_SAMPLE_SHADING);
 		glMinSampleShading(minSampleShading);
 		for (auto i = 0; i < sampleMasks.size(); ++i) glSampleMaski(i, sampleMasks.at(i));

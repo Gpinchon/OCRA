@@ -8,8 +8,10 @@
 
 #include <Handle.hpp>
 #include <Pipeline/RasterizationState.hpp>
+#include <Pipeline/DynamicState.hpp>
 
-#include <GL/glew.hpp>
+#include <GL/Command/Buffer/ExecutionState.hpp>
+#include <GL/glew.h>
 
 #include <stdexcept>
 
@@ -62,9 +64,9 @@ static inline auto GetGLFrontFace(const FrontFace& a_FrontFace)
 {
 	switch (a_FrontFace)
 	{
-	case FrontFace::ClockWise :
+	case FrontFace::Clockwise :
 		return GL_CW;
-	case FrontFace::CounterClockWise:
+	case FrontFace::CounterClockwise:
 		return GL_CCW;
 	default :
 		throw std::runtime_error("Unknown Front Face");
@@ -91,6 +93,7 @@ struct GLInfo {
     GLfloat depthBiasClamp { 0 };
     GLfloat depthBiasSlopeFactor { 0 };
     GLfloat lineWidth { 1 };
+	GLenum polygonOffsetMode{ GL_POLYGON_OFFSET_FILL };
     GLenum polygonMode { GL_FILL };
     GLenum cullMode { GL_BACK };
     GLenum frontFace { GL_CCW };
