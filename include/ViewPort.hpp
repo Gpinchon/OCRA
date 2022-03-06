@@ -7,12 +7,12 @@
 #pragma once
 
 #include <Common/Rect2D.hpp>
-#include <Common/DepthBounds.hpp>
+#include <Common/DepthRange.hpp>
 #include <Scalar.hpp>
 
 namespace OCRA::ViewPort {
 struct Info {
-    Rect2D      rect;
-    DepthBounds<double> depthBounds;
+    Rect2D rect;
+    DepthRange<double> depthRange;
 };
 }

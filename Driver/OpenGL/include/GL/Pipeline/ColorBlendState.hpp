@@ -15,54 +15,66 @@
 #include <GL/glew.h>
 
 #include <functional>
-#include <array>
+#include <vector>
 
 namespace OCRA::Pipeline::ColorBlendState {
-inline const auto Compile(const ColorBlendState::AttachmentState& a_AttachmentState, const Uint8& a_Index)
+struct GLAttachmentState {
+    GLAttachmentState(const AttachmentState& a_AttachmentState)
+    : enable(a_AttachmentState.enable),
+    , srcColorBlendFactor(GetGLFactor(a_AttachmentState.srcColorBlendFactor))
+    , dstColorBlendFactor(GetGLFactor(a_AttachmentState.dstColorBlendFactor))
+    , colorBlendOperation(GetGLOperation(a_AttachmentState.colorBlendOperation))
+    , srcAlphaBlendFactor(GetGLFactor(a_AttachmentState.srcAlphaBlendFactor))
+    , dstAlphaBlendFactor(GetGLFactor(a_AttachmentState.dstAlphaBlendFactor))
+    , alphaBlendOperation(GetGLOperation(a_AttachmentState.alphaBlendOperation))
+    , colorMask(a_AttachmentState.colorMask)
+    {}
+    bool enable { false }; //is blending enabled ?
+    GLenum srcColorBlendFactor { GL_ONE };
+    GLenum dstColorBlendFactor { GL_ZERO };
+    GLenum colorBlendOperation { GL_FUNC_ADD };
+    GLenum srcAlphaBlendFactor { GL_ONE };
+    GLenum dstAlphaBlendFactor { GL_ZERO };
+    GLenum alphaBlendOperation { GL_FUNC_ADD };
+    GLenum colorMask { Blend::R | Blend::G | Blend::B | Blend::A }; //color mask used for writing to this attachment
+};
+inline const auto Compile(const AttachmentState& a_AttachmentState, const Uint8& a_Index)
 {
     return [
         index(a_Index),
-        enable(a_AttachmentState.enable),
-        srcColorBlendFactor(GetGLFactor(a_AttachmentState.srcColorBlendFactor)),
-        dstColorBlendFactor(GetGLFactor(a_AttachmentState.dstColorBlendFactor)),
-        colorBlendOperation(GetGLOperation(a_AttachmentState.colorBlendOperation)),
-        srcAlphaBlendFactor(GetGLFactor(a_AttachmentState.srcAlphaBlendFactor)),
-        dstAlphaBlendFactor(GetGLFactor(a_AttachmentState.dstAlphaBlendFactor)),
-        alphaBlendOperation(GetGLOperation(a_AttachmentState.alphaBlendOperation)),
-        colorMask(a_AttachmentState.colorMask)
+        attachmentState(GLAttachmentState(a_AttachmentState))
     ]() {
-        enable ? glEnablei(GL_BLEND, index) : glDisablei(GL_BLEND, index);
+        attachmentState.enable ? glEnablei(GL_BLEND, index) : glDisablei(GL_BLEND, index);
         glBlendFuncSeparatei(
             index,
-            srcColorBlendFactor,
-            dstColorBlendFactor,
-            srcAlphaBlendFactor,
-            srcAlphaBlendFactor);
+            attachmentState.srcColorBlendFactor,
+            attachmentState.dstColorBlendFactor,
+            attachmentState.srcAlphaBlendFactor,
+            attachmentState.srcAlphaBlendFactor);
         glBlendEquationSeparatei(
             index,
-            colorBlendOperation,
-            alphaBlendOperation);
+            attachmentState.colorBlendOperation,
+            attachmentState.alphaBlendOperation);
         glColorMaski(
             index,
-            Blend::None != (colorMask & Blend::R),
-            Blend::None != (colorMask & Blend::G),
-            Blend::None != (colorMask & Blend::B),
-            Blend::None != (colorMask & Blend::A));
+            Blend::None != (attachmentState.colorMask & Blend::R),
+            Blend::None != (attachmentState.colorMask & Blend::G),
+            Blend::None != (attachmentState.colorMask & Blend::B),
+            Blend::None != (attachmentState.colorMask & Blend::A));
     };
 }
 inline const std::function<void(Command::Buffer::ExecutionState&)> Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info& a_DynamicState) {
     const auto attachments([a_Info] {
-        std::array<std::function<void()>, FrameBuffer::MaxColorAttachments> attachments;
+        std::vector<std::function<void()>> attachments;
+        attachments.reserve(a_Info.attachementCount);
         for (Uint8 index = 0; index < a_Info.attachementCount; ++index)
-            attachments.at(index) = Compile(a_Info.attachments.at(index), index);
+            attachments.push_back(Compile(a_Info.attachments.at(index), index));
         return attachments;
     }());
     if (a_DynamicState.Contains(DynamicState::State::BlendConstants)) //use dynamic blend constants
         return [
             logicOpEnable(a_Info.logicOpEnable),
             logicOp(GetGLOperation(a_Info.logicOp)),
-            blendConstants(a_Info.blendConstants),
-            attachementCount(a_Info.attachementCount),
             attachments(attachments)
         ](Command::Buffer::ExecutionState& a_ExecutionState) {
             logicOpEnable ? glEnable(GL_COLOR_LOGIC_OP) : glDisable(GL_COLOR_LOGIC_OP);
@@ -72,13 +84,12 @@ inline const std::function<void(Command::Buffer::ExecutionState&)> Compile(const
                 a_ExecutionState.dynamicStates.blendConstants.g,
                 a_ExecutionState.dynamicStates.blendConstants.b,
                 a_ExecutionState.dynamicStates.blendConstants.a);
-            for (Uint8 buf = 0; buf < attachementCount; ++buf) attachments.at(buf)();
+            for (const auto& attachment : attachments) attachment();
         };
     else return [
             logicOpEnable(a_Info.logicOpEnable),
             logicOp(GetGLOperation(a_Info.logicOp)),
             blendConstants(a_Info.blendConstants),
-            attachementCount(a_Info.attachementCount),
             attachments(attachments)
         ](Command::Buffer::ExecutionState&) {
             logicOpEnable ? glEnable(GL_COLOR_LOGIC_OP) : glDisable(GL_COLOR_LOGIC_OP);
@@ -88,7 +99,7 @@ inline const std::function<void(Command::Buffer::ExecutionState&)> Compile(const
                 blendConstants.g,
                 blendConstants.b,
                 blendConstants.a);
-            for (Uint8 buf = 0; buf < attachementCount; ++buf) attachments.at(buf)();
+            for (const auto& attachment : attachments) attachment();
         };
 }
 inline auto Default(const Device::Handle& a_Device)

@@ -14,9 +14,11 @@
 
 namespace OCRA::Pipeline::ViewPortState {
 constexpr auto MaxViewPorts = 64;
+constexpr auto MaxScissors = 64;
 struct Info {
-	Uint8 viewPortsCount{ 0 };
+	Uint8 viewPortsCount { 0 };
     std::array<ViewPort::Info, MaxViewPorts> viewPorts;
-    std::array<Rect<2, Int32>, MaxViewPorts> scissors;
+    Uint8 scissorsCount { 0 };
+    std::array<Rect<2, Int32>, MaxScissors> scissors;
 };
 }

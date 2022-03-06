@@ -46,13 +46,13 @@ static inline auto GetGLCullMode(const CullMode& a_Mode)
 {
 	switch (a_Mode)
 	{
-	case None :
+	case CullMode::None :
 		return GL_NONE;
-	case Front :
+	case CullMode::Front :
 		return GL_FRONT;
-	case Back :
+	case CullMode::Back :
 		return GL_BACK;
-	case FrontAndBack :
+	case CullMode::FrontAndBack :
 		return GL_FRONT_AND_BACK;
 	default:
 		throw std::runtime_error("Unknown Cull Mode");
@@ -62,48 +62,72 @@ static inline auto GetGLFrontFace(const FrontFace& a_FrontFace)
 {
 	switch (a_FrontFace)
 	{
-	case ClockWise :
+	case FrontFace::ClockWise :
 		return GL_CW;
-	case CounterClockWise:
+	case FrontFace::CounterClockWise:
 		return GL_CCW;
 	default :
 		throw std::runtime_error("Unknown Front Face");
 	}
 }
+struct GLInfo {
+	GLInfo(const Info& a_Info)
+	: rasterizerDiscardEnable(a_Info.rasterizerDiscardEnable)
+	, depthClampEnable(a_Info.depthClampEnable)
+	, depthBiasEnable(a_Info.depthBiasEnable)
+	, depthBiasConstantFactor(a_Info.depthBiasConstantFactor)
+	, depthBiasClamp(a_Info.depthBiasClamp)
+	, depthBiasSlopeFactor(a_Info.depthBiasSlopeFactor)
+	, lineWidth(a_Info.lineWidth)
+	, polygonOffsetMode(GetGLPolygonOffsetMode(a_Info.polygonMode))
+	, polygonMode(GetGLPolygonMode(a_Info.polygonMode))
+	, cullMode(GetGLCullMode(a_Info.cullMode))
+	, frontFace(GetGLFrontFace(a_Info.frontFace))
+	{}
+    GLboolean rasterizerDiscardEnable { false };
+    GLboolean depthClampEnable { true };
+    GLboolean depthBiasEnable { false };
+    GLfloat depthBiasConstantFactor { 0 };
+    GLfloat depthBiasClamp { 0 };
+    GLfloat depthBiasSlopeFactor { 0 };
+    GLfloat lineWidth { 1 };
+    GLenum polygonMode { GL_FILL };
+    GLenum cullMode { GL_BACK };
+    GLenum frontFace { GL_CCW };
+};
 inline auto Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info& a_DynamicState)
 {
-	const auto dynamicRasterizerDiscardEnable(a_DynamicState.Contains(DynamicState::State::RasterizerDiscardEnable));
-	const auto dynamicLineWidth(a_DynamicState.Contains(DynamicState::State::LineWidth));
-	const auto rasterizerDiscardEnable(a_Info.rasterizerDiscardEnable);
-	const auto depthClampEnable(a_Info.depthClampEnable);
-	const auto depthBiasEnable(a_Info.depthBiasEnable);
-	const auto depthBiasConstantFactor(a_Info.depthBiasConstantFactor);
-	const auto depthBiasClamp(a_Info.depthBiasClamp);
-	const auto depthBiasSlopeFactor(a_Info.depthBiasSlopeFactor);
-	const auto lineWidth(a_Info.depthBiasSlopeFactor);
-	const auto polygonOffsetMode(GetGLPolygonOffsetMode(a_Info.polygonMode));;
-	const auto polygonMode(GetGLPolygonMode(a_Info.polygonMode));
-	const auto cullMode(GetGLCullMode(a_Info.cullMode));
-	const auto frontFace(GetGLFrontFace(a_Info.frontFace));
-	return [=](Command::Buffer::ExecutionState& a_ExecutionState){
-		const auto bRasterizerDiscardEnable = dynamicRasterizerDiscardEnable ? a_ExecutionState.dynamicStates.rasterizerDiscardEnable : rasterizerDiscardEnable;
+	return [
+		info(GLInfo(a_Info)),
+		dynamicRasterizerDiscardEnable(a_DynamicState.Contains(DynamicState::State::RasterizerDiscardEnable)),
+		dynamicLineWidth(a_DynamicState.Contains(DynamicState::State::LineWidth)),
+		dynamicCullMode(a_DynamicState.Contains(DynamicState::State::CullMode)),
+		dynamicFrontFace(a_DynamicState.Contains(DynamicState::State::FrontFace)),
+		dynamicDepthBiasEnable(a_DynamicState.Contains(DynamicState::State::DepthBiasEnable)),
+		dynamicDepthBias(a_DynamicState.Contains(DynamicState::State::DepthBias))
+	](Command::Buffer::ExecutionState& a_ExecutionState){
+		const auto &bRasterizerDiscardEnable = dynamicRasterizerDiscardEnable ? a_ExecutionState.dynamicStates.rasterizerDiscardEnable : info.rasterizerDiscardEnable;
+		const auto &bDepthBiasEnable = dynamicDepthBiasEnable ? a_ExecutionState.dynamicStates.depthBiasEnable : info.depthBiasEnable;
+		const auto &fDepthBiasConstantFactor = dynamicDepthBias ? a_ExecutionState.dynamicStates.depthBiasConstantFactor : info.depthBiasConstantFactor;
+		const auto &fDepthBiasSlopeFactor = dynamicDepthBias ? a_ExecutionState.dynamicStates.depthBiasSlopeFactor : info.depthBiasSlopeFactor;
+		const auto &fDepthBiasClamp = dynamicDepthBias ? a_ExecutionState.dynamicStates.depthBiasClamp : info.depthBiasClamp;
+		const auto &fLineWidth = dynamicLineWidth ? a_ExecutionState.dynamicStates.lineWidth : info.lineWidth;
+		const auto &eFrontFace = dynamicFrontFace ? info.frontFace : a_ExecutionState.dynamicStates.frontFace;
+		const auto &eCullMode = dynamicCullMode ? info.cullMode : a_ExecutionState.dynamicStates.cullMode;
 		bRasterizerDiscardEnable ? glEnable(GL_RASTERIZER_DISCARD) : glDisable(GL_RASTERIZER_DISCARD);
-		depthClampEnable ? glEnable(GL_DEPTH_CLAMP) : glDisable(GL_DEPTH_CLAMP);
-		depthBiasEnable ? glEnable(polygonOffsetMode) : glDisable(polygonOffsetMode);
-		glPolygonOffsetClamp(
-			depthBiasConstantFactor,
-			depthBiasSlopeFactor,
-			depthBiasClamp);
-		glLineWidth(dynamicLineWidth ? a_ExecutionState.dynamicStates.lineWidth : lineWidth);
+		info.depthClampEnable ? glEnable(GL_DEPTH_CLAMP) : glDisable(GL_DEPTH_CLAMP);
+		bDepthBiasEnable ? glEnable(info.polygonOffsetMode) : glDisable(info.polygonOffsetMode);
 		glPolygonMode(
 			GL_FRONT_AND_BACK,
-			polygonMode);
-		if (cullMode != GL_NONE) {
-			glEnable(GL_CULL_FACE);
-			glCullFace(cullMode);
-		}
-		else glDisable(GL_CULL_FACE);
-		glFrontFace(frontFace);
+			info.polygonMode);
+		glPolygonOffsetClamp(
+			fDepthBiasConstantFactor,
+			fDepthBiasSlopeFactor,
+			fDepthBiasClamp);
+		glLineWidth(fLineWidth);
+		glFrontFace(eFrontFace);
+		eCullMode != GL_NONE ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
+		glCullFace(eCullMode);
 	};
 }
 static inline auto Default(const Device::Handle& a_Device)

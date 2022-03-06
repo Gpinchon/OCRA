@@ -30,8 +30,8 @@ struct Info {
     bool depthClampEnable { true };
     bool depthBiasEnable { false };
     float depthBiasConstantFactor { 0 };
-    float depthBiasClamp { 0 };
     float depthBiasSlopeFactor { 0 };
+    float depthBiasClamp { 0 };
     float lineWidth { 1 };
     PolygonMode polygonMode { PolygonMode::Fill };
     CullMode cullMode { CullMode::Back };

@@ -8,9 +8,10 @@
 
 #include <Stencil.hpp>
 
-#include <stdexcept>
-
+#include <GL/Compare.hpp>
 #include <GL/glew.h>
+
+#include <stdexcept>
 
 namespace OCRA::Stencil {
 static inline auto GetGLOperation(const Operation& a_Operation) {
@@ -36,4 +37,22 @@ static inline auto GetGLOperation(const Operation& a_Operation) {
 		throw std::runtime_error("Unknown Stencil Operation");
 	}
 }
+struct GLOpState {
+	GLOpState(const OpState& a_OpState)
+	: failOp(GetGLOperation(a_OpState.failOp))
+	, passOp(GetGLOperation(a_OpState.passOp))
+	, depthFailOp(GetGLOperation(a_OpState.depthFailOp))
+	, compareOp(GetGLOperation(a_OpState.compareOp))
+	, compareMask(a_OpState.compareMask)
+	, writeMask(a_OpState.writeMask)
+	, reference(a_OpState.reference)
+	{}
+    GLenum failOp { GL_KEEP }; //the operation to be realized when stencil test FAILS
+    GLenum passOp { GL_KEEP }; //the operation to be realized when stencil test PASSES
+    GLenum depthFailOp { GL_KEEP }; //the operation to be realized when stencil test PASSES but depth test FAILS
+    GLenum compareOp { GL_ALWAYS };
+    Uint32 compareMask { 1 }; //a mask that is ANDed with ref and the buffer's content
+    Uint32 writeMask { 1 }; //a mask that is ANDed with the stencil value about to be written to the buffer
+    Uint32 reference { 0 }; //the reference value used in comparison.
+};
 }
