@@ -6,19 +6,17 @@
 */
 #pragma once
 
-#include <Scalar.hpp>
-
 namespace OCRA
 {
 struct ClearValue {
 	union ColorValue {
 		float float32[4]{ 0, 0, 0, 0 };
-		Int32 int32[4];
-		Uint32 uint32[4];
+		int32_t int32[4];
+		uint32_t uint32[4];
 	} color;
 	struct DepthStencilValue {
 		float depth{ 0 };
-		Uint32 stencil{ 0 };
+		uint32_t stencil{ 0 };
 	} depthStencil;
 };
 }

@@ -29,7 +29,6 @@ set(OCRA_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Logic.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/RenderPass.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Queue.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Scalar.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/ScissorTest.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Stencil.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VertexType.hpp
@@ -72,6 +71,7 @@ set(OCRA_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/VertexInputState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/ViewPortState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Primitive/Topology.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Shader/Module.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Shader/Stage.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/State/Clear.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/State/Draw.hpp

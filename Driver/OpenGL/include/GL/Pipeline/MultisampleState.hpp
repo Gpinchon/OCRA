@@ -30,7 +30,7 @@ const auto Compile(const Device::Handle& a_Device, const Info& a_Info, const Dyn
 		sampleMasks = a_Info.sampleMasks,
 		alphaToCoverageEnable = a_Info.alphaToCoverageEnable,
 		alphaToOneEnable = a_Info.alphaToOneEnable,
-		rasterizationSamples = Uint8(a_Info.rasterizationSamples)
+		rasterizationSamples = uint8_t(a_Info.rasterizationSamples)
 	](Command::Buffer::ExecutionState&) {
 		sampleShadingEnable ? glEnable(GL_SAMPLE_SHADING) : glDisable(GL_SAMPLE_SHADING);
 		glMinSampleShading(minSampleShading);

@@ -6,11 +6,14 @@
 */
 #pragma once
 
+#include <Device.hpp>
 #include <Handle.hpp>
-#include <Scalar.hpp>
+
+HANDLE(OCRA::Buffer::Vertex);
 
 namespace OCRA::Buffer::Vertex {
 struct Info {
-	Uint64 size;
+	uint64_t size;
 };
+Handle Create(const Device::Handle& a_Device, const Info& a_Info);
 }

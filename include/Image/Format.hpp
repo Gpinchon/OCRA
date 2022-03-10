@@ -11,7 +11,7 @@ namespace OCRA::Image {
 enum class Format {
     Unknown = -1,
     /// <summary>
-    /// Normalized Uint8 pixel types
+    /// Normalized uint8_t pixel types
     /// </summary>
     Uint8_Normalized_R,
     Uint8_Normalized_RG,
@@ -25,7 +25,7 @@ enum class Format {
     Int8_Normalized_RGB,
     Int8_Normalized_RGBA,
     /// <summary>
-    /// Unnormalized Uint8 pixel types
+    /// Unnormalized uint8_t pixel types
     /// </summary>
     Uint8_R,
     Uint8_RG,
@@ -74,7 +74,7 @@ enum class Format {
     Uint32_RGB,
     Uint32_RGBA,
     /// <summary>
-    /// Int32 pixel types
+    /// int32_t pixel types
     /// </summary>
     Int32_R,
     Int32_RG,

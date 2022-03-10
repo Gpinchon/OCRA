@@ -17,17 +17,17 @@
 namespace OCRA::Pipeline::VertexInputState {
 struct AttributeDescription {
     struct Format {
-		Uint8 size{ 0 }; //Number of components per vertex
+		uint8_t size{ 0 }; //Number of components per vertex
 		VertexType type{ VertexType::None }; //Type of data of each components
 		bool normalized{ false };
 	} format;
-    Uint32 offset{ 0 }; //(Relative offset) the distance between elements in the buffer
-	Uint8 binding{ 0 }; //The binding number this attribute takes its data from
-    Uint32 location{ 0 }; //Location in the shader for this attribute
+    uint32_t offset{ 0 }; //(Relative offset) the distance between elements in the buffer
+	uint8_t binding{ 0 }; //The binding number this attribute takes its data from
+    uint32_t location{ 0 }; //Location in the shader for this attribute
 };
 struct BindingDescription {
-	Uint32 binding{ 0 }; //index inside the BindVertexBuffers Command
-    Uint32 stride{ 0 }; //byte stride
+	uint32_t binding{ 0 }; //index inside the BindVertexBuffers Command
+    uint32_t stride{ 0 }; //byte stride
     enum class InputRate {
         Vertex, //use vertex attribute
         Instance //use instance index
@@ -36,10 +36,10 @@ struct BindingDescription {
 struct Info {
     static constexpr auto MaxAttributes = 32;
     static constexpr auto MaxBindings = 32;
-    Uint32 primitiveRestartIndex{ 0 };
-    Uint8 attributeDescriptionCount{ 0 };
+    uint32_t primitiveRestartIndex{ 0 };
+    uint8_t attributeDescriptionCount{ 0 };
     std::array<AttributeDescription, MaxAttributes> attributeDescriptions;
-    Uint8 bindingDescriptionCount{ 0 };
+    uint8_t bindingDescriptionCount{ 0 };
     std::array<BindingDescription, MaxBindings> bindingDescriptions;
 };
 }

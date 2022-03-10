@@ -16,7 +16,7 @@ namespace OCRA::Descriptor {
 struct Info {
     constexpr auto MaxLayouts = 32;
     const Pool::Handle descriptorPool;
-    Uint8 layoutCount { 0 };
+    uint8_t layoutCount { 0 };
     Layout::Handle layouts[MaxLayouts];
 }
 }

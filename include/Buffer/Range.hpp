@@ -14,6 +14,6 @@ namespace OCRA::Buffer
 {
 struct Range
 {
-	Uint64 offset{ 0 }, size{ 0 };
+	uint64_t offset{ 0 }, size{ 0 };
 };
 }

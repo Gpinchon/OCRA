@@ -16,13 +16,13 @@
 #include <stdexcept>
 
 namespace OCRA {
-template <typename T, typename IndexType = Uint16, IndexType MaxObjects = std::numeric_limits<IndexType>::max()>
+template <typename T, typename IndexType = uint16_t, IndexType MaxObjects = std::numeric_limits<IndexType>::max()>
 struct ObjectPool {
     typedef ObjectPool<T, IndexType, MaxObjects> ObjectPoolType;
     typedef IndexType IndexType;
     struct Reference {
         Reference() = default;
-        Reference(ObjectPool& a_Pool, Int32 a_Index)
+        Reference(ObjectPool& a_Pool, int32_t a_Index)
             : pool(a_Pool.controlBlock)
             , index(a_Index)
         {
@@ -65,7 +65,7 @@ struct ObjectPool {
             return *pool.lock();
         }
         std::weak_ptr<ObjectPoolType*> pool;
-        Int32 index{ -1 };
+        int32_t index{ -1 };
     };
 
     ObjectPool()
@@ -104,7 +104,7 @@ struct ObjectPool {
     {
         return objectArray.at(a_VAOIndex);
     }
-    std::array<Uint32, MaxObjects> objectRef{ 0 };
+    std::array<uint32_t, MaxObjects> objectRef{ 0 };
     std::array<T, MaxObjects> objectArray;
     std::queue<IndexType> freeIndices;
     std::set<IndexType> usedIndices;

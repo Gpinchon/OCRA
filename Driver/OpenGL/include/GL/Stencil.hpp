@@ -51,8 +51,8 @@ struct GLOpState {
     GLenum passOp; //the operation to be realized when stencil test PASSES
     GLenum depthFailOp; //the operation to be realized when stencil test PASSES but depth test FAILS
     GLenum compareOp;
-    Uint32 compareMask; //a mask that is ANDed with ref and the buffer's content
-    Uint32 writeMask; //a mask that is ANDed with the stencil value about to be written to the buffer
-    Uint32 reference; //the reference value used in comparison.
+    uint32_t compareMask; //a mask that is ANDed with ref and the buffer's content
+    uint32_t writeMask; //a mask that is ANDed with the stencil value about to be written to the buffer
+    uint32_t reference; //the reference value used in comparison.
 };
 }

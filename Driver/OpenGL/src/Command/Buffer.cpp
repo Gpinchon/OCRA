@@ -12,6 +12,7 @@
 #include <RenderPass.hpp>
 #include <FrameBuffer.hpp>
 #include <Pipeline/BindingPoint.hpp>
+#include <Pipeline/Pipeline.hpp>
 
 #include <GL/IndexType.hpp>
 #include <GL/IndexType.hpp>
@@ -152,7 +153,7 @@ void BindPipeline(
 void BindIndexBuffer(
 	const Handle& a_CommandBuffer,
 	const OCRA::Buffer::Vertex::Handle& a_IndexBuffer,
-	const Uint64 a_Offset,
+	const uint64_t a_Offset,
 	const IndexType a_IndexType)
 {
 	const auto& bufferHandle{ OCRA::Buffer::Vertex::GetBufferHandle(a_IndexBuffer) };
@@ -168,10 +169,10 @@ void BindIndexBuffer(
 }
 void BindVertexBuffers(
 	const Handle& a_CommandBuffer,
-	const Uint32 firstBinding,
-	const Uint32 bindingCount,
+	const uint32_t firstBinding,
+	const uint32_t bindingCount,
 	const std::vector<OCRA::Buffer::Vertex::Handle>& a_VertexBuffers,
-	const std::vector<Uint64>& a_Offsets)
+	const std::vector<uint64_t>& a_Offsets)
 {
 	for (auto index = 0u; index < bindingCount; ++index)
 	{

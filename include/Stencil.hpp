@@ -26,8 +26,8 @@ struct OpState {
     Operation passOp { Operation::Keep }; //the operation to be realized when stencil test PASSES
     Operation depthFailOp { Operation::Keep }; //the operation to be realized when stencil test PASSES but depth test FAILS
     Compare::Operation compareOp{ Compare::Operation ::Always };
-    Uint32 compareMask { 1 }; //a mask that is ANDed with ref and the buffer's content
-    Uint32 writeMask { 1 }; //a mask that is ANDed with the stencil value about to be written to the buffer
-    Uint32 reference { 0 }; //the reference value used in comparison.
+    uint32_t compareMask { 1 }; //a mask that is ANDed with ref and the buffer's content
+    uint32_t writeMask { 1 }; //a mask that is ANDed with the stencil value about to be written to the buffer
+    uint32_t reference { 0 }; //the reference value used in comparison.
 };
 }

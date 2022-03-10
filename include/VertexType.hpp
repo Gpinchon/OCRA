@@ -12,12 +12,12 @@ enum class VertexType {
 	None,
 	Float32,
 	Float16,
-	Int32,
-	Uint32,
+	int32_t,
+	uint32_t,
 	Int16,
-	Uint16,
+	uint16_t,
 	Int8,
-	Uint8,
+	uint8_t,
 	MaxValue
 };
 }

@@ -27,7 +27,7 @@ struct AttachmentState {
 struct Info {
     bool logicOpEnable{ false };
     Logic::Operation logicOp{ Logic::Operation::Copy }; //see glLogicOp
-    Uint8 attachementCount { 0 };
+    uint8_t attachementCount { 0 };
     std::array<AttachmentState, FrameBuffer::MaxColorAttachments> attachments;
     Vec4 blendConstants;
 };

@@ -94,7 +94,7 @@ struct Impl {
             case Image::Info::Type::Image2D:
                 glTextureStorage2DMultisample(
                     handle,
-                    Uint32(a_Info.samples),
+                    uint32_t(a_Info.samples),
                     internalFormat,
                     a_Info.extent.width,
                     a_Info.extent.height,
@@ -103,7 +103,7 @@ struct Impl {
             case Image::Info::Type::Image3D:
                 glTextureStorage3DMultisample(
                     handle,
-                    Uint32(a_Info.samples),
+                    uint32_t(a_Info.samples),
                     a_Info.mipLevels,
                     internalFormat,
                     a_Info.extent.width,

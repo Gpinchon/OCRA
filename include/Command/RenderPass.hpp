@@ -12,9 +12,12 @@
 #include <ClearValue.hpp>
 #include <Pipeline/BindingPoint.hpp>
 #include <IndexType.hpp>
+#include <RenderPass.hpp>
 
 #include <array>
 #include <vector>
+
+HANDLE(OCRA::Command::Buffer);
 
 namespace OCRA::Command
 {
@@ -23,7 +26,7 @@ struct RenderPassBeginInfo
 	OCRA::RenderPass::Handle renderPass{ 0 };
 	FrameBuffer::Handle framebuffer{ 0 };
 	Rect2D renderArea;
-	Uint8 clearValueCount{ 0 };
+	uint8_t clearValueCount{ 0 };
 	std::array<ClearValue, OCRA::FrameBuffer::MaxColorAttachments> clearValues;
 };
 enum class SubPassContents
@@ -43,13 +46,13 @@ void BindPipeline(
 void BindIndexBuffer(
 	const Command::Buffer::Handle& a_CommandBuffer,
 	const OCRA::Buffer::Vertex::Handle& a_IndexBuffer,
-	const Uint64 offset,
+	const uint64_t offset,
 	const IndexType indexType);
 //Bind specified Vertex Buffers to Render Pass currently bound to this Command Buffer
 void BindVertexBuffers(
 	const Command::Buffer::Handle& a_CommandBuffer,
-	const Uint32 firstBinding,
-	const Uint32 bindingCount,
+	const uint32_t firstBinding,
+	const uint32_t bindingCount,
 	const std::vector<OCRA::Buffer::Vertex::Handle>& a_VertexBuffers,
-	const std::vector<Uint64>& a_Offsets);
+	const std::vector<uint64_t>& a_Offsets);
 }

@@ -14,14 +14,14 @@ namespace OCRA::Command
 //Draw commands
 void Draw(
 	const Command::Buffer::Handle& a_CommandBuffer,
-	const Uint32 a_VertexCount,
-	const Uint32 a_InstanceCount,
-	const Uint32 a_FirstVertex,
-	const Uint32 a_FirstInstance);
+	const uint32_t a_VertexCount,
+	const uint32_t a_InstanceCount,
+	const uint32_t a_FirstVertex,
+	const uint32_t a_FirstInstance);
 void DrawIndexed(
 	const Command::Buffer::Handle& a_CommandBuffer,
-	const Uint32 a_IndexCount,
-	const Uint32 a_InstanceCount,
-	const Uint32 a_VertexOffset,
-	const Uint32 a_FirstInstance);
+	const uint32_t a_IndexCount,
+	const uint32_t a_InstanceCount,
+	const uint32_t a_VertexOffset,
+	const uint32_t a_FirstInstance);
 }

@@ -8,7 +8,9 @@
 
 #include <Handle.hpp>
 
-#include <GL/Handle.hpp>
+#include <GL/Buffer/Buffer.hpp>
+
+HANDLE(OCRA::Buffer::Vertex);
 
 namespace OCRA::Buffer::Vertex
 {

@@ -7,14 +7,17 @@
 #pragma once
 
 #include <Handle.hpp>
-#include <Scalar.hpp>
+#include <Shader/Stage.hpp>
 
 #include <array>
+
+HANDLE(OCRA::Pipeline::ShaderPipelineState);
 
 namespace OCRA::Pipeline::ShaderPipelineState {
 constexpr auto MaxStages = 6;
 struct Info {
-	Uint8 stageCount{ 0 };
+	uint8_t stageCount{ 0 };
 	std::array<Shader::Stage::Handle, MaxStages> stages{ 0 };
 };
+Handle Create(const Device::Handle& a_Device, const Info& a_Info);
 }

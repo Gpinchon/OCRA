@@ -4,26 +4,21 @@
 * @Last Modified by:   gpinchon
 * @Last Modified time: 2021-09-26 14:31:34
 */
+#include <Device.hpp>
 #include <Handle.hpp>
 #include <ViewPort.hpp>
 
-#include <map>
-
 namespace OCRA::ViewPort {
-static Handle s_CurrentHandle = 0;
-static std::map<Uint32, Info> s_ViewPortsInfo;
+struct Impl {
+    Impl(const Info& a_Info) : info(a_Info) {};
+    Info info;
+};
 Handle Create(const Device::Handle& a_Device, const Info& a_Info)
 {
-    ++s_CurrentHandle;
-    s_ViewPortsInfo[s_CurrentHandle] = a_Info;
-    return s_CurrentHandle;
-}
-void Destroy(const Device::Handle& a_Device, const Handle& a_Handle)
-{
-    s_ViewPortsInfo.erase(a_Handle);
+    return Handle(new Impl(a_Info));
 }
 const Info& GetInfo(const Device::Handle& a_Device, const Handle& a_Handle)
 {
-    return s_ViewPortsInfo.at(a_Handle);
+    return a_Handle->info;
 }
 }

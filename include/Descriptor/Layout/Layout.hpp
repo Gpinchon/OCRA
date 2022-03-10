@@ -11,7 +11,7 @@
 namespace OCRA::Layout {
 struct Info { //describes a list of bindings
     constexpr auto MaxBindings = 32;
-    Uint8 bindingCount { 0 };
+    uint8_t bindingCount { 0 };
     Binding::Handle bindings[MaxBindings];
 }
 }

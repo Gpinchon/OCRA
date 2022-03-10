@@ -8,17 +8,12 @@
 
 #include <Common/Rect2D.hpp>
 #include <ViewPort.hpp>
-#include <Scalar.hpp>
 
-#include <array>
+#include <vector>
 
 namespace OCRA::Pipeline::ViewPortState {
-constexpr auto MaxViewPorts = 64;
-constexpr auto MaxScissors = 64;
 struct Info {
-	Uint8 viewPortsCount { 0 };
-    std::array<ViewPort::Info, MaxViewPorts> viewPorts;
-    Uint8 scissorsCount { 0 };
-    std::array<Rect<2, Int32>, MaxScissors> scissors;
+    std::vector<ViewPort::Info> viewPorts;
+    std::vector<Rect<2, int32_t>> scissors;
 };
 }

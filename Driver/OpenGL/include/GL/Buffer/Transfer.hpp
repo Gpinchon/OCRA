@@ -8,7 +8,7 @@
 
 #include <Handle.hpp>
 
-#include <GL/Handle.hpp>
+#include <GL/Buffer/Buffer.hpp>
 
 namespace OCRA::Buffer::Transfer
 {

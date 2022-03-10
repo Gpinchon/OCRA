@@ -6,10 +6,9 @@
 */
 #pragma once
 
-#include <Scalar.hpp>
 
 namespace OCRA {
 struct Offset3D {
-    Int32 x { 0 }, y { 0 }, z { 0 };
+    int32_t x { 0 }, y { 0 }, z { 0 };
 };
 }

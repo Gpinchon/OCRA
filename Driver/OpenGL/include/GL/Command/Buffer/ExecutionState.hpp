@@ -1,7 +1,6 @@
 #pragma once
 
 #include <Handle.hpp>
-#include <Scalar.hpp>
 #include <Pipeline/BindingPoint.hpp>
 #include <Command/RenderPass.hpp>
 #include <Common/DepthBounds.hpp>
@@ -14,17 +13,14 @@
 #include <GL/Stencil.hpp>
 #include <GL/glew.h>
 
+#include <vector>
 #include <array>
 
 namespace OCRA::Command::Buffer
 {
-constexpr auto MaxViewPorts = 64;
-constexpr auto MaxScissors = 64;
 struct DynamicStates {
-	Uint8 viewPortsCount { 0 };
-	std::array<ViewPort::Info, MaxViewPorts> viewPorts;
-	Uint8 scissorsCount { 0 };
-	std::array<Rect<2, GLint>, MaxScissors> scissors;
+	std::vector<Viewport::Info> viewPorts;
+	std::vector<Rect<2, GLint>> scissors;
 	Vec<4, GLfloat> blendConstants{ 0, 0, 0, 0 };
 	GLfloat lineWidth{ 0.f };
 	GLfloat depthBiasConstantFactor{ 0.f };
@@ -47,23 +43,22 @@ struct DynamicStates {
 };
 struct VertexInputBinding {
 	GLuint buffer{ 0 };
-	Uint64 offset{ 0 };
+	uint64_t offset{ 0 };
 };
 struct IndexBufferBinding : VertexInputBinding {
 	GLenum indexType{ GL_NONE };
 };
 struct RenderPass
 {
-	constexpr static auto MaxVertexBuffers = 32;
 	RenderPassBeginInfo beginInfo;
-	std::array<VertexInputBinding, MaxVertexBuffers> vertexInputBindings;
+	std::vector<VertexInputBinding> vertexInputBindings;
 	IndexBufferBinding indexBufferBinding;
 	GLenum primitiveTopology{ GL_NONE };
 };
 struct ExecutionState {
 	bool				once{ false };
 	RenderPass			renderPass{};
-	Uint32				subpassIndex{ 0 };
+	uint32_t				subpassIndex{ 0 };
 	std::array<Pipeline::Handle, size_t(Pipeline::BindingPoint::MaxValue)> pipelineState{};
 	DynamicStates		dynamicStates;
 };

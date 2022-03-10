@@ -10,7 +10,8 @@
 #include <Handle.hpp>
 #include <Image/Image.hpp>
 #include <Offset3D.hpp>
-#include <Scalar.hpp>
+#include <Buffer/Transfer.hpp>
+#include <Command/Buffer.hpp>
 
 namespace OCRA::Command
 {
@@ -21,12 +22,12 @@ struct SubresourceLayers {
         Unknown = -1, Color, Depth, Stencil, DepthStencil, MaxValue
     } aspect{ Aspect::Unknown };
     */
-    Uint32 level{ 0 }; //indicates the base level (mipmap or array layer) used for the copy
+    uint32_t level{ 0 }; //indicates the base level (mipmap or array layer) used for the copy
 };
 struct BufferImageCopy {
-    Uint64 bufferOffset{ 0 };
-    Uint32 bufferRowLength{ 0 };
-    Uint32 bufferImageHeight{ 0 };
+    uint64_t bufferOffset{ 0 };
+    uint32_t bufferRowLength{ 0 };
+    uint32_t bufferImageHeight{ 0 };
     SubresourceLayers imageSubresource;
     Offset3D imageOffset;
     Extent3D imageExtent;

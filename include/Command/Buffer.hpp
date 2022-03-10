@@ -7,12 +7,13 @@
 #pragma once
 
 #include <Handle.hpp>
-#include <Rect2D.hpp>
+#include <Common/Rect2D.hpp>
 #include <FrameBuffer.hpp>
 #include <ClearValue.hpp>
 #include <Command/RenderPass.hpp>
 #include <Pipeline/Pipeline.hpp>
 #include <RenderPass.hpp>
+#include <Buffer/Vertex.hpp>
 
 HANDLE(OCRA::Command::Buffer);
 
@@ -24,8 +25,8 @@ struct RenderPassBeginInfo
 	RenderPass::Handle renderPass{ 0 };
 	FrameBuffer::Handle framebuffer{ 0 };
 	Rect2D renderArea;
-	Uint8 clearValueCount{ 0 };
-	std::array<ClearValue, Framebuffer::MaxColorAttachments> clearValues;
+	uint8_t clearValueCount{ 0 };
+	std::array<ClearValue, FrameBuffer::MaxColorAttachments> clearValues;
 };
 enum class SubPassContents
 {
@@ -70,13 +71,13 @@ void BindPipeline(
 void BindIndexBuffer(
 	const Handle& a_CommandBuffer,
 	const OCRA::Buffer::Vertex::Handle& a_IndexBuffer,
-	const Uint64 offset,
+	const uint64_t offset,
 	const IndexType indexType);
 //Bind specified Vertex Buffers to Render Pass currently bound to this Command Buffer
 void BindVertexBuffers(
 	const Handle& a_CommandBuffer,
-	const Uint32 firstBinding,
-	const Uint32 bindingCount,
+	const uint32_t firstBinding,
+	const uint32_t bindingCount,
 	const std::vector<OCRA::Buffer::Vertex::Handle>& a_VertexBuffers,
-	const std::vector<Uint64>& a_Offsets);
+	const std::vector<uint64_t>& a_Offsets);
 }

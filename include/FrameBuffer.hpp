@@ -7,13 +7,15 @@
 #pragma once
 
 #include <Handle.hpp>
-#include <Scalar.hpp>
+#include <Image/View.hpp>
+
+HANDLE(OCRA::FrameBuffer);
 
 namespace OCRA::FrameBuffer {
 constexpr auto MaxColorAttachments = 32;
 struct Info {
-    Uint16 width { 0 }, height { 0 }, layers { 1 }; //extents, rarelly used except for layers
-    Uint8 attachmentCount { 0 };
+    uint16_t width { 0 }, height { 0 }, layers { 1 }; //extents, rarelly used except for layers
+    uint8_t attachmentCount { 0 };
     Image::View::Handle attachments[MaxColorAttachments]; //Image View handles
 };
 }

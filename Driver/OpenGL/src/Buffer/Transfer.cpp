@@ -33,38 +33,26 @@ struct Impl
 		bufferInfo.flags = accessFlags;
 		bufferHandle = Buffer::Create(a_Device, bufferInfo);
 	}
-	~Impl()
-	{
-		Buffer::Destroy(device, bufferHandle);
-	}
-	Device::Handle device;
+	const Device::Handle device;
 	Buffer::Handle bufferHandle;
 	const Info info;
 };
-static Handle s_CurrentHandle = 0;
-static std::map<Handle, Impl> s_TransferBuffers;
 Handle Create(const Device::Handle& a_Device, const Info& a_Info)
 {
-	++s_CurrentHandle;
-	s_TransferBuffers.emplace(s_CurrentHandle, Impl(a_Device, a_Info));
-	return s_CurrentHandle;
-}
-void Destroy(const Device::Handle& a_Device, const Handle& a_Handle)
-{
-	s_TransferBuffers.erase(a_Handle);
+	return Handle(new Impl(a_Device, a_Info));
 }
 const Info& GetInfo(const Device::Handle& a_Device, const Handle& a_Handle)
 {
-	return s_TransferBuffers.at(a_Handle).info;
+	return a_Handle->info;
 }
-Buffer::Handle GetBufferHandle(const Device::Handle& a_Device, const Handle& a_Handle)
+Buffer::Handle GetBufferHandle(const Handle& a_Handle)
 {
-	return s_TransferBuffers.at(a_Handle).bufferHandle;
+	return a_Handle->bufferHandle;
 }
 void* Map(const Device::Handle& a_Device, const MapOperation& a_MapOperation)
 {
 	Buffer::MapOperation map;
-	map.buffer = GetBufferHandle(a_Device, a_MapOperation.buffer);
+	map.buffer = GetBufferHandle(a_MapOperation.buffer);
 	map.range = a_MapOperation.range;
 	if ((a_MapOperation.flags & Read) == Read)
 		map.flags |= GL_MAP_READ_BIT;
@@ -75,12 +63,12 @@ void* Map(const Device::Handle& a_Device, const MapOperation& a_MapOperation)
 void Flush(const Device::Handle& a_Device, const FlushOperation& a_FlushOperation)
 {
 	Buffer::FlushOperation flush;
-	flush.buffer = GetBufferHandle(a_Device, a_FlushOperation.buffer);
+	flush.buffer = GetBufferHandle(a_FlushOperation.buffer);
 	flush.range = a_FlushOperation.range;
 	return Buffer::Flush(a_Device, flush);
 }
 void Unmap(const Device::Handle& a_Device, const Handle& a_Handle)
 {
-	return Buffer::Unmap(a_Device, GetBufferHandle(a_Device, a_Handle));
+	return Buffer::Unmap(a_Device, GetBufferHandle(a_Handle));
 }
 }

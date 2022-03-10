@@ -8,13 +8,15 @@
 
 #include <Handle.hpp>
 #include <Image/Format.hpp>
+#include <Image/Image.hpp>
 #include <Component.hpp>
-#include <Scalar.hpp>
+
+HANDLE(OCRA::Image::View);
 
 namespace OCRA::Image::View {
 struct SubRange {
-    Uint16 baseMipLevel { 0 }, levelCount { 1000 };
-    Uint16 baseArrayLayer { 0 }, layerCount { 1000 };
+    uint16_t baseMipLevel { 0 }, levelCount { 1000 };
+    uint16_t baseArrayLayer { 0 }, layerCount { 1000 };
 };
 enum class Type {
     Unknown = -1,
@@ -35,4 +37,5 @@ struct Info {
 	Component::Mapping components {};
     SubRange subRange {};
 };
+Handle Create(const Device::Handle& a_Device, const Info& a_Info);
 }

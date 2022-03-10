@@ -53,17 +53,16 @@ set(OCRA_IMPL_HEADER_FILES
 )
 set(OCRA_IMPL_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Queue.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/ViewPort.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Buffer/Transfer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Buffer/Vertex.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Buffer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Image/Image.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Image/View.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/Graphics.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/Pipeline.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/ShaderPipelineState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/VertexInputState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Shader/Stage.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Shader/Module.cpp
 )
 add_library(OCRAImpl ${OCRA_IMPL_SOURCE_FILES} ${OCRA_IMPL_HEADER_FILES})
 target_include_directories(OCRAImpl PRIVATE

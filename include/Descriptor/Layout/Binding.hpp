@@ -24,8 +24,8 @@ struct Info { //describes a binding in shader
         AccelerationStructure, //for RayTracing
         MutableValve
     } descriptorType;
-    Uint8 index { 0 }; //binding point in the shader
-    Uint64 descriptorCount { 1 }; //number of values in array
+    uint8_t index { 0 }; //binding point in the shader
+    uint64_t descriptorCount { 1 }; //number of values in array
     Shader::Stage::Flags stageFlags { Shader::Stage::Flags::None };
 }
 }

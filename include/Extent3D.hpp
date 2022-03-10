@@ -6,10 +6,8 @@
 */
 #pragma once
 
-#include <Scalar.hpp>
-
 namespace OCRA {
 struct Extent3D {
-    Uint32 width { 0 }, height { 0 }, depth { 0 };
+    uint32_t width { 0 }, height { 0 }, depth { 0 };
 };
 }

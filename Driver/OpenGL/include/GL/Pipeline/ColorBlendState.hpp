@@ -38,7 +38,7 @@ struct GLAttachmentState {
     GLenum alphaBlendOperation;
     Blend::ColorMask colorMask; //color mask used for writing to this attachment
 };
-inline const auto Compile(const AttachmentState& a_AttachmentState, const Uint8& a_Index)
+inline const auto Compile(const AttachmentState& a_AttachmentState, const uint8_t& a_Index)
 {
     return [
         index(a_Index),
@@ -67,7 +67,7 @@ inline const std::function<void(Command::Buffer::ExecutionState&)> Compile(const
     const auto attachments = [a_Info] {
         std::vector<std::function<void()>> attachments;
         attachments.reserve(a_Info.attachementCount);
-        for (Uint8 index = 0; index < a_Info.attachementCount; ++index)
+        for (uint8_t index = 0; index < a_Info.attachementCount; ++index)
             attachments.push_back(Compile(a_Info.attachments.at(index), index));
         return attachments;
     }();

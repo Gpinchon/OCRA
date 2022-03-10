@@ -6,13 +6,15 @@
 */
 #pragma once
 
+#include <Device.hpp>
 #include <Extent3D.hpp>
 #include <Handle.hpp>
 #include <Image/Format.hpp>
-#include <Scalar.hpp>
 
 #include <bitset>
 #include <vector>
+
+HANDLE(OCRA::Image);
 
 namespace OCRA::Image {
 //Image Info specs
@@ -36,7 +38,8 @@ struct Info {
     } samples { Samples::Samples1 };
     Image::Format format { Image::Format::Unknown };
     Extent3D extent;
-    Uint16 mipLevels { 0 }, arrayLayers { 0 };
+    uint16_t mipLevels { 0 }, arrayLayers { 0 };
     bool fixedSampleLocations { false };
 };
+Handle Create(const Device::Handle& a_Device, const Info& a_Info);
 }

@@ -10,6 +10,6 @@
 
 namespace OCRA::Pipeline::TessellationState {
 struct Info {
-    Uint32 patchControlPoints { 0 };
+    uint32_t patchControlPoints { 0 };
 };
 }

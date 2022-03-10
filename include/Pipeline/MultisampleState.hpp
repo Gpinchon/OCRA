@@ -6,7 +6,6 @@
 */
 #pragma once
 
-#include <Scalar.hpp>
 #include <Sample.hpp>
 
 #include <array>
@@ -16,7 +15,7 @@ struct Info {
     Sample::Count rasterizationSamples { Sample::Count::Count1 };
     bool sampleShadingEnable { false };
     float minSampleShading { 1 };
-    std::array<Uint32, 32> sampleMasks; //sampleMask size == rasterizationSamples / 32
+    std::array<uint32_t, 32> sampleMasks; //sampleMask size == rasterizationSamples / 32
     bool alphaToCoverageEnable { false };
     bool alphaToOneEnable { false };
 };

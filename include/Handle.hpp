@@ -15,20 +15,3 @@ namespace name {                                                            \
     struct Impl;                                                            \
     typedef std::shared_ptr<Impl> Handle;                                   \
 }
-
-namespace OCRA {
-HANDLE(Descriptor);
-HANDLE(Descriptor::Layout);
-HANDLE(Descriptor::Layout::Binding);
-HANDLE(FrameBuffer);
-HANDLE(Image);
-HANDLE(Image::Descriptor);
-HANDLE(Image::Sampler);
-HANDLE(Image::View);
-HANDLE(Buffer::Transfer);
-HANDLE(Buffer::Vertex);
-HANDLE(Shader::Stage);
-HANDLE(State::Draw);
-HANDLE(State::Clear);
-HANDLE(ViewPort);
-}

@@ -8,7 +8,6 @@
 
 #include <Common/Rect2D.hpp>
 #include <Common/DepthRange.hpp>
-#include <Scalar.hpp>
 
 namespace OCRA::ViewPort {
 struct Info {

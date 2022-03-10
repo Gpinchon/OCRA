@@ -7,22 +7,22 @@
 #pragma once
 
 #include <Handle.hpp>
-#include <Scalar.hpp>
 #include <Buffer/Range.hpp>
 
 #include <GL/glew.h>
 
+HANDLE(OCRA::Buffer);
+
 namespace OCRA::Buffer {
-typedef HandleType Handle;
 struct Info
 {
-	Uint64 size{ 0 };
+	uint64_t size{ 0 };
 	GLbitfield flags{ 0 }; //flags of the buffer storage
 };
 struct CopyOperation
 {
 	Buffer::Handle srcBuffer{ 0 }, dstBuffer{ 0 };
-	Uint64 readOffset{ 0 }, writeOffset{ 0 }, size{ 0 };
+	uint64_t readOffset{ 0 }, writeOffset{ 0 }, size{ 0 };
 };
 struct MapOperation
 {
@@ -36,7 +36,6 @@ struct FlushOperation
 	Range range;
 };
 Handle Create(const Device::Handle& a_Device, const Info& a_Info);
-void Destroy(const Device::Handle& a_Device, const Handle& a_Handle);
 const Info& GetInfo(const Device::Handle& a_Device, const Handle& a_Handle);
 unsigned GetGLHandle(const Handle& a_Handle);
 void* Map(const Device::Handle& a_Device, const MapOperation& a_MapOperation);

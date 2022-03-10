@@ -12,9 +12,8 @@
 #include <Pipeline/BindingPoint.hpp>
 #include <Common/Rect2D.hpp>
 #include <Sample.hpp>
-#include <Scalar.hpp>
 
-#include <array>
+#include <vector>
 
 HANDLE(OCRA::RenderPass);
 
@@ -49,45 +48,40 @@ struct AttachmentDescription {
 };
 
 struct AttachmentReference {
-	Int8 attachment{ -1 }; //-1 means no attachment
+	int8_t attachment{ -1 }; //-1 means no attachment
 	Image::Layout layout{ Image::Layout::Unknown };
 };
 
 struct SubPassDescription {
 	constexpr static auto MaxAttachments = 32;
 	Pipeline::BindingPoint pipelineBindPoint{ Pipeline::BindingPoint::Unknown };
-	Uint8 inputAttachmentCount{ 0 };
+	uint8_t inputAttachmentCount{ 0 };
 	std::array<AttachmentReference, MaxAttachments> inputAttachments;
-	Uint8 colorAttachmentCount{ 0 };
+	uint8_t colorAttachmentCount{ 0 };
 	std::array<AttachmentReference, MaxAttachments> colorAttachments;
 	AttachmentReference resolveAttachment;
 	AttachmentReference depthStencilAttachment;
 	//describes attachments not used by this subpass but whose content must pe preserved
-	Uint8 preserveAttachmentCount{ 0 };
+	uint8_t preserveAttachmentCount{ 0 };
 	std::array<AttachmentReference, MaxAttachments> preserveAttachments;
 };
 
 struct SubPassDependency {
-	Int8 srcSubPass{ -1 };
-	Int8 dstSubPass{ -1 };
+	int8_t srcSubPass{ -1 };
+	int8_t dstSubPass{ -1 };
 };
 
 struct Info {
-	constexpr static auto MaxAttachments = 32;
-	constexpr static auto MaxDependencies = 64;
-	Uint8 attachmentCount{ 0 };
-	std::array<AttachmentDescription, MaxAttachments> attachments;
-	Uint8 subpassCount{ 0 };
-	std::array<SubPassDescription, MaxAttachments> subPasses;
-	Uint8 dependencyCount{ 0 };
-	std::array<SubPassDependency, MaxDependencies> dependencies;
+	std::vector<AttachmentDescription> attachments;
+	std::vector<SubPassDescription> subPasses;
+	std::vector<SubPassDependency> dependencies;
 };
 Handle Create(const Device::Handle& a_Device, const Info& a_Info);
 const Info& GetInfo(const Device::Handle& a_Device, const Handle& a_Handle);
-Uint8 GetAttachmentCount(const Handle& a_RenderPass);
-const AttachmentDescription& GetAttachment(const Handle& a_RenderPass, Uint8 a_AttachmentIndex);
-Uint8 GetSubpassCount(const Handle& a_RenderPass);
-const SubPassDescription& GetSubpass(const Handle& a_RenderPass, Uint8 a_SubPassIndex);
-Uint8 GetDependencyCount(const Handle& a_RenderPass);
-const SubPassDependency& GetDependency(const Handle& a_RenderPass, Uint8 a_DependencyIndex);
+uint8_t GetAttachmentCount(const Handle& a_RenderPass);
+const AttachmentDescription& GetAttachment(const Handle& a_RenderPass, uint8_t a_AttachmentIndex);
+uint8_t GetSubpassCount(const Handle& a_RenderPass);
+const SubPassDescription& GetSubpass(const Handle& a_RenderPass, uint8_t a_SubPassIndex);
+uint8_t GetDependencyCount(const Handle& a_RenderPass);
+const SubPassDependency& GetDependency(const Handle& a_RenderPass, uint8_t a_DependencyIndex);
 }

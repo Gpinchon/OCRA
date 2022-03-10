@@ -20,11 +20,11 @@ static inline GLenum GetGLIndexType(const IndexType& a_IndexType)
 	{
 	case IndexType::None:
 		return GL_NONE;
-	case IndexType::Uint32:
+	case IndexType::uint32_t:
 		return GL_UNSIGNED_INT;
-	case IndexType::Uint16:
+	case IndexType::uint16_t:
 		return GL_UNSIGNED_SHORT;
-	case IndexType::Uint8:
+	case IndexType::uint8_t:
 		return GL_UNSIGNED_BYTE;
 	default:
 		throw std::runtime_error("Unknown Index Type");
