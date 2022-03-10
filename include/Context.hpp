@@ -7,12 +7,16 @@
 #pragma once
 
 #include <Handle.hpp>
+#include <Window.hpp>
 
 #include <string>
+
+HANDLE(OCRA::Context);
 
 namespace OCRA::Context {
 struct Info {
     Window::Handle window;
     std::string version;
 };
+Handle Create(const Info& a_Info);
 }

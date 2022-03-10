@@ -1,6 +1,7 @@
 #pragma once
 
-#include <Handle.hpp>
+#include <Pipeline/Pipeline.hpp>
+#include <Pipeline/BindingPoint.hpp>
 
 #include <functional>
 
@@ -9,11 +10,12 @@ struct ExecutionState;
 }
 
 namespace OCRA::Pipeline {
-struct Base {
-	virtual void Execute(const Device::Handle& a_Device, const Handle& a_Handle, Command::Buffer::ExecutionState& a_ExecutionState);
+struct Impl {
+	Impl(const BindingPoint& a_BindingPoint) : bindingPoint(a_BindingPoint) {};
+	virtual void Execute(const Device::Handle& a_Device, Command::Buffer::ExecutionState& a_ExecutionState) = 0;
+	const BindingPoint bindingPoint;
 };
-Base& Get(const Handle& a_Pipeline);
-Handle Create(const Device::Handle& a_Device, std::function<Base*()> a_Allocator);
-void Destroy(const Device::Handle& a_Device, const Handle& a_Handle);
-void Execute(const Device::Handle& a_Device, const Handle& a_Handle, Command::Buffer::ExecutionState& a_ExecutionState);
+void Execute(const Device::Handle& a_Device, const Handle& a_Handle, Command::Buffer::ExecutionState& a_ExecutionState) {
+	a_Handle->Execute(a_Device, a_ExecutionState);
+}
 }

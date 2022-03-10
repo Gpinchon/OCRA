@@ -11,6 +11,10 @@
 #include <FrameBuffer.hpp>
 #include <ClearValue.hpp>
 #include <Command/RenderPass.hpp>
+#include <Pipeline/Pipeline.hpp>
+#include <RenderPass.hpp>
+
+HANDLE(OCRA::Command::Buffer);
 
 //Types definition
 namespace OCRA::Command
@@ -32,20 +36,36 @@ enum class SubPassContents
 //Functions declaration
 namespace OCRA::Command::Buffer
 {
-//Begin Command Buffer recording
+struct SubmitInfo {
+Handle commandBuffer;
+uint32_t deviceMask;//TODO : ???
+};
+//Command Buffer creation
+Handle Create(const Device::Handle& a_Device);
+
+//Begin Command Buffer recording, swutcgubg it to Recording state
 void Begin(const Handle& a_CommandBuffer);
-//End Command Buffer recording
+//End Command Buffer recording, switching it to Executable state
 void End(const Handle& a_CommandBuffer);
+
+//Reset Command Buffer to Initial state
+void Reset(const Handle& a_CommandBuffer);
 
 //Begin Render Pass recording
 void BeginRenderPass(const Handle& a_CommandBuffer, const RenderPassBeginInfo& a_BeginInfo, const SubPassContents& a_SubPassContents);
 //End Render Pass recording
 void EndRenderPass(const Handle& a_CommandBuffer);
+
+void ExecuteCommands(
+	const Buffer::Handle& a_CommandBuffer,
+	const Buffer::Handle& a_SecondaryCommandBuffer);
+
 //Bind the specified Pipeline to the specified Command Buffer at the specified Binding Point
 void BindPipeline(
 	const Handle& a_CommandBuffer,
 	const Pipeline::BindingPoint& a_BindingPoint,
 	const Pipeline::Handle& a_Pipeline);
+
 //Bind specified Vertex Buffer to Render Pass currently bound to this Command Buffer
 void BindIndexBuffer(
 	const Handle& a_CommandBuffer,

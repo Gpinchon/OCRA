@@ -6,6 +6,9 @@
 */
 #pragma once
 
+#include <bitset>
+
+
 namespace OCRA::Pipeline
 {
 enum class BindingPoint

@@ -16,6 +16,8 @@
 
 #include <array>
 
+HANDLE(OCRA::RenderPass);
+
 namespace OCRA::Image {
 enum class Layout {
 	Unknown = -1,
@@ -80,6 +82,8 @@ struct Info {
 	Uint8 dependencyCount{ 0 };
 	std::array<SubPassDependency, MaxDependencies> dependencies;
 };
+Handle Create(const Device::Handle& a_Device, const Info& a_Info);
+const Info& GetInfo(const Device::Handle& a_Device, const Handle& a_Handle);
 Uint8 GetAttachmentCount(const Handle& a_RenderPass);
 const AttachmentDescription& GetAttachment(const Handle& a_RenderPass, Uint8 a_AttachmentIndex);
 Uint8 GetSubpassCount(const Handle& a_RenderPass);

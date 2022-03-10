@@ -6,7 +6,8 @@
 */
 #pragma once
 
-#include <Handle.hpp>
+#include <Device.hpp>
+#include <RenderPass.hpp>
 #include <Pipeline/ColorBlendState.hpp>
 #include <Pipeline/DepthStencilState.hpp>
 #include <Pipeline/DynamicState.hpp>
@@ -34,4 +35,6 @@ struct Info { //describes a graphics pipeline with each stage
     ViewPortState::Info viewPortState;
     DynamicState::Info dynamicState;
 };
+Handle Create(const Device::Handle& a_Device, const Info& a_Info);
+const Info& GetInfo(const Device::Handle& a_Device, const Handle& a_Handle);
 }

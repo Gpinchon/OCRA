@@ -7,10 +7,13 @@
 #pragma once
 
 #include <Handle.hpp>
+#include <Context.hpp>
+
+HANDLE(OCRA::Device);
 
 namespace OCRA::Device {
 struct Info {
     Context::Handle context;
 };
-void RenderPass(const Device::Handle& a_Device, const RenderPass::Handle& a_Pass);
+Handle Create(const Info& a_Info);
 }

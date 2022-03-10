@@ -4,7 +4,7 @@
 * @Last Modified by:   gpinchon
 * @Last Modified time: 2021-09-26 15:03:53
 */
-#include <Handle.hpp>
+#include <Pipeline/Pipeline.hpp>
 #include <Pipeline/Graphics.hpp>
 
 #include <GL/Pipeline/Pipeline.hpp>
@@ -19,11 +19,13 @@
 #include <GL/Pipeline/VertexInputState.hpp>
 
 #include <functional>
+#include <cassert>
 
 namespace OCRA::Pipeline::Graphics {
-struct Impl : Base {
+struct Impl : Pipeline::Impl {
 	Impl(const Device::Handle& a_Device, const Info& a_Info)
-	: info(a_Info)
+	: Pipeline::Impl(BindingPoint::Graphics)
+	, info(a_Info)
 	{}
 	auto Compile(const Device::Handle& a_Device)
 	{
@@ -52,7 +54,7 @@ struct Impl : Base {
 		compiled = true;
 		return callback;
 	}
-	virtual void Execute(const Device::Handle& a_Device, const Handle& a_Handle, Command::Buffer::ExecutionState& a_ExecutionState) override
+	virtual void Execute(const Device::Handle& a_Device, Command::Buffer::ExecutionState& a_ExecutionState) override
 	{
 		Compile(a_Device)(a_ExecutionState);
 	}
@@ -61,12 +63,10 @@ struct Impl : Base {
     std::function<void(Command::Buffer::ExecutionState&)> callback;
 };
 Handle Create(const Device::Handle& a_Device, const Info& a_Info) {
-	return Pipeline::Create(a_Device, [a_Device, a_Info]() { return new Impl(a_Device, a_Info); });
-}
-void Destroy(const Device::Handle& a_Device, const Handle& a_Handle) {
-	Pipeline::Destroy(a_Device, a_Handle);
+	return Handle(new Graphics::Impl(a_Device, a_Info));
 }
 const Info& GetInfo(const Device::Handle& a_Device, const Handle& a_Handle) {
-    return static_cast<Impl&>(Get(a_Handle)).info;
+	asser(a_Handle->bindingPoint == BindingPoint::Graphics);
+    return std::static_pointer_cast<Impl>(a_Handle)->info;
 }
 }

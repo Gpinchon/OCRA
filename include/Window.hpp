@@ -6,13 +6,17 @@
 */
 #pragma once
 
+#include <Handle.hpp>
 #include <Scalar.hpp>
 
 #include <string>
+
+HANDLE(OCRA::Window);
 
 namespace OCRA::Window {
 struct Info {
     Uint16 width { 0 }, height { 0 };
     std::string name;
 };
+Handle Create(const Info& a_Info);
 }

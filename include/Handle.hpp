@@ -6,43 +6,17 @@
 */
 #pragma once
 
-#include <Scalar.hpp>
+#include <memory>
 
-typedef Uint32 HandleType;
-
-#define HANDLE(name)                                                            \
-    namespace name {                                                            \
-        typedef HandleType Handle;                                              \
-        struct Info;                                                            \
-        Handle Create(const Device::Handle& a_Device, const Info& a_Info);      \
-        void Destroy(const Device::Handle& a_Device, const Handle& a_Handle);   \
-        const Info& GetInfo(const Handle& a_Handle);                            \
-    }
+// Handle uses Pimpl pattern to hide real implementation
+// Handles are not convertible between object types
+#define HANDLE(name)                                                        \
+namespace name {                                                            \
+    struct Impl;                                                            \
+    typedef std::shared_ptr<Impl> Handle;                                   \
+}
 
 namespace OCRA {
-namespace Window {
-    typedef HandleType Handle;
-    struct Info;
-    Handle Create(const Info& a_Info);
-    void Destroy(const Handle& a_Handle);
-}
-namespace Context {
-    typedef HandleType Handle;
-    struct Info;
-    Handle Create(const Info& a_Info);
-    void Destroy(const Handle& a_Handle);
-}
-namespace Device {
-    typedef HandleType Handle;
-    struct Info;
-    Handle Create(const Info& a_Info);
-    void Destroy(const Handle& a_Handle);
-}
-namespace Command::Buffer {
-    typedef HandleType Handle;
-    Handle Create(const Device::Handle& a_Device);
-    void Destroy(const Device::Handle& a_Device, const Handle& a_Handle);
-}
 HANDLE(Descriptor);
 HANDLE(Descriptor::Layout);
 HANDLE(Descriptor::Layout::Binding);
@@ -53,10 +27,8 @@ HANDLE(Image::Sampler);
 HANDLE(Image::View);
 HANDLE(Buffer::Transfer);
 HANDLE(Buffer::Vertex);
-HANDLE(Pipeline);
 HANDLE(Shader::Stage);
 HANDLE(State::Draw);
 HANDLE(State::Clear);
-HANDLE(RenderPass);
 HANDLE(ViewPort);
 }
