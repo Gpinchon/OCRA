@@ -6,11 +6,14 @@
 */
 #pragma once
 
+#include <Device.hpp>
 #include <Handle.hpp>
-#include <Scalar.hpp>
+#include <Shader/Module.hpp>
 
 #include <vector>
 #include <bitset>
+
+HANDLE(OCRA::Shader::Stage);
 
 namespace OCRA::Shader::Stage {
 typedef std::bitset<6> StageFlag;
@@ -33,9 +36,20 @@ enum class Stage {
     TessEval,
     MaxValue
 };
+struct SpecializationMapEntry {
+    uint32_t    constantID;
+    uint32_t    offset;
+    size_t      size;
+};
+struct SpecializationInfo {
+    std::vector<SpecializationMapEntry> mapEntries;
+    std::vector<std::byte> data;
+};
 struct Info {
     Stage stage { Stage::None };
-    std::vector<char> code;
-    std::string name { "" };
+    Module::Handle module;
+    std::string name { "" }; //entry point name
+    SpecializationInfo specializationInfo;
 };
+Handle Create(const Device::Handle& a_Device, const Info& a_Info);
 }
