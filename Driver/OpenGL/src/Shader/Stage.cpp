@@ -26,7 +26,9 @@ static inline auto CheckCompilation(GLuint program)
             std::string logString(infoLog.begin(), infoLog.end());
             throw std::runtime_error(logString);
         } else throw std::runtime_error("Unknown Error");
+        return false;
     }
+    return true;
 }
 struct Impl {
     Impl(const Device::Handle& a_Device, const Info& a_Info)
@@ -53,10 +55,13 @@ struct Impl {
         //ARB_gl_spirv
         glShaderBinary(1, &shader, GL_SHADER_BINARY_FORMAT_SPIR_V, moduleInfo.code.data(), moduleInfo.code.size());
         glSpecializeShader(shader, info.name.c_str(), specialization.mapEntries.size(), constantIndex.data(), constantValue.data());
-        CheckCompilation(shader);
-        glAttachShader(program, shader);
-        glLinkProgram(program);
-        glDetachShader(program, shader);
+        glCompileShader(shader);
+        if (!CheckCompilation(shader)) //compilation failed
+        {
+            glAttachShader(program, shader);
+            glLinkProgram(program);
+            glDetachShader(program, shader);
+        }
         glDeleteShader(shader);
     }
     ~Impl()
@@ -70,7 +75,7 @@ Handle Create(const Device::Handle& a_Device, const Info& a_Info)
 {
     return Handle(new Impl(a_Device, a_Info));
 }
-const Info& GetInfo(const Device::Handle& a_Device, const Handle& a_Handle)
+const Info& GetInfo(const Handle& a_Handle)
 {
     return a_Handle->info;
 }

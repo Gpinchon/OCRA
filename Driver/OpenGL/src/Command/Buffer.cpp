@@ -6,25 +6,13 @@
 */
 
 //See SwiftShader !
+#include <Command/Buffer.hpp>
 
-#include <Handle.hpp>
-#include <Command/RenderPass.hpp>
-#include <RenderPass.hpp>
-#include <FrameBuffer.hpp>
-#include <Pipeline/BindingPoint.hpp>
-#include <Pipeline/Pipeline.hpp>
-
-#include <GL/IndexType.hpp>
-#include <GL/IndexType.hpp>
-#include <GL/Buffer/Vertex.hpp>
-#include <GL/Buffer/Buffer.hpp>
-#include <GL/Command/Buffer/ExecutionState.hpp>
+#include <GL/Command/ExecutionState.hpp>
 
 #include <functional>
 #include <array>
-#include <mutex>
 #include <cassert>
-#include <map>
 
 namespace OCRA::Command::Buffer
 {
@@ -33,7 +21,6 @@ enum class State {
 };
 struct Impl
 {
-	typedef std::function<void(Impl::ExecutionState&)> CallBack;
 	void Reset()
 	{
 		assert(
@@ -98,32 +85,25 @@ Handle Create(const Device::Handle& a_Device) {
     return Handle(new Impl);
 }
 
-void Begin(const Handle& a_CommandBuffer) {
+void PushCommand(const Handle& a_CommandBuffer, const CallBack& a_Callback) {
+	a_CommandBuffer->PushCommand(a_Callback);
+}
+}
+
+namespace OCRA::Command
+{
+void BeginCommandBuffer(const Buffer::Handle& a_CommandBuffer) {
 	a_CommandBuffer->Begin();
 }
-void End(const Handle& a_CommandBuffer) {
+void EndCommandBuffer(const Buffer::Handle& a_CommandBuffer) {
 	a_CommandBuffer->End();
 }
 
-void Reset(const Handle& a_CommandBuffer) {
+void ResetCommandBuffer(const Buffer::Handle& a_CommandBuffer) {
 	a_CommandBuffer->Reset();
 }
-void Submit(const Handle& a_CommandBuffer, bool a_Once) {
+void Submit(const Buffer::Handle& a_CommandBuffer, bool a_Once) {
 	a_CommandBuffer->Submit(a_Once);
-}
-
-void BeginRenderPass(const Handle& a_CommandBuffer, const RenderPassBeginInfo& a_BeginInfo, const SubPassContents& a_SubPassContents)
-{
-	a_CommandBuffer->PushCommand([beginInfo = a_BeginInfo](Buffer::ExecutionState& executionState) {
-		executionState.renderPass.beginInfo = beginInfo;
-	});
-}
-void EndRenderPass(const Handle& a_CommandBuffer)
-{
-	a_CommandBuffer->PushCommand([](Buffer::ExecutionState& executionState) {
-		executionState.renderPass = {};
-		executionState.subpassIndex = 0;
-	});
 }
 
 void ExecuteCommands(
@@ -135,55 +115,5 @@ void ExecuteCommands(
 	](Buffer::ExecutionState& executionState) {
 		commandBuffer->SubmitSecondary(executionState);
 	});
-}
-
-void BindPipeline(
-	const Buffer::Handle& a_CommandBuffer,
-	const Pipeline::BindingPoint& a_BindingPoint,
-	const Pipeline::Handle& a_Pipeline)
-{
-	a_CommandBuffer->PushCommand([
-		bindingPoint = size_t(a_BindingPoint),
-		pipeline = a_Pipeline
-	](Buffer::ExecutionState& executionState){
-		executionState.pipelineState.at(bindingPoint) = pipeline;
-	});
-}
-
-void BindIndexBuffer(
-	const Handle& a_CommandBuffer,
-	const OCRA::Buffer::Vertex::Handle& a_IndexBuffer,
-	const uint64_t a_Offset,
-	const IndexType a_IndexType)
-{
-	const auto& bufferHandle{ OCRA::Buffer::Vertex::GetBufferHandle(a_IndexBuffer) };
-	a_CommandBuffer->PushCommand([
-		buffer = OCRA::Buffer::GetGLHandle(bufferHandle),
-		offset = a_Offset,
-		type = GetGLIndexType(a_IndexType)
-	](Buffer::ExecutionState& executionState){
-		executionState.renderPass.indexBufferBinding = { buffer, offset, type };
-		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer);
-	});
-	
-}
-void BindVertexBuffers(
-	const Handle& a_CommandBuffer,
-	const uint32_t firstBinding,
-	const uint32_t bindingCount,
-	const std::vector<OCRA::Buffer::Vertex::Handle>& a_VertexBuffers,
-	const std::vector<uint64_t>& a_Offsets)
-{
-	for (auto index = 0u; index < bindingCount; ++index)
-	{
-		const auto& bufferHandle{ OCRA::Buffer::Vertex::GetBufferHandle(a_VertexBuffers.at(index)) };
-		a_CommandBuffer->PushCommand([
-			binding = firstBinding + index,
-			buffer = OCRA::Buffer::GetGLHandle(bufferHandle),
-			offset = a_Offsets.at(index)
-		](Buffer::ExecutionState& executionState){
-			executionState.renderPass.vertexInputBindings.at(binding) = {buffer, offset};
-		});
-	}
 }
 }

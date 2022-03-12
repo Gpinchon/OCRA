@@ -6,8 +6,6 @@
 */
 #pragma once
 
-#include <Scalar.hpp>
-
 #include <array>
 #include <limits>
 #include <memory>

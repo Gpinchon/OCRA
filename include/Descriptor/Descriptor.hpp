@@ -7,7 +7,6 @@
 #pragma once
 
 #include <Handle.hpp>
-#include <Scalar.hpp>
 
 /**
  * @brief Describes shader ressources

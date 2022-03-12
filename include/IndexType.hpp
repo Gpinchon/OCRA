@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include <stdexcept>
+
 namespace OCRA
 {
 enum class IndexType {
@@ -15,4 +17,15 @@ enum class IndexType {
 	Uint32,
 	MaxValue
 };
+auto GetIndexTypeSize(const IndexType& a_IndexType){
+	switch (a_IndexType) {
+	case Uint8 :
+		return 1;
+	case Uint16 :
+		return 2;
+	case Uint32 :
+		return 4;
+	default : throw std::runtime_error("Unknown Index Type");
+	}
+}
 }

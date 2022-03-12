@@ -6,7 +6,6 @@
 */
 #pragma once
 
-#include <Scalar.hpp>
 #include <Compare.hpp>
 
 namespace OCRA::Stencil {

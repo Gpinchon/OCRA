@@ -6,18 +6,12 @@
 */
 #pragma once
 
-#include <Handle.hpp>
 #include <Shader/Stage.hpp>
 
-#include <array>
-
-HANDLE(OCRA::Pipeline::ShaderPipelineState);
+#include <vector>
 
 namespace OCRA::Pipeline::ShaderPipelineState {
-constexpr auto MaxStages = 6;
 struct Info {
-	uint8_t stageCount{ 0 };
-	std::array<Shader::Stage::Handle, MaxStages> stages{ 0 };
+	std::vector<Shader::Stage::Handle> stages;
 };
-Handle Create(const Device::Handle& a_Device, const Info& a_Info);
 }

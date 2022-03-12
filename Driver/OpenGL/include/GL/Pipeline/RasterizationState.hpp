@@ -10,7 +10,7 @@
 #include <Pipeline/RasterizationState.hpp>
 #include <Pipeline/DynamicState.hpp>
 
-#include <GL/Command/Buffer/ExecutionState.hpp>
+#include <GL/Command/ExecutionState.hpp>
 #include <GL/glew.h>
 
 #include <stdexcept>

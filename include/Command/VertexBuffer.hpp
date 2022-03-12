@@ -6,7 +6,6 @@
 */
 #pragma once
 
-#include <Handle.hpp>
 #include <IndexType.hpp>
 #include <Command/Buffer.hpp>
 #include <Buffer/Vertex.hpp>
@@ -14,17 +13,30 @@
 
 #include <vector>
 
-namespace OCRA::Command::VertexBuffer
+namespace OCRA::Command
 {
 //Vertex buffer copy commands
-void ReadFrom(
+void ReadVertexBufferFrom(
 	const Command::Buffer::Handle& a_CommandBuffer,
-	const OCRA::Buffer::Vertex::Handle& a_DstVBO,
-	const OCRA::Buffer::Transfer::Handle& a_SrcTransferBuffer,
+	const Buffer::Vertex::Handle& a_DstVBO,
+	const Buffer::Transfer::Handle& a_SrcTransferBuffer,
 	uint64_t a_ReadOffset, uint64_t a_WriteOffset, uint64_t a_Size);
-void WriteTo(
+void WriteVertexBufferTo(
 	const Command::Buffer::Handle& a_CommandBuffer,
-	const OCRA::Buffer::Vertex::Handle& a_SrcVBO,
-	const OCRA::Buffer::Transfer::Handle& a_DstTransferBuffer,
+	const Buffer::Vertex::Handle& a_SrcVBO,
+	const Buffer::Transfer::Handle& a_DstTransferBuffer,
 	uint64_t a_ReadOffset, uint64_t a_WriteOffset, uint64_t a_Size);
+//Bind specified Vertex Buffers to Render Pass currently bound to this Command Buffer
+void BindVertexBuffers(
+	const Command::Buffer::Handle& a_CommandBuffer,
+	const uint32_t firstBinding,
+	const uint32_t bindingCount,
+	const std::vector<Buffer::Vertex::Handle>& a_VertexBuffers,
+	const std::vector<uint64_t>& a_Offsets);
+//Bind specified Vertex Buffer to Render Pass currently bound to this Command Buffer
+void BindIndexBuffer(
+	const Command::Buffer::Handle& a_CommandBuffer,
+	const Buffer::Vertex::Handle& a_IndexBuffer,
+	const uint64_t offset,
+	const IndexType indexType);
 }

@@ -6,8 +6,7 @@
 */
 #pragma once
 
-#include <Handle.hpp>
-#include <Scalar.hpp>
+#include <Command/Buffer.hpp>
 
 namespace OCRA::Command
 {
@@ -21,7 +20,8 @@ void Draw(
 void DrawIndexed(
 	const Command::Buffer::Handle& a_CommandBuffer,
 	const uint32_t a_IndexCount,
-	const uint32_t a_InstanceCount,
-	const uint32_t a_VertexOffset,
-	const uint32_t a_FirstInstance);
+    const uint32_t a_InstanceCount,
+    const uint32_t a_FirstIndex,
+    const uint32_t a_VertexOffset,
+    const uint32_t a_FirstInstance);
 }

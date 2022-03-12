@@ -2,13 +2,15 @@
 
 #include <Handle.hpp>
 #include <Pipeline/BindingPoint.hpp>
-#include <Command/RenderPass.hpp>
 #include <Common/DepthBounds.hpp>
 #include <Common/Rect2D.hpp>
 #include <Common/Vec4.hpp>
 #include <Compare.hpp>
 #include <Stencil.hpp>
 #include <ViewPort.hpp>
+#include <FrameBuffer.hpp>
+#include <ClearValue.hpp>
+#include <RenderPass.hpp>
 
 #include <GL/Stencil.hpp>
 #include <GL/glew.h>
@@ -50,15 +52,18 @@ struct IndexBufferBinding : VertexInputBinding {
 };
 struct RenderPass
 {
-	RenderPassBeginInfo beginInfo;
-	std::vector<VertexInputBinding> vertexInputBindings;
-	IndexBufferBinding indexBufferBinding;
-	GLenum primitiveTopology{ GL_NONE };
+	RenderPass::Handle	renderPass;
+	FrameBuffer::Handle	framebuffer;
+	Rect2D				renderArea;
+	std::vector<ClearValue>			clearValues;
+	std::vector<VertexInputBinding>	vertexInputBindings;
+	IndexBufferBinding				indexBufferBinding;
+	GLenum							primitiveTopology{ GL_NONE };
 };
 struct ExecutionState {
 	bool				once{ false };
 	RenderPass			renderPass{};
-	uint32_t				subpassIndex{ 0 };
+	uint32_t			subpassIndex{ 0 };
 	std::array<Pipeline::Handle, size_t(Pipeline::BindingPoint::MaxValue)> pipelineState{};
 	DynamicStates		dynamicStates;
 };

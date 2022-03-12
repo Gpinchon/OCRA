@@ -8,11 +8,10 @@
 #pragma once
 
 #include <Handle.hpp>
-#include <Scalar.hpp>
 #include <IndexType.hpp>
 #include <VertexType.hpp>
 
-#include <array>
+#include <vector>
 
 namespace OCRA::Pipeline::VertexInputState {
 struct AttributeDescription {
@@ -31,15 +30,11 @@ struct BindingDescription {
     enum class InputRate {
         Vertex, //use vertex attribute
         Instance //use instance index
-    } inputRate{ InputRate::Vertex }; //source of the data
+    } inputRate{ InputRate::Vertex }; //is the data divided by vertex or by instance ?
 };
 struct Info {
-    static constexpr auto MaxAttributes = 32;
-    static constexpr auto MaxBindings = 32;
     uint32_t primitiveRestartIndex{ 0 };
-    uint8_t attributeDescriptionCount{ 0 };
-    std::array<AttributeDescription, MaxAttributes> attributeDescriptions;
-    uint8_t bindingDescriptionCount{ 0 };
-    std::array<BindingDescription, MaxBindings> bindingDescriptions;
+    std::vector<AttributeDescription> attributeDescriptions;
+    std::vector<BindingDescription> bindingDescriptions;
 };
 }

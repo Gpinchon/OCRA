@@ -9,7 +9,7 @@
 #include <Handle.hpp>
 #include <Pipeline/DepthStencilState.hpp>
 
-#include <GL/Command/Buffer/ExecutionState.hpp>
+#include <GL/Command/ExecutionState.hpp>
 #include <GL/Compare.hpp>
 #include <GL/Stencil.hpp>
 #include <GL/glew.h>

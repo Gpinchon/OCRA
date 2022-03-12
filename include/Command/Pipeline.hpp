@@ -6,8 +6,13 @@
 */
 #pragma once
 
-#include <Handle.hpp>
-#include <Pipeline/BindingPoint.hpp>
+#include <Command/Buffer.hpp>
+#include <Pipeline/Pipeline.hpp>
+
+namespace OCRA::Pipeline
+{
+enum class BindingPoint;
+}
 
 namespace OCRA::Command::Pipeline
 {

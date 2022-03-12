@@ -7,7 +7,6 @@
 #pragma once
 
 #include <Pipeline/MultisampleState.hpp>
-#include <Scalar.hpp>
 
 #include <array>
 

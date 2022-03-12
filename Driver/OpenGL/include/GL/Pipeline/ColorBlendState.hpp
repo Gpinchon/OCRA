@@ -9,7 +9,7 @@
 #include <Pipeline/ColorBlendState.hpp>
 #include <Pipeline/DynamicState.hpp>
 
-#include <GL/Command/Buffer/ExecutionState.hpp>
+#include <GL/Command/ExecutionState.hpp>
 #include <GL/Blend.hpp>
 #include <GL/Logic.hpp>
 #include <GL/glew.h>

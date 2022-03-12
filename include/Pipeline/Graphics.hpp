@@ -18,22 +18,22 @@
 #include <Pipeline/TessellationState.hpp>
 #include <Pipeline/VertexInputState.hpp>
 #include <Pipeline/ViewPortState.hpp>
-#include <Scalar.hpp>
+
+#include <vector>
 
 namespace OCRA::Pipeline::Graphics {
 struct Info { //describes a graphics pipeline with each stage
-	RenderPass::Handle renderPass{ 0 }; //a handle to a previously created render pass
-	Int8 subPass{ -1 }; //-1 means no subpass
-    ShaderPipelineState::Info shaderPipelineState;
-    ColorBlendState::Info colorBlendState;
-    DepthStencilState::Info depthStencilState;
-    InputAssemblyState::Info inputAssemblyState;
-    MultisampleState::Info multisampleState;
-    RasterizationState::Info rasterizationState;
-    TessellationState::Info tessellationState;
-    VertexInputState::Info vertexInputState;
-    ViewPortState::Info viewPortState;
-    DynamicState::Info dynamicState;
+	RenderPass::Handle          renderPass{ 0 }; //a handle to a previously created render pass
+    ShaderPipelineState::Info   shaderPipelineStates;
+    ColorBlendState::Info       colorBlendState;
+    DepthStencilState::Info     depthStencilState;
+    InputAssemblyState::Info    inputAssemblyState;
+    MultisampleState::Info      multisampleState;
+    RasterizationState::Info    rasterizationState;
+    TessellationState::Info     tessellationState;
+    VertexInputState::Info      vertexInputState;
+    ViewPortState::Info         viewPortState;
+    DynamicState::Info          dynamicState;
 };
 Handle Create(const Device::Handle& a_Device, const Info& a_Info);
 const Info& GetInfo(const Device::Handle& a_Device, const Handle& a_Handle);

@@ -11,7 +11,7 @@
 
 #include <array>
 
-#include <GL/Command/Buffer/ExecutionState.hpp>
+#include <GL/Command/ExecutionState.hpp>
 #include <GL/glew.h>
 
 namespace OCRA::Pipeline::ViewPortState {

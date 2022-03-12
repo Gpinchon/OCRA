@@ -7,7 +7,6 @@
 #pragma once
 
 #include <Handle.hpp>
-#include <Scalar.hpp>
 
 namespace OCRA::State::Draw {
 struct Info {

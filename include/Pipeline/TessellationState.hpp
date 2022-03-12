@@ -6,8 +6,6 @@
 */
 #pragma once
 
-#include <Scalar.hpp>
-
 namespace OCRA::Pipeline::TessellationState {
 struct Info {
     uint32_t patchControlPoints { 0 };

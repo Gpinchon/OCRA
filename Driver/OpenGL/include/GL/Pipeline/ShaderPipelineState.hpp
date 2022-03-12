@@ -6,9 +6,9 @@
 */
 #pragma once
 
-#include <Handle.hpp>
+#include <Device.hpp>
+#include <Pipeline/ShaderPipelineState.hpp>
 
-#include <GL/Pipeline/ShaderPipelinePool.hpp>
 #include <GL/glew.h>
 
 namespace OCRA::Pipeline::DynamicState {
@@ -20,12 +20,18 @@ struct ExecutionState;
 }
 
 namespace OCRA::Pipeline::ShaderPipelineState {
-//compiles the specified stages into a program
-struct Compile {
-	Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info&);
-	void operator()(Command::Buffer::ExecutionState&) const noexcept {
-		glBindProgramPipeline(shaderPipelineRef->handle);
+//compiles the specified stages into a program pipeline
+inline auto Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info&)
+{
+	Gluint handle;
+	glGenProgramPipelines(1, &handle);
+	for (const auto& stage : a_Info.stages) {
+		const auto& stageInfo{ Shader::Stage::GetInfo(stage) };
+		const auto& stageGLHandle{ Shader::Stage::GetGLHandle(stage) };
+		glUseProgramStages(handle, Shader::Stage::GetGLStage(stageInfo.stage), stageGLHandle);
 	}
-	ShaderPipelinePool::Reference shaderPipelineRef;
-};
+	return [handle](Command::Buffer::ExecutionState&){
+		glBindProgramPipeline(handle);
+	};
+}
 }

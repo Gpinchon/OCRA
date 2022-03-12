@@ -35,6 +35,7 @@ set(OCRA_IMPL_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Buffer/Buffer.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Buffer/Transfer.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Buffer/Vertex.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Command/Buffer.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Image/Format.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Image/Image.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Image/View.hpp
@@ -43,10 +44,8 @@ set(OCRA_IMPL_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/MultisampleState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/Pipeline.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/RasterizationState.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/ShaderPipelinePool.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/ShaderPipelineState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/TessellationState.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/VAOPool.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/VertexInputState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/ViewPortState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Shader/Stage.hpp
@@ -56,11 +55,12 @@ set(OCRA_IMPL_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Buffer/Transfer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Buffer/Vertex.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Buffer.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Draw.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Pipeline.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/RenderPass.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Image/Image.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Image/View.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/Graphics.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/ShaderPipelineState.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/VertexInputState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Shader/Stage.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Shader/Module.cpp
 )

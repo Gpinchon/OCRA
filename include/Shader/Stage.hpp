@@ -17,15 +17,15 @@ HANDLE(OCRA::Shader::Stage);
 
 namespace OCRA::Shader::Stage {
 typedef std::bitset<6> StageFlag;
-constexpr StageFlag None = 0b000000;
-constexpr StageFlag Vertex = 0b100000;
-constexpr StageFlag Geometry = 0b010000;
-constexpr StageFlag Fragment = 0b001000;
-constexpr StageFlag Compute = 0b000100;
+constexpr StageFlag None        = 0b000000;
+constexpr StageFlag Vertex      = 0b100000;
+constexpr StageFlag Geometry    = 0b010000;
+constexpr StageFlag Fragment    = 0b001000;
+constexpr StageFlag Compute     = 0b000100;
 constexpr StageFlag TessControl = 0b000010;
-constexpr StageFlag TessEval = 0b000001;
+constexpr StageFlag TessEval    = 0b000001;
 constexpr StageFlag AllGraphics = 0b111000; //Vertex | Geometry | Fragment
-constexpr StageFlag All = 0b111111;
+constexpr StageFlag All         = 0b111111;
 enum class Stage {
     None,
     Vertex,
@@ -47,9 +47,10 @@ struct SpecializationInfo {
 };
 struct Info {
     Stage stage { Stage::None };
-    Module::Handle module;
+    Module::Handle module; //the spir-v module
     std::string name { "" }; //entry point name
     SpecializationInfo specializationInfo;
 };
 Handle Create(const Device::Handle& a_Device, const Info& a_Info);
+const Info& GetInfo(const Handle& a_Handle);
 }
