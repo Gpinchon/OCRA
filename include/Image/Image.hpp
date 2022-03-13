@@ -6,12 +6,11 @@
 */
 #pragma once
 
+#include <Common/Extent3D.hpp>
 #include <Device.hpp>
-#include <Extent3D.hpp>
 #include <Handle.hpp>
 #include <Image/Format.hpp>
 
-#include <bitset>
 #include <vector>
 
 HANDLE(OCRA::Image);
@@ -42,4 +41,39 @@ struct Info {
     bool fixedSampleLocations { false };
 };
 Handle Create(const Device::Handle& a_Device, const Info& a_Info);
+}
+
+#include <Buffer.hpp>
+#include <Common/Offset3D.hpp>
+#include <Command/Buffer.hpp>
+
+namespace OCRA::Command
+{
+struct SubresourceLayers {
+    /*
+    * //TODO support aspect copy for OGL
+    enum class Aspect {
+        Unknown = -1, Color, Depth, Stencil, DepthStencil, MaxValue
+    } aspect{ Aspect::Unknown };
+    */
+    uint32_t level{ 0 }; //indicates the base level (mipmap or array layer) used for the copy
+};
+struct BufferImageCopy {
+    uint64_t bufferOffset{ 0 };
+    uint32_t bufferRowLength{ 0 };
+    uint32_t bufferImageHeight{ 0 };
+    SubresourceLayers imageSubresource;
+    Offset3D imageOffset;
+    Extent3D imageExtent;
+};
+void CopyBufferToImage(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const OCRA::Buffer::Handle& a_SrcBuffer,
+    const Image::Handle& a_DstImage,
+    const std::vector<BufferImageCopy>& a_Regions);
+void CopyImageToBuffer(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const OCRA::Buffer::Handle& a_DstBuffer,
+    const Image::Handle& a_SrcImage,
+    const std::vector<BufferImageCopy>& a_Regions);
 }

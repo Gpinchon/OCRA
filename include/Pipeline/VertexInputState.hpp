@@ -8,8 +8,8 @@
 #pragma once
 
 #include <Handle.hpp>
-#include <IndexType.hpp>
-#include <VertexType.hpp>
+#include <Common/IndexType.hpp>
+#include <Common/VertexType.hpp>
 
 #include <vector>
 

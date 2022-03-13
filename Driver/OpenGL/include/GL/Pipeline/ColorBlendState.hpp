@@ -10,8 +10,8 @@
 #include <Pipeline/DynamicState.hpp>
 
 #include <GL/Command/ExecutionState.hpp>
-#include <GL/Blend.hpp>
-#include <GL/Logic.hpp>
+#include <GL/Common/Blend.hpp>
+#include <GL/Common/Logic.hpp>
 #include <GL/glew.h>
 
 #include <functional>

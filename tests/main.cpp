@@ -24,7 +24,17 @@ Begin recording Command Buffer
 End recording Command Buffer
 */
 
+#include <Instance.hpp>
+
+using namespace OCRA;
+
 int main()
 {
-	
+	Instance::Handle instance;
+	{
+		Instance::Info instanceInfo;
+		instanceInfo.applicationInfo.name = "Test";
+		instance = Instance::Create(instanceInfo);
+	}
+	auto physicalDevices = Instance::EnumeratePhysicalDevice(instance);
 }

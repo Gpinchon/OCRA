@@ -9,7 +9,7 @@
 #include <Handle.hpp>
 #include <Image/Format.hpp>
 #include <Image/Image.hpp>
-#include <Component.hpp>
+#include <Common/Component.hpp>
 
 HANDLE(OCRA::Image::View);
 

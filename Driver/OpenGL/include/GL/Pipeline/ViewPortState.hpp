@@ -22,20 +22,18 @@ inline auto Compile(const Device::Handle& a_Device, const Info& a_Info, const Dy
 		dynamicViewport(a_DynamicState.Contains(DynamicState::State::Viewport)),
 		dynamicScissor(a_DynamicState.Contains(DynamicState::State::Scissor))
 	](Command::Buffer::ExecutionState& a_ExecutionState) {
-		const auto& scissorsCount = dynamicScissor ? a_ExecutionState.dynamicStates.scissorsCount : info.scissorsCount;
-		const auto& scissorsArray = dynamicScissor ? a_ExecutionState.dynamicStates.scissors : info.scissors;
-		for (auto index = 0u; index < scissorsCount; ++index) {
-			const auto& scissor = scissorsArray.at(index);
+		const auto& scissorsVector = dynamicScissor ? a_ExecutionState.dynamicStates.scissors : info.scissors;
+		for (auto index = 0u; index < scissorsVector.size(); ++index) {
+			const auto& scissor = scissorsVector.at(index);
 			glScissorIndexed(
 				index,
 				scissor.offset.x, scissor.offset.y,
 				scissor.extent.width, scissor.extent.height
 			);
 		}
-		const auto& viewPortsCount = dynamicViewport ? a_ExecutionState.dynamicStates.viewPortsCount : info.viewPortsCount;
-		const auto& viewPortsArray = dynamicViewport ? a_ExecutionState.dynamicStates.viewPorts : info.viewPorts;
-		for (auto index = 0u; index < viewPortsCount; ++index) {
-			const auto& viewPort = viewPortsArray.at(index);
+		const auto& viewPortsVector = dynamicViewport ? a_ExecutionState.dynamicStates.viewPorts : info.viewPorts;
+		for (auto index = 0u; index < viewPortsVector.size(); ++index) {
+			const auto& viewPort = viewPortsVector.at(index);
 			glViewportIndexedf(
 				index,
 				viewPort.rect.offset.x, viewPort.rect.offset.y,

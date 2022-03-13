@@ -8,6 +8,7 @@
 //See SwiftShader !
 #include <Command/Buffer.hpp>
 
+#include <GL/Command/Buffer.hpp>
 #include <GL/Command/ExecutionState.hpp>
 
 #include <functional>

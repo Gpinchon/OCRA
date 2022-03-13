@@ -6,13 +6,13 @@
 */
 #pragma once
 
-#include <Sample.hpp>
+#include <Common/SampleCount.hpp>
 
 #include <array>
 
 namespace OCRA::Pipeline::MultisampleState {
 struct Info {
-    Sample::Count rasterizationSamples { Sample::Count::Count1 };
+    SampleCount rasterizationSamples { SampleCount::Count1 };
     bool sampleShadingEnable { false };
     float minSampleShading { 1 };
     std::array<uint32_t, 32> sampleMasks; //sampleMask size == rasterizationSamples / 32

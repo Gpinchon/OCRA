@@ -7,9 +7,9 @@
 #pragma once
 
 #include <Common/Vec4.hpp>
-#include <Blend.hpp>
+#include <Common/Blend.hpp>
+#include <Common/Logic.hpp>
 #include <FrameBuffer.hpp>
-#include <Logic.hpp>
 
 #include <array>
 

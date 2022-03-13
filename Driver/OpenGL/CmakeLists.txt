@@ -26,16 +26,16 @@ if(NOT GLEW_POPULATED)
   set(GLEW_LIBRARIES GLEW::glew GLEW::glew_s)
 endif()
 set(OCRA_IMPL_HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Blend.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Compare.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Logic.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/ObjectPool.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Stencil.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/VertexType.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Buffer/Buffer.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Buffer/Transfer.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Buffer/Vertex.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/PhysicalDevice.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Command/Buffer.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Command/ExecutionState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Common/Blend.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Common/Compare.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Common/IndexType.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Common/Logic.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Common/Stencil.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Common/VertexType.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Image/Format.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Image/Image.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Image/View.hpp
@@ -51,16 +51,16 @@ set(OCRA_IMPL_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Shader/Stage.hpp
 )
 set(OCRA_IMPL_SOURCE_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Buffer.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Instance.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/PhysicalDevice.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Queue.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Buffer/Transfer.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Buffer/Vertex.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Buffer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Draw.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Pipeline.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/RenderPass.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Image/Image.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Image/View.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/Graphics.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/Pipeline.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Shader/Stage.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Shader/Module.cpp
 )

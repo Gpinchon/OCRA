@@ -30,6 +30,7 @@ struct Info { //describes a graphics pipeline with each stage
     InputAssemblyState::Info    inputAssemblyState;
     MultisampleState::Info      multisampleState;
     RasterizationState::Info    rasterizationState;
+    ShaderPipelineState::Info   shaderPipelineState;
     TessellationState::Info     tessellationState;
     VertexInputState::Info      vertexInputState;
     ViewPortState::Info         viewPortState;

@@ -10,8 +10,8 @@
 #include <Pipeline/DepthStencilState.hpp>
 
 #include <GL/Command/ExecutionState.hpp>
-#include <GL/Compare.hpp>
-#include <GL/Stencil.hpp>
+#include <GL/Common/Compare.hpp>
+#include <GL/Common/Stencil.hpp>
 #include <GL/glew.h>
 
 namespace OCRA::Pipeline::DepthStencilState {

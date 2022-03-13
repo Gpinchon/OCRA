@@ -6,9 +6,9 @@
 */
 #include <Device.hpp>
 #include <Handle.hpp>
-#include <ViewPort.hpp>
+#include <Viewport.hpp>
 
-namespace OCRA::ViewPort {
+namespace OCRA::Viewport {
 struct Impl {
     Impl(const Info& a_Info) : info(a_Info) {};
     Info info;

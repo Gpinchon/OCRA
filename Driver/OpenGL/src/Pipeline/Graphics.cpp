@@ -66,7 +66,7 @@ Handle Create(const Device::Handle& a_Device, const Info& a_Info) {
 	return Handle(new Graphics::Impl(a_Device, a_Info));
 }
 const Info& GetInfo(const Device::Handle& a_Device, const Handle& a_Handle) {
-	asser(a_Handle->bindingPoint == BindingPoint::Graphics);
+	assert(a_Handle->bindingPoint == BindingPoint::Graphics);
     return std::static_pointer_cast<Impl>(a_Handle)->info;
 }
 }

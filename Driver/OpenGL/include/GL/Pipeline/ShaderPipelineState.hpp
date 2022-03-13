@@ -9,6 +9,7 @@
 #include <Device.hpp>
 #include <Pipeline/ShaderPipelineState.hpp>
 
+#include <GL/Shader/Stage.hpp>
 #include <GL/glew.h>
 
 namespace OCRA::Pipeline::DynamicState {
@@ -23,7 +24,7 @@ namespace OCRA::Pipeline::ShaderPipelineState {
 //compiles the specified stages into a program pipeline
 inline auto Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info&)
 {
-	Gluint handle;
+	GLuint handle;
 	glGenProgramPipelines(1, &handle);
 	for (const auto& stage : a_Info.stages) {
 		const auto& stageInfo{ Shader::Stage::GetInfo(stage) };

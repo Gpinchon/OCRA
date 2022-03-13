@@ -7,13 +7,13 @@
 #pragma once
 
 #include <Common/Rect2D.hpp>
-#include <ViewPort.hpp>
+#include <Viewport.hpp>
 
 #include <vector>
 
 namespace OCRA::Pipeline::ViewPortState {
 struct Info {
-    std::vector<ViewPort::Info> viewPorts;
+    std::vector<Viewport::Info> viewPorts;
     std::vector<Rect<2, int32_t>> scissors;
 };
 }

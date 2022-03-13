@@ -10,8 +10,7 @@
 #include <Pipeline/VertexInputState.hpp>
 
 #include <GL/Command/ExecutionState.hpp>
-#include <GL/Buffer/Vertex.hpp>
-#include <GL/VertexType.hpp>
+#include <GL/Common/VertexType.hpp>
 #include <GL/glew.h>
 
 namespace OCRA::Pipeline::VertexInputState {

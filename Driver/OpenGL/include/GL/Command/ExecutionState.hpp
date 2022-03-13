@@ -1,18 +1,19 @@
 #pragma once
 
-#include <Handle.hpp>
-#include <Pipeline/BindingPoint.hpp>
+#include <Common/ClearValue.hpp>
+#include <Common/Compare.hpp>
 #include <Common/DepthBounds.hpp>
+#include <Common/Stencil.hpp>
 #include <Common/Rect2D.hpp>
 #include <Common/Vec4.hpp>
-#include <Compare.hpp>
-#include <Stencil.hpp>
-#include <ViewPort.hpp>
+#include <Handle.hpp>
+#include <Pipeline/Pipeline.hpp>
+
+#include <Viewport.hpp>
 #include <FrameBuffer.hpp>
-#include <ClearValue.hpp>
 #include <RenderPass.hpp>
 
-#include <GL/Stencil.hpp>
+#include <GL/Common/Stencil.hpp>
 #include <GL/glew.h>
 
 #include <vector>
@@ -48,13 +49,13 @@ struct VertexInputBinding {
 	uint64_t offset{ 0 };
 };
 struct IndexBufferBinding : VertexInputBinding {
-	GLenum indexType{ GL_NONE };
+	GLenum type{ GL_NONE };
 };
 struct RenderPass
 {
-	RenderPass::Handle	renderPass;
-	FrameBuffer::Handle	framebuffer;
-	Rect2D				renderArea;
+	OCRA::RenderPass::Handle	renderPass;
+	FrameBuffer::Handle			framebuffer;
+	Rect2D						renderArea;
 	std::vector<ClearValue>			clearValues;
 	std::vector<VertexInputBinding>	vertexInputBindings;
 	IndexBufferBinding				indexBufferBinding;
@@ -64,7 +65,7 @@ struct ExecutionState {
 	bool				once{ false };
 	RenderPass			renderPass{};
 	uint32_t			subpassIndex{ 0 };
-	std::array<Pipeline::Handle, size_t(Pipeline::BindingPoint::MaxValue)> pipelineState{};
+	std::array<OCRA::Pipeline::Handle, size_t(OCRA::Pipeline::BindingPoint::MaxValue)> pipelineState{};
 	DynamicStates		dynamicStates;
 };
 }

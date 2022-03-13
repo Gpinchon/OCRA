@@ -9,7 +9,7 @@
 #include <Common/Rect2D.hpp>
 #include <Common/DepthRange.hpp>
 
-namespace OCRA::ViewPort {
+namespace OCRA::Viewport {
 struct Info {
     Rect2D rect;
     DepthRange<double> depthRange;

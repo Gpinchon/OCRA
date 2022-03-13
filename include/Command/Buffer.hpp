@@ -6,6 +6,7 @@
 */
 #pragma once
 
+#include <Device.hpp>
 #include <Handle.hpp>
 
 HANDLE(OCRA::Command::Buffer);
@@ -20,12 +21,12 @@ Handle Create(const Device::Handle& a_Device);
 //Command Buffer relative commands
 namespace OCRA::Command
 {
-//Begin Command Buffer recording, swutcgubg it to Recording state
-void BeginCommandBuffer(const Handle& a_CommandBuffer);
+//Begin Command Buffer recording, switching it to Recording state
+void BeginCommandBuffer(const Buffer::Handle& a_CommandBuffer);
 //End Command Buffer recording, switching it to Executable state
-void EndCommandBuffer(const Handle& a_CommandBuffer);
+void EndCommandBuffer(const Buffer::Handle& a_CommandBuffer);
 //Reset Command Buffer to Initial state
-void ResetCommandBuffer(const Handle& a_CommandBuffer);
+void ResetCommandBuffer(const Buffer::Handle& a_CommandBuffer);
 //Add a secondary Command Buffer to execute
 void ExecuteCommands(
 	const Buffer::Handle& a_CommandBuffer,

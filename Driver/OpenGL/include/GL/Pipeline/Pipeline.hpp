@@ -1,7 +1,6 @@
 #pragma once
 
 #include <Pipeline/Pipeline.hpp>
-#include <Pipeline/BindingPoint.hpp>
 
 #include <functional>
 

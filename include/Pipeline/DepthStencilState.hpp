@@ -7,8 +7,8 @@
 #pragma once
 
 #include <Common/DepthBounds.hpp>
-#include <Compare.hpp>
-#include <Stencil.hpp>
+#include <Common/Compare.hpp>
+#include <Common/Stencil.hpp>
 
 namespace OCRA::Pipeline::DepthStencilState {
 struct Info {

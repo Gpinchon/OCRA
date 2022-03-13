@@ -6,12 +6,12 @@
 */
 #pragma once
 
+#include <Common/Rect2D.hpp>
 #include <Framebuffer.hpp>
 #include <Handle.hpp>
 #include <Image/Format.hpp>
-#include <Pipeline/BindingPoint.hpp>
-#include <Common/Rect2D.hpp>
-#include <Sample.hpp>
+#include <Pipeline/Pipeline.hpp>
+#include <Common/SampleCount.hpp>
 
 #include <vector>
 
@@ -36,7 +36,7 @@ struct AttachmentDescription {
 		MaxValue
 	};
 	Image::Format format{ Image::Format::Unknown };
-	Sample::Count samples{ Sample::Count::Count1 };
+	SampleCount samples{ SampleCount::Count1 };
 	//load/store for color/depth buffer
 	LoadOperation loadOp{ LoadOperation::DontCare }; //determines what to do with the buffer before rendering
 	StoreOperation storeOp{ StoreOperation::DontCare }; //determines what to do with the buffer after rendering
@@ -55,15 +55,12 @@ struct AttachmentReference {
 struct SubPassDescription {
 	constexpr static auto MaxAttachments = 32;
 	Pipeline::BindingPoint pipelineBindPoint{ Pipeline::BindingPoint::Unknown };
-	uint8_t inputAttachmentCount{ 0 };
-	std::array<AttachmentReference, MaxAttachments> inputAttachments;
-	uint8_t colorAttachmentCount{ 0 };
-	std::array<AttachmentReference, MaxAttachments> colorAttachments;
+	std::vector<AttachmentReference> inputAttachments;
+	std::vector<AttachmentReference> colorAttachments;
 	AttachmentReference resolveAttachment;
 	AttachmentReference depthStencilAttachment;
 	//describes attachments not used by this subpass but whose content must pe preserved
-	uint8_t preserveAttachmentCount{ 0 };
-	std::array<AttachmentReference, MaxAttachments> preserveAttachments;
+	std::vector<AttachmentReference> preserveAttachments;
 };
 
 struct SubPassDependency {
