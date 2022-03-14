@@ -25,6 +25,6 @@ Handle Create(
  *  - Vulkan
  */
 const std::string& GetType(const Handle& a_Instance);
-const std::vector<PhysicalDevice::Handle>& EnumeratePhysicalDevice(const Instance::Handle& a_Instance);
+const std::vector<PhysicalDevice::Handle>& EnumeratePhysicalDevices(const Instance::Handle& a_Instance);
 const Info& GetInfo(const Handle& a_Instance);
 }

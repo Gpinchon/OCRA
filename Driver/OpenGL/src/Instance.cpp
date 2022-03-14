@@ -6,11 +6,15 @@
 
 namespace OCRA::Instance
 {
+auto GetPhysicalDevices()
+{
+	return { PhysicalDevice::Create() }; //OGL has only one device :/
+}
 struct Impl
 {
 	Impl(const Info& a_Info)
 		: info(a_Info)
-		, physicalDevices({ PhysicalDevice::Create() }) //OGL has only one device :/
+		, physicalDevices(GetPhysicalDevices())
 	{}
 	const Info info;
 	const std::vector<PhysicalDevice::Handle> physicalDevices;
@@ -30,7 +34,7 @@ const Info& GetInfo(const Handle& a_Instance)
 {
 	return a_Instance->info;
 }
-const std::vector<PhysicalDevice::Handle>& EnumeratePhysicalDevice(const Instance::Handle& a_Instance)
+const std::vector<PhysicalDevice::Handle>& EnumeratePhysicalDevices(const Instance::Handle& a_Instance)
 {
 	return a_Instance->physicalDevices;
 }

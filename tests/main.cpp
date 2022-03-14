@@ -36,5 +36,5 @@ int main()
 		instanceInfo.applicationInfo.name = "Test";
 		instance = Instance::Create(instanceInfo);
 	}
-	auto physicalDevices = Instance::EnumeratePhysicalDevice(instance);
+	auto physicalDevices = Instance::EnumeratePhysicalDevices(instance);
 }

@@ -4,7 +4,9 @@ namespace OCRA::PhysicalDevice
 {
 struct Impl
 {
-	Impl() {}
+	Impl()
+	{
+	}
 	Properties properties;
 };
 Handle Create()
