@@ -9,11 +9,140 @@
 
 #include <d3d9.h>
 
+#include <windows.h>
+#include <winuser.h>
+
+#include <GL/glew.h>
+
 namespace OCRA::PhysicalDevice
 {
-//DirectX to the rescue !
-int GetPhysicalDeviceDX9()
+Limits GetPhysicalDeviceLimitsGL()
 {
+    glGetInteger(GL_MAX_TEXTURE_SIZE, &properties.limits.maxImageDimension1D);
+    glGetInteger(GL_MAX_RECTANGLE_TEXTURE_SIZE, &properties.limits.maxImageDimension2D);
+    glGetInteger(GL_MAX_3D_TEXTURE_SIZE, &properties.limits.maxImageDimension3D);
+    glGetInteger(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &properties.limits.maxImageDimensionCube);
+    glGetInteger(GL_MAX_ARRAY_TEXTURE_LAYERS, &properties.limits.maxImageArrayLayers);
+    glGetInteger(GL_MAX_TEXTURE_BUFFER_SIZE, &properties.limits.maxTexelBufferElements);
+    glGetInteger(GL_MAX_UNIFORM_BLOCK_SIZE, &properties.limits.maxUniformBufferRange);
+    glGetInteger(GL_MAX_COMBINED_SHADER_STORAGE_BLOCKS, &properties.limits.maxStorageBufferRange);
+    glGetInteger(    , &properties.limits.maxPushConstantsSize);
+    glGetInteger(    , &properties.limits.maxMemoryAllocationCount);
+    glGetInteger(    , &properties.limits.maxSamplerAllocationCount);
+    glGetInteger(    , &properties.limits.bufferImageGranularity);
+    glGetInteger(    , &properties.limits.sparseAddressSpaceSize);
+    glGetInteger(    , &properties.limits.maxBoundDescriptorSets);
+
+    glGetInteger(    , &properties.limits.maxPerStageDescriptorSamplers);
+    glGetInteger(    , &properties.limits.maxPerStageDescriptorUniformBuffers);
+    glGetInteger(    , &properties.limits.maxPerStageDescriptorStorageBuffers);
+    glGetInteger(    , &properties.limits.maxPerStageDescriptorSampledImages);
+    glGetInteger(    , &properties.limits.maxPerStageDescriptorStorageImages);
+    glGetInteger(    , &properties.limits.maxPerStageDescriptorInputAttachments);
+    glGetInteger(    , &properties.limits.maxPerStageResources);
+
+    glGetInteger(    , &properties.limits.maxDescriptorSetSamplers);
+    glGetInteger(    , &properties.limits.maxDescriptorSetUniformBuffers);
+    glGetInteger(    , &properties.limits.maxDescriptorSetUniformBuffersDynamic);
+    glGetInteger(    , &properties.limits.maxDescriptorSetStorageBuffers);
+    glGetInteger(    , &properties.limits.maxDescriptorSetStorageBuffersDynamic);
+    glGetInteger(    , &properties.limits.maxDescriptorSetSampledImages);
+    glGetInteger(    , &properties.limits.maxDescriptorSetStorageImages);
+    glGetInteger(    , &properties.limits.maxDescriptorSetInputAttachments);
+
+    glGetInteger(GL_MAX_VERTEX_ATTRIBS, &properties.limits.maxVertexInputAttributes);
+    glGetInteger(GL_MAX_VERTEX_ATTRIB_BINDINGS, &properties.limits.maxVertexInputBindings);
+    glGetInteger(    , &properties.limits.maxVertexInputAttributeOffset);
+    glGetInteger(    , &properties.limits.maxVertexInputBindingStride);
+    glGetInteger(GL_MAX_VERTEX_OUTPUT_COMPONENTS, &properties.limits.maxVertexOutputComponents);
+
+    glGetInteger(    , &properties.limits.maxTessellationGenerationLevel);
+    glGetInteger(    , &properties.limits.maxTessellationPatchSize);
+    glGetInteger(    , &properties.limits.maxTessellationControlPerVertexInputComponents);
+    glGetInteger(    , &properties.limits.maxTessellationControlPerVertexOutputComponents);
+    glGetInteger(    , &properties.limits.maxTessellationControlPerPatchOutputComponents);
+    glGetInteger(    , &properties.limits.maxTessellationControlTotalOutputComponents);
+    glGetInteger(    , &properties.limits.maxTessellationEvaluationInputComponents);
+    glGetInteger(    , &properties.limits.maxTessellationEvaluationOutputComponents);
+
+    glGetInteger(    , &properties.limits.maxGeometryShaderInvocations);
+    glGetInteger(GL_MAX_GEOMETRY_INPUT_COMPONENTS, &properties.limits.maxGeometryInputComponents);
+    glGetInteger(GL_MAX_GEOMETRY_OUTPUT_COMPONENTS, &properties.limits.maxGeometryOutputComponents);
+    glGetInteger(    , &properties.limits.maxGeometryOutputVertices);
+    glGetInteger(    , &properties.limits.maxGeometryTotalOutputComponents);
+
+    glGetInteger(GL_MAX_FRAGMENT_INPUT_COMPONENTS, &properties.limits.maxFragmentInputComponents);
+    glGetInteger(    , &properties.limits.maxFragmentOutputAttachments);
+    glGetInteger(    , &properties.limits.maxFragmentDualSrcAttachments);
+    glGetInteger(    , &properties.limits.maxFragmentCombinedOutputResources);
+
+    glGetInteger(    , &properties.limits.maxComputeSharedMemorySize);
+    glGetInteger(GL_MAX_COMPUTE_WORK_GROUP_COUNT, &properties.limits.maxComputeWorkGroupCount);
+    glGetInteger(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS, &properties.limits.maxComputeWorkGroupInvocations);
+    glGetInteger(GL_MAX_COMPUTE_WORK_GROUP_SIZE, &properties.limits.maxComputeWorkGroupSize);
+    glGetInteger(    , &properties.limits.subPixelPrecisionBits);
+    glGetInteger(    , &properties.limits.subTexelPrecisionBits);
+    glGetInteger(    , &properties.limits.mipmapPrecisionBits);
+    glGetInteger(    , &properties.limits.maxDrawIndexedIndexValue);
+    glGetInteger(    , &properties.limits.maxDrawIndirectCount);
+    glGetInteger(    , &properties.limits.maxSamplerLodBias);
+    glGetInteger(    , &properties.limits.maxSamplerAnisotropy);
+    glGetInteger(    , &properties.limits.maxViewports);
+    glGetInteger(    , &properties.limits.maxViewportDimensions);
+    glGetInteger(    , &properties.limits.viewportBoundsRange);
+    glGetInteger(    , &properties.limits.viewportSubPixelBits);
+    glGetInteger(    , &properties.limits.minMemoryMapAlignment);
+    glGetInteger(    , &properties.limits.minTexelBufferOffsetAlignment);
+    glGetInteger(    , &properties.limits.minUniformBufferOffsetAlignment);
+    glGetInteger(    , &properties.limits.minStorageBufferOffsetAlignment);
+    glGetInteger(    , &properties.limits.minTexelOffset);
+    glGetInteger(    , &properties.limits.maxTexelOffset);
+    glGetInteger(    , &properties.limits.minTexelGatherOffset);
+    glGetInteger(    , &properties.limits.maxTexelGatherOffset);
+    glGetInteger(    , &properties.limits.minInterpolationOffset);
+    glGetInteger(    , &properties.limits.maxInterpolationOffset);
+    glGetInteger(    , &properties.limits.subPixelInterpolationOffsetBits);
+    glGetInteger(    , &properties.limits.maxFramebufferWidth);
+    glGetInteger(    , &properties.limits.maxFramebufferHeight);
+    glGetInteger(    , &properties.limits.maxFramebufferLayers);
+    glGetInteger(    , &properties.limits.framebufferColorSampleCounts);
+    glGetInteger(    , &properties.limits.framebufferDepthSampleCounts);
+    glGetInteger(    , &properties.limits.framebufferStencilSampleCounts);
+    glGetInteger(GL_MAX_FRAMEBUFFER_SAMPLES, &properties.limits.framebufferNoAttachmentsSampleCounts);
+    glGetInteger(    , &properties.limits.maxColorAttachments);
+    glGetInteger(GL_MAX_COLOR_TEXTURE_SAMPLES, &properties.limits.sampledImageColorSampleCounts);
+    glGetInteger(GL_MAX_INTEGER_SAMPLES, &properties.limits.sampledImageIntegerSampleCounts);
+    glGetInteger(GL_MAX_DEPTH_TEXTURE_SAMPLES, &properties.limits.sampledImageDepthSampleCounts);
+    glGetInteger(    , &properties.limits.sampledImageStencilSampleCounts);
+    glGetInteger(    , &properties.limits.storageImageSampleCounts);
+    glGetInteger(    , &properties.limits.maxSampleMaskWords);
+    glGetInteger(    , &properties.limits.timestampComputeAndGraphics);
+    glGetInteger(    , &properties.limits.timestampPeriod);
+    glGetInteger(    , &properties.limits.maxClipDistances);
+    glGetInteger(    , &properties.limits.maxCullDistances);
+    glGetInteger(    , &properties.limits.maxCombinedClipAndCullDistances);
+    glGetInteger(    , &properties.limits.discreteQueuePriorities);
+    glGetInteger(    , &properties.limits.pointSizeRange);
+    glGetInteger(    , &properties.limits.lineWidthRange);
+    glGetInteger(    , &properties.limits.pointSizeGranularity);
+    glGetInteger(    , &properties.limits.lineWidthGranularity);
+    glGetInteger(    , &properties.limits.strictLines);
+    glGetInteger(    , &properties.limits.standardSampleLocations);
+    glGetInteger(    , &properties.limits.optimalBufferCopyOffsetAlignment);
+    glGetInteger(    , &properties.limits.optimalBufferCopyRowPitchAlignment);
+    glGetInteger(    , &properties.limits.nonCoherentAtomSize);
+    properties.sparseProperties = 0;
+}
+Properties GetPhysicalDeviceWGL()
+{
+    //device context handle
+    HDC     hdc   = GetDC(nullptr); //if hwnd is null, GetDC retrieves the DC for the entire screen 
+    //gl render context handle
+    HGLRC   hglrc = wglCreateContext(hdc);
+    wglMakeCurrent(hdc, hglrc);
+    if (glewInit() != GLEW_OK) throw std::runtime_error("Cound not initialize GLEW");
+
+    //DX9 to the rescue !
     auto pD3D = Direct3DCreate9(D3D_SDK_VERSION);
     D3DADAPTER_IDENTIFIER9  d3dIdentifier;
     D3DCAPS9                d3dCaps;
@@ -29,6 +158,21 @@ int GetPhysicalDeviceDX9()
     pD3D->GetAdapterDisplayMode(
         D3DADAPTER_DEFAULT,
         &d3dDisplayMode);
+    pD3D->Release();
+    Properties properties;
+    properties.apiVersion = 430;
+    properties.driverVersion = d3dIdentifier.DriverVersion;
+    properties.vendorID = d3dIdentifier.VendorId;
+    properties.deviceID = d3dIdentifier.DeviceId;
+    properties.deviceType = Type::Other;
+    properties.deviceName = d3dIdentifier.DeviceName;
+    properties.pipelineCacheUUID = 0;
+    properties.limits = GetLimits();
+
+    wglMakeCurrent(hdc, nullptr);
+    wglDeleteContext(hglrc);
+    ReleaseDC(hdc);
+    return properties;
 }
 int GetPhysicalDeviceWMI()
 {
