@@ -1,12 +1,15 @@
 #pragma once
 
 #include <Handle.hpp>
+#include <Common/Extent3D.hpp>
 #include <Common/SampleCount.hpp>
 
 #include <string>
 #include <array>
+#include <bitset>
+#include <vector>
 
-HANDLE(OCRA::PhysicalDevice);
+OCRA_DECLARE_HANDLE(OCRA::PhysicalDevice);
 
 namespace OCRA::PhysicalDevice
 {
@@ -135,14 +138,89 @@ enum class Type {
 };
 struct Properties {
     uint32_t				apiVersion{ 0 };
-    uint32_t				driverVersion{ 0 };
+    uint64_t				driverVersion{ 0 };
     uint32_t				vendorID{ 0 };
     uint32_t				deviceID{ 0 };
     Type					deviceType;
+    std::string				vendorName;
     std::string				deviceName;
     std::array<uint8_t, 16>	pipelineCacheUUID;
     Limits					limits;
     SparseProperties		sparseProperties;
 };
+struct Features {
+    bool    robustBufferAccess{ false };
+    bool    fullDrawIndexUint32{ false };
+    bool    imageCubeArray{ false };
+    bool    independentBlend{ false };
+    bool    geometryShader{ false };
+    bool    tessellationShader{ false };
+    bool    sampleRateShading{ false };
+    bool    dualSrcBlend{ false };
+    bool    logicOp{ false };
+    bool    multiDrawIndirect{ false };
+    bool    drawIndirectFirstInstance{ false };
+    bool    depthClamp{ false };
+    bool    depthBiasClamp{ false };
+    bool    fillModeNonSolid{ false };
+    bool    depthBounds{ false };
+    bool    wideLines{ false };
+    bool    largePoints{ false };
+    bool    alphaToOne{ false };
+    bool    multiViewport{ false };
+    bool    samplerAnisotropy{ false };
+    bool    textureCompressionETC2{ false };
+    bool    textureCompressionASTC_LDR{ false };
+    bool    textureCompressionBC{ false };
+    bool    occlusionQueryPrecise{ false };
+    bool    pipelineStatisticsQuery{ false };
+    bool    vertexPipelineStoresAndAtomics{ false };
+    bool    fragmentStoresAndAtomics{ false };
+    bool    shaderTessellationAndGeometryPointSize{ false };
+    bool    shaderImageGatherExtended{ false };
+    bool    shaderStorageImageExtendedFormats{ false };
+    bool    shaderStorageImageMultisample{ false };
+    bool    shaderStorageImageReadWithoutFormat{ false };
+    bool    shaderStorageImageWriteWithoutFormat{ false };
+    bool    shaderUniformBufferArrayDynamicIndexing{ false };
+    bool    shaderSampledImageArrayDynamicIndexing{ false };
+    bool    shaderStorageBufferArrayDynamicIndexing{ false };
+    bool    shaderStorageImageArrayDynamicIndexing{ false };
+    bool    shaderClipDistance{ false };
+    bool    shaderCullDistance{ false };
+    bool    shaderFloat64{ false };
+    bool    shaderInt64{ false };
+    bool    shaderInt16{ false };
+    bool    shaderResourceResidency{ false };
+    bool    shaderResourceMinLod{ false };
+    bool    sparseBinding{ false };
+    bool    sparseResidencyBuffer{ false };
+    bool    sparseResidencyImage2D{ false };
+    bool    sparseResidencyImage3D{ false };
+    bool    sparseResidency2Samples{ false };
+    bool    sparseResidency4Samples{ false };
+    bool    sparseResidency8Samples{ false };
+    bool    sparseResidency16Samples{ false };
+    bool    sparseResidencyAliased{ false };
+    bool    variableMultisampleRate{ false };
+    bool    inheritedQueries{ false };
+};
+using QueueFlags = std::bitset<5>;
+namespace QueueFlagsBits {
+static QueueFlags None = 0b00000;
+static QueueFlags Graphics = 0b10000;
+static QueueFlags Compute = 0b01000;
+static QueueFlags Transfer = 0b00100;
+static QueueFlags SparceBinding = 0b00010;
+static QueueFlags Protected = 0b00001;// VK_VERSION_1_1
+}
+struct QueueFamilyProperties {
+    QueueFlags  queueFlags{ QueueFlagsBits::None };
+    uint32_t    queueCount{ 0 };
+    uint32_t    timestampValidBits{ 0 };
+    Extent3D    minImageTransferGranularity;
+};
 const Properties& GetProperties(const Handle& a_PhysicalDevice);
+const Features& GetFeatures(const Handle& a_PhysicalDevice);
+const std::vector<QueueFamilyProperties> GetQueueFamilyProperties(const Handle& a_PhysicalDevice);
 }

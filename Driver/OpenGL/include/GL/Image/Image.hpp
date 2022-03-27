@@ -10,6 +10,8 @@
 
 #include <vector>
 
+OCRA_DECLARE_HANDLE(OCRA::Device);
+
 namespace OCRA::Image {
 unsigned GetGLHandle(const Device::Handle& a_Device, const Handle& a_Handle);
 }

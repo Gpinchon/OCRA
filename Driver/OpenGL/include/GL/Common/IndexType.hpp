@@ -30,7 +30,8 @@ static inline auto GetGLIndexType(const IndexType& a_IndexType)
 		throw std::runtime_error("Unknown Index Type");
 	}
 }
-static inline auto GetIndexTypeSize(const GLenum& a_IndexType){
+static inline auto GetIndexTypeSize(const GLenum& a_IndexType)
+{
 	switch (a_IndexType) {
 	case GL_UNSIGNED_BYTE :
 		return 1;

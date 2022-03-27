@@ -6,21 +6,30 @@
 */
 #pragma once
 
-#include <Command/Buffer.hpp>
 #include <Handle.hpp>
-#include <Pipeline/StageFlags.hpp>
-#include <Queue/Fence.hpp>
-#include <Queue/Semaphore.hpp>
 
 #include <vector>
 
-HANDLE(OCRA::Queue);
+OCRA_DECLARE_HANDLE(OCRA::Queue);
+OCRA_DECLARE_HANDLE(OCRA::Queue::Semaphore);
+OCRA_DECLARE_HANDLE(OCRA::Queue::Fence);
+OCRA_DECLARE_HANDLE(OCRA::Command::Buffer);
 
-namespace OCRA::Queue {
-struct SubmitInfo {
-	std::vector<Semaphore::SubmitInfo>			waitSemaphoreInfos;
-	std::vector<Command::Buffer::SubmitInfo>	commandBufferInfos;
-	std::vector<Semaphore::SubmitInfo>			signalSemaphoreInfos;
+namespace OCRA::Queue
+{
+struct Info {
+	uint32_t                    queueFamilyIndex;
+	uint32_t                    queueCount;
+	std::vector<float>          queuePriorities;
 };
-void Submit(const Handle& a_Queue, std::vector<SubmitInfo> a_SubmitInfos, const Fence::Handle& a_Fence);
+struct SubmitInfo
+{
+	std::vector<Semaphore::Handle>			waitSemaphores;
+	std::vector<Command::Buffer::Handle>	commandBuffers;
+	std::vector<Semaphore::Handle>			signalSemaphores;
+};
+void Submit(
+	const Handle& a_Queue,
+	std::vector<SubmitInfo> a_SubmitInfos,
+	const Fence::Handle& a_Fence);
 }

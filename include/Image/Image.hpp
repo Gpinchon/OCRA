@@ -7,13 +7,13 @@
 #pragma once
 
 #include <Common/Extent3D.hpp>
-#include <Device.hpp>
 #include <Handle.hpp>
 #include <Image/Format.hpp>
 
 #include <vector>
 
-HANDLE(OCRA::Image);
+OCRA_DECLARE_HANDLE(OCRA::Image);
+OCRA_DECLARE_HANDLE(OCRA::Device);
 
 namespace OCRA::Image {
 //Image Info specs

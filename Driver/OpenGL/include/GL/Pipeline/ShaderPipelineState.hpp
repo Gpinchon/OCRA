@@ -6,11 +6,12 @@
 */
 #pragma once
 
-#include <Device.hpp>
 #include <Pipeline/ShaderPipelineState.hpp>
 
 #include <GL/Shader/Stage.hpp>
 #include <GL/glew.h>
+
+OCRA_DECLARE_HANDLE(OCRA::Device);
 
 namespace OCRA::Pipeline::DynamicState {
 struct Info;

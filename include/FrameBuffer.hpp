@@ -9,7 +9,7 @@
 #include <Handle.hpp>
 #include <Image/View.hpp>
 
-HANDLE(OCRA::FrameBuffer);
+OCRA_DECLARE_HANDLE(OCRA::FrameBuffer);
 
 namespace OCRA::FrameBuffer {
 constexpr auto MaxColorAttachments = 32;

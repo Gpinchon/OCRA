@@ -1,11 +1,11 @@
 #pragma once
 
-#include <Device.hpp>
 #include <Handle.hpp>
 
 #include <vector>
 
-HANDLE(OCRA::Shader::Module);
+OCRA_DECLARE_HANDLE(OCRA::Device);
+OCRA_DECLARE_HANDLE(OCRA::Shader::Module);
 
 namespace OCRA::Shader::Module {
 struct Info {

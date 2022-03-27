@@ -1,12 +1,12 @@
 #pragma once
 
 #include <Handle.hpp>
-#include <Device.hpp>
-#include <Memory/AllocationCallback.hpp>
+#include <Allocator.hpp>
 
 #include <vector>
 
-HANDLE(OCRA::Queue::Fence);
+OCRA_DECLARE_HANDLE(OCRA::Queue::Fence);
+OCRA_DECLARE_HANDLE(OCRA::Device);
 
 namespace OCRA::Queue::Fence {
 enum class Status {
@@ -14,7 +14,7 @@ enum class Status {
 };
 Handle Create(
 	const Device::Handle& a_Device,
-	const Memory::AllocationCallback* a_Allocator = nullptr);
+	const AllocationCallback* a_Allocator = nullptr);
 /**
  * @brief Used to wait for one or more fences to enter signal state
  * @arg a_WaitAll : if true, will wait for all fences to signal, else will wait for at least one fence to signal

@@ -8,6 +8,9 @@
 
 #include <Handle.hpp>
 
+OCRA_DECLARE_HANDLE(OCRA::Device);
+OCRA_DECLARE_HANDLE(OCRA::Image::View);
+
 namespace OCRA::Image::View {
 unsigned GetGLHandle(const Device::Handle& a_Device, const Handle& a_Handle);
 }

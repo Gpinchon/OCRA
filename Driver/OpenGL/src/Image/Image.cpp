@@ -180,7 +180,7 @@ template <bool Compressed>
 struct Texture3D : Texture<Compressed>
 {
     Texture3D(const Device::Handle& a_Device, const Info& a_Info)
-    : Texture<Compressed>(a_Device, a_Info, a_Info.samples == Info::Samples::Samples1 ? GL_TEXTURE_3D : GL_TEXTURE_3D_MULTISAMPLE)
+    : Texture<Compressed>(a_Device, a_Info, a_Info.samples == Info::Samples::Samples1 ? GL_TEXTURE_2D_ARRAY : GL_TEXTURE_2D_MULTISAMPLE_ARRAY)
     {
         Bind();//initialize texture object
         if (info.samples == Info::Samples::Samples1)

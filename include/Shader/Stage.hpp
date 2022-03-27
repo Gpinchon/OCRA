@@ -6,14 +6,14 @@
 */
 #pragma once
 
-#include <Device.hpp>
 #include <Handle.hpp>
 #include <Shader/Module.hpp>
 
 #include <vector>
 #include <bitset>
 
-HANDLE(OCRA::Shader::Stage);
+OCRA_DECLARE_HANDLE(OCRA::Device);
+OCRA_DECLARE_HANDLE(OCRA::Shader::Stage);
 
 namespace OCRA::Shader::Stage {
 typedef std::bitset<6> StageFlag;

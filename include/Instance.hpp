@@ -7,7 +7,7 @@
 
 #include <vector>
 
-HANDLE(OCRA::Instance);
+OCRA_DECLARE_HANDLE(OCRA::Instance);
 
 namespace OCRA::Instance
 {
@@ -17,7 +17,7 @@ struct Info
 };
 Handle Create(
 	const Info& a_Info,
-	const AllocationCallback* a_Allocator);
+	const AllocationCallback* a_Allocator = nullptr);
 /**
  * @brief Returns the type of Instance :
  *  - OpenGL

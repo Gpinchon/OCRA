@@ -6,10 +6,10 @@
 */
 #pragma once
 
-#include <Device.hpp>
 #include <Handle.hpp>
 
-HANDLE(OCRA::Command::Buffer);
+OCRA_DECLARE_HANDLE(OCRA::Command::Buffer);
+OCRA_DECLARE_HANDLE(OCRA::Device);
 
 //Functions declaration
 namespace OCRA::Command::Buffer

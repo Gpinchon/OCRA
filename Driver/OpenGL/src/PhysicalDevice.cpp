@@ -1,355 +1,251 @@
 #include <PhysicalDevice.hpp>
-
-#define _WIN32_DCOM
-#include <iostream>
-#include <comdef.h>
-#include <Wbemidl.h>
-#include <Rpcdce.h>
-#pragma comment(lib, "wbemuuid.lib")
-
-#include <d3d9.h>
-
-#include <windows.h>
-#include <winuser.h>
+#include <Queue/Queue.hpp>
 
 #include <GL/glew.h>
 
 namespace OCRA::PhysicalDevice
 {
+auto GetInteger(const GLenum& state)
+{
+    GLint val;
+    glGetIntegerv(state, &val);
+    return val;
+}
+
+auto GetIntegerIndex(const GLenum& a_State, const GLuint& a_Index)
+{
+    GLint val;
+    glGetIntegeri_v(a_State, a_Index, &val);
+    return val;
+}
+
 Limits GetPhysicalDeviceLimitsGL()
 {
-    glGetInteger(GL_MAX_TEXTURE_SIZE, &properties.limits.maxImageDimension1D);
-    glGetInteger(GL_MAX_RECTANGLE_TEXTURE_SIZE, &properties.limits.maxImageDimension2D);
-    glGetInteger(GL_MAX_3D_TEXTURE_SIZE, &properties.limits.maxImageDimension3D);
-    glGetInteger(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &properties.limits.maxImageDimensionCube);
-    glGetInteger(GL_MAX_ARRAY_TEXTURE_LAYERS, &properties.limits.maxImageArrayLayers);
-    glGetInteger(GL_MAX_TEXTURE_BUFFER_SIZE, &properties.limits.maxTexelBufferElements);
-    glGetInteger(GL_MAX_UNIFORM_BLOCK_SIZE, &properties.limits.maxUniformBufferRange);
-    glGetInteger(GL_MAX_COMBINED_SHADER_STORAGE_BLOCKS, &properties.limits.maxStorageBufferRange);
-    glGetInteger(    , &properties.limits.maxPushConstantsSize);
-    glGetInteger(    , &properties.limits.maxMemoryAllocationCount);
-    glGetInteger(    , &properties.limits.maxSamplerAllocationCount);
-    glGetInteger(    , &properties.limits.bufferImageGranularity);
-    glGetInteger(    , &properties.limits.sparseAddressSpaceSize);
-    glGetInteger(    , &properties.limits.maxBoundDescriptorSets);
+    Limits limits{};
+    limits.maxImageDimension1D = GetInteger(GL_MAX_TEXTURE_SIZE);
+    limits.maxImageDimension2D = GetInteger(GL_MAX_RECTANGLE_TEXTURE_SIZE);
+    limits.maxImageDimension3D = GetInteger(GL_MAX_3D_TEXTURE_SIZE);
+    limits.maxImageDimensionCube = GetInteger(GL_MAX_CUBE_MAP_TEXTURE_SIZE);
+    limits.maxImageArrayLayers = GetInteger(GL_MAX_ARRAY_TEXTURE_LAYERS);
+    limits.maxTexelBufferElements = GetInteger(GL_MAX_TEXTURE_BUFFER_SIZE);
+    limits.maxUniformBufferRange = GetInteger(GL_MAX_UNIFORM_BLOCK_SIZE);
+    limits.maxStorageBufferRange = GetInteger(GL_MAX_COMBINED_SHADER_STORAGE_BLOCKS);
+    limits.maxPushConstantsSize = std::numeric_limits<uint32_t>::infinity();
+    limits.maxPushConstantsSize = std::numeric_limits<uint32_t>::infinity();
+    limits.maxMemoryAllocationCount = GetInteger(GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX);
+    //limits.maxSamplerAllocationCount = GetInteger(    );
+    //limits.bufferImageGranularity = GetInteger(    );
+    //limits.sparseAddressSpaceSize = GetInteger(    );
 
-    glGetInteger(    , &properties.limits.maxPerStageDescriptorSamplers);
-    glGetInteger(    , &properties.limits.maxPerStageDescriptorUniformBuffers);
-    glGetInteger(    , &properties.limits.maxPerStageDescriptorStorageBuffers);
-    glGetInteger(    , &properties.limits.maxPerStageDescriptorSampledImages);
-    glGetInteger(    , &properties.limits.maxPerStageDescriptorStorageImages);
-    glGetInteger(    , &properties.limits.maxPerStageDescriptorInputAttachments);
-    glGetInteger(    , &properties.limits.maxPerStageResources);
+    limits.maxBoundDescriptorSets = (std::numeric_limits<uint32_t>::max)();
 
-    glGetInteger(    , &properties.limits.maxDescriptorSetSamplers);
-    glGetInteger(    , &properties.limits.maxDescriptorSetUniformBuffers);
-    glGetInteger(    , &properties.limits.maxDescriptorSetUniformBuffersDynamic);
-    glGetInteger(    , &properties.limits.maxDescriptorSetStorageBuffers);
-    glGetInteger(    , &properties.limits.maxDescriptorSetStorageBuffersDynamic);
-    glGetInteger(    , &properties.limits.maxDescriptorSetSampledImages);
-    glGetInteger(    , &properties.limits.maxDescriptorSetStorageImages);
-    glGetInteger(    , &properties.limits.maxDescriptorSetInputAttachments);
+    limits.maxPerStageDescriptorSamplers = (std::numeric_limits<uint32_t>::max)();
+    /*
+    limits.maxPerStageDescriptorUniformBuffers = GetInteger();
+    limits.maxPerStageDescriptorStorageBuffers = GetInteger(    );
+    limits.maxPerStageDescriptorSampledImages = GetInteger(    );
+    limits.maxPerStageDescriptorStorageImages = GetInteger(    );
+    limits.maxPerStageDescriptorInputAttachments = GetInteger(    );
+    limits.maxPerStageResources = GetInteger(    );
 
-    glGetInteger(GL_MAX_VERTEX_ATTRIBS, &properties.limits.maxVertexInputAttributes);
-    glGetInteger(GL_MAX_VERTEX_ATTRIB_BINDINGS, &properties.limits.maxVertexInputBindings);
-    glGetInteger(    , &properties.limits.maxVertexInputAttributeOffset);
-    glGetInteger(    , &properties.limits.maxVertexInputBindingStride);
-    glGetInteger(GL_MAX_VERTEX_OUTPUT_COMPONENTS, &properties.limits.maxVertexOutputComponents);
+    limits.maxDescriptorSetSamplers = GetInteger(    );
+    limits.maxDescriptorSetUniformBuffers = GetInteger(    );
+    limits.maxDescriptorSetUniformBuffersDynamic = GetInteger(    );
+    limits.maxDescriptorSetStorageBuffers = GetInteger(    );
+    limits.maxDescriptorSetStorageBuffersDynamic = GetInteger(    );
+    limits.maxDescriptorSetSampledImages = GetInteger(    );
+    limits.maxDescriptorSetStorageImages = GetInteger(    );
+    limits.maxDescriptorSetInputAttachments = GetInteger(    );
+    */
 
-    glGetInteger(    , &properties.limits.maxTessellationGenerationLevel);
-    glGetInteger(    , &properties.limits.maxTessellationPatchSize);
-    glGetInteger(    , &properties.limits.maxTessellationControlPerVertexInputComponents);
-    glGetInteger(    , &properties.limits.maxTessellationControlPerVertexOutputComponents);
-    glGetInteger(    , &properties.limits.maxTessellationControlPerPatchOutputComponents);
-    glGetInteger(    , &properties.limits.maxTessellationControlTotalOutputComponents);
-    glGetInteger(    , &properties.limits.maxTessellationEvaluationInputComponents);
-    glGetInteger(    , &properties.limits.maxTessellationEvaluationOutputComponents);
+    limits.maxVertexInputAttributes = GetInteger(GL_MAX_VERTEX_ATTRIBS);
+    limits.maxVertexInputBindings = GetInteger(GL_MAX_VERTEX_ATTRIB_BINDINGS);
+    limits.maxVertexInputAttributeOffset = GetInteger(GL_MAX_VERTEX_ATTRIB_RELATIVE_OFFSET);
+    limits.maxVertexInputBindingStride = GetInteger(GL_MAX_VERTEX_ATTRIB_STRIDE);
+    limits.maxVertexOutputComponents = GetInteger(GL_MAX_VERTEX_OUTPUT_COMPONENTS);
 
-    glGetInteger(    , &properties.limits.maxGeometryShaderInvocations);
-    glGetInteger(GL_MAX_GEOMETRY_INPUT_COMPONENTS, &properties.limits.maxGeometryInputComponents);
-    glGetInteger(GL_MAX_GEOMETRY_OUTPUT_COMPONENTS, &properties.limits.maxGeometryOutputComponents);
-    glGetInteger(    , &properties.limits.maxGeometryOutputVertices);
-    glGetInteger(    , &properties.limits.maxGeometryTotalOutputComponents);
+    limits.maxTessellationGenerationLevel = GetInteger(GL_MAX_TESS_GEN_LEVEL);
+    limits.maxTessellationPatchSize = GetInteger(GL_MAX_PATCH_VERTICES);
+    limits.maxTessellationControlPerVertexInputComponents = GetInteger(GL_MAX_TESS_CONTROL_INPUT_COMPONENTS);
+    limits.maxTessellationControlPerVertexOutputComponents = GetInteger(GL_MAX_TESS_CONTROL_OUTPUT_COMPONENTS);
+    limits.maxTessellationControlPerPatchOutputComponents = GetInteger(GL_MAX_TESS_PATCH_COMPONENTS);
+    limits.maxTessellationControlTotalOutputComponents = GetInteger(GL_MAX_TESS_CONTROL_TOTAL_OUTPUT_COMPONENTS);
+    limits.maxTessellationEvaluationInputComponents = GetInteger(GL_MAX_TESS_EVALUATION_INPUT_COMPONENTS);
+    limits.maxTessellationEvaluationOutputComponents = GetInteger(GL_MAX_TESS_EVALUATION_OUTPUT_COMPONENTS);
 
-    glGetInteger(GL_MAX_FRAGMENT_INPUT_COMPONENTS, &properties.limits.maxFragmentInputComponents);
-    glGetInteger(    , &properties.limits.maxFragmentOutputAttachments);
-    glGetInteger(    , &properties.limits.maxFragmentDualSrcAttachments);
-    glGetInteger(    , &properties.limits.maxFragmentCombinedOutputResources);
+    limits.maxGeometryShaderInvocations = GetInteger(GL_MAX_GEOMETRY_SHADER_INVOCATIONS);
+    limits.maxGeometryInputComponents = GetInteger(GL_MAX_GEOMETRY_INPUT_COMPONENTS);
+    limits.maxGeometryOutputComponents = GetInteger(GL_MAX_GEOMETRY_OUTPUT_COMPONENTS);
+    limits.maxGeometryOutputVertices = GetInteger(GL_MAX_GEOMETRY_OUTPUT_VERTICES);
+    limits.maxGeometryTotalOutputComponents = GetInteger(GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS);
 
-    glGetInteger(    , &properties.limits.maxComputeSharedMemorySize);
-    glGetInteger(GL_MAX_COMPUTE_WORK_GROUP_COUNT, &properties.limits.maxComputeWorkGroupCount);
-    glGetInteger(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS, &properties.limits.maxComputeWorkGroupInvocations);
-    glGetInteger(GL_MAX_COMPUTE_WORK_GROUP_SIZE, &properties.limits.maxComputeWorkGroupSize);
-    glGetInteger(    , &properties.limits.subPixelPrecisionBits);
-    glGetInteger(    , &properties.limits.subTexelPrecisionBits);
-    glGetInteger(    , &properties.limits.mipmapPrecisionBits);
-    glGetInteger(    , &properties.limits.maxDrawIndexedIndexValue);
-    glGetInteger(    , &properties.limits.maxDrawIndirectCount);
-    glGetInteger(    , &properties.limits.maxSamplerLodBias);
-    glGetInteger(    , &properties.limits.maxSamplerAnisotropy);
-    glGetInteger(    , &properties.limits.maxViewports);
-    glGetInteger(    , &properties.limits.maxViewportDimensions);
-    glGetInteger(    , &properties.limits.viewportBoundsRange);
-    glGetInteger(    , &properties.limits.viewportSubPixelBits);
-    glGetInteger(    , &properties.limits.minMemoryMapAlignment);
-    glGetInteger(    , &properties.limits.minTexelBufferOffsetAlignment);
-    glGetInteger(    , &properties.limits.minUniformBufferOffsetAlignment);
-    glGetInteger(    , &properties.limits.minStorageBufferOffsetAlignment);
-    glGetInteger(    , &properties.limits.minTexelOffset);
-    glGetInteger(    , &properties.limits.maxTexelOffset);
-    glGetInteger(    , &properties.limits.minTexelGatherOffset);
-    glGetInteger(    , &properties.limits.maxTexelGatherOffset);
-    glGetInteger(    , &properties.limits.minInterpolationOffset);
-    glGetInteger(    , &properties.limits.maxInterpolationOffset);
-    glGetInteger(    , &properties.limits.subPixelInterpolationOffsetBits);
-    glGetInteger(    , &properties.limits.maxFramebufferWidth);
-    glGetInteger(    , &properties.limits.maxFramebufferHeight);
-    glGetInteger(    , &properties.limits.maxFramebufferLayers);
-    glGetInteger(    , &properties.limits.framebufferColorSampleCounts);
-    glGetInteger(    , &properties.limits.framebufferDepthSampleCounts);
-    glGetInteger(    , &properties.limits.framebufferStencilSampleCounts);
-    glGetInteger(GL_MAX_FRAMEBUFFER_SAMPLES, &properties.limits.framebufferNoAttachmentsSampleCounts);
-    glGetInteger(    , &properties.limits.maxColorAttachments);
-    glGetInteger(GL_MAX_COLOR_TEXTURE_SAMPLES, &properties.limits.sampledImageColorSampleCounts);
-    glGetInteger(GL_MAX_INTEGER_SAMPLES, &properties.limits.sampledImageIntegerSampleCounts);
-    glGetInteger(GL_MAX_DEPTH_TEXTURE_SAMPLES, &properties.limits.sampledImageDepthSampleCounts);
-    glGetInteger(    , &properties.limits.sampledImageStencilSampleCounts);
-    glGetInteger(    , &properties.limits.storageImageSampleCounts);
-    glGetInteger(    , &properties.limits.maxSampleMaskWords);
-    glGetInteger(    , &properties.limits.timestampComputeAndGraphics);
-    glGetInteger(    , &properties.limits.timestampPeriod);
-    glGetInteger(    , &properties.limits.maxClipDistances);
-    glGetInteger(    , &properties.limits.maxCullDistances);
-    glGetInteger(    , &properties.limits.maxCombinedClipAndCullDistances);
-    glGetInteger(    , &properties.limits.discreteQueuePriorities);
-    glGetInteger(    , &properties.limits.pointSizeRange);
-    glGetInteger(    , &properties.limits.lineWidthRange);
-    glGetInteger(    , &properties.limits.pointSizeGranularity);
-    glGetInteger(    , &properties.limits.lineWidthGranularity);
-    glGetInteger(    , &properties.limits.strictLines);
-    glGetInteger(    , &properties.limits.standardSampleLocations);
-    glGetInteger(    , &properties.limits.optimalBufferCopyOffsetAlignment);
-    glGetInteger(    , &properties.limits.optimalBufferCopyRowPitchAlignment);
-    glGetInteger(    , &properties.limits.nonCoherentAtomSize);
-    properties.sparseProperties = 0;
-}
-Properties GetPhysicalDeviceWGL()
-{
-    //device context handle
-    HDC     hdc   = GetDC(nullptr); //if hwnd is null, GetDC retrieves the DC for the entire screen 
-    //gl render context handle
-    HGLRC   hglrc = wglCreateContext(hdc);
-    wglMakeCurrent(hdc, hglrc);
-    if (glewInit() != GLEW_OK) throw std::runtime_error("Cound not initialize GLEW");
+    limits.maxFragmentInputComponents = GetInteger(GL_MAX_FRAGMENT_INPUT_COMPONENTS);
+    limits.maxFragmentOutputAttachments = GetInteger(GL_MAX_DRAW_BUFFERS);
+    limits.maxFragmentDualSrcAttachments = GetInteger(GL_MAX_DUAL_SOURCE_DRAW_BUFFERS);
+    limits.maxFragmentCombinedOutputResources = GetInteger(GL_MAX_COMBINED_SHADER_OUTPUT_RESOURCES);
 
-    //DX9 to the rescue !
-    auto pD3D = Direct3DCreate9(D3D_SDK_VERSION);
-    D3DADAPTER_IDENTIFIER9  d3dIdentifier;
-    D3DCAPS9                d3dCaps;
-    D3DDISPLAYMODE          d3dDisplayMode;
-    pD3D->GetAdapterIdentifier(
-        D3DADAPTER_DEFAULT,
-        0,
-        &d3dIdentifier);
-    pD3D->GetDeviceCaps(
-        D3DADAPTER_DEFAULT,
-        D3DDEVTYPE_HAL,
-        &d3dCaps);
-    pD3D->GetAdapterDisplayMode(
-        D3DADAPTER_DEFAULT,
-        &d3dDisplayMode);
-    pD3D->Release();
-    Properties properties;
-    properties.apiVersion = 430;
-    properties.driverVersion = d3dIdentifier.DriverVersion;
-    properties.vendorID = d3dIdentifier.VendorId;
-    properties.deviceID = d3dIdentifier.DeviceId;
-    properties.deviceType = Type::Other;
-    properties.deviceName = d3dIdentifier.DeviceName;
-    properties.pipelineCacheUUID = 0;
-    properties.limits = GetLimits();
+    limits.maxComputeSharedMemorySize = GetInteger(GL_MAX_COMPUTE_SHARED_MEMORY_SIZE);
+    limits.maxComputeWorkGroupCount[0] = GetIntegerIndex(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0);
+    limits.maxComputeWorkGroupCount[1] = GetIntegerIndex(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 1);
+    limits.maxComputeWorkGroupCount[2] = GetIntegerIndex(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 2);
+    limits.maxComputeWorkGroupInvocations = GetInteger(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS);
+    limits.maxComputeWorkGroupSize[0] = GetIntegerIndex(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0);
+    limits.maxComputeWorkGroupSize[1] = GetIntegerIndex(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1);
+    limits.maxComputeWorkGroupSize[2] = GetIntegerIndex(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2);
+    limits.subPixelPrecisionBits = GetInteger(GL_SUBPIXEL_BITS);
+    //limits.subTexelPrecisionBits = GetInteger(    );
+    //limits.mipmapPrecisionBits = GetInteger(    );
+    limits.maxDrawIndexedIndexValue = GetInteger(GL_MAX_ELEMENT_INDEX);
+    //limits.maxDrawIndirectCount = GetInteger(    );
+    limits.maxSamplerLodBias = GetInteger(GL_MAX_TEXTURE_LOD_BIAS);
+    limits.maxSamplerAnisotropy = GetInteger(GL_MAX_TEXTURE_MAX_ANISOTROPY);
 
-    wglMakeCurrent(hdc, nullptr);
-    wglDeleteContext(hglrc);
-    ReleaseDC(hdc);
-    return properties;
-}
-int GetPhysicalDeviceWMI()
-{
-    HRESULT hres;
-
-    // Step 1: --------------------------------------------------
-    // Initialize COM. ------------------------------------------
-
-    hres = CoInitializeEx(0, COINIT_MULTITHREADED);
-    if (FAILED(hres))
+    limits.maxViewports = GetInteger(GL_MAX_VIEWPORTS);
     {
-        std::cout << "Failed to initialize COM library. Error code = 0x"
-            << std::hex << hres << std::endl;
-        return 1;                  // Program has failed.
+        GLint viewportDims[2];
+        glGetIntegerv(GL_MAX_VIEWPORT_DIMS, viewportDims);
+        limits.maxViewportDimensions[0] = viewportDims[0];
+        limits.maxViewportDimensions[1] = viewportDims[1];
     }
-    hres = CoInitializeSecurity(
-        NULL,
-        -1,                          // COM authentication
-        NULL,                        // Authentication services
-        NULL,                        // Reserved
-        RPC_C_AUTHN_LEVEL_DEFAULT,   // Default authentication 
-        RPC_C_IMP_LEVEL_IMPERSONATE, // Default Impersonation  
-        NULL,                        // Authentication info
-        EOAC_NONE,                   // Additional capabilities 
-        NULL                         // Reserved
-    );
-
-
-    if (FAILED(hres))
     {
-        std::cout << "Failed to initialize security. Error code = 0x"
-            << std::hex << hres << std::endl;
-        CoUninitialize();
-        return 1;                    // Program has failed.
+        GLint viewportBoundsRange[2];
+        glGetIntegerv(GL_VIEWPORT_BOUNDS_RANGE, viewportBoundsRange);
+        limits.viewportBoundsRange[0] = viewportBoundsRange[0];
+        limits.viewportBoundsRange[1] = viewportBoundsRange[1];
     }
+    limits.viewportSubPixelBits = GetInteger(GL_VIEWPORT_SUBPIXEL_BITS);
 
-    // Step 3: ---------------------------------------------------
-    // Obtain the initial locator to WMI -------------------------
+    limits.minMemoryMapAlignment = GetInteger(GL_MIN_MAP_BUFFER_ALIGNMENT);
+    //limits.minTexelBufferOffsetAlignment = GetInteger(    );
+    //limits.minUniformBufferOffsetAlignment = GetInteger(    );
+    //limits.minStorageBufferOffsetAlignment = GetInteger(    );
+    limits.minTexelOffset = GetInteger(GL_MIN_PROGRAM_TEXEL_OFFSET);
+    limits.maxTexelOffset = GetInteger(GL_MAX_PROGRAM_TEXEL_OFFSET);
+    limits.minTexelGatherOffset = GetInteger(GL_MIN_PROGRAM_TEXTURE_GATHER_OFFSET);
+    limits.maxTexelGatherOffset = GetInteger(GL_MAX_PROGRAM_TEXTURE_GATHER_OFFSET);
+    limits.minInterpolationOffset = GetInteger(GL_MIN_FRAGMENT_INTERPOLATION_OFFSET);
+    limits.maxInterpolationOffset = GetInteger(GL_MAX_FRAGMENT_INTERPOLATION_OFFSET);
+    //limits.subPixelInterpolationOffsetBits = GetInteger(    );
+    
+    limits.maxFramebufferWidth = GetInteger(GL_MAX_FRAMEBUFFER_WIDTH);
+    limits.maxFramebufferHeight = GetInteger(GL_MAX_FRAMEBUFFER_HEIGHT);
+    limits.maxFramebufferLayers = GetInteger(GL_MAX_FRAMEBUFFER_LAYERS);
+    limits.framebufferColorSampleCounts = OCRA::SampleCount(GetInteger(GL_COLOR_SAMPLES_NV));
+    limits.framebufferDepthSampleCounts = OCRA::SampleCount(GetInteger(GL_DEPTH_SAMPLES_NV));
+    limits.framebufferStencilSampleCounts = OCRA::SampleCount(GetInteger(GL_STENCIL_SAMPLES_NV));
+    limits.framebufferNoAttachmentsSampleCounts = OCRA::SampleCount(GetInteger(GL_MAX_FRAMEBUFFER_SAMPLES));
+    limits.maxColorAttachments = GetInteger(GL_MAX_COLOR_ATTACHMENTS);
 
-    IWbemLocator* pLoc = NULL;
+    limits.sampledImageColorSampleCounts = OCRA::SampleCount(GetInteger(GL_MAX_COLOR_TEXTURE_SAMPLES));
+    limits.sampledImageIntegerSampleCounts = OCRA::SampleCount(GetInteger(GL_MAX_INTEGER_SAMPLES));
+    limits.sampledImageDepthSampleCounts = OCRA::SampleCount(GetInteger(GL_MAX_DEPTH_TEXTURE_SAMPLES));
+    //limits.sampledImageStencilSampleCounts = GetInteger(    );
+    //limits.storageImageSampleCounts = GetInteger(    );
+    limits.maxSampleMaskWords = GetInteger(GL_MAX_SAMPLE_MASK_WORDS);
 
-    hres = CoCreateInstance(
-        CLSID_WbemLocator,
-        0,
-        CLSCTX_INPROC_SERVER,
-        IID_IWbemLocator, (LPVOID*)&pLoc);
+    //limits.timestampComputeAndGraphics = GetInteger(    );
+    //limits.timestampPeriod = GetInteger(    );
 
-    if (FAILED(hres))
+    limits.maxClipDistances = GetInteger(GL_MAX_CLIP_DISTANCES);
+    limits.maxCullDistances = GetInteger(GL_MAX_CULL_DISTANCES);
+    limits.maxCombinedClipAndCullDistances = GetInteger(GL_MAX_COMBINED_CLIP_AND_CULL_DISTANCES);
+
+    //limits.discreteQueuePriorities = GetInteger(    );
     {
-        std::cout << "Failed to create IWbemLocator object."
-            << " Err code = 0x"
-            << std::hex << hres << std::endl;
-        CoUninitialize();
-        return 1;                 // Program has failed.
+        GLfloat pointSizeRange[2];
+        glGetFloatv(GL_VIEWPORT_BOUNDS_RANGE, pointSizeRange);
+        limits.pointSizeRange[0] = pointSizeRange[0];
+        limits.pointSizeRange[1] = pointSizeRange[1];
     }
-
-    // Step 4: -----------------------------------------------------
-    // Connect to WMI through the IWbemLocator::ConnectServer method
-
-    IWbemServices* pSvc = NULL;
-
-    // Connect to the root\cimv2 namespace with
-    // the current user and obtain pointer pSvc
-    // to make IWbemServices calls.
-    hres = pLoc->ConnectServer(
-        _bstr_t(L"ROOT\\CIMV2"), // Object path of WMI namespace
-        NULL,                    // User name. NULL = current user
-        NULL,                    // User password. NULL = current
-        0,                       // Locale. NULL indicates current
-        NULL,                    // Security flags.
-        0,                       // Authority (for example, Kerberos)
-        0,                       // Context object 
-        &pSvc                    // pointer to IWbemServices proxy
-    );
-
-    if (FAILED(hres))
     {
-        std::cout << "Could not connect. Error code = 0x"
-            << std::hex << hres << std::endl;
-        pLoc->Release();
-        CoUninitialize();
-        return 1;                // Program has failed.
+        GLfloat lineWidthRange[2];
+        glGetFloatv(GL_VIEWPORT_BOUNDS_RANGE, lineWidthRange);
+        limits.lineWidthRange[0] = lineWidthRange[0];
+        limits.lineWidthRange[1] = lineWidthRange[1];
     }
+    limits.pointSizeGranularity = GetInteger(GL_POINT_SIZE_GRANULARITY);
+    limits.lineWidthGranularity = GetInteger(GL_LINE_WIDTH_GRANULARITY);
+    //limits.strictLines = GetInteger(    );
 
-    std::cout << "Connected to ROOT\\CIMV2 WMI namespace" << std::endl;
-
-
-    // Step 5: --------------------------------------------------
-    // Set security levels on the proxy -------------------------
-
-    hres = CoSetProxyBlanket(
-        pSvc,                        // Indicates the proxy to set
-        RPC_C_AUTHN_WINNT,           // RPC_C_AUTHN_xxx
-        RPC_C_AUTHZ_NONE,            // RPC_C_AUTHZ_xxx
-        NULL,                        // Server principal name 
-        RPC_C_AUTHN_LEVEL_CALL,      // RPC_C_AUTHN_LEVEL_xxx 
-        RPC_C_IMP_LEVEL_IMPERSONATE, // RPC_C_IMP_LEVEL_xxx
-        NULL,                        // client identity
-        EOAC_NONE                    // proxy capabilities 
-    );
-
-    if (FAILED(hres))
-    {
-        std::cout << "Could not set proxy blanket. Error code = 0x"
-            << std::hex << hres << std::endl;
-        pSvc->Release();
-        pLoc->Release();
-        CoUninitialize();
-        return 1;               // Program has failed.
-    }
-
-    // Step 6: --------------------------------------------------
-    // Use the IWbemServices pointer to make requests of WMI ----
-
-    // For example, get the name of the operating system
-    IEnumWbemClassObject* pEnumerator = NULL;
-    hres = pSvc->ExecQuery(
-        bstr_t("WQL"),
-        bstr_t("SELECT * FROM Win32_VideoController"),
-        WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY,
-        NULL,
-        &pEnumerator);
-
-    if (FAILED(hres))
-    {
-        std::cout << "Query for operating system name failed."
-            << " Error code = 0x"
-            << std::hex << hres << std::endl;
-        pSvc->Release();
-        pLoc->Release();
-        CoUninitialize();
-        return 1;               // Program has failed.
-    }
-
-    // Step 7: -------------------------------------------------
-    // Get the data from the query in step 6 -------------------
-
-    IWbemClassObject* pclsObj = NULL;
-    ULONG uReturn = 0;
-
-    while (pEnumerator)
-    {
-        HRESULT hr = pEnumerator->Next(WBEM_INFINITE, 1,
-            &pclsObj, &uReturn);
-
-        if (0 == uReturn)
-        {
-            break;
-        }
-
-        VARIANT vtProp;
-
-        // Get the value of the Name property
-        hr = pclsObj->Get(L"Name", 0, &vtProp, 0, 0);
-        std::cout << " GPU Name : " << vtProp.bstrVal << std::endl;
-        VariantClear(&vtProp);
-
-        pclsObj->Release();
-    }
-
-    // Cleanup
-    // ========
-
-    pSvc->Release();
-    pLoc->Release();
-    pEnumerator->Release();
-    CoUninitialize();
-
-    return 0;   // Program successfully completed.
+    //limits.standardSampleLocations = GetInteger(    );
+    //limits.optimalBufferCopyOffsetAlignment = GetInteger(    );
+    //limits.optimalBufferCopyRowPitchAlignment = GetInteger(    );
+    //limits.nonCoherentAtomSize = GetInteger(    );
+    return limits;
 }
 struct Impl
 {
 	Impl()
 	{
+        properties.apiVersion = GetInteger(GL_MAJOR_VERSION) * 100 + GetInteger(GL_MINOR_VERSION) * 10;
+        //properties.driverVersion = (char*)glGetString(GL_VERSION);
+        properties.vendorName = (char*)glGetString(GL_VENDOR);
+        properties.deviceName = (char*)glGetString(GL_RENDERER);
+        properties.deviceType = Type::Other;
+        //properties.pipelineCacheUUID = 0;
+        properties.limits = GetPhysicalDeviceLimitsGL();
+        //properties.sparseProperties = 0;
 
+        features.robustBufferAccess = glewGetExtension("GL_ARB_robust_buffer_access_behavior");
+        features.fullDrawIndexUint32 = properties.limits.maxDrawIndexedIndexValue == (std::numeric_limits<uint32_t>::max)();
+        features.imageCubeArray = glewGetExtension("GL_ARB_texture_cube_map_array");
+        features.independentBlend = glewGetExtension("GL_ARB_blend_func_extended");
+        features.geometryShader = glewGetExtension("GL_ARB_geometry_shader4");
+        features.tessellationShader = glewGetExtension("GL_ARB_tessellation_shader");
+        features.sampleRateShading = glewGetExtension("GL_ARB_sample_shading");
+        features.dualSrcBlend = glewGetExtension("GL_ARB_draw_buffers_blend");
+        features.logicOp = true; //supported by default
+        features.multiDrawIndirect = glewGetExtension("GL_ARB_multi_draw_indirect");
+        features.drawIndirectFirstInstance = glewGetExtension("GL_ARB_base_instance");
+        features.depthClamp = glewGetExtension("GL_ARB_depth_clamp");
+        features.depthBiasClamp = glewGetExtension("GL_ARB_polygon_offset_clamp");
+        features.fillModeNonSolid = true; //supported by default
+        features.depthBounds = glewGetExtension("GL_EXT_depth_bounds_test");
+        features.wideLines = properties.limits.lineWidthRange[1] > 1;
+        features.largePoints = properties.limits.pointSizeRange[1] > 1;
+        features.alphaToOne = glewGetExtension("GL_ARB_multisample");
+        features.multiViewport = glewGetExtension("GL_ARB_viewport_array");
+        features.samplerAnisotropy = glewGetExtension("GL_ARB_texture_filter_anisotropic");
+        features.textureCompressionETC2 = glewGetExtension("GL_ARB_ES3_compatibility");
+        features.textureCompressionASTC_LDR = glewGetExtension("GL_KHR_texture_compression_astc_ldr");
+        features.textureCompressionBC = glewGetExtension("GL_EXT_texture_compression_s3tc");
+        features.occlusionQueryPrecise = glewGetExtension("GL_ARB_occlusion_query");
+        features.pipelineStatisticsQuery = glewGetExtension("GL_ARB_pipeline_statistics_query");
+        features.vertexPipelineStoresAndAtomics = glewGetExtension("GL_ARB_shader_atomic_counters");
+        features.fragmentStoresAndAtomics = glewGetExtension("GL_ARB_shader_atomic_counters");
+        features.shaderTessellationAndGeometryPointSize = true; //supported by default
+        features.shaderImageGatherExtended = glewGetExtension("GL_ARB_texture_gather");
+        features.shaderStorageImageExtendedFormats = false; //not supported by OpenGL
+        features.shaderStorageImageMultisample = glewGetExtension("GL_ARB_multisample");
+        features.shaderStorageImageReadWithoutFormat = false; //not supported by OpenGL
+        features.shaderStorageImageWriteWithoutFormat = false; //not supported by OpenGL
+        features.shaderUniformBufferArrayDynamicIndexing = false; //not supported by OpenGL
+        features.shaderSampledImageArrayDynamicIndexing = false; //not supported by OpenGL
+        features.shaderStorageBufferArrayDynamicIndexing = false; //not supported by OpenGL
+        features.shaderStorageImageArrayDynamicIndexing = false; //not supported by OpenGL
+        features.shaderClipDistance = true; //supported by default
+        features.shaderCullDistance = glewGetExtension("GL_ARB_cull_distance");
+        features.shaderFloat64 = glewGetExtension("GL_ARB_gpu_shader_fp64");
+        features.shaderInt64 = glewGetExtension("GL_ARB_gpu_shader_int64");
+        features.shaderInt16 = glewGetExtension("GL_AMD_gpu_shader_int16");
+        features.shaderResourceResidency = glewGetExtension("GL_ARB_bindless_texture");
+        features.shaderResourceMinLod = glewGetExtension("GL_ARB_shader_texture_lod");
+        features.sparseBinding = glewGetExtension("GL_ARB_sparse_texture") && glewGetExtension("GL_ARB_sparse_buffer");
+        features.sparseResidencyBuffer = glewGetExtension("GL_ARB_sparse_buffer");
+        features.sparseResidencyImage2D = glewGetExtension("GL_ARB_sparse_texture");
+        features.sparseResidencyImage3D = glewGetExtension("GL_ARB_sparse_texture");
+        features.sparseResidency2Samples = glewGetExtension("GL_ARB_sparse_texture2");
+        features.sparseResidency4Samples = glewGetExtension("GL_ARB_sparse_texture2");
+        features.sparseResidency8Samples = glewGetExtension("GL_ARB_sparse_texture2");
+        features.sparseResidency16Samples = glewGetExtension("GL_ARB_sparse_texture2");
+        features.sparseResidencyAliased = false; //not supported by OpenGL
+        features.variableMultisampleRate = true; //TODO make sure it's supported
+        features.inheritedQueries = false; //not supported by OpenGL
 	}
-	Properties properties;
+	Properties    properties;
+    Features      features;
+    std::vector<QueueFamilyProperties> queueFamilyProperties;
+    std::array<Queue::Handle, 32> queues;
 };
 Handle Create()
 {
@@ -358,5 +254,13 @@ Handle Create()
 const Properties& GetProperties(const Handle& a_PhysicalDevice)
 {
 	return a_PhysicalDevice->properties;
+}
+const Features& GetFeatures(const Handle& a_PhysicalDevice)
+{
+    return a_PhysicalDevice->features;
+}
+const std::vector<QueueFamilyProperties> GetQueueFamilyProperties(const Handle& a_PhysicalDevice)
+{
+    return std::vector<QueueFamilyProperties>();
 }
 }

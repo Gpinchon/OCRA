@@ -7,16 +7,16 @@
 #pragma once
 
 #include <Handle.hpp>
-#include <Device.hpp>
 #include <Pipeline/StageFlags.hpp>
 
 #include <vector>
 
-namespace OCRA::Memory {
+namespace OCRA {
 struct AllocationCallback;
 }
 
-HANDLE(OCRA::Queue::Semaphore);
+OCRA_DECLARE_HANDLE(OCRA::Device);
+OCRA_DECLARE_HANDLE(OCRA::Queue::Semaphore);
 
 namespace OCRA::Queue::Semaphore {
 struct SubmitInfo {
@@ -27,7 +27,7 @@ struct SubmitInfo {
 };
 Handle Create(
 	const Device::Handle& a_Device,
-	const Memory::AllocationCallback* a_Allocator = nullptr);
+	const AllocationCallback* a_Allocator = nullptr);
 void Signal(
 	const Device::Handle& a_Device,
 	const Handle& a_Semaphore,

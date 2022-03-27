@@ -4,9 +4,9 @@
 #include <GL/Command/ExecutionState.hpp>
 #include <GL/Command/Buffer.hpp>
 
-namespace OCRA::Command::Pipeline
+namespace OCRA::Command
 {
-void Bind(
+void BindPipeline(
 	const Command::Buffer::Handle& a_CommandBuffer,
 	const OCRA::Pipeline::BindingPoint& a_BindingPoint,
 	const OCRA::Pipeline::Handle& a_Pipeline)

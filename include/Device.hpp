@@ -7,13 +7,27 @@
 #pragma once
 
 #include <Handle.hpp>
-#include <Context.hpp>
+#include <PhysicalDevice.hpp>
+#include <Queue/Queue.hpp>
 
-HANDLE(OCRA::Device);
+#include <vector>
+#include <string>
+
+OCRA_DECLARE_HANDLE(OCRA::Device);
+
+namespace OCRA {
+struct AllocationCallback;
+}
 
 namespace OCRA::Device {
 struct Info {
-    Context::Handle context;
+    std::vector<Queue::Info>    queueInfos;
+    std::vector<std::string>    enabledLayerNames;
+    std::vector<std::string>    enabledExtensionNames;
+    PhysicalDevice::Features    enabledFeatures;
 };
-Handle Create(const Info& a_Info);
+Handle Create(
+    const PhysicalDevice::Handle& a_PhysicalDevice,
+    const Info& a_Info,
+    const AllocationCallback* a_Allocator = nullptr);
 }

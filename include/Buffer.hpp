@@ -1,15 +1,15 @@
 #pragma once
 
-#include <Device.hpp>
 #include <Handle.hpp>
 #include <Allocator.hpp>
 
 #include <bitset>
 #include <vector>
 
-HANDLE(OCRA::Buffer);
+OCRA_DECLARE_HANDLE(OCRA::Buffer);
+OCRA_DECLARE_HANDLE(OCRA::Device);
 
-namespace OCRA::Memory {
+namespace OCRA {
 struct AllocationCallback;
 }
 
@@ -52,7 +52,7 @@ struct Info {
 Handle Create(
     const Device::Handle&       a_Device,
     const Info&                 a_Info,
-    const Memory::AllocationCallback&   a_Allocator);
+    const AllocationCallback*   a_Allocator = nullptr);
 void* Map(
     Device::Handle  a_Device,
     Handle          a_Memory,

@@ -11,7 +11,7 @@
 #include <Image/Image.hpp>
 #include <Common/Component.hpp>
 
-HANDLE(OCRA::Image::View);
+OCRA_DECLARE_HANDLE(OCRA::Image::View);
 
 namespace OCRA::Image::View {
 struct SubRange {

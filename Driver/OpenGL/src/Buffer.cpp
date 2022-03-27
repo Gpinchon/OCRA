@@ -32,7 +32,7 @@ struct Impl {
 Handle Create(
     const Device::Handle&       a_Device,
     const Info&                 a_Info,
-    const Memory::AllocationCallback&   a_Allocator)
+    const AllocationCallback*   a_Allocator)
 {
     return Handle(new Impl(a_Device, a_Info));
 }

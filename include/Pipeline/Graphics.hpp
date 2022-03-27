@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include <Device.hpp>
+#include <Handle.hpp>
 #include <RenderPass.hpp>
 #include <Pipeline/ColorBlendState.hpp>
 #include <Pipeline/DepthStencilState.hpp>
@@ -20,6 +20,8 @@
 #include <Pipeline/ViewPortState.hpp>
 
 #include <vector>
+
+OCRA_DECLARE_HANDLE(OCRA::Device);
 
 namespace OCRA::Pipeline::Graphics {
 struct Info { //describes a graphics pipeline with each stage

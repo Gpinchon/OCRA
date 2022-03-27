@@ -10,7 +10,7 @@
 
 #include <string>
 
-HANDLE(OCRA::Window);
+OCRA_DECLARE_HANDLE(OCRA::Window);
 
 namespace OCRA::Window {
 struct Info {

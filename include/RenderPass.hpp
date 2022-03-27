@@ -15,7 +15,7 @@
 
 #include <vector>
 
-HANDLE(OCRA::RenderPass);
+OCRA_DECLARE_HANDLE(OCRA::RenderPass);
 
 namespace OCRA::Image {
 enum class Layout {

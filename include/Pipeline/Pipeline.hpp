@@ -1,10 +1,11 @@
 #pragma once
 
-#include <Command/Buffer.hpp>
 #include <Handle.hpp>
+
 #include <bitset>
 
-HANDLE(OCRA::Pipeline);
+OCRA_DECLARE_HANDLE(OCRA::Pipeline);
+OCRA_DECLARE_HANDLE(OCRA::Command::Buffer);
 
 namespace OCRA::Pipeline
 {
