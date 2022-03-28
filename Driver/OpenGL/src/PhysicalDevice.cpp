@@ -241,11 +241,14 @@ struct Impl
         features.sparseResidencyAliased = false; //not supported by OpenGL
         features.variableMultisampleRate = true; //TODO make sure it's supported
         features.inheritedQueries = false; //not supported by OpenGL
+        queueFamilyProperties.resize(1);
+        queueFamilyProperties.front().queueCount = 1;
+        queueFamilyProperties.front().queueFlags = QueueFlagsBits::Graphics | QueueFlagsBits::Compute | QueueFlagsBits::Transfer | QueueFlagsBits::SparseBinding;
 	}
 	Properties    properties;
     Features      features;
     std::vector<QueueFamilyProperties> queueFamilyProperties;
-    std::array<Queue::Handle, 32> queues;
+    std::array<Queue::Handle, 1> queues;
 };
 Handle Create()
 {
@@ -261,6 +264,6 @@ const Features& GetFeatures(const Handle& a_PhysicalDevice)
 }
 const std::vector<QueueFamilyProperties> GetQueueFamilyProperties(const Handle& a_PhysicalDevice)
 {
-    return std::vector<QueueFamilyProperties>();
+    return a_PhysicalDevice->queueFamilyProperties;
 }
 }

@@ -39,6 +39,8 @@ set(OCRA_IMPL_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Image/Format.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Image/Image.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Image/View.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Queue/Fence.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Queue/Queue.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/ColorBlendState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/DepthStencilState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/MultisampleState.hpp
@@ -56,7 +58,6 @@ set(OCRA_IMPL_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Instance.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/PhysicalDevice.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Queue/Fence.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Queue/Queue.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Queue/Semaphore.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Buffer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Draw.cpp

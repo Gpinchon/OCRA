@@ -22,7 +22,6 @@ struct AllocationCallback;
 namespace OCRA::Device {
 struct Info {
     std::vector<Queue::Info>    queueInfos;
-    std::vector<std::string>    enabledLayerNames;
     std::vector<std::string>    enabledExtensionNames;
     PhysicalDevice::Features    enabledFeatures;
 };
@@ -30,4 +29,8 @@ Handle Create(
     const PhysicalDevice::Handle& a_PhysicalDevice,
     const Info& a_Info,
     const AllocationCallback* a_Allocator = nullptr);
+Queue::Handle GetQueue(
+    const Handle& a_Device,
+    uint32_t a_FamilyIndex,
+    uint32_t a_QueueIndex);
 }

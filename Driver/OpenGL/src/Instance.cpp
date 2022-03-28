@@ -74,6 +74,7 @@ struct Impl
         wglDeleteContext(hglrc);
         ReleaseDC(hwnd, hdc);
         DestroyWindow(hwnd);
+        UnregisterClassA("Dummy_OpenGL_Window", GetModuleHandle(0));
 #endif
     }
 #if defined(_WIN32)

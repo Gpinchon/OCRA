@@ -92,7 +92,8 @@ endif (RenderingAPI STREQUAL "OpenGL")
 
 set(OCRA_TEST_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/main.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/PhysicalDevice.cpp)
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/PhysicalDevice.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/Queue.cpp)
 set(OCRA_TEST_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestList.hpp)
 add_executable(UnitTests

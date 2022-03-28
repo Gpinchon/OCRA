@@ -1,8 +1,8 @@
 #pragma once
 
-#include <Command/Buffer.hpp>
-
 #include <functional>
+
+OCRA_DECLARE_HANDLE(OCRA::Command::Buffer);
 
 namespace OCRA::Command::Buffer
 {

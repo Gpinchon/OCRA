@@ -211,7 +211,7 @@ static QueueFlags None = 0b00000;
 static QueueFlags Graphics = 0b10000;
 static QueueFlags Compute = 0b01000;
 static QueueFlags Transfer = 0b00100;
-static QueueFlags SparceBinding = 0b00010;
+static QueueFlags SparseBinding = 0b00010;
 static QueueFlags Protected = 0b00001;// VK_VERSION_1_1
 }
 struct QueueFamilyProperties {
