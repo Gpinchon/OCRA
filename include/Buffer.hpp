@@ -8,6 +8,7 @@
 
 OCRA_DECLARE_HANDLE(OCRA::Buffer);
 OCRA_DECLARE_HANDLE(OCRA::Device);
+OCRA_DECLARE_HANDLE(OCRA::Memory);
 
 namespace OCRA {
 struct AllocationCallback;
@@ -24,7 +25,7 @@ static CreateFlags Protected                  = 0b00010;// VK_VERSION_1_1
 static CreateFlags DeviceAddressCaptureReplay = 0b00001;// VK_VERSION_1_2
 }
 using UsageFlags = std::bitset<10>;
-namespace UsageFlagsBits {
+namespace UsageFlagBits {
 static UsageFlags None                 = 0b0000000000;
 static UsageFlags TransferSrc          = 0b1000000000;
 static UsageFlags TransferDst          = 0b0100000000;
@@ -37,6 +38,7 @@ static UsageFlags VertexBuffer         = 0b0000000100;
 static UsageFlags IndirectBuffer       = 0b0000000010;
 static UsageFlags ShaderDeviceAddress  = 0b0000000001;// Provided by VK_VERSION_1_2
 }
+
 enum class SharingMode {
     Exclusive,
     Concurrent,
@@ -45,7 +47,7 @@ enum class SharingMode {
 struct Info {
     CreateFlags             flags{ CreateFlagsBits::None };;
     uint64_t                size{ 0 };
-    UsageFlags              usage{ UsageFlagsBits::None };
+    UsageFlags              usage{ UsageFlagBits::None };
     SharingMode             sharingMode;
     std::vector<uint32_t>   queueFamilyIndices;
 };
@@ -53,19 +55,12 @@ Handle Create(
     const Device::Handle&       a_Device,
     const Info&                 a_Info,
     const AllocationCallback*   a_Allocator = nullptr);
-void* Map(
-    Device::Handle  a_Device,
-    Handle          a_Memory,
-    uint64_t        a_Offset,
-    uint64_t        a_Length);
-void Unmap(
-    Device::Handle  a_Device,
-    Handle          a_Memory);
-void Flush(
-    Device::Handle  a_Device,
-    Handle          a_Memory,
-    int32_t         a_Offset,
-    uint64_t        a_Length);
+void BindMemory(
+    const Device::Handle&   a_Device,
+    const Handle&           a_Buffer,
+    const Memory::Handle&   a_Memory,
+    const size_t&           a_MemoryOffset
+);
 }
 
 #include <Command/Buffer.hpp>

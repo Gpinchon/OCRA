@@ -220,7 +220,38 @@ struct QueueFamilyProperties {
     uint32_t    timestampValidBits{ 0 };
     Extent3D    minImageTransferGranularity;
 };
+const std::vector<QueueFamilyProperties> GetQueueFamilyProperties(const Handle& a_PhysicalDevice);
+
+using MemoryPropertyFlags = std::bitset<6>;
+namespace MemoryPropertyFlagBits {
+static MemoryPropertyFlags None             = 0b000000;
+static MemoryPropertyFlags DeviceLocal      = 0b100000;
+static MemoryPropertyFlags HostVisible      = 0b010000; //allows for memory mapping
+static MemoryPropertyFlags HostCoherent     = 0b001000; //flush and invalidate are not necesssary for sync with device
+static MemoryPropertyFlags HostCached       = 0b000100; //is backed by host's buffer, faster access
+static MemoryPropertyFlags LazilyAllocated  = 0b000010; //only allows access from device, do not use with HostVisible
+static MemoryPropertyFlags Protected        = 0b000001; //only allows access from device, allows protected queue operations, do not use with HostVisible, HostCoherent or HostCached
+};
+struct MemoryType {
+    MemoryPropertyFlags propertyFlags{ MemoryPropertyFlagBits::None };
+    uint32_t            heapIndex{ 0 };
+};
+using MemoryHeapFlags = std::bitset<2>;
+namespace MemoryHeapFlagBits {
+static MemoryHeapFlags None             = 0b000000;
+static MemoryHeapFlags DeviceLocal      = 0b100000;
+static MemoryHeapFlags MultiInstance    = 0b010000; //allows for memory mapping
+};
+struct MemoryHeap {
+    size_t          size{ 0 };
+    MemoryHeapFlags flags{ MemoryHeapFlagBits::None };
+};
+struct MemoryProperties {
+    std::vector<MemoryType> memoryTypes;
+    std::vector<MemoryHeap> memoryHeaps;
+};
+const MemoryProperties& GetMemoryProperties(const Handle& a_PhysicalDevice);
+
 const Properties& GetProperties(const Handle& a_PhysicalDevice);
 const Features& GetFeatures(const Handle& a_PhysicalDevice);
-const std::vector<QueueFamilyProperties> GetQueueFamilyProperties(const Handle& a_PhysicalDevice);
 }

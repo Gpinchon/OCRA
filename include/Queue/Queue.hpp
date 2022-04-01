@@ -30,6 +30,6 @@ struct SubmitInfo
 };
 void Submit(
 	const Handle& a_Queue,
-	std::vector<SubmitInfo> a_SubmitInfos,
+	const std::vector<SubmitInfo>& a_SubmitInfos,
 	const Fence::Handle& a_Fence);
 }

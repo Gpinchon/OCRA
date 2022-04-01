@@ -42,22 +42,24 @@ struct Impl
 		);
 		state = State::Invalid;
 	}
-	void Begin()
+	void Begin(const CommandBufferBeginInfo& a_BeginInfo)
 	{
 		assert(state == State::Initial);
 		state = State::Recording;
+		beginInfo = a_BeginInfo;
 	}
 	void End()
 	{
 		assert(state == State::Recording);
 		state = State::Executable;
 	}
-	void Submit(bool a_Once)
+	void Submit()
 	{
 		assert(state == State::Executable);
 		state = State::Pending;
 		Execute(executionState);
-		if (a_Once) Invalidate();
+		if ((beginInfo.flags & CommandBufferUsageFlagBits::OneTimeSubmit) != 0)
+			Invalidate();
 	}
 	void SubmitSecondary(ExecutionState& a_ExecutionState)
 	{
@@ -79,6 +81,7 @@ struct Impl
 	}
 	State state{ State::Initial };
 	std::vector<CallBack> commands;
+	CommandBufferBeginInfo beginInfo;
 	ExecutionState executionState{};
 };
 
@@ -89,24 +92,24 @@ Handle Create(const Device::Handle& a_Device) {
 void PushCommand(const Handle& a_CommandBuffer, const CallBack& a_Callback) {
 	a_CommandBuffer->PushCommand(a_Callback);
 }
+void Submit(const std::vector<Command::Buffer::Handle>& a_CommandBuffers)
+{
+	for (const auto& commandBuffer : a_CommandBuffers)
+		commandBuffer->Submit();
+}
 }
 
 namespace OCRA::Command
 {
-void BeginCommandBuffer(const Buffer::Handle& a_CommandBuffer) {
-	a_CommandBuffer->Begin();
+void BeginCommandBuffer(const Buffer::Handle& a_CommandBuffer, const CommandBufferBeginInfo& a_BeginInfo) {
+	a_CommandBuffer->Begin(a_BeginInfo);
 }
 void EndCommandBuffer(const Buffer::Handle& a_CommandBuffer) {
 	a_CommandBuffer->End();
 }
-
 void ResetCommandBuffer(const Buffer::Handle& a_CommandBuffer) {
 	a_CommandBuffer->Reset();
 }
-void Submit(const Buffer::Handle& a_CommandBuffer, bool a_Once) {
-	a_CommandBuffer->Submit(a_Once);
-}
-
 void ExecuteCommands(
 	const Buffer::Handle& a_CommandBuffer,
 	const Buffer::Handle& a_SecondaryCommandBuffer)

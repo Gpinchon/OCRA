@@ -32,11 +32,15 @@ void Signal(
 	const Device::Handle& a_Device,
 	const Handle& a_Semaphore,
 	const uint64_t& a_Value);
+void Signal(
+	const Device::Handle& a_Device,
+	const std::vector<Handle>& a_Semaphores,
+	const std::vector<uint64_t>& a_Values);
 bool Wait(
 	const Device::Handle& a_Device,
-	std::vector<Handle> a_Semaphores,
-	std::vector<uint64_t> a_Values,
-	uint64_t a_TimeoutMS);
+	const std::vector<Handle>& a_Semaphores,
+	const std::vector<uint64_t>& a_Values,
+	const uint64_t& a_TimeoutMS);
 uint64_t GetCounterValue(
 	const Device::Handle& a_Device,
 	const Handle& a_Semaphore);

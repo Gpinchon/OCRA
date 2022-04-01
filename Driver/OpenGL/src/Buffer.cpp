@@ -1,6 +1,9 @@
+
 #include <Buffer.hpp>
 #include <Allocator.hpp>
 
+#include <GL/Buffer.hpp>
+#include <GL/Memory.hpp>
 #include <GL/glew.h>
 
 #include <cassert>
@@ -11,23 +14,11 @@ struct Impl {
     Impl(Device::Handle a_Device, const Info& a_Info)
         : info(a_Info)
     {
-        assert(info.usage != UsageFlagsBits::None);
-        allocationFlags |= (info.usage & UsageFlagsBits::TransferSrc) != 0 ? GL_MAP_READ_BIT : 0;
-        allocationFlags |= (info.usage & UsageFlagsBits::TransferDst) != 0 ? GL_MAP_WRITE_BIT : 0;
-        glCreateBuffers(1, &handle);
-        glNamedBufferStorage(
-            handle,
-            info.size,
-            nullptr,
-            allocationFlags);
+        assert(info.usage != UsageFlagBits::None);
     }
-    ~Impl()
-    {
-        glDeleteBuffers(1, &handle);
-    }
-    const Info  info;
-    GLbitfield  allocationFlags{ 0 };
-    GLuint      handle{ 0 };
+    
+    const Info      info;
+    MemoryBinding   memoryBinding;
 };
 Handle Create(
     const Device::Handle&       a_Device,
@@ -36,38 +27,14 @@ Handle Create(
 {
     return Handle(new Impl(a_Device, a_Info));
 }
-void* Map(
-    Device::Handle  a_Device,
-    Handle          a_Buffer,
-    uint64_t        a_Offset,
-    uint64_t        a_Length)
+void BindMemory(const Device::Handle& a_Device, const Handle& a_Buffer, const Memory::Handle& a_Memory, const size_t& a_MemoryOffset)
 {
-    return glMapNamedBufferRange(
-        a_Buffer->handle,
-        a_Offset,
-        a_Length,
-        a_Buffer->allocationFlags | GL_MAP_FLUSH_EXPLICIT_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
+    a_Buffer->memoryBinding.memory = a_Memory;
+    a_Buffer->memoryBinding.memoryOffset = a_MemoryOffset;
 }
-void Unmap(
-    Device::Handle  a_Device,
-    Handle          a_Buffer)
+const MemoryBinding& GetMemoryBinding(const Handle& a_Buffer)
 {
-    glUnmapNamedBuffer(a_Buffer->handle);
-}
-void Flush(
-    Device::Handle  a_Device,
-    Handle          a_Buffer,
-    int32_t         a_Offset,
-    uint64_t        a_Length)
-{
-    glFlushMappedNamedBufferRange(
-        a_Buffer->handle,
-        a_Offset,
-        a_Length);
-}
-uint32_t GetGLHandle(const Handle& a_Buffer)
-{
-    return a_Buffer->handle;
+    return a_Buffer->memoryBinding;
 }
 }
 
@@ -87,12 +54,14 @@ void CopyBuffer(
         dstBuffer = a_DstBuffer,
         regions = a_Regions
     ](Buffer::ExecutionState& executionState) {
+        auto& srcMemory = srcBuffer->memoryBinding;
+        auto& dstMemory = dstBuffer->memoryBinding;
         for (const auto& region : regions) {
             glCopyNamedBufferSubData(
-            srcBuffer->handle,
-            dstBuffer->handle,
-            region.readOffset,
-            region.writeOffset,
+            Memory::GetGLHandle(srcMemory.memory),
+            Memory::GetGLHandle(dstMemory.memory),
+            region.readOffset + srcMemory.memoryOffset,
+            region.writeOffset + dstMemory.memoryOffset,
             region.size);
         }
     });
@@ -107,8 +76,9 @@ void BindIndexBuffer(
         indexBuffer = a_IndexBuffer,
         offset = a_Offset, indexType = GetGLIndexType(a_IndexType)
     ](Buffer::ExecutionState& executionState) {
-        executionState.renderPass.indexBufferBinding.buffer = indexBuffer->handle;
-        executionState.renderPass.indexBufferBinding.offset = offset;
+        auto& memory = indexBuffer->memoryBinding;
+        executionState.renderPass.indexBufferBinding.buffer = Memory::GetGLHandle(memory.memory);
+        executionState.renderPass.indexBufferBinding.offset = offset + memory.memoryOffset;
         executionState.renderPass.indexBufferBinding.type   = indexType;
     });
     
@@ -128,8 +98,9 @@ void BindVertexBuffers(
             for (auto index = 0u; index < vertexBuffers.size(); ++index)
             {
                 const auto binding = firstBinding + index;
-                a_ExecutionState.renderPass.vertexInputBindings.at(binding).buffer = vertexBuffers.at(index)->handle;
-                a_ExecutionState.renderPass.vertexInputBindings.at(binding).offset = offsets.at(index);
+                auto& memory = vertexBuffers.at(index)->memoryBinding;
+                a_ExecutionState.renderPass.vertexInputBindings.at(binding).buffer = Memory::GetGLHandle(memory.memory);
+                a_ExecutionState.renderPass.vertexInputBindings.at(binding).offset = offsets.at(index) + memory.memoryOffset;
             }
         });
 }

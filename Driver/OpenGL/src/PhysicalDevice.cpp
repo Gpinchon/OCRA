@@ -1,10 +1,15 @@
+#include "PhysicalDevice.hpp"
 #include <PhysicalDevice.hpp>
 #include <Queue/Queue.hpp>
 
 #include <GL/glew.h>
 
+#include <queue>
+#include <functional>
+
 namespace OCRA::PhysicalDevice
 {
+using Command = std::function<void()>;
 auto GetInteger(const GLenum& state)
 {
     GLint val;
@@ -173,6 +178,18 @@ Limits GetPhysicalDeviceLimitsGL()
     //limits.nonCoherentAtomSize = GetInteger(    );
     return limits;
 }
+struct Queue {
+    void PushCommand(const std::function<void()>& a_Command) {
+        commands.push(a_Command);
+    }
+    void Execute() {
+        while (!commands.empty()) {
+            commands.front()();
+            commands.pop();
+        }
+    }
+    std::queue<std::function<void()>> commands;
+};
 struct Impl
 {
 	Impl()
@@ -244,15 +261,31 @@ struct Impl
         queueFamilyProperties.resize(1);
         queueFamilyProperties.front().queueCount = 1;
         queueFamilyProperties.front().queueFlags = QueueFlagsBits::Graphics | QueueFlagsBits::Compute | QueueFlagsBits::Transfer | QueueFlagsBits::SparseBinding;
+        queueFamilyProperties.front().minImageTransferGranularity = { 1, 1, 1 }; //Queues supporting graphics and/or compute operations must report (1,1,1)
+        memoryProperties.memoryHeaps.resize(1);
+        memoryProperties.memoryHeaps.at(0).size = GetInteger(GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX);
+        memoryProperties.memoryHeaps.at(0).flags = MemoryHeapFlagBits::DeviceLocal;
+        memoryProperties.memoryTypes.resize(1);
+        memoryProperties.memoryTypes.at(0).heapIndex = 0;
+        memoryProperties.memoryTypes.at(0).propertyFlags =
+            MemoryPropertyFlagBits::DeviceLocal |
+            MemoryPropertyFlagBits::HostVisible |
+            MemoryPropertyFlagBits::HostCached  |
+            MemoryPropertyFlagBits::HostCoherent;
 	}
-	Properties    properties;
-    Features      features;
+	Properties          properties;
+    Features            features;
+    MemoryProperties    memoryProperties;
     std::vector<QueueFamilyProperties> queueFamilyProperties;
-    std::array<Queue::Handle, 1> queues;
+    std::array<std::array<Queue, 1>, 1> queues;
 };
 Handle Create()
 {
 	return Handle(new Impl());
+}
+const MemoryProperties& GetMemoryProperties(const Handle& a_PhysicalDevice)
+{
+    return a_PhysicalDevice->memoryProperties;
 }
 const Properties& GetProperties(const Handle& a_PhysicalDevice)
 {
@@ -265,5 +298,14 @@ const Features& GetFeatures(const Handle& a_PhysicalDevice)
 const std::vector<QueueFamilyProperties> GetQueueFamilyProperties(const Handle& a_PhysicalDevice)
 {
     return a_PhysicalDevice->queueFamilyProperties;
+}
+void PushCommand(
+    const Handle& a_PhysicalDevice,
+    const uint32_t& a_FamilyIndex,
+    const uint32_t& a_QueueIndex,
+    const Command& a_Command)
+{
+    a_Command();
+    //a_PhysicalDevice->queues.at(a_FamilyIndex).at(a_QueueIndex).PushCommand(a_Command);
 }
 }

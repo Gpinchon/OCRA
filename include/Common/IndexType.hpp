@@ -17,7 +17,7 @@ enum class IndexType {
 	Uint32,
 	MaxValue
 };
-auto GetIndexTypeSize(const IndexType& a_IndexType){
+static inline auto GetIndexTypeSize(const IndexType& a_IndexType){
 	switch (a_IndexType) {
 	case IndexType::Uint8 :
 		return 1;

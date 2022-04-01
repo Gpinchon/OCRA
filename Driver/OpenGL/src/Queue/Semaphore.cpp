@@ -39,11 +39,19 @@ void Signal(
 {
     a_Semaphore->Signal(a_Value);
 }
+void Signal(
+    const Device::Handle& a_Device,
+    const std::vector<Handle>& a_Semaphores,
+    const std::vector<uint64_t>& a_Values)
+{
+    for (auto semaphoreIndex = 0u; semaphoreIndex < a_Semaphores.size(); ++semaphoreIndex)
+        a_Semaphores.at(semaphoreIndex)->Signal(a_Values.at(semaphoreIndex));
+}
 bool Wait(
     const Device::Handle& a_Device,
-    std::vector<Handle> a_Semaphores,
-    std::vector<uint64_t> a_Values,
-    uint64_t a_TimeoutMS)
+    const std::vector<Handle>& a_Semaphores,
+    const std::vector<uint64_t>& a_Values,
+    const uint64_t& a_TimeoutMS)
 {
     auto timeout = std::chrono::milliseconds(a_TimeoutMS);
     const auto waitStart = std::chrono::system_clock::now();

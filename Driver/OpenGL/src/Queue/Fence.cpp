@@ -1,20 +1,32 @@
 #include <Queue/Fence.hpp>
 #include <Allocator.hpp>
 
+#include <GL/glew.h>
+
 #include <condition_variable>
 #include <chrono>
 
 namespace OCRA::Queue::Fence {
 struct Impl {
+	inline auto GetStatus() {
+		std::unique_lock<std::mutex>(mutex);
+		return status;
+	}
 	inline bool WaitFor(uint64_t a_TimeoutMS) {
-		const auto duration = std::chrono::duration(std::chrono::milliseconds(a_TimeoutMS));
 		return cv.wait_for(
 			std::unique_lock<std::mutex>(mutex),
-			duration,
-			[this]{ return status == Status::Signaled; });
+			std::chrono::duration(std::chrono::milliseconds(a_TimeoutMS)),
+			[this, a_TimeoutMS]{
+				return status == Status::Signaled;
+			});
 	}
 	inline void Signal() {
 		std::unique_lock<std::mutex>(mutex);
+		const auto sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+		const auto waitResult = glClientWaitSync(sync, 0, GL_TIMEOUT_IGNORED);
+		glDeleteSync(sync);
+		if (waitResult != GL_CONDITION_SATISFIED)
+			throw std::runtime_error("Synchronization with GPU failed !");
 		status = Status::Signaled;
 		cv.notify_all();
 	}
@@ -68,6 +80,6 @@ Status GetStatus(
 	const Device::Handle& a_Device,
 	const Handle& a_Fence)
 {
-	return a_Fence->status;
+	return a_Fence->GetStatus();
 }
 }
