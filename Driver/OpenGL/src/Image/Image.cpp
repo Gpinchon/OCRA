@@ -17,6 +17,7 @@
 #include <GL/Image/Format.hpp>
 #include <GL/glew.h>
 #include <GL/Command/Buffer.hpp>
+#include <GL/Memory.hpp>
 
 #define BUFFER_OFFSET(i) ((char*)NULL + (i))
 
@@ -34,8 +35,8 @@ struct Impl
     ~Impl() {
         glDeleteTextures(1, &handle);
     }
-    virtual void Download(const Command::BufferImageCopy& a_Copy) = 0;
-    virtual void Upload(const Command::BufferImageCopy& a_Copy) = 0;
+    virtual void Download(const Command::BufferImageCopy& a_Copy, const size_t& a_MemoryOffset) = 0;
+    virtual void Upload(const Command::BufferImageCopy& a_Copy, const size_t& a_MemoryOffset) = 0;
     const Info info;
     const GLenum internalFormat;
     const GLenum dataType;
@@ -49,7 +50,7 @@ struct Texture : Impl {
         : Impl(a_Device, a_Info)
         , target(a_Target)
     {}
-    virtual void Download(const Command::BufferImageCopy& a_Copy) override {
+    virtual void Download(const Command::BufferImageCopy& a_Copy, const size_t& a_MemoryOffset) override {
         if constexpr(Compressed) glGetCompressedTextureSubImage(
             handle,
             a_Copy.imageSubresource.level,
@@ -60,7 +61,7 @@ struct Texture : Impl {
             a_Copy.imageExtent.height,
             a_Copy.imageExtent.depth,
             a_Copy.bufferRowLength * a_Copy.bufferImageHeight,
-            BUFFER_OFFSET(a_Copy.bufferOffset));
+            BUFFER_OFFSET(a_Copy.bufferOffset + a_MemoryOffset));
         else glGetTextureSubImage(
             handle,
             a_Copy.imageSubresource.level,
@@ -73,7 +74,7 @@ struct Texture : Impl {
             dataFormat,
             dataType,
             a_Copy.bufferRowLength * a_Copy.bufferImageHeight,
-            BUFFER_OFFSET(a_Copy.bufferOffset));
+            BUFFER_OFFSET(a_Copy.bufferOffset + a_MemoryOffset));
     };
     inline void Bind() const {
         glBindTexture(target, handle); //initialize texture object
@@ -101,7 +102,7 @@ struct Texture1D : Texture<Compressed>
         }
         else throw std::runtime_error("Cannot create multisampled 1D textures");
     }
-    virtual void Upload(const Command::BufferImageCopy& a_Copy) override
+    virtual void Upload(const Command::BufferImageCopy& a_Copy, const size_t& a_MemoryOffset) override
     {
         Bind();
         if constexpr (Compressed)
@@ -112,7 +113,7 @@ struct Texture1D : Texture<Compressed>
                 a_Copy.imageExtent.width,
                 internalFormat,
                 a_Copy.bufferRowLength * a_Copy.bufferImageHeight,
-                BUFFER_OFFSET(a_Copy.bufferOffset));
+                BUFFER_OFFSET(a_Copy.bufferOffset + a_MemoryOffset));
         else glTexSubImage1D(
                 target,
                 a_Copy.imageSubresource.level,
@@ -120,7 +121,7 @@ struct Texture1D : Texture<Compressed>
                 a_Copy.imageExtent.width,
                 dataFormat,
                 dataType,
-                BUFFER_OFFSET(a_Copy.bufferOffset));
+                BUFFER_OFFSET(a_Copy.bufferOffset + a_MemoryOffset));
         Unbind();
     }
 };
@@ -148,7 +149,7 @@ struct Texture2D : Texture<Compressed>
                 info.fixedSampleLocations);
         Unbind();
     }
-    virtual void Upload(const Command::BufferImageCopy& a_Copy) override
+    virtual void Upload(const Command::BufferImageCopy& a_Copy, const size_t& a_MemoryOffset) override
     {
         Bind();
         if constexpr (Compressed)
@@ -161,7 +162,7 @@ struct Texture2D : Texture<Compressed>
                 a_Copy.imageExtent.height,
                 internalFormat,
                 a_Copy.bufferRowLength * a_Copy.bufferImageHeight,
-                BUFFER_OFFSET(a_Copy.bufferOffset));
+                BUFFER_OFFSET(a_Copy.bufferOffset + a_MemoryOffset));
         else glTexSubImage2D(
                 target,
                 a_Copy.imageSubresource.level,
@@ -171,7 +172,7 @@ struct Texture2D : Texture<Compressed>
                 a_Copy.imageExtent.height,
                 dataFormat,
                 dataType,
-                BUFFER_OFFSET(a_Copy.bufferOffset));
+                BUFFER_OFFSET(a_Copy.bufferOffset + a_MemoryOffset));
         Unbind();
     }
 };
@@ -201,7 +202,7 @@ struct Texture3D : Texture<Compressed>
                 info.fixedSampleLocations);
         Unbind();
     }
-    virtual void Upload(const Command::BufferImageCopy& a_Copy) override
+    virtual void Upload(const Command::BufferImageCopy& a_Copy, const size_t& a_MemoryOffset) override
     {
         Bind();//initialize texture object
         if constexpr (Compressed)
@@ -216,7 +217,7 @@ struct Texture3D : Texture<Compressed>
                 a_Copy.imageExtent.depth,
                 internalFormat,
                 a_Copy.bufferRowLength * a_Copy.bufferImageHeight,
-                BUFFER_OFFSET(a_Copy.bufferOffset));
+                BUFFER_OFFSET(a_Copy.bufferOffset + a_MemoryOffset));
         else glTexSubImage3D(
                 target,
                 a_Copy.imageSubresource.level,
@@ -228,7 +229,7 @@ struct Texture3D : Texture<Compressed>
                 a_Copy.imageExtent.depth,
                 dataFormat,
                 dataType,
-                BUFFER_OFFSET(a_Copy.bufferOffset));
+                BUFFER_OFFSET(a_Copy.bufferOffset + a_MemoryOffset));
         Unbind();
     }
 };
@@ -284,9 +285,9 @@ void CopyBufferToImage(
     Command::Buffer::PushCommand(a_CommandBuffer, [
         srcBuffer = a_SrcBuffer, dstImage = a_DstImage, regions = a_Regions
     ](Command::Buffer::ExecutionState&) {
-        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, OCRA::Buffer::GetGLHandle(srcBuffer));
-        for (const auto& copy : regions)
-            dstImage->Upload(copy);
+        auto& memoryBinding = OCRA::Buffer::GetMemoryBinding(srcBuffer);
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, Memory::GetGLHandle(memoryBinding.memory));
+        for (auto& copy : regions) dstImage->Upload(copy, memoryBinding.memoryOffset);
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
     });
     
@@ -302,9 +303,10 @@ void CopyImageToBuffer(
     Command::Buffer::PushCommand(a_CommandBuffer, [
         dstBuffer = a_DstBuffer, srcImage = a_SrcImage, regions = a_Regions
     ](Command::Buffer::ExecutionState&) {
-        glBindBuffer(GL_PIXEL_PACK_BUFFER, OCRA::Buffer::GetGLHandle(dstBuffer));
+        auto& memoryBinding = OCRA::Buffer::GetMemoryBinding(dstBuffer);
+        glBindBuffer(GL_PIXEL_PACK_BUFFER, Memory::GetGLHandle(memoryBinding.memory));
         for (const auto& copy : regions)
-            srcImage->Download(copy);
+            srcImage->Download(copy, memoryBinding.memoryOffset);
         glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
     });
 }
