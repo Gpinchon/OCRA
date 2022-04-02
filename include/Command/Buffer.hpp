@@ -9,15 +9,25 @@
 #include <Handle.hpp>
 
 #include <bitset>
+#include <vector>
 
+OCRA_DECLARE_HANDLE(OCRA::Command::Pool);
 OCRA_DECLARE_HANDLE(OCRA::Command::Buffer);
 OCRA_DECLARE_HANDLE(OCRA::Device);
 
 //Functions declaration
 namespace OCRA::Command::Buffer
 {
-//Command Buffer creation
-Handle Create(const Device::Handle& a_Device);
+enum class Level {
+	Unknown = -1, Primary, Secondary
+};
+struct AllocateInfo {
+	Command::Pool::Handle	commandPool;
+	Level					level{ Level::Unknown };
+	uint32_t				count{ 0 };
+};
+//Command Buffer allocation
+std::vector<Handle> Allocate(const Device::Handle& a_Device, const AllocateInfo& a_Info);
 }
 
 //Command Buffer relative commands
