@@ -45,6 +45,7 @@ set(OCRA_IMPL_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Image/View.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Queue/Fence.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Queue/Queue.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Queue/Semaphore.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/ColorBlendState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/DepthStencilState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/MultisampleState.hpp

@@ -22,8 +22,13 @@ struct Info {
 	uint32_t                    queueCount;
 	std::vector<float>          queuePriorities;
 };
+struct TimelineSemaphoreSubmitInfo {
+	std::vector<uint64_t> waitSemaphoreValues;
+	std::vector<uint64_t> signalSemaphoreValues;
+};
 struct SubmitInfo
 {
+	TimelineSemaphoreSubmitInfo				timelineSemaphoreValues;
 	std::vector<Semaphore::Handle>			waitSemaphores;
 	std::vector<Command::Buffer::Handle>	commandBuffers;
 	std::vector<Semaphore::Handle>			signalSemaphores;

@@ -10,6 +10,7 @@
 #include <Pipeline/StageFlags.hpp>
 
 #include <vector>
+#include <chrono>
 
 namespace OCRA {
 struct AllocationCallback;
@@ -19,14 +20,12 @@ OCRA_DECLARE_HANDLE(OCRA::Device);
 OCRA_DECLARE_HANDLE(OCRA::Queue::Semaphore);
 
 namespace OCRA::Queue::Semaphore {
-struct SubmitInfo {
-	Handle semaphore;
-	uint64_t value;
-	Pipeline::StageFlags::Bits stageMask;
-	uint32_t deviceIndex;
+enum class Type {
+	Binary, Timeline
 };
 Handle Create(
 	const Device::Handle& a_Device,
+	const Type& a_Type,
 	const AllocationCallback* a_Allocator = nullptr);
 void Signal(
 	const Device::Handle& a_Device,
@@ -38,9 +37,14 @@ void Signal(
 	const std::vector<uint64_t>& a_Values);
 bool Wait(
 	const Device::Handle& a_Device,
+	const Handle& a_Semaphore,
+	const uint64_t& a_Value,
+	const std::chrono::nanoseconds& a_TimeoutNS);
+bool Wait(
+	const Device::Handle& a_Device,
 	const std::vector<Handle>& a_Semaphores,
 	const std::vector<uint64_t>& a_Values,
-	const uint64_t& a_TimeoutMS);
+	const std::chrono::nanoseconds& a_TimeoutNS);
 uint64_t GetCounterValue(
 	const Device::Handle& a_Device,
 	const Handle& a_Semaphore);
