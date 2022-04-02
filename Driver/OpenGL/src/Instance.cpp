@@ -64,6 +64,7 @@ struct Impl
         if (!wglMakeCurrent(hdc, hglrc)) throw std::runtime_error("Failed to activate dummy OpenGL rendering context.");
         if (wglewInit() != GLEW_OK) throw std::runtime_error("Cound not initialize WGLEW");
 #endif
+        glewExperimental = TRUE;
         if (glewInit() != GLEW_OK) throw std::runtime_error("Cound not initialize GLEW");
         physicalDevices = { PhysicalDevice::Create() };
     }

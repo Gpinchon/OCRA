@@ -1,12 +1,13 @@
 #include <Handle.hpp>
 #include <Queue/Queue.hpp>
 #include <Queue/Semaphore.hpp>
+#include <Command/Pool.hpp>
 
 #include <GL/Queue/Fence.hpp>
 #include <GL/Device.hpp>
-#include <GL/PhysicalDevice.hpp>
 #include <GL/Command/Buffer.hpp>
 #include <GL/WeakHandle.hpp>
+#include <GL/Queue/Semaphore.hpp>
 
 #include <vector>
 
@@ -43,20 +44,29 @@ void Submit(
 	const Fence::Handle& a_Fence)
 {
 	const auto device = a_Queue->device.lock();
-	const auto physicalDevice = Device::GetPhysicalDevice(device);
-	PhysicalDevice::PushCommand(physicalDevice, a_Queue->familyIndex, a_Queue->queueIndex, [device = device, submitInfos = a_SubmitInfos, fence = a_Fence] {
-		for (const auto& submitInfo : submitInfos) {
-			{
-				std::vector<uint64_t> waitSemaphoreValues(submitInfo.waitSemaphores.size(), 1);
-				Semaphore::Wait(device, submitInfo.waitSemaphores, waitSemaphoreValues, std::numeric_limits<uint64_t>::max());
-			}
-			Command::Buffer::Submit(submitInfo.commandBuffers);
-			{
-				std::vector<uint64_t> signalSemaphoreValues(submitInfo.waitSemaphores.size(), 1);
-				Semaphore::Signal(device, submitInfo.signalSemaphores, signalSemaphoreValues);
+	for (const auto& submitInfo : a_SubmitInfos) {
+		for (auto semaphoreIndex = 0u; semaphoreIndex < submitInfo.waitSemaphores.size(); ++semaphoreIndex)
+		{
+			auto& semaphore = submitInfo.waitSemaphores.at(semaphoreIndex);
+			if (Semaphore::GetType(semaphore) == Semaphore::Type::Binary)
+				Semaphore::WaitDevice(semaphore);
+			else {
+				auto& semaphoreValue = submitInfo.timelineSemaphoreValues.waitSemaphoreValues.at(semaphoreIndex);
+				Semaphore::WaitDevice(semaphore, semaphoreValue);
 			}
 		}
-		if (fence != nullptr) Fence::Signal(device, { fence });
-	});
+		Command::Buffer::Execute(submitInfo.commandBuffers);
+		for (auto semaphoreIndex = 0u; semaphoreIndex < submitInfo.signalSemaphores.size(); ++semaphoreIndex)
+		{
+			auto& semaphore = submitInfo.signalSemaphores.at(semaphoreIndex);
+			if (Semaphore::GetType(semaphore) == Semaphore::Type::Binary)
+				Semaphore::WaitDevice(semaphore);
+			else {
+				auto& semaphoreValue = submitInfo.timelineSemaphoreValues.signalSemaphoreValues.at(semaphoreIndex);
+				Semaphore::WaitDevice(semaphore, semaphoreValue);
+			}
+		}
+	}
+	if (a_Fence != nullptr) Fence::Signal(device, { a_Fence });
 }
 }
