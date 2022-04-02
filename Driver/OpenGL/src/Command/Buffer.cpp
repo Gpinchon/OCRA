@@ -5,15 +5,19 @@
 * @Last Modified time: 2021-09-26 14:26:36
 */
 
-//See SwiftShader !
 #include <Command/Buffer.hpp>
+#include <Command/Pool.hpp>
+#include <Queue/Queue.hpp>
 
+#include <GL/WeakHandle.hpp>
 #include <GL/Command/Buffer.hpp>
 #include <GL/Command/ExecutionState.hpp>
 
 #include <functional>
 #include <array>
 #include <cassert>
+
+OCRA_DECLARE_WEAK_HANDLE(OCRA::Command::Pool);
 
 namespace OCRA::Command::Buffer
 {
@@ -22,6 +26,10 @@ enum class State {
 };
 struct Impl
 {
+	Impl(const Level a_Level, const Pool::Handle& a_CommandPool)
+		: level(a_Level)
+		, commandPool(a_CommandPool)
+	{}
 	void Reset()
 	{
 		assert(
@@ -53,17 +61,19 @@ struct Impl
 		assert(state == State::Recording);
 		state = State::Executable;
 	}
-	void Submit()
+	void Execute()
 	{
 		assert(state == State::Executable);
+		assert(level == Level::Primary);
 		state = State::Pending;
 		Execute(executionState);
 		if ((beginInfo.flags & CommandBufferUsageFlagBits::OneTimeSubmit) != 0)
 			Invalidate();
 	}
-	void SubmitSecondary(ExecutionState& a_ExecutionState)
+	void ExecuteSecondary(ExecutionState& a_ExecutionState)
 	{
 		assert(state == State::Executable);
+		assert(level == Level::Secondary);
 		state = State::Pending;
 		Execute(a_ExecutionState);
 	}
@@ -74,28 +84,36 @@ struct Impl
 			command(a_ExecutionState);
 		state = State::Executable;
 	}
-	void PushCommand(const CallBack& a_Command)
+	void PushCommand(const Command& a_Command)
 	{
 		assert(state == State::Recording);
 		commands.push_back(a_Command);
 	}
+	const Level level;
+	const Pool::WeakHandle commandPool;
 	State state{ State::Initial };
-	std::vector<CallBack> commands;
+	std::vector<Command> commands;
 	CommandBufferBeginInfo beginInfo;
 	ExecutionState executionState{};
 };
-
-Handle Create(const Device::Handle& a_Device) {
-    return Handle(new Impl);
+std::vector<Handle> Allocate(const Device::Handle& a_Device, const AllocateInfo& a_Info) {
+	std::vector<Handle> commandBuffers;
+	for (auto i = 0u; i < a_Info.count; ++i)
+		commandBuffers.push_back(Handle(new Impl(a_Info.level, a_Info.commandPool)));
+	return commandBuffers;
 }
-
-void PushCommand(const Handle& a_CommandBuffer, const CallBack& a_Callback) {
+void PushCommand(const Handle& a_CommandBuffer, const Command& a_Callback) {
 	a_CommandBuffer->PushCommand(a_Callback);
 }
-void Submit(const std::vector<Command::Buffer::Handle>& a_CommandBuffers)
+void Execute(const std::vector<Handle>& a_CommandBuffers)
 {
-	for (const auto& commandBuffer : a_CommandBuffers)
-		commandBuffer->Submit();
+	for (const auto& commandBuffer : a_CommandBuffers) {
+		commandBuffer->Execute();
+	}
+}
+Pool::Handle GetPool(const Handle& a_CommandBuffer)
+{
+	return a_CommandBuffer->commandPool.lock();
 }
 }
 
@@ -117,7 +135,7 @@ void ExecuteCommands(
 	a_CommandBuffer->PushCommand([
 		commandBuffer = a_SecondaryCommandBuffer
 	](Buffer::ExecutionState& executionState) {
-		commandBuffer->SubmitSecondary(executionState);
+		commandBuffer->ExecuteSecondary(executionState);
 	});
 }
 }

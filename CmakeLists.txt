@@ -54,6 +54,7 @@ set(OCRA_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/BufferBinding.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/Buffer.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/Draw.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/Pool.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Descriptor/Descriptor.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Descriptor/Layout/Binding.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Descriptor/Layout/Layout.hpp
