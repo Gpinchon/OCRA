@@ -12,5 +12,4 @@ struct MemoryBinding {
 	size_t			memoryOffset{ 0 };
 };
 const MemoryBinding& GetMemoryBinding(const Handle& a_Buffer);
-uint32_t GetGLHandle(const Handle& a_Buffer);
 }

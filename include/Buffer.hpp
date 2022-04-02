@@ -1,7 +1,6 @@
 #pragma once
 
 #include <Handle.hpp>
-#include <Allocator.hpp>
 
 #include <bitset>
 #include <vector>
@@ -48,7 +47,7 @@ struct Info {
     CreateFlags             flags{ CreateFlagsBits::None };;
     uint64_t                size{ 0 };
     UsageFlags              usage{ UsageFlagBits::None };
-    SharingMode             sharingMode;
+    SharingMode             sharingMode{ SharingMode::Exclusive };
     std::vector<uint32_t>   queueFamilyIndices;
 };
 Handle Create(

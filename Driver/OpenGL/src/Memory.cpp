@@ -26,7 +26,7 @@ struct Impl
 			mapFlags |= GL_MAP_COHERENT_BIT;
 		}
 		glCreateBuffers(1, &handle);
-		glNamedBufferStorage(
+		glNamedBufferStorageEXT(
 			handle,
 			info.size,
 			nullptr,
@@ -50,7 +50,7 @@ void* Map(
 	const uint64_t&        a_Offset,
 	const uint64_t&        a_Length)
 {
-	return glMapNamedBufferRange(
+	return glMapNamedBufferRangeEXT(
 		a_Memory->handle,
 		a_Offset,
 		a_Length,
@@ -60,7 +60,7 @@ void Unmap(
 	const Device::Handle&  a_Device,
 	const Handle&          a_Memory)
 {
-	glUnmapNamedBuffer(a_Memory->handle);
+	glUnmapNamedBufferEXT(a_Memory->handle);
 }
 uint32_t GetGLHandle(const Handle& a_Memory)
 {
