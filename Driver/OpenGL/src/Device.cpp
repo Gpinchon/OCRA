@@ -1,7 +1,9 @@
 #include <Device.hpp>
 #include <PhysicalDevice.hpp>
 
+#include <GL/Device.hpp>
 #include <GL/WeakHandle.hpp>
+#include <GL/PhysicalDevice.hpp>
 #include <GL/Queue/Queue.hpp>
 
 #include <vector>
@@ -11,9 +13,6 @@ OCRA_DECLARE_WEAK_HANDLE(OCRA::PhysicalDevice);
 
 namespace OCRA::Device
 {
-struct LogicalDeviceQueue {
-	uint32_t familyIndex{ 0 };
-};
 struct Impl
 {
 	Impl(const PhysicalDevice::Handle& a_PhysicalDevice, const Info& a_Info)
@@ -44,5 +43,15 @@ Queue::Handle GetQueue(const Handle& a_Device, uint32_t a_FamilyIndex, uint32_t 
 }
 PhysicalDevice::Handle GetPhysicalDevice(const Handle& a_Device) {
 	return a_Device->physicalDevice.lock();
+}
+void PushCommand(
+	const Handle& a_Device,
+	const uint32_t& a_FamilyIndex,
+	const uint32_t& a_QueueIndex,
+	const Command& a_Command)
+{
+	PhysicalDevice::PushCommand(
+		a_Device->physicalDevice.lock(),
+		a_FamilyIndex, a_QueueIndex, a_Command);
 }
 }
