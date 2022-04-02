@@ -5,38 +5,45 @@
 
 #include <condition_variable>
 #include <chrono>
+#include <atomic>
 
 namespace OCRA::Queue::Fence {
 struct Impl {
-	inline auto GetStatus() {
-		std::unique_lock<std::mutex>(mutex);
-		return status;
+	~Impl() {
+		Reset();
 	}
-	inline bool WaitFor(uint64_t a_TimeoutMS) {
-		return cv.wait_for(
-			std::unique_lock<std::mutex>(mutex),
-			std::chrono::duration(std::chrono::milliseconds(a_TimeoutMS)),
-			[this, a_TimeoutMS]{
-				return status == Status::Signaled;
-			});
+	inline auto GetStatus() {
+		const auto syncValue = sync.load(std::memory_order_acquire);
+		if (syncValue != nullptr) {
+			GLint	status;
+			GLsizei size;
+			glGetSynciv(syncValue, GL_SYNC_STATUS, sizeof(GLenum), &size, &status);
+			if (status == GL_SIGNALED) return Status::Signaled;
+		}
+		return Status::Unsignaled;
+	}
+	inline bool WaitFor(const std::chrono::nanoseconds& a_TimeoutNS) {
+		const auto waitStart = std::chrono::high_resolution_clock::now();
+		auto syncValue = sync.load(std::memory_order_acquire);
+		if (syncValue == nullptr) //avoid locking mutex if not necessary
+			cv.wait_for(std::unique_lock<std::mutex>(mutex), a_TimeoutNS, [this, &syncValue] { return (syncValue = sync.load(std::memory_order_acquire)) != nullptr; });
+		const auto elapsedTime = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - waitStart);
+		if (elapsedTime > a_TimeoutNS) return false;
+		const auto waitResult = glClientWaitSync(syncValue, 0, (a_TimeoutNS - elapsedTime).count());
+		if (waitResult == GL_CONDITION_SATISFIED || waitResult == GL_ALREADY_SIGNALED) return true;
+		else return false;
 	}
 	inline void Signal() {
-		std::unique_lock<std::mutex>(mutex);
-		const auto sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
-		const auto waitResult = glClientWaitSync(sync, 0, GL_TIMEOUT_IGNORED);
-		glDeleteSync(sync);
-		if (waitResult != GL_CONDITION_SATISFIED)
-			throw std::runtime_error("Synchronization with GPU failed !");
-		status = Status::Signaled;
+		if (sync.load(std::memory_order_acquire) == nullptr)
+			sync.store(glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0), std::memory_order_release);
 		cv.notify_all();
 	}
 	inline void Reset() {
-		std::unique_lock<std::mutex>(mutex);
-		status = Status::Unsignaled;
+		glDeleteSync(sync.exchange(nullptr, std::memory_order_acq_rel));
 	}
+	std::atomic<GLsync> sync{ nullptr };
 	std::mutex mutex;
 	std::condition_variable cv;
-	Status status{ Status::Unsignaled };
 };
 Handle Create(
 	const Device::Handle& a_Device,
@@ -53,12 +60,20 @@ Handle Create(
 }
 bool WaitFor(
 	const Device::Handle& a_Device,
+	const Handle& a_Fences,
+	const std::chrono::nanoseconds& a_TimeoutNS)
+{
+	return a_Fences->WaitFor(a_TimeoutNS);
+}
+bool WaitFor(
+	const Device::Handle& a_Device,
 	const std::vector<Handle>& a_Fences,
-	bool a_WaitAll, uint64_t a_TimeoutMS)
+	bool a_WaitAll,
+	const std::chrono::nanoseconds& a_TimeoutNS)
 {
 	bool ret = false;
 	for (auto& fence : a_Fences) {
-		const auto waitResult = fence->WaitFor(a_TimeoutMS);
+		const auto waitResult = fence->WaitFor(a_TimeoutNS);
 		if (a_WaitAll) ret |= waitResult;
 		else return waitResult;
 	}

@@ -4,6 +4,7 @@
 #include <Allocator.hpp>
 
 #include <vector>
+#include <chrono>
 
 OCRA_DECLARE_HANDLE(OCRA::Queue::Fence);
 OCRA_DECLARE_HANDLE(OCRA::Device);
@@ -23,7 +24,12 @@ Handle Create(
 bool WaitFor(
 	const Device::Handle& a_Device,
 	const std::vector<Handle>& a_Fences,
-	bool a_WaitAll, uint64_t timeout);
+	bool a_WaitAll,
+	const std::chrono::nanoseconds& a_TimeoutNS);
+bool WaitFor(
+	const Device::Handle& a_Device,
+	const Handle& a_Fences,
+	const std::chrono::nanoseconds& a_TimeoutNS);
 void Reset(
 	const Device::Handle& a_Device,
 	const std::vector<Handle>& a_Fences);
