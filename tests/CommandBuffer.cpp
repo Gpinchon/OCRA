@@ -10,12 +10,13 @@
 
 #include <Common.hpp>
 
+#include <future>
 #include <iostream>
 
 using namespace OCRA;
 
 //Create OCRA Instance
-auto CreateInstance()
+static inline auto CreateInstance()
 {
 	Instance::Handle instance;
 	Instance::Info instanceInfo;
@@ -34,7 +35,7 @@ auto CreateInstance()
 }
 
 //Get queues from Physical Device
-auto GetQueueInfos(const PhysicalDevice::Handle& a_PhysicalDevice)
+static inline auto GetQueueInfos(const PhysicalDevice::Handle& a_PhysicalDevice)
 {
 	std::vector<Queue::Info> queueInfos;
 	{
@@ -54,14 +55,14 @@ auto GetQueueInfos(const PhysicalDevice::Handle& a_PhysicalDevice)
 }
 
 //Find suitable device
-auto GetPhysicalDevice(const Instance::Handle& a_Instance)
+static inline auto GetPhysicalDevice(const Instance::Handle& a_Instance)
 {
 	const auto& physicalDevices = Instance::EnumeratePhysicalDevices(a_Instance);
 	return physicalDevices.front();
 }
 
 //Create a device with necessary queues
-auto CreateDevice(const PhysicalDevice::Handle& a_PhysicalDevice)
+static inline auto CreateDevice(const PhysicalDevice::Handle& a_PhysicalDevice)
 {
 	Device::Info deviceInfo;
 	deviceInfo.queueInfos = GetQueueInfos(a_PhysicalDevice);
@@ -69,7 +70,7 @@ auto CreateDevice(const PhysicalDevice::Handle& a_PhysicalDevice)
 	return device;
 }
 
-auto FindQueueFamily(const PhysicalDevice::Handle& a_PhysicalDevice, const PhysicalDevice::QueueFlags& a_QueueProperties)
+static inline auto FindQueueFamily(const PhysicalDevice::Handle& a_PhysicalDevice, const PhysicalDevice::QueueFlags& a_QueueProperties)
 {
 	auto& queueProperties = PhysicalDevice::GetQueueFamilyProperties(a_PhysicalDevice);
 	for (auto familyIndex = 0u; familyIndex < queueProperties.size(); ++familyIndex) {
@@ -79,7 +80,7 @@ auto FindQueueFamily(const PhysicalDevice::Handle& a_PhysicalDevice, const Physi
 	return std::numeric_limits<uint32_t>::infinity();
 }
 
-auto FindProperMemoryType(const PhysicalDevice::Handle& a_PhysicalDevice, const PhysicalDevice::MemoryPropertyFlags& a_MemoryProperties)
+static inline auto FindProperMemoryType(const PhysicalDevice::Handle& a_PhysicalDevice, const PhysicalDevice::MemoryPropertyFlags& a_MemoryProperties)
 {
 	auto& memoryProperties = PhysicalDevice::GetMemoryProperties(a_PhysicalDevice);
 	for (auto memoryTypeIndex = 0u; memoryTypeIndex < memoryProperties.memoryTypes.size(); ++memoryTypeIndex) {
@@ -89,9 +90,7 @@ auto FindProperMemoryType(const PhysicalDevice::Handle& a_PhysicalDevice, const 
 	return std::numeric_limits<uint32_t>::infinity();
 }
 
-#include <future>
-
-void SubmitCommandBuffer(const Device::Handle& a_Device, const Queue::Handle& a_Queue, const Command::Buffer::Handle& a_CommandBuffer)
+static inline void SubmitCommandBuffer(const Device::Handle& a_Device, const Queue::Handle& a_Queue, const Command::Buffer::Handle& a_CommandBuffer)
 {
 	auto fence = Queue::Fence::Create(a_Device);
 	std::cout << "========== Command Buffer submit ==========\n";
