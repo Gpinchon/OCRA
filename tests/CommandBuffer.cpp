@@ -18,18 +18,16 @@ using namespace OCRA;
 auto CreateInstance()
 {
 	Instance::Handle instance;
+	Instance::Info instanceInfo;
+	instanceInfo.applicationInfo.name = "Test_CommandBuffer";
+	instanceInfo.applicationInfo.applicationVersion = 1;
+	instance = Instance::Create(instanceInfo);
 	std::cout << "==== Instance ====\n";
-	{
-		Instance::Info instanceInfo;
-		instanceInfo.applicationInfo.name = "Test_CommandBuffer";
-		instanceInfo.applicationInfo.applicationVersion = 1;
-		instance = Instance::Create(instanceInfo);
-		std::cout << "  Type           : " << Instance::GetType(instance) << "\n";
-		std::cout << "  App Name       : " << Instance::GetInfo(instance).applicationInfo.name << "\n";
-		std::cout << "  App Version    : " << Instance::GetInfo(instance).applicationInfo.applicationVersion << "\n";
-		std::cout << "  Engine Name    : " << Instance::GetInfo(instance).applicationInfo.engineName << "\n";
-		std::cout << "  Engine Version : " << Instance::GetInfo(instance).applicationInfo.engineVersion << "\n";
-	}
+	std::cout << "  Type           : " << Instance::GetType(instance) << "\n";
+	std::cout << "  App Name       : " << Instance::GetInfo(instance).applicationInfo.name << "\n";
+	std::cout << "  App Version    : " << Instance::GetInfo(instance).applicationInfo.applicationVersion << "\n";
+	std::cout << "  Engine Name    : " << Instance::GetInfo(instance).applicationInfo.engineName << "\n";
+	std::cout << "  Engine Version : " << Instance::GetInfo(instance).applicationInfo.engineVersion << "\n";
 	std::cout << "==================\n";
 	std::cout << "\n";
 	return instance;
@@ -97,28 +95,26 @@ void SubmitCommandBuffer(const Device::Handle& a_Device, const Queue::Handle& a_
 {
 	auto fence = Queue::Fence::Create(a_Device);
 	std::cout << "========== Command Buffer submit ==========\n";
-	{
-		Queue::SubmitInfo submitInfo;
-		submitInfo.commandBuffers.push_back(a_CommandBuffer);
-		//test multithreaded submit
-		std::async([a_Queue, submitInfo, fence] {
-			Queue::Submit(a_Queue, { submitInfo }, fence);
-		});
-		//Queue::Submit(a_Queue, { submitInfo }, fence);
+	Queue::SubmitInfo submitInfo;
+	submitInfo.commandBuffers.push_back(a_CommandBuffer);
+	//test multithreaded submit
+	std::async([a_Queue, submitInfo, fence] {
+		Queue::Submit(a_Queue, { submitInfo }, fence);
+	});
+	//Queue::Submit(a_Queue, { submitInfo }, fence);
 		
-		//make sure GPU is done
-		{
-			VerboseTimer bufferCopiesTimer("Buffer Copies");
+	//make sure GPU is done
+	{
+		VerboseTimer bufferCopiesTimer("Buffer Copies");
+		Queue::Fence::WaitFor(a_Device, fence, std::chrono::nanoseconds(15000000));
+	}
+	//test for function time itself
+	{
+		auto timer = Timer();
+		int waitNbr = 100000;
+		for (auto i = 0; i < waitNbr; ++i)
 			Queue::Fence::WaitFor(a_Device, fence, std::chrono::nanoseconds(15000000));
-		}
-		//test for function time itself
-		{
-			auto timer = Timer();
-			int waitNbr = 100000;
-			for (auto i = 0; i < waitNbr; ++i)
-				Queue::Fence::WaitFor(a_Device, fence, std::chrono::nanoseconds(15000000));
-			std::cout << "Already signaled Fence mean wait time : " << timer.Elapsed().count() / double(waitNbr) << " nanoseconds\n";
-		}
+		std::cout << "Already signaled Fence mean wait time : " << timer.Elapsed().count() / double(waitNbr) << " nanoseconds\n";
 	}
 	std::cout << "===========================================\n";
 	std::cout << "\n";
@@ -132,14 +128,6 @@ int CommandBuffer()
 	auto queueFamily = FindQueueFamily(physicalDevice, PhysicalDevice::QueueFlagsBits::Transfer);
 	auto queue = Device::GetQueue(device, queueFamily, 0); //Get first available queue
 
-	constexpr auto chunkSize = sizeof(char) * 256;
-	
-	//allocate GPU memory
-	Memory::Info memoryInfo;
-	memoryInfo.memoryTypeIndex = FindProperMemoryType(physicalDevice, PhysicalDevice::MemoryPropertyFlagBits::HostVisible | PhysicalDevice::MemoryPropertyFlagBits::HostCached);
-	memoryInfo.size = chunkSize * 3;
-	auto memory = Memory::Allocate(device, memoryInfo);
-
 	const std::string sentence0 = "Hello World !";
 	const std::string sentence1 = "All your base are belong to us";
 
@@ -149,6 +137,12 @@ int CommandBuffer()
 	std::cout << "=======================================\n";
 	std::cout << "\n";
 
+	//allocate GPU memory
+	constexpr auto chunkSize = sizeof(char) * 256;
+	Memory::Info memoryInfo;
+	memoryInfo.memoryTypeIndex = FindProperMemoryType(physicalDevice, PhysicalDevice::MemoryPropertyFlagBits::HostVisible | PhysicalDevice::MemoryPropertyFlagBits::HostCached);
+	memoryInfo.size = chunkSize * 3;
+	auto memory = Memory::Allocate(device, memoryInfo);
 	//create test buffers
 	Buffer::Info bufferInfo;
 	bufferInfo.size = chunkSize;
