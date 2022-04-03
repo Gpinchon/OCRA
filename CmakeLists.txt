@@ -100,6 +100,7 @@ set(OCRA_TEST_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/Queue.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/CommandBuffer.cpp)
 set(OCRA_TEST_HEADER_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/Common.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestList.hpp)
 add_executable(UnitTests
   ${OCRA_TEST_SOURCE_FILES}

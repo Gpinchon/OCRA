@@ -8,6 +8,8 @@
 #include <Memory.hpp>
 #include <Buffer.hpp>
 
+#include <Common.hpp>
+
 #include <iostream>
 
 using namespace OCRA;
@@ -19,7 +21,7 @@ auto CreateInstance()
 	std::cout << "==== Instance ====\n";
 	{
 		Instance::Info instanceInfo;
-		instanceInfo.applicationInfo.name = "Test";
+		instanceInfo.applicationInfo.name = "Test_CommandBuffer";
 		instanceInfo.applicationInfo.applicationVersion = 1;
 		instance = Instance::Create(instanceInfo);
 		std::cout << "  Type           : " << Instance::GetType(instance) << "\n";
@@ -28,7 +30,8 @@ auto CreateInstance()
 		std::cout << "  Engine Name    : " << Instance::GetInfo(instance).applicationInfo.engineName << "\n";
 		std::cout << "  Engine Version : " << Instance::GetInfo(instance).applicationInfo.engineVersion << "\n";
 	}
-	std::cout << std::endl;
+	std::cout << "==================\n";
+	std::cout << "\n";
 	return instance;
 }
 
@@ -39,7 +42,6 @@ auto GetQueueInfos(const PhysicalDevice::Handle& a_PhysicalDevice)
 	{
 		auto& queueFamilies = PhysicalDevice::GetQueueFamilyProperties(a_PhysicalDevice);
 		uint32_t familyIndex = 0;
-		std::cout << "==== Queue Families ====\n";
 		for (auto& queueFamily : queueFamilies)
 		{
 			Queue::Info queueInfo;
@@ -47,15 +49,6 @@ auto GetQueueInfos(const PhysicalDevice::Handle& a_PhysicalDevice)
 			queueInfo.queueFamilyIndex = familyIndex;
 			queueInfo.queuePriorities.resize(queueFamily.queueCount, 1.f);
 			queueInfos.push_back(queueInfo);
-			std::cout << "  Index         : " << familyIndex << "\n";
-			std::cout << "  Count         : " << queueFamily.queueCount << "\n";
-			std::cout << " == Capabilities ==\n";
-			std::cout << "  Graphics      : " << ((queueFamily.queueFlags & PhysicalDevice::QueueFlagsBits::Graphics) != 0) << "\n";
-			std::cout << "  Compute       : " << ((queueFamily.queueFlags & PhysicalDevice::QueueFlagsBits::Compute) != 0) << "\n";
-			std::cout << "  Protected     : " << ((queueFamily.queueFlags & PhysicalDevice::QueueFlagsBits::Protected) != 0) << "\n";
-			std::cout << "  SparseBinding : " << ((queueFamily.queueFlags & PhysicalDevice::QueueFlagsBits::SparseBinding) != 0) << "\n";
-			std::cout << "  Transfer      : " << ((queueFamily.queueFlags & PhysicalDevice::QueueFlagsBits::Transfer) != 0) << "\n";
-			std::cout << "==========================\n";
 			++familyIndex;
 		}
 	}
@@ -66,16 +59,6 @@ auto GetQueueInfos(const PhysicalDevice::Handle& a_PhysicalDevice)
 auto GetPhysicalDevice(const Instance::Handle& a_Instance)
 {
 	const auto& physicalDevices = Instance::EnumeratePhysicalDevices(a_Instance);
-	std::cout << "==== Physical Devices ====\n";
-	for (const auto& physicalDevice : physicalDevices)
-	{
-		const auto& properties = PhysicalDevice::GetProperties(physicalDevice);
-		std::cout << "  Name        : " << properties.deviceName << "\n";
-		std::cout << "  Vendor      : " << properties.vendorName << "\n";
-		std::cout << "  API version : " << properties.apiVersion << "\n";
-		std::cout << "==========================\n";
-	}
-	std::cout << std::endl;
 	return physicalDevices.front();
 }
 
@@ -108,6 +91,39 @@ auto FindProperMemoryType(const PhysicalDevice::Handle& a_PhysicalDevice, const 
 	return std::numeric_limits<uint32_t>::infinity();
 }
 
+#include <future>
+
+void SubmitCommandBuffer(const Device::Handle& a_Device, const Queue::Handle& a_Queue, const Command::Buffer::Handle& a_CommandBuffer)
+{
+	auto fence = Queue::Fence::Create(a_Device);
+	std::cout << "========== Command Buffer submit ==========\n";
+	{
+		Queue::SubmitInfo submitInfo;
+		submitInfo.commandBuffers.push_back(a_CommandBuffer);
+		//test multithreaded submit
+		std::async([a_Queue, submitInfo, fence] {
+			Queue::Submit(a_Queue, { submitInfo }, fence);
+		});
+		//Queue::Submit(a_Queue, { submitInfo }, fence);
+		
+		//make sure GPU is done
+		{
+			VerboseTimer bufferCopiesTimer("Buffer Copies");
+			Queue::Fence::WaitFor(a_Device, fence, std::chrono::nanoseconds(15000000));
+		}
+		//test for function time itself
+		{
+			auto timer = Timer();
+			int waitNbr = 100000;
+			for (auto i = 0; i < waitNbr; ++i)
+				Queue::Fence::WaitFor(a_Device, fence, std::chrono::nanoseconds(15000000));
+			std::cout << "Already signaled Fence mean wait time : " << timer.Elapsed().count() / double(waitNbr) << " nanoseconds\n";
+		}
+	}
+	std::cout << "===========================================\n";
+	std::cout << "\n";
+}
+
 int CommandBuffer()
 {
 	auto instance = CreateInstance();
@@ -127,10 +143,11 @@ int CommandBuffer()
 	const std::string sentence0 = "Hello World !";
 	const std::string sentence1 = "All your base are belong to us";
 
-	std::cout << "\n";
-	std::cout << "Sentences to swap :\n";
+	std::cout << "========== Sentences to swap ==========\n";
 	std::cout << "  Sentence 0 : " << sentence0 << "\n";
 	std::cout << "  Sentence 1 : " << sentence1 << "\n";
+	std::cout << "=======================================\n";
+	std::cout << "\n";
 
 	//create test buffers
 	Buffer::Info bufferInfo;
@@ -173,25 +190,10 @@ int CommandBuffer()
 		Command::CopyBuffer(commandBuffer, buffer2, buffer1, { copyRegions });
 	}
 	Command::EndCommandBuffer(commandBuffer);
-	{
-		Queue::SubmitInfo submitInfo;
-		auto fence = Queue::Fence::Create(device);
-		submitInfo.commandBuffers.push_back(commandBuffer);
-		Queue::Submit(queue, { submitInfo }, fence);
-		//make sure GPU is done
-		Queue::Fence::WaitFor(device, fence, std::chrono::nanoseconds(15000000));
-		//test for function time itself
-		double elapsedTimed{ 0 };
-		int waitNbr = 100000;
-		for (auto i = 0; i < waitNbr; ++i) {
-			const auto waitStart = std::chrono::high_resolution_clock::now();
-			Queue::Fence::WaitFor(device, fence, std::chrono::nanoseconds(15000000));
-			const auto elapsedTime = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - waitStart);
-			elapsedTimed += elapsedTime.count() / double(waitNbr);
-		}
-		std::cout << "Wait time : " << elapsedTimed << "\n";
-	}
-	std::cout << "Check if sentences were swapped : \n";
+
+	SubmitCommandBuffer(device, queue, commandBuffer);
+	
+	std::cout << "===== Check if sentences were swapped =====\n";
 	int success = 0;
 	{
 		std::string buffer0String = (char*)Memory::Map(device, memory, chunkSize * 0, chunkSize);
@@ -205,6 +207,8 @@ int CommandBuffer()
 		std::cout << "  Buffer 1 value : " << buffer1String << "\n";
 		Memory::Unmap(device, memory);
 	}
-	std::cout << (success == 0 ? "Great success !" : "Failure will not be tolerated.") << std::endl;
+	std::cout << "    " << (success == 0 ? "***** Great success ! *****" : "XXXXX Failure will not be tolerated. XXXXX") << "\n";
+	std::cout << "===========================================\n";
+	std::cout << std::endl;
 	return success;
 }
