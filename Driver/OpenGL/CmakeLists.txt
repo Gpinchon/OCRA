@@ -29,6 +29,7 @@ set(OCRA_IMPL_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Buffer.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Device.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Memory.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Instance.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/ObjectPool.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/PhysicalDevice.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/WeakHandle.hpp

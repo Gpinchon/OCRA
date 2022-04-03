@@ -48,10 +48,11 @@ void PushCommand(
 	const Handle& a_Device,
 	const uint32_t& a_FamilyIndex,
 	const uint32_t& a_QueueIndex,
-	const Command& a_Command)
+	const Command& a_Command,
+	const bool a_Synchronous)
 {
 	PhysicalDevice::PushCommand(
 		a_Device->physicalDevice.lock(),
-		a_FamilyIndex, a_QueueIndex, a_Command);
+		a_FamilyIndex, a_QueueIndex, a_Command, a_Synchronous);
 }
 }

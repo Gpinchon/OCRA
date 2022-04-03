@@ -1,7 +1,5 @@
 #pragma once
 
 namespace OCRA::Queue::Fence {
-void Signal(
-	const Device::Handle& a_Device,
-	const std::vector<Handle>& a_Fences);
+void Signal(const Handle& a_Fences);
 }

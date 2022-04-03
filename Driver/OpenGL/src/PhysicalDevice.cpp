@@ -1,12 +1,15 @@
-#include "PhysicalDevice.hpp"
 #include <PhysicalDevice.hpp>
 #include <Queue/Queue.hpp>
 
 #include <GL/glew.h>
+#include <GL/Instance.hpp>
+#include <GL/WeakHandle.hpp>
 
 #include <queue>
 #include <functional>
 #include <stdexcept>
+
+OCRA_DECLARE_WEAK_HANDLE(OCRA::Instance);
 
 namespace OCRA::PhysicalDevice
 {
@@ -192,9 +195,13 @@ struct Queue {
 };
 struct Impl
 {
-	Impl()
+	Impl(const Instance::Handle& a_Instance) : instance(a_Instance)
 	{
         if (!GLEW_EXT_direct_state_access) throw std::runtime_error("Direct state access extension required !");
+        Instance::PushCommand(a_Instance, [this] { GetProperties(); }, true);
+	}
+    void GetProperties()
+    {
         properties.apiVersion = GetInteger(GL_MAJOR_VERSION) * 100 + GetInteger(GL_MINOR_VERSION) * 10;
         //properties.driverVersion = (char*)glGetString(GL_VERSION);
         properties.vendorName = (char*)glGetString(GL_VENDOR);
@@ -290,16 +297,17 @@ struct Impl
         memoryProperties.memoryTypes.at(9).propertyFlags = MemoryPropertyFlagBits::Protected;
         memoryProperties.memoryTypes.at(10).heapIndex = 0;
         memoryProperties.memoryTypes.at(10).propertyFlags = MemoryPropertyFlagBits::Protected | MemoryPropertyFlagBits::DeviceLocal;
-	}
+    }
+    Instance::WeakHandle instance;
 	Properties          properties;
     Features            features;
     MemoryProperties    memoryProperties;
     std::vector<QueueFamilyProperties> queueFamilyProperties;
     std::array<std::array<Queue, 1>, 1> queues;
 };
-Handle Create()
+Handle Create(const Instance::Handle& a_Instance)
 {
-	return Handle(new Impl());
+	return Handle(new Impl(a_Instance));
 }
 const MemoryProperties& GetMemoryProperties(const Handle& a_PhysicalDevice)
 {
@@ -321,9 +329,9 @@ void PushCommand(
     const Handle& a_PhysicalDevice,
     const uint32_t& a_FamilyIndex,
     const uint32_t& a_QueueIndex,
-    const Command& a_Command)
+    const Command& a_Command,
+    const bool a_Synchronous)
 {
-    a_Command();
-    //a_PhysicalDevice->queues.at(a_FamilyIndex).at(a_QueueIndex).PushCommand(a_Command);
+    Instance::PushCommand(a_PhysicalDevice->instance.lock(), a_Command, a_Synchronous);
 }
 }

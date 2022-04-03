@@ -14,6 +14,7 @@ void PushCommand(
 	const Handle& a_Device,
 	const uint32_t& a_FamilyIndex,
 	const uint32_t& a_QueueIndex,
-	const Command& a_Command);
+	const Command& a_Command,
+	const bool a_Synchronous);
 PhysicalDevice::Handle GetPhysicalDevice(const Handle& a_Device);
 }

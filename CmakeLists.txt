@@ -46,6 +46,7 @@ set(OCRA_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Rect3D.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/ScissorTest.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Stencil.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Timer.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Vec.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Vec2.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Vec3.hpp

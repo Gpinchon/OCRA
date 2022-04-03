@@ -15,9 +15,13 @@
 
 #include <GL/Buffer.hpp>
 #include <GL/Image/Format.hpp>
-#include <GL/glew.h>
 #include <GL/Command/Buffer.hpp>
 #include <GL/Memory.hpp>
+#include <GL/Device.hpp>
+#include <GL/WeakHandle.hpp>
+#include <GL/glew.h>
+
+OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
 
 #define BUFFER_OFFSET(i) ((char*)NULL + (i))
 
@@ -25,18 +29,24 @@ namespace OCRA::Image {
 struct Impl
 {
     Impl(const Device::Handle& a_Device, const Info& a_Info)
-        : info(a_Info)
+        : device(a_Device)
+        , info(a_Info)
         , internalFormat(GetGLSizedFormat(a_Info.format))
         , dataFormat(GetGLDataFormat(a_Info.format))
         , dataType(GetGLDataType(a_Info.format))
     {
-        glGenTextures(1, &handle);
+        Device::PushCommand(a_Device, 0, 0, [this] {
+            glGenTextures(1, &handle);
+        }, true);
     }
     ~Impl() {
-        glDeleteTextures(1, &handle);
+        Device::PushCommand(device.lock(), 0, 0, [this] {
+            glDeleteTextures(1, &handle);
+        }, false);
     }
     virtual void Download(const Command::BufferImageCopy& a_Copy, const size_t& a_MemoryOffset) = 0;
     virtual void Upload(const Command::BufferImageCopy& a_Copy, const size_t& a_MemoryOffset) = 0;
+    const Device::WeakHandle device;
     const Info info;
     const GLenum internalFormat;
     const GLenum dataType;

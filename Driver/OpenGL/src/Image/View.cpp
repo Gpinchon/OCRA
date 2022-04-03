@@ -11,10 +11,14 @@
 
 #include <stdexcept>
 
+#include <GL/Device.hpp>
 #include <GL/Image/Format.hpp>
 #include <GL/Image/Image.hpp>
 #include <GL/Common/Component.hpp>
+#include <GL/WeakHandle.hpp>
 #include <GL/glew.h>
+
+OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
 
 namespace OCRA::Image::View {
 GLenum GetGLType(const Type& a_Type)
@@ -41,30 +45,35 @@ GLenum GetGLType(const Type& a_Type)
 }
 struct Impl {
 	Impl(const Device::Handle& a_Device, const Info& a_Info)
-	: info(a_Info)
+		: device(a_Device)
+		, info(a_Info)
 	{
-		glGenTextures(1, &handle);
-		glTextureView(
-			handle,
-			GetGLType(a_Info.type),
-			Image::GetGLHandle(a_Device, a_Info.image),
-			Image::GetGLSizedFormat(a_Info.format),
-			a_Info.subRange.baseMipLevel,
-			a_Info.subRange.levelCount,
-			a_Info.subRange.baseArrayLayer,
-			a_Info.subRange.layerCount);
-		glTextureParameterfv(
-			handle,
-			GL_TEXTURE_SWIZZLE_RGBA,
-			(float*)&Component::GLSwizzleMask(a_Info.components)
-		);
+		Device::PushCommand(a_Device, 0, 0, [this, a_Device, a_Info] {
+			glGenTextures(1, &handle);
+			glTextureView(
+				handle,
+				GetGLType(a_Info.type),
+				Image::GetGLHandle(a_Device, a_Info.image),
+				Image::GetGLSizedFormat(a_Info.format),
+				a_Info.subRange.baseMipLevel,
+				a_Info.subRange.levelCount,
+				a_Info.subRange.baseArrayLayer,
+				a_Info.subRange.layerCount);
+			glTextureParameterfv(
+				handle,
+				GL_TEXTURE_SWIZZLE_RGBA,
+				(float*)&Component::GLSwizzleMask(a_Info.components));
+		}, true);
 	}
     ~Impl()
     {
-        glDeleteTextures(1, &handle);
+		Device::PushCommand(device.lock(), 0, 0, [this] {
+			glDeleteTextures(1, &handle);
+		}, false);
     }
+	const Device::WeakHandle device;
+	const Info info;
     GLuint handle { 0 };
-    const Info info;
 };
 Handle Create(const Device::Handle& a_Device, const Info& a_Info)
 {

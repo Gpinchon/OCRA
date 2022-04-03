@@ -38,12 +38,11 @@ Handle Create(
 	return Handle(new Impl(a_PhysicalDevice, a_FamilyIndex, a_QueueIndex));
 }
 
-void Submit(
+void Execute(
 	const Handle& a_Queue,
 	const std::vector<SubmitInfo>& a_SubmitInfos,
 	const Fence::Handle& a_Fence)
 {
-	const auto device = a_Queue->device.lock();
 	for (const auto& submitInfo : a_SubmitInfos) {
 		for (auto semaphoreIndex = 0u; semaphoreIndex < submitInfo.waitSemaphores.size(); ++semaphoreIndex)
 		{
@@ -67,6 +66,18 @@ void Submit(
 			}
 		}
 	}
-	if (a_Fence != nullptr) Fence::Signal(device, { a_Fence });
+	if (a_Fence != nullptr) Fence::Signal(a_Fence);
+}
+
+void Submit(
+	const Handle& a_Queue,
+	const std::vector<SubmitInfo>& a_SubmitInfos,
+	const Fence::Handle& a_Fence)
+{
+	const auto device = a_Queue->device.lock();
+	Device::PushCommand(device, a_Queue->familyIndex, a_Queue->queueIndex,
+	[queue = a_Queue, submitInfos = a_SubmitInfos, fence = a_Fence] {
+		Execute(queue, submitInfos, fence);
+	}, false);
 }
 }
