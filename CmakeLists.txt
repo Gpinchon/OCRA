@@ -32,7 +32,7 @@ set(OCRA_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Queue/Fence.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Queue/Semaphore.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Viewport.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Window.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/WindowSurface.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Blend.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Compare.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Extent.hpp
