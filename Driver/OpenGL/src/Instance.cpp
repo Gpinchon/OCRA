@@ -21,12 +21,6 @@ class WorkerThread
 {
 public:
     struct Command {
-        Command(const std::function<void()>& a_FN, const uint64_t& a_ID, const bool a_Notify)
-            : fn(a_FN)
-            , id(a_ID)
-            , notify(a_Notify)
-        {}
-        void operator()() { return fn(); }
         const std::function<void()> fn;
         const uint64_t id;
         const bool notify;
@@ -34,15 +28,15 @@ public:
     WorkerThread() {
         _thread = std::thread([this] {
             std::unique_lock<std::mutex> lock(_mtx);
-            while (!_stop) {
+            while (true) {
                 _cv.wait(lock, [this] {
                     return !_queue.empty() || _stop;
                 });
-                if (_queue.empty()) continue;
-                auto command = std::move(_queue.front());
+                if (_stop) return;
+                Command command(std::move(_queue.front()));
                 _queue.pop();
                 lock.unlock();
-                command();
+                command.fn();
                 if (command.notify) {
                     _finishedTasks.insert(command.id);
                     _taskCv.notify_all();
@@ -58,9 +52,9 @@ public:
         _queue.push({ a_Command, commandID, a_Synchronous });
         _cv.notify_one();
         if (a_Synchronous) {
-            _taskCv.wait(lock, [this, commandID] {
+            _taskCv.wait(lock, [this, &commandID] {
                 const auto done = _finishedTasks.find(commandID) != _finishedTasks.end();
-                _finishedTasks.erase(commandID);
+                if (done) _finishedTasks.erase(commandID);
                 return done;
             });
         }
