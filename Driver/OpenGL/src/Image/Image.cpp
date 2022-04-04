@@ -35,12 +35,12 @@ struct Impl
         , dataFormat(GetGLDataFormat(a_Info.format))
         , dataType(GetGLDataType(a_Info.format))
     {
-        Device::PushCommand(a_Device, 0, 0, [this] {
+        a_Device->PushCommand(0, 0, [this] {
             glGenTextures(1, &handle);
         }, true);
     }
     ~Impl() {
-        Device::PushCommand(device.lock(), 0, 0, [this] {
+        device.lock()->PushCommand(0, 0, [handle = handle] {
             glDeleteTextures(1, &handle);
         }, false);
     }

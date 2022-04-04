@@ -3,6 +3,7 @@
 #include <Queue/Semaphore.hpp>
 #include <Command/Pool.hpp>
 
+#include <GL/Queue/Queue.hpp>
 #include <GL/Queue/Fence.hpp>
 #include <GL/Device.hpp>
 #include <GL/Command/Buffer.hpp>
@@ -13,32 +14,10 @@
 
 OCRA_DECLARE_HANDLE(OCRA::Fence);
 OCRA_DECLARE_HANDLE(OCRA::Queue);
-OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
 
 namespace OCRA::Queue
 {
-struct Impl
-{
-	Impl(const Device::Handle& a_PhysicalDevice,
-		const uint32_t& a_FamilyIndex,
-		const uint32_t& a_QueueIndex)
-		: device(a_PhysicalDevice)
-		, familyIndex(a_FamilyIndex)
-		, queueIndex(a_QueueIndex)
-	{}
-	const Device::WeakHandle device;
-	const uint32_t familyIndex;
-	const uint32_t queueIndex;
-};
-Handle Create(
-	const Device::Handle& a_PhysicalDevice,
-	const uint32_t& a_FamilyIndex,
-	const uint32_t& a_QueueIndex)
-{
-	return Handle(new Impl(a_PhysicalDevice, a_FamilyIndex, a_QueueIndex));
-}
-
-void Execute(
+static inline void Execute(
 	const Handle& a_Queue,
 	const std::vector<SubmitInfo>& a_SubmitInfos,
 	const Fence::Handle& a_Fence)
@@ -66,7 +45,7 @@ void Execute(
 			}
 		}
 	}
-	if (a_Fence != nullptr) Fence::Signal(a_Fence);
+	if (a_Fence != nullptr) a_Fence->Signal();
 }
 
 void Submit(
@@ -74,8 +53,7 @@ void Submit(
 	const std::vector<SubmitInfo>& a_SubmitInfos,
 	const Fence::Handle& a_Fence)
 {
-	const auto device = a_Queue->device.lock();
-	Device::PushCommand(device, a_Queue->familyIndex, a_Queue->queueIndex,
+	a_Queue->device.lock()->PushCommand(a_Queue->familyIndex, a_Queue->queueIndex,
 	[queue = a_Queue, submitInfos = a_SubmitInfos, fence = a_Fence] {
 		Execute(queue, submitInfos, fence);
 	}, false);

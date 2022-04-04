@@ -48,7 +48,7 @@ struct Impl {
 		: device(a_Device)
 		, info(a_Info)
 	{
-		Device::PushCommand(a_Device, 0, 0, [this, a_Device, a_Info] {
+		a_Device->PushCommand(0, 0, [this, a_Device, a_Info] {
 			glGenTextures(1, &handle);
 			glTextureView(
 				handle,
@@ -67,7 +67,7 @@ struct Impl {
 	}
     ~Impl()
     {
-		Device::PushCommand(device.lock(), 0, 0, [this] {
+		device.lock()->PushCommand(0, 0, [handle = handle] {
 			glDeleteTextures(1, &handle);
 		}, false);
     }

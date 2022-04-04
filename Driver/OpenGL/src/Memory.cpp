@@ -15,7 +15,7 @@ struct Impl
 		: device(a_Device)
 		, info(a_Info)
 	{
-		auto& memoryProperties = PhysicalDevice::GetMemoryProperties(Device::GetPhysicalDevice(a_Device));
+		auto& memoryProperties = PhysicalDevice::GetMemoryProperties(a_Device->physicalDevice.lock());
 		auto& memoryTypeFlags = memoryProperties.memoryTypes.at(info.memoryTypeIndex).propertyFlags;
 		GLbitfield  allocationFlags{ 0 };
 		if ((memoryTypeFlags & PhysicalDevice::MemoryPropertyFlagBits::HostCached) != 0) {
@@ -29,7 +29,7 @@ struct Impl
 			allocationFlags |= GL_MAP_COHERENT_BIT | GL_MAP_PERSISTENT_BIT;
 			mapFlags |= GL_MAP_COHERENT_BIT;
 		}
-		Device::PushCommand(a_Device, 0, 0, [this, allocationFlags] {
+		a_Device->PushCommand(0, 0, [this, allocationFlags] {
 			glCreateBuffers(1, &handle);
 			glNamedBufferStorageEXT(
 				handle,
@@ -40,7 +40,7 @@ struct Impl
 	}
 	~Impl()
 	{
-		Device::PushCommand(device.lock(), 0, 0, [this] {
+		device.lock()->PushCommand(0, 0, [this] {
 			glDeleteBuffers(1, &handle);
 		}, false);
 		
@@ -61,7 +61,7 @@ void* Map(
 	const uint64_t&        a_Length)
 {
 	void* ptr{ nullptr };
-	Device::PushCommand(a_Device, 0, 0, [a_Memory, a_Offset, a_Length, &ptr] {
+	a_Device->PushCommand(0, 0, [a_Memory, a_Offset, a_Length, &ptr] {
 		ptr = glMapNamedBufferRangeEXT(
 			a_Memory->handle,
 			a_Offset,
@@ -74,7 +74,7 @@ void Unmap(
 	const Device::Handle&  a_Device,
 	const Handle&          a_Memory)
 {
-	Device::PushCommand(a_Device, 0, 0, [a_Memory] {
+	a_Device->PushCommand(0, 0, [a_Memory] {
 		glUnmapNamedBufferEXT(a_Memory->handle);
 	}, false);
 	

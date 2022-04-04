@@ -1,12 +1,8 @@
 #include <PhysicalDevice.hpp>
-#include <Queue/Queue.hpp>
 
+#include <GL/PhysicalDevice.hpp>
 #include <GL/glew.h>
-#include <GL/Instance.hpp>
-#include <GL/WeakHandle.hpp>
 
-#include <queue>
-#include <functional>
 #include <stdexcept>
 
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Instance);
@@ -21,7 +17,7 @@ auto GetInteger(const GLenum& state)
     return val;
 }
 
-auto GetIntegerIndex(const GLenum& a_State, const GLuint& a_Index)
+auto GetInteger(const GLenum& a_State, const GLuint& a_Index)
 {
     GLint val;
     glGetIntegeri_v(a_State, a_Index, &val);
@@ -93,13 +89,13 @@ Limits GetPhysicalDeviceLimitsGL()
     limits.maxFragmentCombinedOutputResources = GetInteger(GL_MAX_COMBINED_SHADER_OUTPUT_RESOURCES);
 
     limits.maxComputeSharedMemorySize = GetInteger(GL_MAX_COMPUTE_SHARED_MEMORY_SIZE);
-    limits.maxComputeWorkGroupCount[0] = GetIntegerIndex(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0);
-    limits.maxComputeWorkGroupCount[1] = GetIntegerIndex(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 1);
-    limits.maxComputeWorkGroupCount[2] = GetIntegerIndex(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 2);
+    limits.maxComputeWorkGroupCount[0] = GetInteger(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0);
+    limits.maxComputeWorkGroupCount[1] = GetInteger(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 1);
+    limits.maxComputeWorkGroupCount[2] = GetInteger(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 2);
     limits.maxComputeWorkGroupInvocations = GetInteger(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS);
-    limits.maxComputeWorkGroupSize[0] = GetIntegerIndex(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0);
-    limits.maxComputeWorkGroupSize[1] = GetIntegerIndex(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1);
-    limits.maxComputeWorkGroupSize[2] = GetIntegerIndex(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2);
+    limits.maxComputeWorkGroupSize[0] = GetInteger(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0);
+    limits.maxComputeWorkGroupSize[1] = GetInteger(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1);
+    limits.maxComputeWorkGroupSize[2] = GetInteger(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2);
     limits.subPixelPrecisionBits = GetInteger(GL_SUBPIXEL_BITS);
     //limits.subTexelPrecisionBits = GetInteger(    );
     //limits.mipmapPrecisionBits = GetInteger(    );
@@ -181,130 +177,110 @@ Limits GetPhysicalDeviceLimitsGL()
     //limits.nonCoherentAtomSize = GetInteger(    );
     return limits;
 }
-struct Queue {
-    void PushCommand(const std::function<void()>& a_Command) {
-        commands.push(a_Command);
-    }
-    void Execute() {
-        while (!commands.empty()) {
-            commands.front()();
-            commands.pop();
-        }
-    }
-    std::queue<std::function<void()>> commands;
-};
-struct Impl
+Impl::Impl(const Instance::Handle& a_Instance) : instance(a_Instance)
 {
-	Impl(const Instance::Handle& a_Instance) : instance(a_Instance)
-	{
-        if (!GLEW_EXT_direct_state_access) throw std::runtime_error("Direct state access extension required !");
-        Instance::PushCommand(a_Instance, [this] { GetProperties(); }, true);
-	}
-    void GetProperties()
-    {
-        properties.apiVersion = GetInteger(GL_MAJOR_VERSION) * 100 + GetInteger(GL_MINOR_VERSION) * 10;
-        //properties.driverVersion = (char*)glGetString(GL_VERSION);
-        properties.vendorName = (char*)glGetString(GL_VENDOR);
-        properties.deviceName = (char*)glGetString(GL_RENDERER);
-        properties.deviceType = Type::Other;
-        //properties.pipelineCacheUUID = 0;
-        properties.limits = GetPhysicalDeviceLimitsGL();
-        //properties.sparseProperties = 0;
+    if (!GLEW_EXT_direct_state_access) throw std::runtime_error("Direct state access extension required !");
+    a_Instance->PushCommand([this] { GetProperties(); }, true);
+}
+void Impl::GetProperties()
+{
+    properties.apiVersion = GetInteger(GL_MAJOR_VERSION) * 100 + GetInteger(GL_MINOR_VERSION) * 10;
+    //properties.driverVersion = (char*)glGetString(GL_VERSION);
+    properties.vendorName = (char*)glGetString(GL_VENDOR);
+    properties.deviceName = (char*)glGetString(GL_RENDERER);
+    properties.deviceType = Type::Other;
+    //properties.pipelineCacheUUID = 0;
+    properties.limits = GetPhysicalDeviceLimitsGL();
+    //properties.sparseProperties = 0;
 
-        features.robustBufferAccess = GLEW_ARB_robust_buffer_access_behavior;
-        features.fullDrawIndexUint32 = properties.limits.maxDrawIndexedIndexValue == (std::numeric_limits<uint32_t>::max)();
-        features.imageCubeArray = GLEW_ARB_texture_cube_map_array;
-        features.independentBlend = GLEW_ARB_blend_func_extended;
-        features.geometryShader = GLEW_ARB_geometry_shader4;
-        features.tessellationShader = GLEW_ARB_tessellation_shader;
-        features.sampleRateShading = GLEW_ARB_sample_shading;
-        features.dualSrcBlend = GLEW_ARB_draw_buffers_blend;
-        features.logicOp = true; //supported by default
-        features.multiDrawIndirect = GLEW_ARB_multi_draw_indirect;
-        features.drawIndirectFirstInstance = GLEW_ARB_base_instance;
-        features.depthClamp = GLEW_ARB_depth_clamp;
-        features.depthBiasClamp = GLEW_ARB_polygon_offset_clamp;
-        features.fillModeNonSolid = true; //supported by default
-        features.depthBounds = GLEW_EXT_depth_bounds_test;
-        features.wideLines = properties.limits.lineWidthRange[1] > 1;
-        features.largePoints = properties.limits.pointSizeRange[1] > 1;
-        features.alphaToOne = GLEW_ARB_multisample;
-        features.multiViewport = GLEW_ARB_viewport_array;
-        features.samplerAnisotropy = GLEW_ARB_texture_filter_anisotropic;
-        features.textureCompressionETC2 = GLEW_ARB_ES3_compatibility;
-        features.textureCompressionASTC_LDR = GLEW_KHR_texture_compression_astc_ldr;
-        features.textureCompressionBC = GLEW_EXT_texture_compression_s3tc;
-        features.occlusionQueryPrecise = GLEW_ARB_occlusion_query;
-        features.pipelineStatisticsQuery = GLEW_ARB_pipeline_statistics_query;
-        features.vertexPipelineStoresAndAtomics = GLEW_ARB_shader_atomic_counters;
-        features.fragmentStoresAndAtomics = GLEW_ARB_shader_atomic_counters;
-        features.shaderTessellationAndGeometryPointSize = true; //supported by default
-        features.shaderImageGatherExtended = GLEW_ARB_texture_gather;
-        features.shaderStorageImageExtendedFormats = false; //not supported by OpenGL
-        features.shaderStorageImageMultisample = GLEW_ARB_multisample;
-        features.shaderStorageImageReadWithoutFormat = false; //not supported by OpenGL
-        features.shaderStorageImageWriteWithoutFormat = false; //not supported by OpenGL
-        features.shaderUniformBufferArrayDynamicIndexing = false; //not supported by OpenGL
-        features.shaderSampledImageArrayDynamicIndexing = false; //not supported by OpenGL
-        features.shaderStorageBufferArrayDynamicIndexing = false; //not supported by OpenGL
-        features.shaderStorageImageArrayDynamicIndexing = false; //not supported by OpenGL
-        features.shaderClipDistance = true; //supported by default
-        features.shaderCullDistance = GLEW_ARB_cull_distance;
-        features.shaderFloat64 = GLEW_ARB_gpu_shader_fp64;
-        features.shaderInt64 = GLEW_ARB_gpu_shader_int64;
-        features.shaderInt16 = GLEW_AMD_gpu_shader_int16;
-        features.shaderResourceResidency = GLEW_ARB_bindless_texture;
-        features.shaderResourceMinLod = GLEW_ARB_shader_texture_lod;
-        features.sparseBinding = GLEW_ARB_sparse_texture && GLEW_ARB_sparse_buffer;
-        features.sparseResidencyBuffer = GLEW_ARB_sparse_buffer;
-        features.sparseResidencyImage2D = GLEW_ARB_sparse_texture;
-        features.sparseResidencyImage3D = GLEW_ARB_sparse_texture;
-        features.sparseResidency2Samples = GLEW_ARB_sparse_texture2;
-        features.sparseResidency4Samples = GLEW_ARB_sparse_texture2;
-        features.sparseResidency8Samples = GLEW_ARB_sparse_texture2;
-        features.sparseResidency16Samples = GLEW_ARB_sparse_texture2;
-        features.sparseResidencyAliased = false; //not supported by OpenGL
-        features.variableMultisampleRate = true; //TODO make sure it's supported
-        features.inheritedQueries = false; //not supported by OpenGL
-        queueFamilyProperties.resize(1);
-        queueFamilyProperties.front().queueCount = 1;
-        queueFamilyProperties.front().queueFlags = QueueFlagsBits::Graphics | QueueFlagsBits::Compute | QueueFlagsBits::Transfer | QueueFlagsBits::SparseBinding;
-        queueFamilyProperties.front().minImageTransferGranularity = { 1, 1, 1 }; //Queues supporting graphics and/or compute operations must report (1,1,1)
-        memoryProperties.memoryHeaps.resize(1);
-        memoryProperties.memoryHeaps.at(0).size = static_cast<size_t>(GetInteger(GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX)) * 1000;
-        memoryProperties.memoryHeaps.at(0).flags = MemoryHeapFlagBits::DeviceLocal;
-        memoryProperties.memoryTypes.resize(11);
+    features.robustBufferAccess = GLEW_ARB_robust_buffer_access_behavior;
+    features.fullDrawIndexUint32 = properties.limits.maxDrawIndexedIndexValue == (std::numeric_limits<uint32_t>::max)();
+    features.imageCubeArray = GLEW_ARB_texture_cube_map_array;
+    features.independentBlend = GLEW_ARB_blend_func_extended;
+    features.geometryShader = GLEW_ARB_geometry_shader4;
+    features.tessellationShader = GLEW_ARB_tessellation_shader;
+    features.sampleRateShading = GLEW_ARB_sample_shading;
+    features.dualSrcBlend = GLEW_ARB_draw_buffers_blend;
+    features.logicOp = true; //supported by default
+    features.multiDrawIndirect = GLEW_ARB_multi_draw_indirect;
+    features.drawIndirectFirstInstance = GLEW_ARB_base_instance;
+    features.depthClamp = GLEW_ARB_depth_clamp;
+    features.depthBiasClamp = GLEW_ARB_polygon_offset_clamp;
+    features.fillModeNonSolid = true; //supported by default
+    features.depthBounds = GLEW_EXT_depth_bounds_test;
+    features.wideLines = properties.limits.lineWidthRange[1] > 1;
+    features.largePoints = properties.limits.pointSizeRange[1] > 1;
+    features.alphaToOne = GLEW_ARB_multisample;
+    features.multiViewport = GLEW_ARB_viewport_array;
+    features.samplerAnisotropy = GLEW_ARB_texture_filter_anisotropic;
+    features.textureCompressionETC2 = GLEW_ARB_ES3_compatibility;
+    features.textureCompressionASTC_LDR = GLEW_KHR_texture_compression_astc_ldr;
+    features.textureCompressionBC = GLEW_EXT_texture_compression_s3tc;
+    features.occlusionQueryPrecise = GLEW_ARB_occlusion_query;
+    features.pipelineStatisticsQuery = GLEW_ARB_pipeline_statistics_query;
+    features.vertexPipelineStoresAndAtomics = GLEW_ARB_shader_atomic_counters;
+    features.fragmentStoresAndAtomics = GLEW_ARB_shader_atomic_counters;
+    features.shaderTessellationAndGeometryPointSize = true; //supported by default
+    features.shaderImageGatherExtended = GLEW_ARB_texture_gather;
+    features.shaderStorageImageExtendedFormats = false; //not supported by OpenGL
+    features.shaderStorageImageMultisample = GLEW_ARB_multisample;
+    features.shaderStorageImageReadWithoutFormat = false; //not supported by OpenGL
+    features.shaderStorageImageWriteWithoutFormat = false; //not supported by OpenGL
+    features.shaderUniformBufferArrayDynamicIndexing = false; //not supported by OpenGL
+    features.shaderSampledImageArrayDynamicIndexing = false; //not supported by OpenGL
+    features.shaderStorageBufferArrayDynamicIndexing = false; //not supported by OpenGL
+    features.shaderStorageImageArrayDynamicIndexing = false; //not supported by OpenGL
+    features.shaderClipDistance = true; //supported by default
+    features.shaderCullDistance = GLEW_ARB_cull_distance;
+    features.shaderFloat64 = GLEW_ARB_gpu_shader_fp64;
+    features.shaderInt64 = GLEW_ARB_gpu_shader_int64;
+    features.shaderInt16 = GLEW_AMD_gpu_shader_int16;
+    features.shaderResourceResidency = GLEW_ARB_bindless_texture;
+    features.shaderResourceMinLod = GLEW_ARB_shader_texture_lod;
+    features.sparseBinding = GLEW_ARB_sparse_texture && GLEW_ARB_sparse_buffer;
+    features.sparseResidencyBuffer = GLEW_ARB_sparse_buffer;
+    features.sparseResidencyImage2D = GLEW_ARB_sparse_texture;
+    features.sparseResidencyImage3D = GLEW_ARB_sparse_texture;
+    features.sparseResidency2Samples = GLEW_ARB_sparse_texture2;
+    features.sparseResidency4Samples = GLEW_ARB_sparse_texture2;
+    features.sparseResidency8Samples = GLEW_ARB_sparse_texture2;
+    features.sparseResidency16Samples = GLEW_ARB_sparse_texture2;
+    features.sparseResidencyAliased = false; //not supported by OpenGL
+    features.variableMultisampleRate = true; //TODO make sure it's supported
+    features.inheritedQueries = false; //not supported by OpenGL
+    queueFamilyProperties.resize(1);
+    queueFamilyProperties.front().queueCount = 1;
+    queueFamilyProperties.front().queueFlags = QueueFlagsBits::Graphics | QueueFlagsBits::Compute | QueueFlagsBits::Transfer | QueueFlagsBits::SparseBinding;
+    queueFamilyProperties.front().minImageTransferGranularity = { 1, 1, 1 }; //Queues supporting graphics and/or compute operations must report (1,1,1)
+    memoryProperties.memoryHeaps.resize(1);
+    memoryProperties.memoryHeaps.at(0).size = static_cast<size_t>(GetInteger(GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX)) * 1000;
+    memoryProperties.memoryHeaps.at(0).flags = MemoryHeapFlagBits::DeviceLocal;
+    memoryProperties.memoryTypes.resize(11);
 
-        memoryProperties.memoryTypes.at(0).heapIndex = 0;
-        memoryProperties.memoryTypes.at(0).propertyFlags = MemoryPropertyFlagBits::None;
-        memoryProperties.memoryTypes.at(1).heapIndex = 0;
-        memoryProperties.memoryTypes.at(1).propertyFlags = MemoryPropertyFlagBits::HostVisible | MemoryPropertyFlagBits::HostCoherent;
-        memoryProperties.memoryTypes.at(2).heapIndex = 0;
-        memoryProperties.memoryTypes.at(2).propertyFlags = MemoryPropertyFlagBits::HostVisible | MemoryPropertyFlagBits::HostCached;
-        memoryProperties.memoryTypes.at(3).heapIndex = 0;
-        memoryProperties.memoryTypes.at(3).propertyFlags = MemoryPropertyFlagBits::HostVisible | MemoryPropertyFlagBits::HostCached | MemoryPropertyFlagBits::HostCoherent;
-        memoryProperties.memoryTypes.at(4).heapIndex = 0;
-        memoryProperties.memoryTypes.at(4).propertyFlags = MemoryPropertyFlagBits::DeviceLocal;
-        memoryProperties.memoryTypes.at(5).heapIndex = 0;
-        memoryProperties.memoryTypes.at(5).propertyFlags = MemoryPropertyFlagBits::DeviceLocal | MemoryPropertyFlagBits::HostVisible | MemoryPropertyFlagBits::HostCoherent;
-        memoryProperties.memoryTypes.at(6).heapIndex = 0;
-        memoryProperties.memoryTypes.at(6).propertyFlags = MemoryPropertyFlagBits::DeviceLocal | MemoryPropertyFlagBits::HostVisible | MemoryPropertyFlagBits::HostCached;
-        memoryProperties.memoryTypes.at(7).heapIndex = 0;
-        memoryProperties.memoryTypes.at(7).propertyFlags = MemoryPropertyFlagBits::DeviceLocal | MemoryPropertyFlagBits::HostVisible | MemoryPropertyFlagBits::HostCached | MemoryPropertyFlagBits::HostCoherent;
-        memoryProperties.memoryTypes.at(8).heapIndex = 0;
-        memoryProperties.memoryTypes.at(8).propertyFlags = MemoryPropertyFlagBits::DeviceLocal | MemoryPropertyFlagBits::LazilyAllocated;
-        memoryProperties.memoryTypes.at(9).heapIndex = 0;
-        memoryProperties.memoryTypes.at(9).propertyFlags = MemoryPropertyFlagBits::Protected;
-        memoryProperties.memoryTypes.at(10).heapIndex = 0;
-        memoryProperties.memoryTypes.at(10).propertyFlags = MemoryPropertyFlagBits::Protected | MemoryPropertyFlagBits::DeviceLocal;
-    }
-    Instance::WeakHandle instance;
-	Properties          properties;
-    Features            features;
-    MemoryProperties    memoryProperties;
-    std::vector<QueueFamilyProperties> queueFamilyProperties;
-    std::array<std::array<Queue, 1>, 1> queues;
-};
+    memoryProperties.memoryTypes.at(0).heapIndex = 0;
+    memoryProperties.memoryTypes.at(0).propertyFlags = MemoryPropertyFlagBits::None;
+    memoryProperties.memoryTypes.at(1).heapIndex = 0;
+    memoryProperties.memoryTypes.at(1).propertyFlags = MemoryPropertyFlagBits::HostVisible | MemoryPropertyFlagBits::HostCoherent;
+    memoryProperties.memoryTypes.at(2).heapIndex = 0;
+    memoryProperties.memoryTypes.at(2).propertyFlags = MemoryPropertyFlagBits::HostVisible | MemoryPropertyFlagBits::HostCached;
+    memoryProperties.memoryTypes.at(3).heapIndex = 0;
+    memoryProperties.memoryTypes.at(3).propertyFlags = MemoryPropertyFlagBits::HostVisible | MemoryPropertyFlagBits::HostCached | MemoryPropertyFlagBits::HostCoherent;
+    memoryProperties.memoryTypes.at(4).heapIndex = 0;
+    memoryProperties.memoryTypes.at(4).propertyFlags = MemoryPropertyFlagBits::DeviceLocal;
+    memoryProperties.memoryTypes.at(5).heapIndex = 0;
+    memoryProperties.memoryTypes.at(5).propertyFlags = MemoryPropertyFlagBits::DeviceLocal | MemoryPropertyFlagBits::HostVisible | MemoryPropertyFlagBits::HostCoherent;
+    memoryProperties.memoryTypes.at(6).heapIndex = 0;
+    memoryProperties.memoryTypes.at(6).propertyFlags = MemoryPropertyFlagBits::DeviceLocal | MemoryPropertyFlagBits::HostVisible | MemoryPropertyFlagBits::HostCached;
+    memoryProperties.memoryTypes.at(7).heapIndex = 0;
+    memoryProperties.memoryTypes.at(7).propertyFlags = MemoryPropertyFlagBits::DeviceLocal | MemoryPropertyFlagBits::HostVisible | MemoryPropertyFlagBits::HostCached | MemoryPropertyFlagBits::HostCoherent;
+    memoryProperties.memoryTypes.at(8).heapIndex = 0;
+    memoryProperties.memoryTypes.at(8).propertyFlags = MemoryPropertyFlagBits::DeviceLocal | MemoryPropertyFlagBits::LazilyAllocated;
+    memoryProperties.memoryTypes.at(9).heapIndex = 0;
+    memoryProperties.memoryTypes.at(9).propertyFlags = MemoryPropertyFlagBits::Protected;
+    memoryProperties.memoryTypes.at(10).heapIndex = 0;
+    memoryProperties.memoryTypes.at(10).propertyFlags = MemoryPropertyFlagBits::Protected | MemoryPropertyFlagBits::DeviceLocal;
+}
+
 Handle Create(const Instance::Handle& a_Instance)
 {
 	return Handle(new Impl(a_Instance));
@@ -324,14 +300,5 @@ const Features& GetFeatures(const Handle& a_PhysicalDevice)
 const std::vector<QueueFamilyProperties> GetQueueFamilyProperties(const Handle& a_PhysicalDevice)
 {
     return a_PhysicalDevice->queueFamilyProperties;
-}
-void PushCommand(
-    const Handle& a_PhysicalDevice,
-    const uint32_t& a_FamilyIndex,
-    const uint32_t& a_QueueIndex,
-    const Command& a_Command,
-    const bool a_Synchronous)
-{
-    Instance::PushCommand(a_PhysicalDevice->instance.lock(), a_Command, a_Synchronous);
 }
 }
