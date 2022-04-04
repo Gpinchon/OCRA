@@ -49,6 +49,8 @@ struct Impl
 			state == State::Pending
 		);
 		state = State::Invalid;
+		commands.clear();
+		executionState = {};
 	}
 	void Begin(const CommandBufferBeginInfo& a_BeginInfo)
 	{
@@ -105,14 +107,12 @@ std::vector<Handle> Allocate(const Device::Handle& a_Device, const AllocateInfo&
 void PushCommand(const Handle& a_CommandBuffer, const Command& a_Callback) {
 	a_CommandBuffer->PushCommand(a_Callback);
 }
-void Execute(const std::vector<Handle>& a_CommandBuffers)
-{
+void Execute(const std::vector<Handle>& a_CommandBuffers) {
 	for (const auto& commandBuffer : a_CommandBuffers) {
 		commandBuffer->Execute();
 	}
 }
-Pool::Handle GetPool(const Handle& a_CommandBuffer)
-{
+Pool::Handle GetPool(const Handle& a_CommandBuffer) {
 	return a_CommandBuffer->commandPool.lock();
 }
 }

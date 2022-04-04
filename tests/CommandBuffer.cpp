@@ -3,6 +3,7 @@
 #include <Device.hpp>
 #include <Queue/Queue.hpp>
 #include <Queue/Fence.hpp>
+#include <Queue/Semaphore.hpp>
 #include <Command/Pool.hpp>
 #include <Command/Buffer.hpp>
 #include <Memory.hpp>
@@ -90,22 +91,41 @@ static inline auto FindProperMemoryType(const PhysicalDevice::Handle& a_Physical
 	return std::numeric_limits<uint32_t>::infinity();
 }
 
+#define FENCE_VERSION
+
 static inline void SubmitCommandBuffer(const Device::Handle& a_Device, const Queue::Handle& a_Queue, const Command::Buffer::Handle& a_CommandBuffer)
 {
 	auto fence = Queue::Fence::Create(a_Device);
-	std::cout << "========== Command Buffer submit ==========\n";
+	Queue::Semaphore::Handle semaphore = Queue::Semaphore::Create(a_Device, Queue::Semaphore::Type::Timeline);
+#ifndef FENCE_VERSION
+	Queue::TimelineSemaphoreSubmitInfo timelineValues;
+	timelineValues.waitSemaphoreValues.push_back(1);
+	timelineValues.signalSemaphoreValues.push_back(2);
+#endif
 	Queue::SubmitInfo submitInfo;
 	submitInfo.commandBuffers.push_back(a_CommandBuffer);
+#ifndef FENCE_VERSION
+	submitInfo.waitSemaphores.push_back(semaphore);
+	submitInfo.signalSemaphores.push_back(semaphore);
+	submitInfo.timelineSemaphoreValues.emplace(timelineValues);
+#endif
+	std::cout << "========== Command Buffer submit ==========\n";
 	//test multithreaded submit
 	std::async([a_Queue, submitInfo, fence] {
 		Queue::Submit(a_Queue, { submitInfo }, fence);
 	});
-	//Queue::Submit(a_Queue, { submitInfo }, fence);
-		
+	
+#ifndef FENCE_VERSION
+	Queue::Semaphore::Signal(a_Device, semaphore, 1);
+#endif
 	//make sure GPU is done
 	{
 		VerboseTimer bufferCopiesTimer("Buffer Copies");
+#ifndef FENCE_VERSION
+		Queue::Semaphore::Wait(a_Device, { semaphore }, { 2 }, std::chrono::nanoseconds(15000000));
+#else
 		Queue::Fence::WaitFor(a_Device, fence, std::chrono::nanoseconds(15000000));
+#endif
 	}
 	//test for function time itself
 	{

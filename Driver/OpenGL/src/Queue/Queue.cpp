@@ -26,22 +26,22 @@ static inline void Execute(
 		for (auto semaphoreIndex = 0u; semaphoreIndex < submitInfo.waitSemaphores.size(); ++semaphoreIndex)
 		{
 			auto& semaphore = submitInfo.waitSemaphores.at(semaphoreIndex);
-			if (Semaphore::GetType(semaphore) == Semaphore::Type::Binary)
-				Semaphore::WaitDevice(semaphore);
+			if (semaphore->type == Semaphore::Type::Binary)
+				std::static_pointer_cast<Semaphore::Binary>(semaphore)->Wait();
 			else {
-				auto& semaphoreValue = submitInfo.timelineSemaphoreValues.waitSemaphoreValues.at(semaphoreIndex);
-				Semaphore::WaitDevice(semaphore, semaphoreValue);
+				auto& semaphoreValue = submitInfo.timelineSemaphoreValues->waitSemaphoreValues.at(semaphoreIndex);
+				std::static_pointer_cast<Semaphore::Timeline>(semaphore)->WaitDevice(semaphoreValue);
 			}
 		}
 		Command::Buffer::Execute(submitInfo.commandBuffers);
 		for (auto semaphoreIndex = 0u; semaphoreIndex < submitInfo.signalSemaphores.size(); ++semaphoreIndex)
 		{
 			auto& semaphore = submitInfo.signalSemaphores.at(semaphoreIndex);
-			if (Semaphore::GetType(semaphore) == Semaphore::Type::Binary)
-				Semaphore::WaitDevice(semaphore);
+			if (semaphore->type == Semaphore::Type::Binary)
+				std::static_pointer_cast<Semaphore::Binary>(semaphore)->Signal();
 			else {
-				auto& semaphoreValue = submitInfo.timelineSemaphoreValues.signalSemaphoreValues.at(semaphoreIndex);
-				Semaphore::WaitDevice(semaphore, semaphoreValue);
+				auto& semaphoreValue = submitInfo.timelineSemaphoreValues->signalSemaphoreValues.at(semaphoreIndex);
+				std::static_pointer_cast<Semaphore::Timeline>(semaphore)->SignalDevice(semaphoreValue);
 			}
 		}
 	}

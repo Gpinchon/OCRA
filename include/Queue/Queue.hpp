@@ -9,6 +9,7 @@
 #include <Handle.hpp>
 
 #include <vector>
+#include <optional>
 
 OCRA_DECLARE_HANDLE(OCRA::Queue);
 OCRA_DECLARE_HANDLE(OCRA::Queue::Semaphore);
@@ -22,13 +23,16 @@ struct Info {
 	uint32_t                    queueCount;
 	std::vector<float>          queuePriorities;
 };
+/**
+* @brief describes the Timeline Semaphore values to signal/wait for
+*/
 struct TimelineSemaphoreSubmitInfo {
 	std::vector<uint64_t> waitSemaphoreValues;
 	std::vector<uint64_t> signalSemaphoreValues;
 };
 struct SubmitInfo
 {
-	TimelineSemaphoreSubmitInfo				timelineSemaphoreValues;
+	std::optional<TimelineSemaphoreSubmitInfo> timelineSemaphoreValues;
 	std::vector<Semaphore::Handle>			waitSemaphores;
 	std::vector<Command::Buffer::Handle>	commandBuffers;
 	std::vector<Semaphore::Handle>			signalSemaphores;
