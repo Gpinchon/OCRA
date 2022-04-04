@@ -11,6 +11,7 @@
 
 #include <vector>
 #include <chrono>
+#include <optional>
 
 namespace OCRA {
 struct AllocationCallback;
@@ -21,11 +22,15 @@ OCRA_DECLARE_HANDLE(OCRA::Queue::Semaphore);
 
 namespace OCRA::Queue::Semaphore {
 enum class Type {
-	Binary, Timeline
+	Unknown = -1, Binary, Timeline
+};
+struct Info {
+	Type type{ Type::Unknown };
+	std::optional<uint64_t> initialValue;
 };
 Handle Create(
 	const Device::Handle& a_Device,
-	const Type& a_Type,
+	const Info& a_Info,
 	const AllocationCallback* a_Allocator = nullptr);
 void Signal(
 	const Device::Handle& a_Device,

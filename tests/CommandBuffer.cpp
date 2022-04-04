@@ -91,32 +91,39 @@ static inline auto FindProperMemoryType(const PhysicalDevice::Handle& a_Physical
 	return std::numeric_limits<uint32_t>::infinity();
 }
 
-#define FENCE_VERSION
+//#define FENCE_VERSION
 
 static inline void SubmitCommandBuffer(const Device::Handle& a_Device, const Queue::Handle& a_Queue, const Command::Buffer::Handle& a_CommandBuffer)
 {
-	auto fence = Queue::Fence::Create(a_Device);
-	Queue::Semaphore::Handle semaphore = Queue::Semaphore::Create(a_Device, Queue::Semaphore::Type::Timeline);
 #ifndef FENCE_VERSION
+	Queue::Semaphore::Info semaphoreInfo;
+	semaphoreInfo.type = Queue::Semaphore::Type::Timeline;
+	semaphoreInfo.initialValue = 0;
+	Queue::Semaphore::Handle semaphore = Queue::Semaphore::Create(a_Device, semaphoreInfo);
 	Queue::TimelineSemaphoreSubmitInfo timelineValues;
 	timelineValues.waitSemaphoreValues.push_back(1);
 	timelineValues.signalSemaphoreValues.push_back(2);
+#else
+	auto fence = Queue::Fence::Create(a_Device);
 #endif
 	Queue::SubmitInfo submitInfo;
 	submitInfo.commandBuffers.push_back(a_CommandBuffer);
 #ifndef FENCE_VERSION
 	submitInfo.waitSemaphores.push_back(semaphore);
 	submitInfo.signalSemaphores.push_back(semaphore);
-	submitInfo.timelineSemaphoreValues.emplace(timelineValues);
+	submitInfo.timelineSemaphoreValues = timelineValues;
 #endif
 	std::cout << "========== Command Buffer submit ==========\n";
 	//test multithreaded submit
+#ifndef FENCE_VERSION
+	std::async([a_Queue, submitInfo] {
+		Queue::Submit(a_Queue, { submitInfo });
+	});
+	Queue::Semaphore::Signal(a_Device, semaphore, 1);
+#else
 	std::async([a_Queue, submitInfo, fence] {
 		Queue::Submit(a_Queue, { submitInfo }, fence);
 	});
-	
-#ifndef FENCE_VERSION
-	Queue::Semaphore::Signal(a_Device, semaphore, 1);
 #endif
 	//make sure GPU is done
 	{
@@ -128,6 +135,7 @@ static inline void SubmitCommandBuffer(const Device::Handle& a_Device, const Que
 #endif
 	}
 	//test for function time itself
+#ifdef FENCE_VERSION
 	{
 		auto timer = Timer();
 		int waitNbr = 100000;
@@ -135,6 +143,7 @@ static inline void SubmitCommandBuffer(const Device::Handle& a_Device, const Que
 			Queue::Fence::WaitFor(a_Device, fence, std::chrono::nanoseconds(15000000));
 		std::cout << "Already signaled Fence mean wait time : " << timer.Elapsed().count() / double(waitNbr) << " nanoseconds\n";
 	}
+#endif
 	std::cout << "===========================================\n";
 	std::cout << "\n";
 }

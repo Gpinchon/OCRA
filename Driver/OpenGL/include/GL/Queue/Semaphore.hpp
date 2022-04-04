@@ -37,7 +37,10 @@ struct Binary : Impl {
     std::condition_variable cv;
 };
 struct Timeline : Impl {
-    Timeline() : Impl(Type::Timeline) {}
+    Timeline(const uint64_t& a_InitialValue)
+        : Impl(Type::Timeline)
+        , value(a_InitialValue)
+    {}
     void SignalDevice(const uint64_t& a_Value) {
         mutex.lock();
         assert(a_Value > value);

@@ -12,12 +12,12 @@ struct AllocationCallback;
 namespace OCRA::Queue::Semaphore {
 Handle Create(
     const Device::Handle& a_Device,
-    const Type& a_Type,
+    const Info& a_Info,
     const AllocationCallback* a_Allocator)
 {
-    if (a_Type == Type::Timeline)
-        return Handle(new Timeline);
-    else if (a_Type == Type::Binary)
+    if (a_Info.type == Type::Timeline)
+        return Handle(new Timeline(a_Info.initialValue.value()));
+    else if (a_Info.type == Type::Binary)
         return Handle(new Binary);
     throw std::runtime_error("Unknown semaphore type");
 }
