@@ -39,7 +39,7 @@ Impl::Impl(const Info& a_Info) : info(a_Info)
         0);
 
     //device context handle
-    hdc = GetDC(hwnd);
+    hdc = GetDC(HWND(hwnd));
 
     PIXELFORMATDESCRIPTOR pfd{};
     pfd.nSize = sizeof(pfd);
@@ -51,12 +51,12 @@ Impl::Impl(const Info& a_Info) : info(a_Info)
     pfd.iLayerType = PFD_MAIN_PLANE;
     pfd.cDepthBits = 24;
     pfd.cStencilBits = 8;
-    int pixel_format = ChoosePixelFormat(hdc, &pfd);
+    int pixel_format = ChoosePixelFormat(HDC(hdc), &pfd);
     if (!pixel_format) throw std::runtime_error("Failed to find a suitable pixel format.");
-    if (!SetPixelFormat(hdc, pixel_format, &pfd)) throw std::runtime_error("Failed to set the pixel format.");
-    const auto hglrcTemp = wglCreateContext(hdc);
+    if (!SetPixelFormat(HDC(hdc), pixel_format, &pfd)) throw std::runtime_error("Failed to set the pixel format.");
+    const auto hglrcTemp = wglCreateContext(HDC(hdc));
     if (hglrcTemp == nullptr) throw std::runtime_error("Failed to create a dummy OpenGL rendering context.");
-    if (!wglMakeCurrent(hdc, hglrcTemp)) throw std::runtime_error("Failed to activate dummy OpenGL rendering context.");
+    if (!wglMakeCurrent(HDC(hdc), hglrcTemp)) throw std::runtime_error("Failed to activate dummy OpenGL rendering context.");
 
     //LET'S GET STARTED !
     if (wglewInit() != GLEW_OK) throw std::runtime_error("Cound not initialize WGLEW");
@@ -69,13 +69,13 @@ Impl::Impl(const Info& a_Info) : info(a_Info)
         WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_ROBUST_ACCESS_BIT_ARB,
         0
     };
-    hglrc = wglCreateContextAttribsARB(hdc, 0, attribs); //commands execution context
+    hglrc = wglCreateContextAttribsARB(HDC(hdc), 0, attribs); //commands execution context
     if (hglrc == nullptr) throw std::runtime_error("Failed to create a modern OpenGL rendering context.");
     wglMakeCurrent(nullptr, nullptr);
     wglDeleteContext(hglrcTemp);
 #endif
     glThread.PushCommand([this] {
-        wglMakeCurrent(hdc, hglrc);
+        wglMakeCurrent(HDC(hdc), HGLRC(hglrc));
         glewExperimental = TRUE;
         if (glewInit() != GLEW_OK) throw std::runtime_error("Cound not initialize GLEW");
         }, true);
@@ -84,11 +84,11 @@ Impl::~Impl()
 {
     glThread.PushCommand([this] {
         wglMakeCurrent(nullptr, nullptr);
-        wglDeleteContext(hglrc);
+        wglDeleteContext(HGLRC(hglrc));
     }, false);
 #ifdef _WIN32
-    ReleaseDC(hwnd, hdc);
-    DestroyWindow(hwnd);
+    ReleaseDC(HWND(hwnd), HDC(hdc));
+    DestroyWindow(HWND(hwnd));
     UnregisterClassA("Dummy_OpenGL_Window", GetModuleHandle(0));
 #endif //_WIN32
 }
@@ -113,8 +113,8 @@ const std::vector<PhysicalDevice::Handle>& EnumeratePhysicalDevices(const Instan
 {
 	return a_Instance->physicalDevices;
 }
-void MakeCurrent(const Handle& a_Instance, const HDC& a_HDC)
+void MakeCurrent(const Handle& a_Instance, const void* a_HDC)
 {
-    a_Instance->glThread.PushCommand([hdc = a_HDC, hglrc = a_Instance->hglrc]{ wglMakeCurrent(hdc, hglrc); }, false);
+    a_Instance->glThread.PushCommand([hdc = HDC(a_HDC), hglrc = HGLRC(a_Instance->hglrc)]{ wglMakeCurrent(hdc, hglrc); }, false);
 }
 }

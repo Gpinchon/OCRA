@@ -1,13 +1,12 @@
 #pragma once
 
+#include <Handle.hpp>
 #include <Common/ClearValue.hpp>
 #include <Common/Compare.hpp>
 #include <Common/DepthBounds.hpp>
 #include <Common/Stencil.hpp>
 #include <Common/Rect2D.hpp>
 #include <Common/Vec4.hpp>
-#include <Handle.hpp>
-#include <Pipeline/Pipeline.hpp>
 
 #include <Viewport.hpp>
 #include <FrameBuffer.hpp>
@@ -18,6 +17,8 @@
 
 #include <vector>
 #include <array>
+
+OCRA_DECLARE_HANDLE(OCRA::Pipeline);
 
 namespace OCRA::Command::Buffer
 {

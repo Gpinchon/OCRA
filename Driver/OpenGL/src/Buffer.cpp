@@ -1,4 +1,3 @@
-
 #include <Buffer.hpp>
 #include <Allocator.hpp>
 
@@ -49,7 +48,7 @@ void CopyBuffer(
     const OCRA::Buffer::Handle&    a_DstBuffer,
     const std::vector<BufferCopyRegion>&  a_Regions)
 {
-     Command::Buffer::PushCommand(a_CommandBuffer, [
+    a_CommandBuffer->PushCommand([
         srcBuffer = a_SrcBuffer,
         dstBuffer = a_DstBuffer,
         regions = a_Regions
@@ -72,7 +71,7 @@ void BindIndexBuffer(
     const uint64_t a_Offset,
     const IndexType a_IndexType)
 {
-    Command::Buffer::PushCommand(a_CommandBuffer, [
+    a_CommandBuffer->PushCommand([
         indexBuffer = a_IndexBuffer,
         offset = a_Offset, indexType = GetGLIndexType(a_IndexType)
     ](Buffer::ExecutionState& executionState) {
@@ -89,7 +88,7 @@ void BindVertexBuffers(
     const std::vector<OCRA::Buffer::Handle>& a_VertexBuffers,
     const std::vector<uint64_t>& a_Offsets)
 {
-        Command::Buffer::PushCommand(a_CommandBuffer, [
+    a_CommandBuffer->PushCommand([
             firstBinding = a_FirstBinding,
             vertexBuffers = a_VertexBuffers,
             offsets = a_Offsets

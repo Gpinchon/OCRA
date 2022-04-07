@@ -32,7 +32,7 @@ void Draw(
     command.instanceCount = a_InstanceCount;
     command.first = a_FirstVertex;
     command.baseInstance = a_FirstInstance;
-    Command::Buffer::PushCommand(a_CommandBuffer, [
+    a_CommandBuffer->PushCommand([
         command = command
         ](Buffer::ExecutionState& executionState) {
         glDrawArraysIndirect(
@@ -54,7 +54,7 @@ void DrawIndexed(
     command.firstIndex = a_FirstIndex;
     command.baseVertex = a_VertexOffset;
     command.baseInstance = a_FirstInstance;
-    Command::Buffer::PushCommand(a_CommandBuffer, [
+    a_CommandBuffer->PushCommand([
         command = command
         ](Buffer::ExecutionState& executionState) {
             const auto& indexBufferBinding = executionState.renderPass.indexBufferBinding;

@@ -1,4 +1,5 @@
 #include <Handle.hpp>
+#include <Queue/Semaphore.hpp>
 
 #include <GL/glew.h>
 
@@ -13,26 +14,25 @@ struct Impl {
         : type(a_Type)
     {}
     const Type type;
-    
 };
 struct Binary : Impl {
     Binary() : Impl(Type::Binary) {}
     ~Binary() {}
     void Wait() {
         cv.wait(std::unique_lock<std::mutex>(mutex),
-                [this] { return signaled; });
+                [this] { return count > 0; });
+        --count;
     }
     void Signal() {
-        std::unique_lock<std::mutex> lock(mutex);
-        if (signaled) return;
+        mutex.lock();
         const auto sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
         glClientWaitSync(sync, 0, GL_TIMEOUT_IGNORED);
         glDeleteSync(sync);
-        signaled = true;
-        lock.unlock();
+        ++count;
+        mutex.unlock();
         cv.notify_all();
     }
-    bool signaled{ false };
+    int64_t count{ 0 };
     std::mutex mutex;
     std::condition_variable cv;
 };

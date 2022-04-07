@@ -11,7 +11,7 @@ void BindPipeline(
 	const OCRA::Pipeline::BindingPoint& a_BindingPoint,
 	const OCRA::Pipeline::Handle& a_Pipeline)
 {
-	Command::Buffer::PushCommand(a_CommandBuffer, [
+	a_CommandBuffer->PushCommand([
 		bindingPoint = size_t(a_BindingPoint),
 		pipeline = a_Pipeline
 	](Buffer::ExecutionState& executionState){

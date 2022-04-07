@@ -35,10 +35,12 @@ set(OCRA_IMPL_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/WeakHandle.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Command/Buffer.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Command/ExecutionState.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Command/Pool.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Common/Blend.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Common/Compare.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Common/IndexType.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Common/Logic.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Common/MemoryPool.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Common/Stencil.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Common/VertexType.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Image/Format.hpp

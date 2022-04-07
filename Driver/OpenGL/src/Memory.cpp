@@ -7,6 +7,8 @@
 
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
 
+#include <semaphore>
+
 namespace OCRA::Memory
 {
 struct Impl
@@ -40,7 +42,7 @@ struct Impl
 	}
 	~Impl()
 	{
-		device.lock()->PushCommand(0, 0, [this] {
+		device.lock()->PushCommand(0, 0, [handle = handle] {
 			glDeleteBuffers(1, &handle);
 		}, false);
 		

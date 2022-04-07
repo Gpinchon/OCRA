@@ -292,7 +292,7 @@ void CopyBufferToImage(
     const std::vector<BufferImageCopy>& a_Regions)
 {
     for (const auto& copy : a_Regions) CheckValidCopy(copy, a_DstImage);
-    Command::Buffer::PushCommand(a_CommandBuffer, [
+    a_CommandBuffer->PushCommand([
         srcBuffer = a_SrcBuffer, dstImage = a_DstImage, regions = a_Regions
     ](Command::Buffer::ExecutionState&) {
         auto& memoryBinding = OCRA::Buffer::GetMemoryBinding(srcBuffer);
@@ -310,7 +310,7 @@ void CopyImageToBuffer(
     const std::vector<BufferImageCopy>& a_Regions)
 {
     for (const auto& copy : a_Regions) CheckValidCopy(copy, a_SrcImage);
-    Command::Buffer::PushCommand(a_CommandBuffer, [
+    a_CommandBuffer->PushCommand([
         dstBuffer = a_DstBuffer, srcImage = a_SrcImage, regions = a_Regions
     ](Command::Buffer::ExecutionState&) {
         auto& memoryBinding = OCRA::Buffer::GetMemoryBinding(dstBuffer);

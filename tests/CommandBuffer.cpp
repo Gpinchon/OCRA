@@ -91,7 +91,7 @@ static inline auto FindProperMemoryType(const PhysicalDevice::Handle& a_Physical
 	return std::numeric_limits<uint32_t>::infinity();
 }
 
-//#define FENCE_VERSION
+#define FENCE_VERSION
 
 static inline void SubmitCommandBuffer(const Device::Handle& a_Device, const Queue::Handle& a_Queue, const Command::Buffer::Handle& a_CommandBuffer)
 {
@@ -107,9 +107,10 @@ static inline void SubmitCommandBuffer(const Device::Handle& a_Device, const Que
 	auto fence = Queue::Fence::Create(a_Device);
 #endif
 	Queue::SubmitInfo submitInfo;
-	submitInfo.commandBuffers.push_back(a_CommandBuffer);
+	for (auto i = 0u; i < 1; ++i)
+		submitInfo.commandBuffers.push_back(a_CommandBuffer);
 #ifndef FENCE_VERSION
-	submitInfo.waitSemaphores.push_back(semaphore);
+	//submitInfo.waitSemaphores.push_back(semaphore);
 	submitInfo.signalSemaphores.push_back(semaphore);
 	submitInfo.timelineSemaphoreValues = timelineValues;
 #endif
@@ -119,9 +120,12 @@ static inline void SubmitCommandBuffer(const Device::Handle& a_Device, const Que
 	std::async([a_Queue, submitInfo] {
 		Queue::Submit(a_Queue, { submitInfo });
 	});
-	Queue::Semaphore::Signal(a_Device, semaphore, 1);
+	//Queue::Semaphore::Signal(a_Device, semaphore, 1);
 #else
-	std::async([a_Queue, submitInfo, fence] {
+	auto lambada = [a_Queue] {};
+	std::function<void()> lambadaFun(lambada);
+	auto future = std::async([a_Queue, submitInfo, fence] {
+		VerboseTimer("Queue Submission");
 		Queue::Submit(a_Queue, { submitInfo }, fence);
 	});
 #endif
@@ -196,13 +200,13 @@ int CommandBuffer()
 	Command::Pool::Info commandPoolInfo;
 	commandPoolInfo.queueFamilyIndex = queueFamily;
 	auto commandPool = Command::Pool::Create(device, commandPoolInfo);
-	Command::Buffer::AllocateInfo commandBufferAllocateInfo;
+	Command::Pool::AllocateInfo commandBufferAllocateInfo;
 	commandBufferAllocateInfo.commandPool = commandPool;
 	commandBufferAllocateInfo.count = 1;
-	commandBufferAllocateInfo.level = Command::Buffer::Level::Primary;
-	auto commandBuffer = Command::Buffer::Allocate(device, commandBufferAllocateInfo).front();
+	commandBufferAllocateInfo.level = Command::Pool::AllocateInfo::Level::Primary;
+	auto commandBuffer = Command::Pool::AllocateBuffer(device, commandBufferAllocateInfo).front();
 	Command::CommandBufferBeginInfo commandBufferBeginInfo;
-	commandBufferBeginInfo.flags = Command::CommandBufferUsageFlagBits::OneTimeSubmit;
+	commandBufferBeginInfo.flags = Command::CommandBufferUsageFlagBits::None;
 	Command::BeginCommandBuffer(commandBuffer, commandBufferBeginInfo);
 	{
 		Command::BufferCopyRegion copyRegions;

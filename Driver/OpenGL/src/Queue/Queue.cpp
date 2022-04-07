@@ -1,14 +1,11 @@
 #include <Handle.hpp>
-#include <Queue/Queue.hpp>
 #include <Queue/Semaphore.hpp>
-#include <Command/Pool.hpp>
 
+#include <GL/Device.hpp>
 #include <GL/Queue/Queue.hpp>
 #include <GL/Queue/Fence.hpp>
-#include <GL/Device.hpp>
-#include <GL/Command/Buffer.hpp>
-#include <GL/WeakHandle.hpp>
 #include <GL/Queue/Semaphore.hpp>
+#include <GL/Command/Buffer.hpp>
 
 #include <vector>
 
