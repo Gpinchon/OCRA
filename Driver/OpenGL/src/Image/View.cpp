@@ -43,38 +43,33 @@ GLenum GetGLType(const Type& a_Type)
 		throw std::runtime_error("Unknown Image View Type");
 	}
 }
-struct Impl {
-	Impl(const Device::Handle& a_Device, const Info& a_Info)
-		: device(a_Device)
-		, info(a_Info)
-	{
-		a_Device->PushCommand(0, 0, [this, a_Device, a_Info] {
-			glGenTextures(1, &handle);
-			glTextureView(
-				handle,
-				GetGLType(a_Info.type),
-				Image::GetGLHandle(a_Device, a_Info.image),
-				Image::GetGLSizedFormat(a_Info.format),
-				a_Info.subRange.baseMipLevel,
-				a_Info.subRange.levelCount,
-				a_Info.subRange.baseArrayLayer,
-				a_Info.subRange.layerCount);
-			glTextureParameterfv(
-				handle,
-				GL_TEXTURE_SWIZZLE_RGBA,
-				(float*)&Component::GLSwizzleMask(a_Info.components));
-		}, true);
-	}
-    ~Impl()
-    {
-		device.lock()->PushCommand(0, 0, [handle = handle] {
-			glDeleteTextures(1, &handle);
-		}, false);
-    }
-	const Device::WeakHandle device;
-	const Info info;
-    GLuint handle { 0 };
-};
+Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
+	: device(a_Device)
+	, info(a_Info)
+{
+	a_Device->PushCommand(0, 0, [this, a_Device, a_Info] {
+		glGenTextures(1, &handle);
+		glTextureView(
+			handle,
+			GetGLType(a_Info.type),
+			Image::GetGLHandle(a_Device, a_Info.image),
+			Image::GetGLSizedFormat(a_Info.format),
+			a_Info.subRange.baseMipLevel,
+			a_Info.subRange.levelCount,
+			a_Info.subRange.baseArrayLayer,
+			a_Info.subRange.layerCount);
+		glTextureParameterfv(
+			handle,
+			GL_TEXTURE_SWIZZLE_RGBA,
+			(float*)&Component::GLSwizzleMask(a_Info.components));
+	}, true);
+}
+Impl::~Impl()
+{
+	device.lock()->PushCommand(0, 0, [handle = handle] {
+		glDeleteTextures(1, &handle);
+	}, false);
+}
 Handle Create(const Device::Handle& a_Device, const Info& a_Info)
 {
     return Handle(new Impl(a_Device, a_Info));

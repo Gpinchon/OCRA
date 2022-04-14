@@ -7,15 +7,24 @@
 #pragma once
 
 #include <Handle.hpp>
-#include <Image/View.hpp>
+#include <Allocator.hpp>
+#include <Common/Extent3D.hpp>
 
+#include <vector>
+
+OCRA_DECLARE_HANDLE(OCRA::Device);
 OCRA_DECLARE_HANDLE(OCRA::FrameBuffer);
+OCRA_DECLARE_HANDLE(OCRA::Image::View);
+OCRA_DECLARE_HANDLE(OCRA::RenderPass);
 
 namespace OCRA::FrameBuffer {
-constexpr auto MaxColorAttachments = 32;
 struct Info {
-    uint16_t width { 0 }, height { 0 }, layers { 1 }; //extents, rarelly used except for layers
-    uint8_t attachmentCount { 0 };
-    Image::View::Handle attachments[MaxColorAttachments]; //Image View handles
+    RenderPass::Handle                  renderpass;
+    std::vector<Image::View::Handle>    attachments; //Image View handles
+    Extent<3, uint16_t>                 extent; //extents, rarelly used except for layers
 };
+Handle Create(
+    const Device::Handle&       a_Device,
+    const Info&                 a_Info,
+    const AllocationCallback*   a_Allocator = nullptr);
 }

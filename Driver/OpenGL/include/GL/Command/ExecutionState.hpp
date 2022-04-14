@@ -23,8 +23,8 @@ OCRA_DECLARE_HANDLE(OCRA::Pipeline);
 namespace OCRA::Command::Buffer
 {
 struct DynamicStates {
-	std::vector<Viewport::Info> viewPorts;
-	std::vector<Rect<2, GLint>> scissors;
+	std::vector<Viewport::Info>	viewPorts;
+	std::vector<iRect2D>		scissors;
 	Vec<4, GLfloat> blendConstants{ 0, 0, 0, 0 };
 	GLfloat lineWidth{ 0.f };
 	GLfloat depthBiasConstantFactor{ 0.f };

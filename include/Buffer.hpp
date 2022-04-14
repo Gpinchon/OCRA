@@ -16,7 +16,7 @@ struct AllocationCallback;
 
 namespace OCRA::Buffer {
 using CreateFlags = std::bitset<5>;
-namespace CreateFlagsBits {
+namespace CreateFlagBits {
 static CreateFlags None                       = 0b00000;
 static CreateFlags SparseBinding              = 0b10000;
 static CreateFlags SparseResidency            = 0b01000;
@@ -39,7 +39,7 @@ static UsageFlags IndirectBuffer       = 0b0000000010;
 static UsageFlags ShaderDeviceAddress  = 0b0000000001;// Provided by VK_VERSION_1_2
 }
 struct Info {
-    CreateFlags             flags{ CreateFlagsBits::None };;
+    CreateFlags             flags{ CreateFlagBits::None };;
     uint64_t                size{ 0 };
     UsageFlags              usage{ UsageFlagBits::None };
     SharingMode             sharingMode{ SharingMode::Exclusive };

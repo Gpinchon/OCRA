@@ -103,9 +103,3 @@ void OCRA::Command::Buffer::Impl::Execute(ExecutionState& a_ExecutionState)
         command(a_ExecutionState);
     state = State::Executable;
 }
-
-void OCRA::Command::Buffer::Impl::PushCommand(const Command& a_Command)
-{
-    assert(state == State::Recording);
-    commands.push_back(a_Command);
-}
