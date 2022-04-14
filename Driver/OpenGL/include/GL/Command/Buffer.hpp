@@ -31,7 +31,12 @@ struct Impl
 	void Execute();
 	void ExecuteSecondary(ExecutionState& a_ExecutionState);
 	void Execute(ExecutionState& a_ExecutionState);
-	void PushCommand(const Command& a_Command);
+	//moved into header and inline function for performance
+	inline void PushCommand(const Command& a_Command)
+	{
+	    assert(state == State::Recording);
+	    commands.push_back(a_Command);
+	}
 	const Level level;
 	State state{ State::Initial };
 	std::vector<Command> commands;

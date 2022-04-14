@@ -54,9 +54,7 @@ void DrawIndexed(
     command.firstIndex = a_FirstIndex;
     command.baseVertex = a_VertexOffset;
     command.baseInstance = a_FirstInstance;
-    a_CommandBuffer->PushCommand([
-        command = command
-        ](Buffer::ExecutionState& executionState) {
+    a_CommandBuffer->PushCommand([command = command](Buffer::ExecutionState& executionState) {
             const auto& indexBufferBinding = executionState.renderPass.indexBufferBinding;
             //OGL does not allow for offset when binding Element Array, emulate it through Draw Indirect
             const auto offset = indexBufferBinding.offset / GetIndexTypeSize(indexBufferBinding.type);

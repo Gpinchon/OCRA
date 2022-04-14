@@ -6,7 +6,9 @@
 */
 #pragma once
 
-#include <Command/Buffer.hpp>
+#include <Handle.hpp>
+
+OCRA_DECLARE_HANDLE(OCRA::Command::Buffer);
 
 namespace OCRA::Command
 {

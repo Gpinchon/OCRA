@@ -8,6 +8,7 @@
 #include <Shader/Stage.hpp>
 
 #include <GL/Shader/Stage.hpp>
+#include <GL/Device.hpp>
 #include <GL/glew.h>
 
 #include <cassert>
@@ -35,38 +36,39 @@ struct Impl {
         : info(a_Info)
         , program(glCreateProgram())
     {
-        
-        auto& moduleInfo = Module::GetInfo(info.module);
-        auto& specialization = info.specializationInfo;
         std::vector<uint32_t> constantIndex;
         std::vector<uint32_t> constantValue;
-        constantIndex.reserve(specialization.mapEntries.size());
-        constantValue.reserve(specialization.mapEntries.size());
-        for (const auto& entry : specialization.mapEntries) {
+        constantIndex.reserve(info.specializationInfo.mapEntries.size());
+        constantValue.reserve(info.specializationInfo.mapEntries.size());
+        for (const auto& entry : info.specializationInfo.mapEntries) {
             uint32_t value{ 0 };
             assert(entry.size <= sizeof(value));
-            auto data = &specialization.data.at(entry.offset);
+            auto data = &info.specializationInfo.data.at(entry.offset);
             std::memcpy(&value, data, entry.size);
             constantValue.push_back(value);
             constantIndex.push_back(entry.constantID);
         }
-        const auto shader = glCreateShader(GetGLStage(info.stage));
-        glProgramParameteri(program, GL_PROGRAM_SEPARABLE, GL_TRUE);
-        //ARB_gl_spirv
-        glShaderBinary(1, &shader, GL_SHADER_BINARY_FORMAT_SPIR_V, moduleInfo.code.data(), moduleInfo.code.size());
-        glSpecializeShader(shader, info.name.c_str(), specialization.mapEntries.size(), constantIndex.data(), constantValue.data());
-        glCompileShader(shader);
-        if (!CheckCompilation(shader)) //compilation failed
-        {
-            glAttachShader(program, shader);
-            glLinkProgram(program);
-            glDetachShader(program, shader);
-        }
-        glDeleteShader(shader);
+        a_Device->PushCommand(0, 0, [moduleInfo = Module::GetInfo(info.module), constantIndex, constantValue] {
+            const auto shader = glCreateShader(GetGLStage(info.stage));
+            glProgramParameteri(program, GL_PROGRAM_SEPARABLE, GL_TRUE);
+            //ARB_gl_spirv
+            glShaderBinary(1, &shader, GL_SHADER_BINARY_FORMAT_SPIR_V, moduleInfo.code.data(), moduleInfo.code.size());
+            glSpecializeShader(shader, info.name.c_str(), constantIndex.size(), constantIndex.data(), constantValue.data());
+            glCompileShader(shader);
+            if (CheckCompilation(shader)) //compilation is successful
+            {
+                glAttachShader(program, shader);
+                glLinkProgram(program);
+                glDetachShader(program, shader);
+            }
+            glDeleteShader(shader);
+        }, true);
     }
     ~Impl()
     {
-        glDeleteProgram(program);
+        a_Device->PushCommand(0, 0, [program = program] {
+            glDeleteProgram(program);
+        }, false);
     }
     const Info info;
     const GLuint program;

@@ -7,10 +7,19 @@
 #pragma once
 
 #include <Handle.hpp>
+#include <Image/View.hpp>
+
+#include <GL/WeakHandle.hpp>
 
 OCRA_DECLARE_HANDLE(OCRA::Device);
-OCRA_DECLARE_HANDLE(OCRA::Image::View);
+OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
 
 namespace OCRA::Image::View {
-unsigned GetGLHandle(const Device::Handle& a_Device, const Handle& a_Handle);
+struct Impl {
+	Impl(const Device::Handle& a_Device, const Info& a_Info);
+    ~Impl();
+	const Device::WeakHandle device;
+	const Info info;
+    GLuint handle { 0 };
+};
 }
