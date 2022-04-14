@@ -9,18 +9,14 @@
 #include <Handle.hpp>
 
 OCRA_DECLARE_HANDLE(OCRA::Instance);
-OCRA_DECLARE_HANDLE(OCRA::WindowSurface);
+OCRA_DECLARE_HANDLE(OCRA::Surface);
 
 #ifdef _WIN32
-#include <windows.h>
-#endif
-
-namespace OCRA::WindowSurface {
-#ifdef _WIN32
+namespace OCRA::Surface::Win32 {
 struct Info {
-    HINSTANCE   hinstance;
-    HWND        hwnd;
+    void* hinstance;
+    void* hwnd;
 };
-#endif 
 Handle Create(const Instance::Handle& a_Instance, const Info& a_Info);
 }
+#endif 

@@ -32,7 +32,8 @@ set(OCRA_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Queue/Fence.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Queue/Semaphore.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Viewport.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/WindowSurface.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Surface.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/SwapChain.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Blend.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Compare.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Extent.hpp
@@ -45,6 +46,7 @@ set(OCRA_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Rect2D.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Rect3D.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/ScissorTest.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/SharingMode.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Stencil.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Timer.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Vec.hpp
@@ -65,6 +67,7 @@ set(OCRA_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Image/Format.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Image/Image.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Image/Sampler.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Image/Usage.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Image/View.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/ColorBlendState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/DepthStencilState.hpp

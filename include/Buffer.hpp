@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Handle.hpp>
+#include <Common/SharingMode.hpp>
 
 #include <bitset>
 #include <vector>
@@ -37,12 +38,6 @@ static UsageFlags VertexBuffer         = 0b0000000100;
 static UsageFlags IndirectBuffer       = 0b0000000010;
 static UsageFlags ShaderDeviceAddress  = 0b0000000001;// Provided by VK_VERSION_1_2
 }
-
-enum class SharingMode {
-    Exclusive,
-    Concurrent,
-    MaxValue
-};
 struct Info {
     CreateFlags             flags{ CreateFlagsBits::None };;
     uint64_t                size{ 0 };

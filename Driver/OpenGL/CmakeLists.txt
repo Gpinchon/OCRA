@@ -66,7 +66,7 @@ set(OCRA_IMPL_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Instance.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Memory.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/PhysicalDevice.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/WindowSurface.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Surface.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Queue/Fence.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Queue/Queue.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Queue/Semaphore.cpp
