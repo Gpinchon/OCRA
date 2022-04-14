@@ -9,9 +9,8 @@
 #include <Common/Vec4.hpp>
 #include <Common/Blend.hpp>
 #include <Common/Logic.hpp>
-#include <FrameBuffer.hpp>
 
-#include <array>
+#include <vector>
 
 namespace OCRA::Pipeline::ColorBlendState {
 struct AttachmentState {
@@ -27,8 +26,7 @@ struct AttachmentState {
 struct Info {
     bool logicOpEnable{ false };
     Logic::Operation logicOp{ Logic::Operation::Copy }; //see glLogicOp
-    uint8_t attachementCount { 0 };
-    std::array<AttachmentState, FrameBuffer::MaxColorAttachments> attachments;
+    std::vector<AttachmentState> attachments;
     Vec4 blendConstants;
 };
 }

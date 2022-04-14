@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Handle.hpp>
+#include <QueryPool.hpp>
 
 #include <GL/WeakHandle.hpp>
 #include <GL/glew.h>
@@ -26,7 +27,7 @@ struct Impl
         const uint32_t& a_FirstQuery,
         const uint32_t& a_QueryCount,
         const size_t& a_DataSize,
-        const void* a_Data,
+        void* const a_Data,
         const size_t& a_Stride,
         const QueryResultFlags& a_Flags);
     const Type type;
@@ -53,7 +54,7 @@ struct PipelineStatistics : Impl
         const uint32_t& a_FirstQuery,
         const uint32_t& a_QueryCount,
         const size_t& a_DataSize,
-        const void* a_Data,
+        void* const a_Data,
         const size_t& a_Stride,
         const QueryResultFlags& a_Flags) override;
     const uint32_t pipelineStatisticsCount;

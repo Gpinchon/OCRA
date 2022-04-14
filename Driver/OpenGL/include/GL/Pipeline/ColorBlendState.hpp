@@ -66,8 +66,8 @@ inline const auto Compile(const AttachmentState& a_AttachmentState, const uint8_
 inline const std::function<void(Command::Buffer::ExecutionState&)> Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info& a_DynamicState) {
     const auto attachments = [a_Info] {
         std::vector<std::function<void()>> attachments;
-        attachments.reserve(a_Info.attachementCount);
-        for (uint8_t index = 0; index < a_Info.attachementCount; ++index)
+        attachments.reserve(a_Info.attachments.size());
+        for (uint8_t index = 0; index < a_Info.attachments.size(); ++index)
             attachments.push_back(Compile(a_Info.attachments.at(index), index));
         return attachments;
     }();

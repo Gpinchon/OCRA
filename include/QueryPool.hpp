@@ -2,7 +2,10 @@
 
 #include <Handle.hpp>
 
+#include <bitset>
+
 OCRA_DECLARE_HANDLE(OCRA::Device);
+OCRA_DECLARE_HANDLE(OCRA::QueryPool);
 
 namespace OCRA::QueryPool
 {

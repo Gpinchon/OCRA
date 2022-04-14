@@ -8,7 +8,7 @@
 #include <Common/Rect2D.hpp>
 #include <Common/Vec4.hpp>
 
-#include <Viewport.hpp>
+#include <Common/ViewPort.hpp>
 #include <FrameBuffer.hpp>
 #include <RenderPass.hpp>
 
@@ -23,7 +23,7 @@ OCRA_DECLARE_HANDLE(OCRA::Pipeline);
 namespace OCRA::Command::Buffer
 {
 struct DynamicStates {
-	std::vector<Viewport::Info>	viewPorts;
+	std::vector<ViewPort>		viewPorts;
 	std::vector<iRect2D>		scissors;
 	Vec<4, GLfloat> blendConstants{ 0, 0, 0, 0 };
 	GLfloat lineWidth{ 0.f };

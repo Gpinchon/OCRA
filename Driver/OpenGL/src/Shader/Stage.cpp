@@ -9,9 +9,12 @@
 
 #include <GL/Shader/Stage.hpp>
 #include <GL/Device.hpp>
+#include <GL/WeakHandle.hpp>
 #include <GL/glew.h>
 
 #include <cassert>
+
+OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
 
 namespace OCRA::Shader::Stage {
 static inline auto CheckCompilation(GLuint program)
@@ -33,7 +36,8 @@ static inline auto CheckCompilation(GLuint program)
 }
 struct Impl {
     Impl(const Device::Handle& a_Device, const Info& a_Info)
-        : info(a_Info)
+        : device(a_Device)
+        , info(a_Info)
         , program(glCreateProgram())
     {
         std::vector<uint32_t> constantIndex;
@@ -48,7 +52,7 @@ struct Impl {
             constantValue.push_back(value);
             constantIndex.push_back(entry.constantID);
         }
-        a_Device->PushCommand(0, 0, [moduleInfo = Module::GetInfo(info.module), constantIndex, constantValue] {
+        a_Device->PushCommand(0, 0, [this, moduleInfo = Module::GetInfo(info.module), constantIndex, constantValue] {
             const auto shader = glCreateShader(GetGLStage(info.stage));
             glProgramParameteri(program, GL_PROGRAM_SEPARABLE, GL_TRUE);
             //ARB_gl_spirv
@@ -66,10 +70,11 @@ struct Impl {
     }
     ~Impl()
     {
-        a_Device->PushCommand(0, 0, [program = program] {
+        device.lock()->PushCommand(0, 0, [program = program] {
             glDeleteProgram(program);
         }, false);
     }
+    const Device::WeakHandle device;
     const Info info;
     const GLuint program;
 };

@@ -27,12 +27,13 @@ set(OCRA_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Instance.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Memory.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/PhysicalDevice.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/QueryPool.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/RenderPass.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/SwapChain.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Surface.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Queue/Queue.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Queue/Fence.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Queue/Semaphore.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/SwapChain.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/WindowSurface.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Blend.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Compare.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Extent.hpp
@@ -58,6 +59,7 @@ set(OCRA_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/Draw.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/MemoryBarrier.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/Pool.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/Query.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/Scissor.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/ViewPort.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Descriptor/Descriptor.hpp

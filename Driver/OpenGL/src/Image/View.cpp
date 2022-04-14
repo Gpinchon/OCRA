@@ -14,6 +14,7 @@
 #include <GL/Device.hpp>
 #include <GL/Image/Format.hpp>
 #include <GL/Image/Image.hpp>
+#include <GL/Image/View.hpp>
 #include <GL/Common/Component.hpp>
 #include <GL/WeakHandle.hpp>
 #include <GL/glew.h>
