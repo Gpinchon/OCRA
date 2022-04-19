@@ -2,12 +2,15 @@
 
 #include <Handle.hpp>
 #include <Common/Application.hpp>
-#include <Allocator.hpp>
 #include <PhysicalDevice.hpp>
 
 #include <vector>
 
 OCRA_DECLARE_HANDLE(OCRA::Instance);
+
+namespace OCRA {
+struct AllocationCallback;
+}
 
 namespace OCRA::Instance
 {

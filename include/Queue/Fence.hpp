@@ -1,13 +1,16 @@
 #pragma once
 
 #include <Handle.hpp>
-#include <Allocator.hpp>
 
 #include <vector>
 #include <chrono>
 
 OCRA_DECLARE_HANDLE(OCRA::Queue::Fence);
 OCRA_DECLARE_HANDLE(OCRA::Device);
+
+namespace OCRA {
+struct AllocationCallback;
+}
 
 namespace OCRA::Queue::Fence {
 enum class Status {

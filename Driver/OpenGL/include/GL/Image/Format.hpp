@@ -284,4 +284,210 @@ inline auto GetGLDataType(const Format& format)
         throw std::runtime_error("Unknow Image Format");
     }
 }
+inline auto GetRedSize(const Format& format)
+{
+    switch (format) {
+    case Format::Uint8_Normalized_R:
+    case Format::Uint8_R:
+    case Format::Uint8_Normalized_RG:
+    case Format::Uint8_RG:
+    case Format::Uint8_Normalized_RGB:
+    case Format::Uint8_RGB:
+    case Format::Uint8_Normalized_RGBA:
+    case Format::Uint8_RGBA:
+    case Format::Int8_Normalized_R:
+    case Format::Int8_R:
+    case Format::Int8_Normalized_RG:
+    case Format::Int8_RG:
+    case Format::Int8_Normalized_RGB:
+    case Format::Int8_RGB:
+    case Format::Int8_Normalized_RGBA:
+    case Format::Int8_RGBA:
+        return 8;
+    case Format::Uint16_Normalized_R:
+    case Format::Uint16_R:
+    case Format::Uint16_Normalized_RG:
+    case Format::Uint16_RG:
+    case Format::Uint16_Normalized_RGB:
+    case Format::Uint16_RGB:
+    case Format::Uint16_Normalized_RGBA:
+    case Format::Uint16_RGBA:
+    case Format::Int16_Normalized_R:
+    case Format::Int16_R:
+    case Format::Int16_Normalized_RG:
+    case Format::Int16_RG:
+    case Format::Int16_Normalized_RGB:
+    case Format::Int16_RGB:
+    case Format::Int16_Normalized_RGBA:
+    case Format::Int16_RGBA:
+    case Format::Float16_R:
+    case Format::Float16_RG:
+    case Format::Float16_RGB:
+    case Format::Float16_RGBA:
+        return 16;
+    case Format::Uint32_R:
+    case Format::Uint32_RG:
+    case Format::Uint32_RGB:
+    case Format::Uint32_RGBA:
+    case Format::Int32_R:
+    case Format::Int32_RG:
+    case Format::Int32_RGB:
+    case Format::Int32_RGBA:
+    case Format::Float32_R:
+    case Format::Float32_RG:
+    case Format::Float32_RGB:
+    case Format::Float32_RGBA:
+        return 32;
+    default:
+        return 0;
+    }
+}
+inline auto GetGreenSize(const Format& format)
+{
+    switch (format) {
+    case Format::Uint8_Normalized_RG:
+    case Format::Uint8_RG:
+    case Format::Uint8_Normalized_RGB:
+    case Format::Uint8_RGB:
+    case Format::Uint8_Normalized_RGBA:
+    case Format::Uint8_RGBA:
+    case Format::Int8_Normalized_RG:
+    case Format::Int8_RG:
+    case Format::Int8_Normalized_RGB:
+    case Format::Int8_RGB:
+    case Format::Int8_Normalized_RGBA:
+    case Format::Int8_RGBA:
+        return 8;
+    case Format::Uint16_Normalized_RG:
+    case Format::Uint16_RG:
+    case Format::Uint16_Normalized_RGB:
+    case Format::Uint16_RGB:
+    case Format::Uint16_Normalized_RGBA:
+    case Format::Uint16_RGBA:
+    case Format::Int16_Normalized_RG:
+    case Format::Int16_RG:
+    case Format::Int16_Normalized_RGB:
+    case Format::Int16_RGB:
+    case Format::Int16_Normalized_RGBA:
+    case Format::Int16_RGBA:
+    case Format::Float16_RG:
+    case Format::Float16_RGB:
+    case Format::Float16_RGBA:
+        return 16;
+    case Format::Uint32_RG:
+    case Format::Uint32_RGB:
+    case Format::Uint32_RGBA:
+    case Format::Int32_RG:
+    case Format::Int32_RGB:
+    case Format::Int32_RGBA:
+    case Format::Float32_RG:
+    case Format::Float32_RGB:
+    case Format::Float32_RGBA:
+        return 32;
+    default:
+        return 0;
+    }
+}
+inline auto GetGreenSize(const Format& format)
+{
+    switch (format) {
+    case Format::Uint8_Normalized_RG:
+    case Format::Uint8_RG:
+    case Format::Uint8_Normalized_RGB:
+    case Format::Uint8_RGB:
+    case Format::Uint8_Normalized_RGBA:
+    case Format::Uint8_RGBA:
+    case Format::Int8_Normalized_RG:
+    case Format::Int8_RG:
+    case Format::Int8_Normalized_RGB:
+    case Format::Int8_RGB:
+    case Format::Int8_Normalized_RGBA:
+    case Format::Int8_RGBA:
+        return 8;
+    case Format::Uint16_Normalized_RG:
+    case Format::Uint16_RG:
+    case Format::Uint16_Normalized_RGB:
+    case Format::Uint16_RGB:
+    case Format::Uint16_Normalized_RGBA:
+    case Format::Uint16_RGBA:
+    case Format::Int16_Normalized_RG:
+    case Format::Int16_RG:
+    case Format::Int16_Normalized_RGB:
+    case Format::Int16_RGB:
+    case Format::Int16_Normalized_RGBA:
+    case Format::Int16_RGBA:
+    case Format::Float16_RG:
+    case Format::Float16_RGB:
+    case Format::Float16_RGBA:
+        return 16;
+    case Format::Uint32_RG:
+    case Format::Uint32_RGB:
+    case Format::Uint32_RGBA:
+    case Format::Int32_RG:
+    case Format::Int32_RGB:
+    case Format::Int32_RGBA:
+    case Format::Float32_RG:
+    case Format::Float32_RGB:
+    case Format::Float32_RGBA:
+        return 32;
+    default:
+        return 0;
+    }
+}
+inline auto GetBlueSize(const Format& format)
+{
+    switch (format) {
+    case Format::Uint8_Normalized_RGB:
+    case Format::Uint8_RGB:
+    case Format::Uint8_Normalized_RGBA:
+    case Format::Uint8_RGBA:
+    case Format::Int8_Normalized_RGB:
+    case Format::Int8_RGB:
+    case Format::Int8_Normalized_RGBA:
+    case Format::Int8_RGBA:
+        return 8;
+    case Format::Uint16_Normalized_RGB:
+    case Format::Uint16_RGB:
+    case Format::Uint16_Normalized_RGBA:
+    case Format::Uint16_RGBA:
+    case Format::Int16_Normalized_RGB:
+    case Format::Int16_RGB:
+    case Format::Int16_Normalized_RGBA:
+    case Format::Int16_RGBA:
+    case Format::Float16_RGB:
+    case Format::Float16_RGBA:
+        return 16;
+    case Format::Uint32_RGB:
+    case Format::Uint32_RGBA:
+    case Format::Int32_RGB:
+    case Format::Int32_RGBA:
+    case Format::Float32_RGB:
+    case Format::Float32_RGBA:
+        return 32;
+    default:
+        return 0;
+    }
+}
+inline auto GetAlphaSize(const Format& format)
+{
+    switch (format) {
+    case Format::Uint8_Normalized_RGBA:
+    case Format::Uint8_RGBA:
+    case Format::Int8_Normalized_RGBA:
+    case Format::Int8_RGBA:
+        return 8;
+    case Format::Uint16_Normalized_RGBA:
+    case Format::Uint16_RGBA:
+    case Format::Int16_Normalized_RGBA:
+    case Format::Int16_RGBA:
+    case Format::Float16_RGBA:
+        return 16;
+    case Format::Uint32_RGBA:
+    case Format::Int32_RGBA:
+    case Format::Float32_RGBA:
+        return 32;
+    default:
+        return 0;
+    }
+}
 }

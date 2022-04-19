@@ -2,46 +2,34 @@
 
 #include <GL/Instance.hpp>
 #include <GL/WeakHandle.hpp>
+#include <GL/Surface.hpp>
+
+#include <GL/eglew.h>
 
 #include <string>
 
-#ifdef _WIN32
-#include <windows.h>
-#endif
-
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Instance);
 
-namespace OCRA::Surface
-{
-struct Impl
-{
-	Impl(const std::string& a_Type) : type(a_Type) {}
-	const std::string type;
-};
-}
+#ifdef _WIN32
+#include <windows.h>
 
 namespace OCRA::Surface::Win32
 {
-#ifdef _WIN32
-struct Impl : Surface::Impl
+Impl::Impl(const Instance::Handle& a_Instance, const Info& a_Info)
+	: Surface::Impl("Win32")
+	, info(a_Info)
+	, instance(a_Instance)
 {
-	Impl(const Instance::Handle& a_Instance, const Info& a_Info)
-		: Surface::Impl("Win32")
-		, info(a_Info)
-		, instance(a_Instance)
-	{
-		/*a_Instance->PushCommand([hwnd = HWND(a_Info.hwnd), hinstance = HINSTANCE(a_Info.hinstance)]() {
-			auto hdc = GetDC(hwnd);
-			wglMakeCurrent(hdc, hglrc);
-		});*/
-		Instance::MakeCurrent(a_Instance, GetDC(HWND(a_Info.hwnd)));
-	}
-	const Info info;
-	const Instance::WeakHandle instance;
-};
-Handle CreateWin32(const Instance::Handle& a_Instance, const Info& a_Info)
+	nativeWindow = a_Info.hwnd;
+	nativeDisplay = eglGetDisplay(GetDC(a_Info.hwnd));
+	if (eglGetError() != EGL_SUCCESS) throw std::runtime_error("Could not query hwnd display");
+	EGLint major, minor;
+	eglInitialize(nativeDisplay, &major, &minor);
+	if (eglGetError() != EGL_SUCCESS) throw std::runtime_error("Could not initialize display");
+}
+Handle Create(const Instance::Handle& a_Instance, const Info& a_Info)
 {
 	return Handle(new Impl(a_Instance, a_Info));
 }
-#endif
 }
+#endif

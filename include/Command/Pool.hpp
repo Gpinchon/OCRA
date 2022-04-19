@@ -28,7 +28,7 @@ struct Info
     uint32_t				queueFamilyIndex{ 0 };
 };
 struct AllocateInfo {
-	Command::Pool::Handle	commandPool;
+	Command::Pool::Handle	pool;
 	enum class Level {
 		Unknown = -1, Primary, Secondary
 	} level{ Level::Unknown };
@@ -38,7 +38,6 @@ Handle Create(
 	const Device::Handle&		a_Device,
 	const Info&					a_Info,
 	const AllocationCallback*	a_Allocator = nullptr);
-const Info& GetInfo(const Handle& a_CommandPool);
 std::vector<Buffer::Handle> AllocateBuffer(const Device::Handle& a_Device, const AllocateInfo& a_Info);
-void Reset(const Device::Handle& a_Device, const Handle& a_Pool);
+const Info& GetInfo(const Handle& a_CommandPool);
 }

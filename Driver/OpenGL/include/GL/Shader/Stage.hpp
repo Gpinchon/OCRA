@@ -14,24 +14,24 @@
 #include <GL/glew.h>
 
 namespace OCRA::Shader::Stage {
-static inline auto GetGLStage(const Stage& a_Stage)
+static inline auto GetGLStage(const StageFlags& a_Stage)
 {
 	switch (a_Stage)
 	{
-	case Stage::Vertex:
+	case StageFlagBits::Vertex:
 		return GL_VERTEX_SHADER;
-	case Stage::Geometry:
+	case StageFlagBits::Geometry:
 		return GL_GEOMETRY_SHADER;
-	case Stage::Fragment:
+	case StageFlagBits::Fragment:
 		return GL_FRAGMENT_SHADER;
-	case Stage::Compute:
+	case StageFlagBits::Compute:
 		return GL_COMPUTE_SHADER;
-	case Stage::TessControl:
+	case StageFlagBits::TessControl:
 		return GL_TESS_CONTROL_SHADER;
-	case Stage::TessEval:
+	case StageFlagBits::TessEval:
 		return GL_TESS_EVALUATION_SHADER;
 	default:
-		throw std::runtime_error("Unknown Shader Type");
+		throw std::runtime_error("Unknown Shader Stage");
 	}
 }
 unsigned GetGLHandle(const Handle& a_Handle);

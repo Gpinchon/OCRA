@@ -7,7 +7,6 @@
 #pragma once
 
 #include <Handle.hpp>
-#include <Allocator.hpp>
 #include <Common/Extent3D.hpp>
 
 #include <vector>
@@ -16,6 +15,10 @@ OCRA_DECLARE_HANDLE(OCRA::Device);
 OCRA_DECLARE_HANDLE(OCRA::FrameBuffer);
 OCRA_DECLARE_HANDLE(OCRA::Image::View);
 OCRA_DECLARE_HANDLE(OCRA::RenderPass);
+
+namespace OCRA {
+struct AllocationCallback;
+}
 
 namespace OCRA::FrameBuffer {
 struct Info {

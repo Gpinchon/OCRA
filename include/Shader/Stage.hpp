@@ -16,26 +16,18 @@ OCRA_DECLARE_HANDLE(OCRA::Device);
 OCRA_DECLARE_HANDLE(OCRA::Shader::Stage);
 
 namespace OCRA::Shader::Stage {
-typedef std::bitset<6> StageFlag;
-constexpr StageFlag None        = 0b000000;
-constexpr StageFlag Vertex      = 0b100000;
-constexpr StageFlag Geometry    = 0b010000;
-constexpr StageFlag Fragment    = 0b001000;
-constexpr StageFlag Compute     = 0b000100;
-constexpr StageFlag TessControl = 0b000010;
-constexpr StageFlag TessEval    = 0b000001;
-constexpr StageFlag AllGraphics = 0b111000; //Vertex | Geometry | Fragment
-constexpr StageFlag All         = 0b111111;
-enum class Stage {
-    None,
-    Vertex,
-    Geometry,
-    Fragment,
-    Compute,
-    TessControl,
-    TessEval,
-    MaxValue
-};
+using StageFlags = std::bitset<6>;
+namespace StageFlagBits {
+constexpr StageFlags None        = 0b000000;
+constexpr StageFlags Vertex      = 0b100000;
+constexpr StageFlags Geometry    = 0b010000;
+constexpr StageFlags Fragment    = 0b001000;
+constexpr StageFlags Compute     = 0b000100;
+constexpr StageFlags TessControl = 0b000010;
+constexpr StageFlags TessEval    = 0b000001;
+constexpr StageFlags AllGraphics = 0b111000; //Vertex | Geometry | Fragment
+constexpr StageFlags All         = 0b111111;
+}
 struct SpecializationMapEntry {
     uint32_t    constantID;
     uint32_t    offset;
@@ -46,7 +38,7 @@ struct SpecializationInfo {
     std::vector<std::byte> data;
 };
 struct Info {
-    Stage stage { Stage::None };
+    StageFlags stage { StageFlagBits::None }; //must be a single stage
     Module::Handle module; //the spir-v module
     std::string name { "" }; //entry point name
     SpecializationInfo specializationInfo;

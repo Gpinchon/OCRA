@@ -10,19 +10,13 @@
 #include <Framebuffer.hpp>
 #include <Handle.hpp>
 #include <Image/Format.hpp>
+#include <Image/Layout.hpp>
 #include <Pipeline/Pipeline.hpp>
 #include <Common/SampleCount.hpp>
 
 #include <vector>
 
 OCRA_DECLARE_HANDLE(OCRA::RenderPass);
-
-namespace OCRA::Image {
-enum class Layout {
-	Unknown = -1,
-	MaxValue
-};
-}
 
 namespace OCRA::RenderPass
 {

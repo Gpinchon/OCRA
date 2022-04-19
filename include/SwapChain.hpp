@@ -45,7 +45,6 @@ enum PresentMode {
     MaxValue
 };
 struct Info {
-    SwapchainCreateFlags    flags;
     Surface::Handle         surface;
     uint32_t                minImageCount;
     Image::Format           imageFormat;

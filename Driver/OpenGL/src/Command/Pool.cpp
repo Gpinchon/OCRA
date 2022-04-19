@@ -19,20 +19,12 @@ struct Impl
 		: info(a_Info)
 	{}
 	auto Allocate(const AllocateInfo::Level& a_Level) {
-		const auto ptr = memoryPool.allocate();
-		buffers.insert(ptr);
-		return new(ptr) Buffer::Impl(Buffer::Level(a_Level));
+		return new(memoryPool.allocate()) Buffer::Impl(Buffer::Level(a_Level));
 	}
 	void Deallocate(Buffer::Impl* a_Ptr) {
 		a_Ptr->~Impl();
 		memoryPool.free(a_Ptr);
-		buffers.erase(a_Ptr);
 	}
-	void Reset() {
-		for (auto& buffer : buffers)
-			buffer->Reset();
-	}
-	std::set<Buffer::Impl*> buffers;
 	MemoryPool<Buffer::Impl, 256> memoryPool;
 	const Info info;
 };
@@ -51,15 +43,11 @@ std::vector<Buffer::Handle> AllocateBuffer(const Device::Handle& a_Device, const
 {
 	std::vector<Buffer::Handle> commandBuffers;
 	commandBuffers.reserve(a_Info.count);
-	const auto deallocator = [pool = WeakHandle(a_Info.commandPool)](Buffer::Impl* a_Buffer) { pool.lock()->Deallocate(a_Buffer); };
+	const auto deallocator = [pool = WeakHandle(a_Info.pool)](Buffer::Impl* a_Buffer) { pool.lock()->Deallocate(a_Buffer); };
 	for (auto i = 0u; i < a_Info.count; ++i) {
-		auto buffer{ a_Info.commandPool->Allocate(a_Info.level) };
+		auto buffer{ a_Info.pool->Allocate(a_Info.level) };
 		commandBuffers.push_back(Buffer::Handle(buffer, deallocator));
 	}
 	return commandBuffers;
-}
-void Reset(const Device::Handle& a_Device, const Handle& a_Pool)
-{
-	a_Pool->Reset();
 }
 }
