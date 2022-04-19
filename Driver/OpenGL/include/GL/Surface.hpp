@@ -2,9 +2,11 @@
 
 #include <Handle.hpp>
 
+#include <GL/WeakHandle.hpp>
+
 #include <string>
 
-OCRA_DECLARE_HANDLE(OCRA::Instance);
+OCRA_DECLARE_WEAK_HANDLE(OCRA::Instance);
 OCRA_DECLARE_HANDLE(OCRA::Instance);
 
 namespace OCRA::Surface

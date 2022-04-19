@@ -63,8 +63,10 @@ set(OCRA_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/Scissor.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/ViewPort.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Descriptor/Descriptor.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Descriptor/Layout/Binding.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Descriptor/Layout/Layout.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Descriptor/Pool.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Descriptor/Set.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Descriptor/SetLayout.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Descriptor/Type.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Image/Descriptor.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Image/Filter.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Image/Format.hpp

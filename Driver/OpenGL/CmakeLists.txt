@@ -10,6 +10,27 @@ FetchContent_Declare(
   GIT_TAG     glew-cmake-2.2.0
 )
 
+FetchContent_Declare(
+  EXTRA_MODULES
+  GIT_REPOSITORY  https://github.com/KDE/extra-cmake-modules.git
+  GIT_TAG     v5.93.0
+)
+
+
+
+FetchContent_GetProperties(EXTRA_MODULES)
+if(NOT EXTRA_MODULES_POPULATED)
+  FetchContent_Populate(EXTRA_MODULES)
+  message(STATUS "Fetched EXTRA_MODULES to ${extra_modules_SOURCE_DIR}")
+  add_subdirectory(${extra_modules_SOURCE_DIR} ${extra_modules_BINARY_DIR})
+  set(CMAKE_MODULE_PATH ${ECM_FIND_MODULE_DIR})
+  find_package(ECM REQUIRED NO_MODULE)
+  #[[list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")]]
+endif()
+
+find_package(OpenGL REQUIRED)
+find_package(EGL REQUIRED)
+
 FetchContent_GetProperties(GLEW)
 if(NOT GLEW_POPULATED)
   FetchContent_Populate(GLEW)
@@ -17,6 +38,7 @@ if(NOT GLEW_POPULATED)
   option(ONLY_LIBS "Do not build executables" ON)
   option(glew-cmake_BUILD_STATIC "Build the static glew library" ON)
   option(glew-cmake_BUILD_SHARED "Build the shared glew library" OFF)
+  option(GLEW_EGL "EGL mode" ON)
   add_subdirectory(${glew_SOURCE_DIR} ${glew_BINARY_DIR})
   add_library(GLEW::glew_s ALIAS libglew_static)
   add_library(GLEW::GLEW ALIAS libglew_static)
@@ -25,6 +47,7 @@ if(NOT GLEW_POPULATED)
   set(GLEW_INCLUDE_DIR ${glew_SOURCE_DIR}/include)
   set(GLEW_LIBRARIES GLEW::glew GLEW::glew_s)
 endif()
+
 set(OCRA_IMPL_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Buffer.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Device.hpp

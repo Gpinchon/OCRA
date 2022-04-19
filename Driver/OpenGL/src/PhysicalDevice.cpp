@@ -3,9 +3,7 @@
 #include <GL/PhysicalDevice.hpp>
 #include <GL/glew.h>
 
-#ifdef _EGL
 #include <GL/eglew.h>
-#endif //#ifdef _EGL
 
 #include <stdexcept>
 
@@ -18,9 +16,9 @@ using Command = std::function<void()>;
 static inline auto CreateContext(const void* a_DisplayHandle)
 {
     EGLint major, minor;
-    eglInitialize(displayHandle, &major, &minor);
+    eglInitialize(EGLDisplay(a_DisplayHandle), &major, &minor);
     if (eglGetError() != EGL_SUCCESS) throw std::runtime_error("Could not initialize EGL");
-    EGLConfig configs;
+    EGLConfig config = nullptr;
     EGLint numConfig;
     const EGLint cfgAttribs[] = {
         EGL_RENDERABLE_TYPE,    EGL_TRUE,
@@ -32,15 +30,15 @@ static inline auto CreateContext(const void* a_DisplayHandle)
         EGL_STENCIL_SIZE,       EGL_DONT_CARE,
         EGL_NONE
     };
-    eglChooseConfig(displayHandle, cfgAttribs, configs, 1, &numConfig);
+    eglChooseConfig(EGLDisplay(a_DisplayHandle), cfgAttribs, &config, 1, &numConfig);
     if (eglGetError() != EGL_SUCCESS) throw std::runtime_error("Could not choose EGL config");
     eglBindAPI(EGL_OPENGL_API);
-    const auto contextAttribs = {
+    const EGLint contextAttribs[] = {
         EGL_CONTEXT_MAJOR_VERSION, 4,
         EGL_CONTEXT_MINOR_VERSION, 3,
         EGL_CONTEXT_OPENGL_ROBUST_ACCESS, EGL_TRUE
     };
-    const auto context = eglCreateContext(displayHandle, config, EGL_NO_CONTEXT, contextAttribs);
+    const auto context = eglCreateContext(EGLDisplay(a_DisplayHandle), config, EGL_NO_CONTEXT, contextAttribs);
     if (eglGetError() != EGL_SUCCESS) throw std::runtime_error("Could not create EGL context");
     return context;
 }
@@ -227,11 +225,11 @@ static inline auto GetPhysicalDevicePropertiesGL()
     return properties;
 }
 
-static inline auto GetPhysicalDeviceFeaturesGL()
+static inline auto GetPhysicalDeviceFeaturesGL(const Properties& a_Properties)
 {
     Features features;
     features.robustBufferAccess = GLEW_ARB_robust_buffer_access_behavior;
-    features.fullDrawIndexUint32 = properties.limits.maxDrawIndexedIndexValue == (std::numeric_limits<uint32_t>::max)();
+    features.fullDrawIndexUint32 = a_Properties.limits.maxDrawIndexedIndexValue == (std::numeric_limits<uint32_t>::max)();
     features.imageCubeArray = GLEW_ARB_texture_cube_map_array;
     features.independentBlend = GLEW_ARB_blend_func_extended;
     features.geometryShader = GLEW_ARB_geometry_shader4;
@@ -245,8 +243,8 @@ static inline auto GetPhysicalDeviceFeaturesGL()
     features.depthBiasClamp = GLEW_ARB_polygon_offset_clamp;
     features.fillModeNonSolid = true; //supported by default
     features.depthBounds = GLEW_EXT_depth_bounds_test;
-    features.wideLines = properties.limits.lineWidthRange[1] > 1;
-    features.largePoints = properties.limits.pointSizeRange[1] > 1;
+    features.wideLines = a_Properties.limits.lineWidthRange[1] > 1;
+    features.largePoints = a_Properties.limits.pointSizeRange[1] > 1;
     features.alphaToOne = GLEW_ARB_multisample;
     features.multiViewport = GLEW_ARB_viewport_array;
     features.samplerAnisotropy = GLEW_ARB_texture_filter_anisotropic;
@@ -321,45 +319,45 @@ static inline auto GetMemoryPropertiesGL()
     return memoryProperties;
 }
 
-QueueFamily::QueueFamily(const void* a_DisplayHandle, void* a_ContextHandle)
+QueueFamily::QueueFamily(const void* a_DisplayHandle, const void* a_ContextHandle)
     : displayHandle(a_DisplayHandle)
     , contextHandle(a_ContextHandle)
 {
     properties.queueCount = 1;
     properties.queueFlags = QueueFlagsBits::Graphics | QueueFlagsBits::Compute | QueueFlagsBits::Transfer | QueueFlagsBits::SparseBinding;
     properties.minImageTransferGranularity = { 1, 1, 1 }; //Queues supporting graphics and/or compute operations must report (1,1,1)
-    queues.front().PushCommand([this] {
-        eglMakeCurrent(displayHandle, EGL_NO_SURFACE, EGL_NO_SURFACE, contextHandle);
-        glewExperimental = TRUE;
+    queue.PushCommand([this] {
+        eglMakeCurrent(EGLDisplay(displayHandle), EGL_NO_SURFACE, EGL_NO_SURFACE, EGLContext(contextHandle));
+        glewExperimental = true;
         if (glewInit() != GLEW_OK) throw std::runtime_error("Cound not initialize GLEW");
     }, true);
 }
 
 QueueFamily::~QueueFamily()
 {
-    queues.front().PushCommand([this] {
+    queue.PushCommand([this] {
         //release the context
-        eglMakeCurrent(displayHandle, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+        eglMakeCurrent(EGLDisplay(displayHandle), EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     }, true);
 }
 
 Impl::Impl(const void* a_DeviceHandle)
     : deviceHandle(a_DeviceHandle)
-    , displayHandle(eglGetPlatformDisplay(EGL_PLATFORM_DEVICE_EXT, deviceHandle, &attribList))
+    , displayHandle(eglGetPlatformDisplay(EGL_PLATFORM_DEVICE_EXT, EGLDisplay(deviceHandle), (const EGLAttrib*)(&attribList)))
     , contextHandle(CreateContext(displayHandle))
-    , queueFamiles({ displayHandle, contextHandle })
+    , queueFamily({ displayHandle, contextHandle })
 {
     if (!GLEW_EXT_direct_state_access) throw std::runtime_error("Direct state access extension required !");
-    queueFamiles.front().queues.front().PushCommand([this] {
+    queueFamily.queue.PushCommand([this] {
         properties = GetPhysicalDevicePropertiesGL();
-        features = GetPhysicalDeviceFeaturesGL();
+        features = GetPhysicalDeviceFeaturesGL(properties);
         memoryProperties = GetMemoryPropertiesGL();
     }, true);
 }
 
 Impl::~Impl()
 {
-    eglDestroyContext(displayHandle, contextHandle);
+    eglDestroyContext(EGLDisplay(displayHandle), EGLContext(contextHandle));
     if (eglGetError() != EGL_SUCCESS) throw std::runtime_error("Error while destroying EGL context");
 }
 
@@ -381,6 +379,6 @@ const Features& GetFeatures(const Handle& a_PhysicalDevice)
 }
 const std::vector<QueueFamilyProperties> GetQueueFamilyProperties(const Handle& a_PhysicalDevice)
 {
-    return a_PhysicalDevice->queueFamilyProperties;
+    return { a_PhysicalDevice->queueFamily.properties };
 }
 }

@@ -9,30 +9,26 @@
 #include <Handle.hpp>
 #include <Shader/Stage.hpp>
 
-#include <stdexcept>
-
 #include <GL/glew.h>
+
+#include <stdexcept>
 
 namespace OCRA::Shader::Stage {
 static inline auto GetGLStage(const StageFlags& a_Stage)
 {
-	switch (a_Stage)
-	{
-	case StageFlagBits::Vertex:
+	if (a_Stage == StageFlagBits::Vertex)
 		return GL_VERTEX_SHADER;
-	case StageFlagBits::Geometry:
+	if (a_Stage == StageFlagBits::Geometry)
 		return GL_GEOMETRY_SHADER;
-	case StageFlagBits::Fragment:
+	if (a_Stage == StageFlagBits::Fragment)
 		return GL_FRAGMENT_SHADER;
-	case StageFlagBits::Compute:
+	if (a_Stage == StageFlagBits::Compute)
 		return GL_COMPUTE_SHADER;
-	case StageFlagBits::TessControl:
+	if (a_Stage == StageFlagBits::TessControl)
 		return GL_TESS_CONTROL_SHADER;
-	case StageFlagBits::TessEval:
+	if (a_Stage == StageFlagBits::TessEval)
 		return GL_TESS_EVALUATION_SHADER;
-	default:
-		throw std::runtime_error("Unknown Shader Stage");
-	}
+	throw std::runtime_error("Unknown Shader Stage");
 }
 unsigned GetGLHandle(const Handle& a_Handle);
 }

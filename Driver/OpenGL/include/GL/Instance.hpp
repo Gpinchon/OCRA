@@ -14,9 +14,9 @@ struct Impl
 {
     Impl(const Info& a_Info);
     ~Impl();
-    inline void PushCommand(const std::function<void()>& a_Command, const bool a_Synchronous) {
+    /*inline void PushCommand(const std::function<void()>& a_Command, const bool a_Synchronous) {
         glThread.PushCommand(a_Command, a_Synchronous);
-    }
+    }*/
     void* displayHandle;
     const Info info;
     std::vector<PhysicalDevice::Handle> physicalDevices;
