@@ -27,6 +27,7 @@ struct QueueFamily
 struct Impl
 {
     Impl(const void* a_DeviceHandle);
+    ~Impl();
     inline void PushCommand(
         const uint32_t& a_FamilyIndex,
         const uint32_t& a_QueueIndex,

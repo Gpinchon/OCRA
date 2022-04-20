@@ -13,6 +13,7 @@ FetchContent_Declare(
 FetchContent_Declare(
   EGL
   GIT_REPOSITORY  https://github.com/McNopper/EGL.git
+  SOURCE_SUBDIR   EGL
 )
 
 FetchContent_Declare(
@@ -38,15 +39,16 @@ if(NOT GLEW_POPULATED)
   set(GLEW_LIBRARIES GLEW::glew GLEW::glew_s)
 endif()
 
+#[[
 if(NOT PVR_SDK_POPULATED)
   FetchContent_MakeAvailable(PVR_SDK)
 endif()
+]]
 
 if(NOT EGL_POPULATED)
-  FetchContent_MakeAvailable(
-    EGL
-    SOURCE_SUBDIR EGL
-  )
+  option(EGL_NO_GLEW "Do not use GLEW" ON)
+  FetchContent_MakeAvailable(EGL)
+  set_target_properties(egl PROPERTIES FOLDER "3rdparty")
 endif()
 
 find_package(OpenGL REQUIRED)
@@ -122,7 +124,7 @@ target_include_directories(OCRAImpl PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}/../../include"
   "${egl_registery_SOURCE_DIR}/api/"
 )
-target_link_libraries(OCRAImpl PUBLIC GLEW::GLEW)
+target_link_libraries(OCRAImpl PUBLIC GLEW::GLEW egl)
 
 if(MSVC_IDE)
   set(CMAKE_DEBUG_POSTFIX "d")

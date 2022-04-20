@@ -201,7 +201,7 @@ int CommandBuffer()
 	commandPoolInfo.queueFamilyIndex = queueFamily;
 	auto commandPool = Command::Pool::Create(device, commandPoolInfo);
 	Command::Pool::AllocateInfo commandBufferAllocateInfo;
-	commandBufferAllocateInfo.commandPool = commandPool;
+	commandBufferAllocateInfo.pool = commandPool;
 	commandBufferAllocateInfo.count = 1;
 	commandBufferAllocateInfo.level = Command::Pool::AllocateInfo::Level::Primary;
 	auto commandBuffer = Command::Pool::AllocateBuffer(device, commandBufferAllocateInfo).front();

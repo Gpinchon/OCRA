@@ -7,6 +7,7 @@
 #include <GL/eglew.h>
 
 #include <string>
+#include <stdexcept>
 
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Instance);
 
@@ -21,7 +22,7 @@ Impl::Impl(const Instance::Handle& a_Instance, const Info& a_Info)
 	, instance(a_Instance)
 {
 	nativeWindow = a_Info.hwnd;
-	nativeDisplay = eglGetDisplay(GetDC(a_Info.hwnd));
+	nativeDisplay = eglGetDisplay(GetDC(HWND(a_Info.hwnd)));
 	if (eglGetError() != EGL_SUCCESS) throw std::runtime_error("Could not query hwnd display");
 	EGLint major, minor;
 	eglInitialize(nativeDisplay, &major, &minor);

@@ -2,7 +2,9 @@
 
 #include <GL/Instance.hpp>
 #include <GL/PhysicalDevice.hpp>
-#include <GL/eglew.h>
+//#include <GL/eglew.h>
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
 
 #include <stdexcept>
 
@@ -10,7 +12,7 @@ namespace OCRA::Instance
 {
 Impl::Impl(const Info& a_Info) : info(a_Info)
 {
-    if (eglewInit() != GLEW_OK) throw std::runtime_error("Cound not initialize EGLEW");
+    //if (eglewInit() != GLEW_OK) throw std::runtime_error("Cound not initialize EGLEW");
     constexpr EGLint maxDevices = 16;
     EGLDeviceEXT    devices[maxDevices];
     EGLint          devicesNum;
@@ -21,12 +23,6 @@ Impl::Impl(const Info& a_Info) : info(a_Info)
     }
     
 }
-Impl::~Impl()
-{
-    if (!eglTerminate(displayHandle))
-        throw std::runtime_error("Could not terminate EGL");
-}
-
 Handle Create(
 	const Info& a_Info,
 	const AllocationCallback* a_Allocator)
@@ -44,9 +40,5 @@ const Info& GetInfo(const Handle& a_Instance)
 const std::vector<PhysicalDevice::Handle>& EnumeratePhysicalDevices(const Instance::Handle& a_Instance)
 {
 	return a_Instance->physicalDevices;
-}
-void MakeCurrent(const Handle& a_Instance, const void* a_HDC)
-{
-    a_Instance->glThread.PushCommand([hdc = HDC(a_HDC), hglrc = HGLRC(a_Instance->hglrc)]{ wglMakeCurrent(hdc, hglrc); }, false);
 }
 }

@@ -3,7 +3,8 @@
 #include <GL/PhysicalDevice.hpp>
 #include <GL/glew.h>
 
-#include <GL/eglew.h>
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
 
 #include <stdexcept>
 
@@ -345,7 +346,7 @@ Impl::Impl(const void* a_DeviceHandle)
     : deviceHandle(a_DeviceHandle)
     , displayHandle(eglGetPlatformDisplay(EGL_PLATFORM_DEVICE_EXT, EGLDisplay(deviceHandle), (const EGLAttrib*)(&attribList)))
     , contextHandle(CreateContext(displayHandle))
-    , queueFamily({ displayHandle, contextHandle })
+    , queueFamily(displayHandle, contextHandle)
 {
     if (!GLEW_EXT_direct_state_access) throw std::runtime_error("Direct state access extension required !");
     queueFamily.queue.PushCommand([this] {
@@ -359,6 +360,8 @@ Impl::~Impl()
 {
     eglDestroyContext(EGLDisplay(displayHandle), EGLContext(contextHandle));
     if (eglGetError() != EGL_SUCCESS) throw std::runtime_error("Error while destroying EGL context");
+    if (!eglTerminate(EGLDisplay(displayHandle)))
+        throw std::runtime_error("Could not terminate EGL");
 }
 
 Handle Create(const void* a_DisplayHandle)
