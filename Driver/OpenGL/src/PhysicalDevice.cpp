@@ -2,9 +2,7 @@
 
 #include <GL/PhysicalDevice.hpp>
 #include <GL/glew.h>
-
-#include <EGL/egl.h>
-#include <EGL/eglext.h>
+#include <GL/wglew.h>
 
 #include <stdexcept>
 
@@ -16,32 +14,39 @@ using Command = std::function<void()>;
 
 static inline auto CreateContext(const void* a_DisplayHandle)
 {
-    EGLint major, minor;
-    eglInitialize(EGLDisplay(a_DisplayHandle), &major, &minor);
-    if (eglGetError() != EGL_SUCCESS) throw std::runtime_error("Could not initialize EGL");
-    EGLConfig config = nullptr;
-    EGLint numConfig;
-    const EGLint cfgAttribs[] = {
-        EGL_RENDERABLE_TYPE,    EGL_TRUE,
-        EGL_CONFORMANT,         EGL_OPENGL_BIT,
-        EGL_RED_SIZE,           8,
-        EGL_GREEN_SIZE,         8,
-        EGL_BLUE_SIZE,          8,
-        EGL_DEPTH_SIZE,         EGL_DONT_CARE,
-        EGL_STENCIL_SIZE,       EGL_DONT_CARE,
-        EGL_NONE
+    PIXELFORMATDESCRIPTOR pfd{};
+    pfd.nSize = sizeof(pfd);
+    pfd.nVersion = 1;
+    pfd.iPixelType = PFD_TYPE_RGBA;
+    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+    pfd.cColorBits = 32;
+    pfd.cAlphaBits = 8;
+    pfd.iLayerType = PFD_MAIN_PLANE;
+    pfd.cDepthBits = 24;
+    pfd.cStencilBits = 8;
+    int pixel_format = ChoosePixelFormat(HDC(a_DisplayHandle), &pfd);
+    if (!pixel_format) throw std::runtime_error("Failed to find a suitable pixel format.");
+    if (!SetPixelFormat(HDC(a_DisplayHandle), pixel_format, &pfd)) throw std::runtime_error("Failed to set the pixel format.");
+    const auto hglrcTemp = wglCreateContext(HDC(a_DisplayHandle));
+    if (hglrcTemp == nullptr) throw std::runtime_error("Failed to create a dummy OpenGL rendering context.");
+    if (!wglMakeCurrent(HDC(a_DisplayHandle), hglrcTemp)) throw std::runtime_error("Failed to activate dummy OpenGL rendering context.");
+
+    //LET'S GET STARTED !
+    if (wglewInit() != GLEW_OK) throw std::runtime_error("Cound not initialize WGLEW");
+    if (!WGLEW_ARB_create_context) throw std::runtime_error("Modern context creation not supported !");
+    if (!WGLEW_ARB_create_context_robustness) throw std::runtime_error("Robust context creation not supported !");
+    int attribs[] =
+    {
+        WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
+        WGL_CONTEXT_MINOR_VERSION_ARB, 3,
+        WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_ROBUST_ACCESS_BIT_ARB,
+        0
     };
-    eglChooseConfig(EGLDisplay(a_DisplayHandle), cfgAttribs, &config, 1, &numConfig);
-    if (eglGetError() != EGL_SUCCESS) throw std::runtime_error("Could not choose EGL config");
-    eglBindAPI(EGL_OPENGL_API);
-    const EGLint contextAttribs[] = {
-        EGL_CONTEXT_MAJOR_VERSION, 4,
-        EGL_CONTEXT_MINOR_VERSION, 3,
-        EGL_CONTEXT_OPENGL_ROBUST_ACCESS, EGL_TRUE
-    };
-    const auto context = eglCreateContext(EGLDisplay(a_DisplayHandle), config, EGL_NO_CONTEXT, contextAttribs);
-    if (eglGetError() != EGL_SUCCESS) throw std::runtime_error("Could not create EGL context");
-    return context;
+    auto hglrc = wglCreateContextAttribsARB(HDC(a_DisplayHandle), 0, attribs); //commands execution context
+    if (hglrc == nullptr) throw std::runtime_error("Failed to create a modern OpenGL rendering context.");
+    wglMakeCurrent(nullptr, nullptr);
+    wglDeleteContext(hglrcTemp);
+    return hglrc;
 }
 
 static inline auto GetInteger(const GLenum& state)
@@ -320,36 +325,33 @@ static inline auto GetMemoryPropertiesGL()
     return memoryProperties;
 }
 
-QueueFamily::QueueFamily(const void* a_DisplayHandle, const void* a_ContextHandle)
+Queue::Queue(const void* a_DisplayHandle, const void* a_ContextHandle)
     : displayHandle(a_DisplayHandle)
     , contextHandle(a_ContextHandle)
 {
     properties.queueCount = 1;
     properties.queueFlags = QueueFlagsBits::Graphics | QueueFlagsBits::Compute | QueueFlagsBits::Transfer | QueueFlagsBits::SparseBinding;
     properties.minImageTransferGranularity = { 1, 1, 1 }; //Queues supporting graphics and/or compute operations must report (1,1,1)
-    queue.PushCommand([this] {
-        eglMakeCurrent(EGLDisplay(displayHandle), EGL_NO_SURFACE, EGL_NO_SURFACE, EGLContext(contextHandle));
+    PushCommand([this] {
+        wglMakeCurrent(HDC(displayHandle), HGLRC(contextHandle));
+        //eglMakeCurrent(EGLDisplay(displayHandle), EGL_NO_SURFACE, EGL_NO_SURFACE, EGLContext(contextHandle));
         glewExperimental = true;
         if (glewInit() != GLEW_OK) throw std::runtime_error("Cound not initialize GLEW");
     }, true);
 }
 
-QueueFamily::~QueueFamily()
+Queue::~Queue()
 {
-    queue.PushCommand([this] {
-        //release the context
-        eglMakeCurrent(EGLDisplay(displayHandle), EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-    }, true);
+   
 }
 
-Impl::Impl(const void* a_DeviceHandle)
-    : deviceHandle(a_DeviceHandle)
-    , displayHandle(eglGetPlatformDisplay(EGL_PLATFORM_DEVICE_EXT, EGLDisplay(deviceHandle), (const EGLAttrib*)(&attribList)))
+Impl::Impl(const void* a_DisplayHandle)
+    : displayHandle(a_DisplayHandle)
     , contextHandle(CreateContext(displayHandle))
-    , queueFamily(displayHandle, contextHandle)
+    , queue(displayHandle, contextHandle)
 {
     if (!GLEW_EXT_direct_state_access) throw std::runtime_error("Direct state access extension required !");
-    queueFamily.queue.PushCommand([this] {
+    PushCommand(0, 0, [this] {
         properties = GetPhysicalDevicePropertiesGL();
         features = GetPhysicalDeviceFeaturesGL(properties);
         memoryProperties = GetMemoryPropertiesGL();
@@ -358,10 +360,10 @@ Impl::Impl(const void* a_DeviceHandle)
 
 Impl::~Impl()
 {
-    eglDestroyContext(EGLDisplay(displayHandle), EGLContext(contextHandle));
-    if (eglGetError() != EGL_SUCCESS) throw std::runtime_error("Error while destroying EGL context");
-    if (!eglTerminate(EGLDisplay(displayHandle)))
-        throw std::runtime_error("Could not terminate EGL");
+    PushCommand(0, 0, [this] {
+        wglMakeCurrent(nullptr, nullptr);
+    }, true);
+    wglDeleteContext(HGLRC(contextHandle));
 }
 
 Handle Create(const void* a_DisplayHandle)
@@ -382,6 +384,6 @@ const Features& GetFeatures(const Handle& a_PhysicalDevice)
 }
 const std::vector<QueueFamilyProperties> GetQueueFamilyProperties(const Handle& a_PhysicalDevice)
 {
-    return { a_PhysicalDevice->queueFamily.properties };
+    return { a_PhysicalDevice->queue.properties };
 }
 }

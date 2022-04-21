@@ -4,8 +4,6 @@
 #include <GL/WeakHandle.hpp>
 #include <GL/Surface.hpp>
 
-#include <GL/eglew.h>
-
 #include <string>
 #include <stdexcept>
 
@@ -22,11 +20,8 @@ Impl::Impl(const Instance::Handle& a_Instance, const Info& a_Info)
 	, instance(a_Instance)
 {
 	nativeWindow = a_Info.hwnd;
-	nativeDisplay = eglGetDisplay(GetDC(HWND(a_Info.hwnd)));
-	if (eglGetError() != EGL_SUCCESS) throw std::runtime_error("Could not query hwnd display");
-	EGLint major, minor;
-	eglInitialize(nativeDisplay, &major, &minor);
-	if (eglGetError() != EGL_SUCCESS) throw std::runtime_error("Could not initialize display");
+	nativeDisplay = GetDC(HWND(a_Info.hwnd));
+	if (nativeDisplay == nullptr) throw std::runtime_error("Could not query hwnd display");
 }
 Handle Create(const Instance::Handle& a_Instance, const Info& a_Info)
 {

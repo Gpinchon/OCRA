@@ -3,55 +3,49 @@ cmake_policy(SET CMP0074 NEW)
 project(OCRAImpl LANGUAGES CXX)
 
 include(FetchContent)
-
-# Fetch MESA3D for Windows
+#[[
+# Fetch MESA3D_DEV for Windows
 if (WIN32)
   FetchContent_Declare(
-    MESA3D
+    MESA3D_DEV
     URL https://github.com/pal1000/mesa-dist-win/releases/download/22.0.1/mesa3d-22.0.1-development-pack-msvc.7z
   )
-  if (NOT MESA3D_POPULATED)
-    FetchContent_Populate(MESA3D)
-    message(STATUS "Fetched MESA3D to ${mesa3d_SOURCE_DIR}")
+  if (NOT MESA3D_DEV_POPULATED)
+    FetchContent_Populate(MESA3D_DEV)
+    message(STATUS "Fetched MESA3D_DEV to ${mesa3d_dev_SOURCE_DIR}")
     find_library(OPENGL_opengl_LIBRARY
       NAMES opengl32
-      PATHS ${mesa3d_SOURCE_DIR}/lib/x64/
+      PATHS ${mesa3d_dev_SOURCE_DIR}/lib/x64/
     )
-    set(OPENGL_INCLUDE_DIR ${mesa3d_SOURCE_DIR}/include)
+    set(OPENGL_INCLUDE_DIR ${mesa3d_dev_SOURCE_DIR}/include)
     find_library(OPENGL_egl_LIBRARY
       NAMES libEGL
-      PATHS ${mesa3d_SOURCE_DIR}/lib/x64/
+      PATHS ${mesa3d_dev_SOURCE_DIR}/lib/x64/
     )
-    set(OPENGL_EGL_INCLUDE_DIR ${mesa3d_SOURCE_DIR}/include)
-  endif (MESA3D_POPULATED)
+    set(OPENGL_EGL_INCLUDE_DIR ${mesa3d_dev_SOURCE_DIR}/include)
+  endif (NOT MESA3D_DEV_POPULATED)
 endif (WIN32)
-# Fetch MESA3D for Windows
+# Fetch MESA3D_DEV for Windows
 
-# Fetch GLEW
-FetchContent_Declare(
-  GLEW
-  GIT_REPOSITORY  https://github.com/Perlmint/glew-cmake.git
-  GIT_TAG         glew-cmake-2.2.0
-)
-FetchContent_GetProperties(GLEW)
-if (NOT GLEW_POPULATED)
-  FetchContent_Populate(GLEW)
-  message(STATUS "Fetched GLEW to ${glew_SOURCE_DIR}")
-  option(ONLY_LIBS "Do not build executables" ON)
-  option(glew-cmake_BUILD_STATIC "Build the static glew library" ON)
-  option(glew-cmake_BUILD_SHARED "Build the shared glew library" OFF)
-  option(GLEW_EGL "EGL mode" ON)
-  add_subdirectory(${glew_SOURCE_DIR} ${glew_BINARY_DIR})
-  add_library(GLEW::glew_s ALIAS libglew_static)
-  add_library(GLEW::GLEW ALIAS libglew_static)
-  set_target_properties(libglew_static PROPERTIES FOLDER "3rdparty")
-  set(GLEW_FOUND 1)
-  set(GLEW_INCLUDE_DIR ${glew_SOURCE_DIR}/include)
-  set(GLEW_LIBRARIES GLEW::glew GLEW::glew_s)
-endif (GLEW_POPULATED)
-# Fetch GLEW
+# Fetch MESA3D_REL for Windows
+if (WIN32)
+  FetchContent_Declare(
+    MESA3D_REL
+    URL https://github.com/pal1000/mesa-dist-win/releases/download/22.0.1/mesa3d-22.0.1-release-msvc.7z
+  )
+  if (NOT MESA3D_REL_POPULATED)
+    FetchContent_Populate(MESA3D_REL)
+    message(STATUS "Fetched MESA3D_REL to ${mesa3d_rel_SOURCE_DIR}")
+  endif (NOT MESA3D_REL_POPULATED)
+endif (WIN32)
+# Fetch MESA3D_REL for Windows
 
-#[[
+message(STATUS ${OPENGL_opengl_LIBRARY})
+message(STATUS ${OPENGL_egl_LIBRARY})
+
+find_package(OpenGL REQUIRED)
+
+
 #PowerVR SDK for Windows
 if (WIN32)
   FetchContent_Declare(
@@ -61,7 +55,7 @@ if (WIN32)
   )
   if (NOT PVR_SDK_POPULATED)
     FetchContent_MakeAvailable(PVR_SDK)
-  endif ()
+  endif (NOT PVR_SDK_POPULATED)
 endif (WIN32)
 #PowerVR SDK for Windows
 ]]
@@ -78,16 +72,36 @@ if (WIN32)
     option(EGL_NO_GLEW "Do not use GLEW" ON)
     FetchContent_MakeAvailable(EGL)
     set_target_properties(egl PROPERTIES FOLDER "3rdparty")
-  endif ()
+    add_library(OpenGL::EGL ALIAS egl)
+  endif (NOT EGL_POPULATED)
 endif (WIN32)
 #EGL for Windows
+
 ]]
 
-find_package(OpenGL REQUIRED)
-
-if (NOT OpenGL_EGL_FOUND)
-  message("Could not find EGL")
-endif ()
+# Fetch GLEW
+FetchContent_Declare(
+  GLEW
+  GIT_REPOSITORY  https://github.com/Perlmint/glew-cmake.git
+  GIT_TAG         glew-cmake-2.2.0
+)
+FetchContent_GetProperties(GLEW)
+if (NOT GLEW_POPULATED)
+  FetchContent_Populate(GLEW)
+  message(STATUS "Fetched GLEW to ${glew_SOURCE_DIR}")
+  option(ONLY_LIBS "Do not build executables" ON)
+  option(glew-cmake_BUILD_STATIC "Build the static glew library" ON)
+  option(glew-cmake_BUILD_SHARED "Build the shared glew library" OFF)
+  #option(GLEW_EGL "EGL mode" ON)
+  add_subdirectory(${glew_SOURCE_DIR} ${glew_BINARY_DIR})
+  add_library(GLEW::glew_s ALIAS libglew_static)
+  add_library(GLEW::GLEW ALIAS libglew_static)
+  set_target_properties(libglew_static PROPERTIES FOLDER "3rdparty")
+  set(GLEW_FOUND 1)
+  set(GLEW_INCLUDE_DIR ${glew_SOURCE_DIR}/include)
+  set(GLEW_LIBRARIES GLEW::glew GLEW::glew_s)
+endif (NOT GLEW_POPULATED)
+# Fetch GLEW
 
 set(OCRA_IMPL_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Buffer.hpp
@@ -156,7 +170,7 @@ target_include_directories(OCRAImpl PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}/../../include"
   "${egl_registery_SOURCE_DIR}/api/"
 )
-target_link_libraries(OCRAImpl PUBLIC GLEW::GLEW OpenGL::OpenGL OpenGL::EGL)
+target_link_libraries(OCRAImpl PUBLIC GLEW::GLEW)
 
 if (MSVC_IDE)
   set(CMAKE_DEBUG_POSTFIX "d")
