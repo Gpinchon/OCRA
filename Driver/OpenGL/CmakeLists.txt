@@ -4,26 +4,37 @@ project(OCRAImpl LANGUAGES CXX)
 
 include(FetchContent)
 
+# Fetch MESA3D for Windows
+if (WIN32)
+  FetchContent_Declare(
+    MESA3D
+    URL https://github.com/pal1000/mesa-dist-win/releases/download/22.0.1/mesa3d-22.0.1-development-pack-msvc.7z
+  )
+  if (NOT MESA3D_POPULATED)
+    FetchContent_Populate(MESA3D)
+    message(STATUS "Fetched MESA3D to ${mesa3d_SOURCE_DIR}")
+    find_library(OPENGL_opengl_LIBRARY
+      NAMES opengl32
+      PATHS ${mesa3d_SOURCE_DIR}/lib/x64/
+    )
+    set(OPENGL_INCLUDE_DIR ${mesa3d_SOURCE_DIR}/include)
+    find_library(OPENGL_egl_LIBRARY
+      NAMES libEGL
+      PATHS ${mesa3d_SOURCE_DIR}/lib/x64/
+    )
+    set(OPENGL_EGL_INCLUDE_DIR ${mesa3d_SOURCE_DIR}/include)
+  endif (MESA3D_POPULATED)
+endif (WIN32)
+# Fetch MESA3D for Windows
+
+# Fetch GLEW
 FetchContent_Declare(
   GLEW
   GIT_REPOSITORY  https://github.com/Perlmint/glew-cmake.git
   GIT_TAG         glew-cmake-2.2.0
 )
-
-FetchContent_Declare(
-  EGL
-  GIT_REPOSITORY  https://github.com/McNopper/EGL.git
-  SOURCE_SUBDIR   EGL
-)
-
-FetchContent_Declare(
-  PVR_SDK
-  GIT_REPOSITORY  https://github.com/powervr-graphics/Native_SDK.git
-  GIT_TAG         R21.2-v5.8
-)
-
 FetchContent_GetProperties(GLEW)
-if(NOT GLEW_POPULATED)
+if (NOT GLEW_POPULATED)
   FetchContent_Populate(GLEW)
   message(STATUS "Fetched GLEW to ${glew_SOURCE_DIR}")
   option(ONLY_LIBS "Do not build executables" ON)
@@ -37,25 +48,46 @@ if(NOT GLEW_POPULATED)
   set(GLEW_FOUND 1)
   set(GLEW_INCLUDE_DIR ${glew_SOURCE_DIR}/include)
   set(GLEW_LIBRARIES GLEW::glew GLEW::glew_s)
-endif()
+endif (GLEW_POPULATED)
+# Fetch GLEW
 
 #[[
-if(NOT PVR_SDK_POPULATED)
-  FetchContent_MakeAvailable(PVR_SDK)
-endif()
+#PowerVR SDK for Windows
+if (WIN32)
+  FetchContent_Declare(
+    PVR_SDK
+    GIT_REPOSITORY  https://github.com/powervr-graphics/Native_SDK.git
+    GIT_TAG         R21.2-v5.8
+  )
+  if (NOT PVR_SDK_POPULATED)
+    FetchContent_MakeAvailable(PVR_SDK)
+  endif ()
+endif (WIN32)
+#PowerVR SDK for Windows
 ]]
 
-if(NOT EGL_POPULATED)
-  option(EGL_NO_GLEW "Do not use GLEW" ON)
-  FetchContent_MakeAvailable(EGL)
-  set_target_properties(egl PROPERTIES FOLDER "3rdparty")
-endif()
+#[[
+#EGL for Windows
+if (WIN32)
+  FetchContent_Declare(
+    EGL
+    GIT_REPOSITORY  https://github.com/McNopper/EGL.git
+    SOURCE_SUBDIR   EGL
+  )
+  if (NOT EGL_POPULATED)
+    option(EGL_NO_GLEW "Do not use GLEW" ON)
+    FetchContent_MakeAvailable(EGL)
+    set_target_properties(egl PROPERTIES FOLDER "3rdparty")
+  endif ()
+endif (WIN32)
+#EGL for Windows
+]]
 
 find_package(OpenGL REQUIRED)
 
 if (NOT OpenGL_EGL_FOUND)
   message("Could not find EGL")
-endif()
+endif ()
 
 set(OCRA_IMPL_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Buffer.hpp
@@ -124,16 +156,16 @@ target_include_directories(OCRAImpl PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}/../../include"
   "${egl_registery_SOURCE_DIR}/api/"
 )
-target_link_libraries(OCRAImpl PUBLIC GLEW::GLEW egl)
+target_link_libraries(OCRAImpl PUBLIC GLEW::GLEW OpenGL::OpenGL OpenGL::EGL)
 
-if(MSVC_IDE)
+if (MSVC_IDE)
   set(CMAKE_DEBUG_POSTFIX "d")
   # Macro to preserve source files hierarchy in the IDE
   macro(GroupSources curdir)
     file(GLOB children RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/${curdir} ${CMAKE_CURRENT_SOURCE_DIR}/${curdir}/*)
   
     foreach(child ${children})
-      if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${curdir}/${child})
+      if (IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${curdir}/${child})
         GroupSources(${curdir}/${child})
       else()
         string(REPLACE "/" "\\" groupname ${curdir})
@@ -141,7 +173,7 @@ if(MSVC_IDE)
         string(REPLACE "include" "Includes" groupname ${groupname})
         #string(REPLACE "shaders" "Shaders" groupname ${groupname})
         source_group(${groupname} FILES ${CMAKE_CURRENT_SOURCE_DIR}/${curdir}/${child})
-      endif()
+      endif ()
     endforeach()
   endmacro()
   
@@ -149,4 +181,4 @@ if(MSVC_IDE)
   GroupSources(src)
   GroupSources(include)
   GroupSources(../../include)
-endif()
+endif ()
