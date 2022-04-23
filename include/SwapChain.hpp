@@ -15,6 +15,7 @@ OCRA_DECLARE_HANDLE(OCRA::SwapChain);
 OCRA_DECLARE_HANDLE(OCRA::Surface);
 OCRA_DECLARE_HANDLE(OCRA::Queue);
 OCRA_DECLARE_HANDLE(OCRA::Queue::Semaphore);
+OCRA_DECLARE_HANDLE(OCRA::Image);
 
 namespace OCRA::SwapChain
 {
@@ -40,33 +41,33 @@ static CompositeAlphaFlags PostMultiplied   = 0b0010;
 static CompositeAlphaFlags Inherit          = 0b0001;
 }
 enum PresentMode {
-    Immediate,
-    Mailbox,
-    Fifo,
-    FifoRelaxed,
+    Immediate = 0,
+    Fifo = 1,
+    FifoRelaxed = -1,
     MaxValue
 };
 struct Info {
-    Surface::Handle         surface;
-    uint32_t                minImageCount;
-    Image::Format           imageFormat;
-    Image::ColorSpace       imageColorSpace;
-    Extent2D                imageExtent;
-    uint32_t                imageArrayLayers;
-    Image::UsageFlags       imageUsage;
-    SharingMode             imageSharingMode;
+    Surface::Handle         surface{ nullptr };
+    uint32_t                minImageCount{ 0 };
+    Image::Format           imageFormat{ Image::Format::Unknown };
+    Image::ColorSpace       imageColorSpace{ Image::ColorSpace::Unknown };
+    Extent2D                imageExtent{ 0, 0 };
+    uint32_t                imageArrayLayers{ 0 };
+    Image::UsageFlags       imageUsage{ Image::UsageFlagBits::None };
+    SharingMode             imageSharingMode{ SharingMode::Exclusive };
     std::vector<uint32_t>   queueFamilyIndices;
-    TransformFlags          preTransform;
-    CompositeAlphaFlags     compositeAlpha;
-    PresentMode             presentMode;
-    bool                    clipped;
-    Handle                  oldSwapchain;
+    TransformFlags          preTransform{ TransformFlagsBits::None };
+    CompositeAlphaFlags     compositeAlpha{ CompositeAlphaFlagsBits::None };
+    PresentMode             presentMode{ PresentMode::Immediate };
+    bool                    clipped{ false };
+    Handle                  oldSwapchain{ nullptr };
 };
 Handle Create(const Device::Handle& a_Device, const Info& a_Info);
 struct PresentInfo {
-    std::vector<Queue::Semaphore>   semaphores;
-    std::vector<SwapChain::Handle>  swapChains;
-    std::vector<uint32_t>           imageIndices;
+    std::vector<Queue::Semaphore::Handle>   waitSemaphores;
+    std::vector<SwapChain::Handle>          swapChains;
+    std::vector<uint32_t>                   imageIndices;
 };
+std::vector<Image::Handle> GetFrameBuffers(const Device::Handle& a_Device, const Handle& a_SwapChain);
 void Present(const Queue::Handle& a_Queue, const PresentInfo& a_PresentInfo);
 }

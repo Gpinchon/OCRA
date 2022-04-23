@@ -44,16 +44,15 @@ GLenum GetGLType(const Type& a_Type)
 		throw std::runtime_error("Unknown Image View Type");
 	}
 }
-Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
-	: device(a_Device)
-	, info(a_Info)
+static inline auto CreateImageView(const Device::Handle& a_Device, const Info& a_Info)
 {
-	a_Device->PushCommand(0, 0, [this, a_Device, a_Info] {
+	uint32_t handle = 0;
+	a_Device->PushCommand(0, 0, [&handle, a_Device, a_Info] {
 		glGenTextures(1, &handle);
 		glTextureView(
 			handle,
 			GetGLType(a_Info.type),
-			Image::GetGLHandle(a_Device, a_Info.image),
+			a_Info.image->handle,
 			Image::GetGLSizedFormat(a_Info.format),
 			a_Info.subRange.baseMipLevel,
 			a_Info.subRange.levelCount,
@@ -63,8 +62,14 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
 			handle,
 			GL_TEXTURE_SWIZZLE_RGBA,
 			(float*)&Component::GLSwizzleMask(a_Info.components));
-	}, true);
+		}, true);
+	return handle;
 }
+Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
+	: device(a_Device)
+	, info(a_Info)
+	, handle(CreateImageView(a_Device, a_Info))
+{}
 Impl::~Impl()
 {
 	device.lock()->PushCommand(0, 0, [handle = handle] {

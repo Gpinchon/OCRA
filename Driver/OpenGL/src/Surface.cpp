@@ -15,11 +15,8 @@ OCRA_DECLARE_WEAK_HANDLE(OCRA::Instance);
 namespace OCRA::Surface::Win32
 {
 Impl::Impl(const Instance::Handle& a_Instance, const Info& a_Info)
-	: Surface::Impl(a_Instance, "Win32")
+	: Surface::Impl(a_Instance, a_Info.hwnd, "Win32")
 {
-	nativeWindow = a_Info.hwnd;
-	nativeDisplay = GetDC(HWND(nativeWindow));
-	if (nativeDisplay == nullptr) throw std::runtime_error("Could not query hwnd display context");
 }
 Handle Create(const Instance::Handle& a_Instance, const Info& a_Info)
 {

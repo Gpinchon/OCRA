@@ -16,59 +16,11 @@
 
 using namespace OCRA;
 
-//Create OCRA Instance
-static inline auto CreateInstance()
-{
-	Instance::Handle instance;
-	Instance::Info instanceInfo;
-	instanceInfo.applicationInfo.name = "Test_CommandBuffer";
-	instanceInfo.applicationInfo.applicationVersion = 1;
-	instance = Instance::Create(instanceInfo);
-	std::cout << "==== Instance ====\n";
-	std::cout << "  Type           : " << Instance::GetType(instance) << "\n";
-	std::cout << "  App Name       : " << Instance::GetInfo(instance).applicationInfo.name << "\n";
-	std::cout << "  App Version    : " << Instance::GetInfo(instance).applicationInfo.applicationVersion << "\n";
-	std::cout << "  Engine Name    : " << Instance::GetInfo(instance).applicationInfo.engineName << "\n";
-	std::cout << "  Engine Version : " << Instance::GetInfo(instance).applicationInfo.engineVersion << "\n";
-	std::cout << "==================\n";
-	std::cout << "\n";
-	return instance;
-}
-
-//Get queues from Physical Device
-static inline auto GetQueueInfos(const PhysicalDevice::Handle& a_PhysicalDevice)
-{
-	std::vector<Queue::Info> queueInfos;
-	{
-		auto& queueFamilies = PhysicalDevice::GetQueueFamilyProperties(a_PhysicalDevice);
-		uint32_t familyIndex = 0;
-		for (auto& queueFamily : queueFamilies)
-		{
-			Queue::Info queueInfo;
-			queueInfo.queueCount = queueFamily.queueCount;
-			queueInfo.queueFamilyIndex = familyIndex;
-			queueInfo.queuePriorities.resize(queueFamily.queueCount, 1.f);
-			queueInfos.push_back(queueInfo);
-			++familyIndex;
-		}
-	}
-	return queueInfos;
-}
-
 //Find suitable device
 static inline auto GetPhysicalDevice(const Instance::Handle& a_Instance)
 {
 	const auto& physicalDevices = Instance::EnumeratePhysicalDevices(a_Instance);
 	return physicalDevices.front();
-}
-
-//Create a device with necessary queues
-static inline auto CreateDevice(const PhysicalDevice::Handle& a_PhysicalDevice)
-{
-	Device::Info deviceInfo;
-	deviceInfo.queueInfos = GetQueueInfos(a_PhysicalDevice);
-	auto device = Device::Create(a_PhysicalDevice, deviceInfo);
-	return device;
 }
 
 static inline auto FindQueueFamily(const PhysicalDevice::Handle& a_PhysicalDevice, const PhysicalDevice::QueueFlags& a_QueueProperties)
@@ -154,7 +106,7 @@ static inline void SubmitCommandBuffer(const Device::Handle& a_Device, const Que
 
 int CommandBuffer()
 {
-	auto instance = CreateInstance();
+	auto instance = CreateInstance("Test_CommandBuffer");
 	auto physicalDevice = GetPhysicalDevice(instance);
 	auto device = CreateDevice(physicalDevice);
 	auto queueFamily = FindQueueFamily(physicalDevice, PhysicalDevice::QueueFlagsBits::Transfer);

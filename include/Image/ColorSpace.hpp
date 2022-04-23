@@ -2,6 +2,9 @@
 
 namespace OCRA::Image {
 enum class ColorSpace {
-	Linear, sRGB
+	Unknown = -1,
+	Linear,
+	sRGB,
+	MaxValue
 };
 }

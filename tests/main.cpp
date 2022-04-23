@@ -8,6 +8,10 @@ int main()
 	if (PhysicalDevice() != 0)
 		return -1;
 	std::cout << std::endl;
+	std::cout << "========== TEST : SwapChain ==========\n\n";
+	if (SwapChain() != 0)
+		return -1;
+	std::cout << std::endl;
 	std::cout << "========== TEST : Queue ==========\n\n";
 	if (Queue() != 0)
 		return -1;

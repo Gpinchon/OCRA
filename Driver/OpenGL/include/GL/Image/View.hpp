@@ -20,6 +20,6 @@ struct Impl {
     ~Impl();
 	const Device::WeakHandle device;
 	const Info info;
-    GLuint handle { 0 };
+    const uint32_t handle;
 };
 }

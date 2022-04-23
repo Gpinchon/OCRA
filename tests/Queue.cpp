@@ -2,28 +2,11 @@
 #include <PhysicalDevice.hpp>
 #include <Device.hpp>
 
+#include <Common.hpp>
+
 #include <iostream>
 
 using namespace OCRA;
-
-//Create OCRA Instance
-static inline auto CreateInstance()
-{
-	Instance::Handle instance;
-	Instance::Info instanceInfo;
-	instanceInfo.applicationInfo.name = "Test_Queue";
-	instanceInfo.applicationInfo.applicationVersion = 1;
-	instance = Instance::Create(instanceInfo);
-	std::cout << "==== Instance ====\n";
-	std::cout << "  Type           : " << Instance::GetType(instance) << "\n";
-	std::cout << "  App Name       : " << Instance::GetInfo(instance).applicationInfo.name << "\n";
-	std::cout << "  App Version    : " << Instance::GetInfo(instance).applicationInfo.applicationVersion << "\n";
-	std::cout << "  Engine Name    : " << Instance::GetInfo(instance).applicationInfo.engineName << "\n";
-	std::cout << "  Engine Version : " << Instance::GetInfo(instance).applicationInfo.engineVersion << "\n";
-	std::cout << "==================\n";
-	std::cout << "\n";
-	return instance;
-}
 
 //Find suitable device
 static inline auto GetPhysicalDevice(const Instance::Handle& a_Instance)
@@ -95,7 +78,7 @@ static inline void ListQueues(const Device::Handle& a_Device, const std::vector<
 
 int Queue()
 {
-	const auto instance = CreateInstance();
+	const auto instance = CreateInstance("Test_Queue");
 	const auto physicalDevice = GetPhysicalDevice(instance);
 	const auto queueInfos = GetQueueInfos(physicalDevice);
 	const auto device = CreateDevice(physicalDevice, queueInfos);

@@ -3,9 +3,12 @@
  * @brief Unit test's common tools
  */
 
+#include <Handle.hpp>
+
 #include <Common/Timer.hpp>
 
 #include <iostream>
+#include <string>
 
 struct VerboseTimer : Timer
 {
@@ -15,3 +18,13 @@ struct VerboseTimer : Timer
 	}
 	const std::string name;
 };
+
+OCRA_DECLARE_HANDLE(OCRA::Instance);
+OCRA_DECLARE_HANDLE(OCRA::PhysicalDevice);
+OCRA_DECLARE_HANDLE(OCRA::Device);
+
+//Create an instance with app name a_Name
+OCRA::Instance::Handle CreateInstance(const std::string& a_Name);
+//Create a device with all available queues
+OCRA::Device::Handle CreateDevice(const OCRA::PhysicalDevice::Handle& a_PhysicalDevice);
+

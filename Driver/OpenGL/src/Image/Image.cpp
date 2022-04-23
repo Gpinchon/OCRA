@@ -14,45 +14,37 @@
 #include <vector>
 
 #include <GL/Buffer.hpp>
+#include <GL/Image/Image.hpp>
 #include <GL/Image/Format.hpp>
 #include <GL/Command/Buffer.hpp>
 #include <GL/Memory.hpp>
 #include <GL/Device.hpp>
-#include <GL/WeakHandle.hpp>
 #include <GL/glew.h>
-
-OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
 
 #define BUFFER_OFFSET(i) ((char*)NULL + (i))
 
 namespace OCRA::Image {
-struct Impl
+static inline auto CreateTexture(const Device::Handle& a_Device)
 {
-    Impl(const Device::Handle& a_Device, const Info& a_Info)
-        : device(a_Device)
-        , info(a_Info)
-        , internalFormat(GetGLSizedFormat(a_Info.format))
-        , dataFormat(GetGLDataFormat(a_Info.format))
-        , dataType(GetGLDataType(a_Info.format))
-    {
-        a_Device->PushCommand(0, 0, [this] {
-            glGenTextures(1, &handle);
-        }, true);
-    }
-    ~Impl() {
-        device.lock()->PushCommand(0, 0, [handle = handle] {
-            glDeleteTextures(1, &handle);
-        }, false);
-    }
-    virtual void Download(const Command::BufferImageCopy& a_Copy, const size_t& a_MemoryOffset) = 0;
-    virtual void Upload(const Command::BufferImageCopy& a_Copy, const size_t& a_MemoryOffset) = 0;
-    const Device::WeakHandle device;
-    const Info info;
-    const GLenum internalFormat;
-    const GLenum dataType;
-    const GLenum dataFormat;
-    GLuint handle{ 0 };
-};
+    uint32_t handle = 0;
+    a_Device->PushCommand(0, 0, [&handle] {
+        glGenTextures(1, &handle);
+    }, true);
+    return handle;
+}
+Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
+    : device(a_Device)
+    , info(a_Info)
+    , internalFormat(GetGLSizedFormat(a_Info.format))
+    , dataFormat(GetGLDataFormat(a_Info.format))
+    , dataType(GetGLDataType(a_Info.format))
+    , handle(CreateTexture(a_Device))
+{}
+Impl::~Impl() {
+    device.lock()->PushCommand(0, 0, [handle = handle] {
+        glDeleteTextures(1, &handle);
+    }, false);
+}
 
 template<bool Compressed>
 struct Texture : Impl {
@@ -101,7 +93,7 @@ struct Texture1D : Texture<Compressed>
     Texture1D(const Device::Handle& a_Device, const Info& a_Info)
         : Texture<Compressed>(a_Device, a_Info, GL_TEXTURE_1D)
     {
-        if (info.samples == Info::Samples::Samples1) {
+        if (info.samples == Samples::Samples1) {
             Bind(); //initialize texture object
             glTexStorage1D(
                 target,
@@ -140,10 +132,10 @@ template <bool Compressed>
 struct Texture2D : Texture<Compressed>
 {
     Texture2D(const Device::Handle& a_Device, const Info& a_Info)
-        : Texture<Compressed>(a_Device, a_Info, a_Info.samples == Info::Samples::Samples1 ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE)
+        : Texture<Compressed>(a_Device, a_Info, a_Info.samples == Samples::Samples1 ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE)
     {
         Bind();//initialize texture object
-        if (info.samples == Info::Samples::Samples1)
+        if (info.samples == Samples::Samples1)
             glTexStorage2D(
                 target,
                 info.mipLevels,
@@ -191,10 +183,10 @@ template <bool Compressed>
 struct Texture3D : Texture<Compressed>
 {
     Texture3D(const Device::Handle& a_Device, const Info& a_Info)
-    : Texture<Compressed>(a_Device, a_Info, a_Info.samples == Info::Samples::Samples1 ? GL_TEXTURE_2D_ARRAY : GL_TEXTURE_2D_MULTISAMPLE_ARRAY)
+    : Texture<Compressed>(a_Device, a_Info, a_Info.samples == Samples::Samples1 ? GL_TEXTURE_2D_ARRAY : GL_TEXTURE_2D_MULTISAMPLE_ARRAY)
     {
         Bind();//initialize texture object
-        if (info.samples == Info::Samples::Samples1)
+        if (info.samples == Samples::Samples1)
             glTexStorage3D(
                 target,
                 info.mipLevels,
@@ -250,15 +242,15 @@ Handle Create(const Device::Handle& a_Device, const Info& a_Info)
     const auto isCompressed = IsCompressedFormat(a_Info.format);
     switch (a_Info.type)
     {
-    case Image::Info::Type::Image1D:
+    case Image::Type::Image1D:
         if (isCompressed) impl = new Texture1D<true>(a_Device, a_Info);
         else impl = new Texture1D<false>(a_Device, a_Info);
         break;
-    case Image::Info::Type::Image2D:
+    case Image::Type::Image2D:
         if (isCompressed) impl = new Texture2D<true>(a_Device, a_Info);
         else impl = new Texture2D<false>(a_Device, a_Info);
         break;
-    case Image::Info::Type::Image3D:
+    case Image::Type::Image3D:
         if (isCompressed) impl = new Texture3D<true>(a_Device, a_Info);
         else impl = new Texture3D<false>(a_Device, a_Info);
         break;

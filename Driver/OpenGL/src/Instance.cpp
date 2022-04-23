@@ -10,30 +10,23 @@
 
 namespace OCRA::Instance
 {
-Impl::Impl(const Info& a_Info) : info(a_Info)
+//for multi instances
+static auto s_ID = 0u;
+Impl::Impl(const Info& a_Info)
+    : info(a_Info)
+    , id(s_ID++)
 {
-    //if (eglewInit() != GLEW_OK) throw std::runtime_error("Cound not initialize EGLEW");
-    //constexpr EGLint maxDevices = 16;
-    //EGLDeviceEXT    devices[maxDevices];
-    //EGLint          devicesNum;
-    //eglQueryDevicesEXT(maxDevices, devices, &devicesNum);
-    //if (eglGetError() != EGL_SUCCESS) throw std::runtime_error("Could not query devices");
-    //physicalDevices.push_back(PhysicalDevice::Create(eglGetDisplay(EGL_DEFAULT_DISPLAY)));
-    /*for (auto deviceIndex = 0; deviceIndex < devicesNum; ++deviceIndex) {
-        physicalDevices.push_back(PhysicalDevice::Create(devices[deviceIndex]));
-    }*/
-#ifdef _WIN32
+    std::string windowClassName = "DummyWindow" + std::to_string(id);
     WNDCLASSA wndclass{};
     wndclass.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
     wndclass.lpfnWndProc = DefWindowProcA;
     wndclass.hInstance = GetModuleHandle(0);
-    wndclass.lpszClassName = "Dummy_OpenGL_Window";
-    if (!RegisterClassA(&wndclass)) throw std::runtime_error("Could not register window class");
-
-    auto hwnd = CreateWindowExA(
+    wndclass.lpszClassName = windowClassName.c_str();
+    if (!RegisterClass(&wndclass)) throw std::runtime_error("Could not register window class");
+    dummyWindow = CreateWindowEx(
         0,
         wndclass.lpszClassName,
-        "Dummy OpenGL Window",
+        "Dummy Window",
         0,
         CW_USEDEFAULT,
         CW_USEDEFAULT,
@@ -43,28 +36,23 @@ Impl::Impl(const Info& a_Info) : info(a_Info)
         0,
         wndclass.hInstance,
         0);
-
-    //device context handle
-    displayHandle = GetDC(HWND(hwnd));
-#endif //_WIN32
-    physicalDevices.push_back(PhysicalDevice::Create(displayHandle));
-    DestroyWindow(HWND(hwnd));
-    UnregisterClassA("Dummy_OpenGL_Window", GetModuleHandle(0));
+    dummyDevice = GetDC(HWND(dummyWindow));
+    physicalDevices.push_back(PhysicalDevice::Create(dummyDevice));
 }
 Impl::~Impl()
 {
-#if _WIN32
-    DeleteDC(HDC(displayHandle));
-    UnregisterClassA("Dummy_OpenGL_Window", GetModuleHandle(0));
-#endif //_WIN32
+    std::string windowClassName = "DummyWindow" + std::to_string(id);
+    ReleaseDC(HWND(dummyWindow), HDC(dummyDevice));
+    DestroyWindow(HWND(dummyWindow));
+    UnregisterClass(windowClassName.c_str(), GetModuleHandle(0));
 }
 Handle Create(
 	const Info& a_Info,
 	const AllocationCallback* a_Allocator)
 {
-	return Handle(new Impl(a_Info));
+    return Handle(new Impl(a_Info));
 }
-const std::string& GetType(const Handle& a_Instance)
+const std::string GetType(const Handle& a_Instance)
 {
 	return Impl::type;
 }

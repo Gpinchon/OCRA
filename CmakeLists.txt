@@ -105,7 +105,9 @@ endif (RenderingAPI STREQUAL "OpenGL")
 
 set(OCRA_TEST_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/main.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/Common.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/PhysicalDevice.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/SwapChain.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/Queue.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/CommandBuffer.cpp)
 set(OCRA_TEST_HEADER_FILES

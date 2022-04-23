@@ -16,25 +16,27 @@ OCRA_DECLARE_HANDLE(OCRA::Image);
 OCRA_DECLARE_HANDLE(OCRA::Device);
 
 namespace OCRA::Image {
+enum class Type {
+    Unknown = -1,
+    Image1D,
+    Image2D,
+    Image3D,
+    MaxValue
+};
+enum class Samples {
+    Samples1 = 1,
+    Samples2 = 2,
+    Samples4 = 4,
+    Samples8 = 8,
+    Samples16 = 16,
+    Samples32 = 32,
+    Samples64 = 64,
+    MaxValue
+};
 //Image Info specs
 struct Info {
-    enum class Type {
-        Unknown = -1,
-        Image1D,
-        Image2D,
-        Image3D,
-        MaxValue
-    } type { Type::Unknown };
-    enum class Samples {
-        Samples1 = 1,
-        Samples2 = 2,
-        Samples4 = 4,
-        Samples8 = 8,
-        Samples16 = 16,
-        Samples32 = 32,
-        Samples64 = 64,
-        MaxValue
-    } samples { Samples::Samples1 };
+    Type type { Type::Unknown };
+    Samples samples { Samples::Samples1 };
     Image::Format format { Image::Format::Unknown };
     Extent3D extent;
     uint16_t mipLevels { 0 }, arrayLayers { 0 };

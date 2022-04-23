@@ -92,7 +92,6 @@ if (NOT GLEW_POPULATED)
   option(ONLY_LIBS "Do not build executables" ON)
   option(glew-cmake_BUILD_STATIC "Build the static glew library" ON)
   option(glew-cmake_BUILD_SHARED "Build the shared glew library" OFF)
-  #option(GLEW_EGL "EGL mode" ON)
   add_subdirectory(${glew_SOURCE_DIR} ${glew_BINARY_DIR})
   add_library(GLEW::glew_s ALIAS libglew_static)
   add_library(GLEW::GLEW ALIAS libglew_static)
@@ -110,6 +109,7 @@ set(OCRA_IMPL_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Instance.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/ObjectPool.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/PhysicalDevice.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Surface.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/WeakHandle.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Command/Buffer.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Command/ExecutionState.hpp
@@ -141,11 +141,13 @@ set(OCRA_IMPL_HEADER_FILES
 set(OCRA_IMPL_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Buffer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Device.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/FrameBuffer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Instance.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Memory.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/PhysicalDevice.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/QueryPool.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Surface.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/SwapChain.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Queue/Fence.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Queue/Queue.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Queue/Semaphore.cpp
@@ -168,7 +170,6 @@ add_library(OCRAImpl ${OCRA_IMPL_SOURCE_FILES} ${OCRA_IMPL_HEADER_FILES})
 target_include_directories(OCRAImpl PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}/include"
   "${CMAKE_CURRENT_SOURCE_DIR}/../../include"
-  "${egl_registery_SOURCE_DIR}/api/"
 )
 target_link_libraries(OCRAImpl PUBLIC GLEW::GLEW)
 

@@ -13,9 +13,17 @@ namespace OCRA::PhysicalDevice
 {
 using Command = std::function<void()>;
 
-static inline auto CreateContext(const Instance::Handle& a_Instance)
+static inline void CheckError(const std::string& a_ProcedureName)
 {
-    const auto hdc = HDC(a_Instance->displayHandle);
+    const auto errorCode = GetLastError();
+    SetLastError(ERROR_SUCCESS);
+    if (errorCode != ERROR_SUCCESS)
+        throw std::runtime_error(a_ProcedureName + " failed with code : " + std::to_string(errorCode));
+}
+
+static inline auto CreateContext(const void* a_DeviceHandle)
+{
+    const auto hdc = HDC(a_DeviceHandle);
     PIXELFORMATDESCRIPTOR pfd{};
     pfd.nSize = sizeof(pfd);
     pfd.nVersion = 1;
@@ -27,11 +35,17 @@ static inline auto CreateContext(const Instance::Handle& a_Instance)
     pfd.cDepthBits = 24;
     pfd.cStencilBits = 8;
     int pixel_format = ChoosePixelFormat(hdc, &pfd);
+    SetLastError(ERROR_SUCCESS);
+    CheckError("ChoosePixelFormat");
     if (!pixel_format) throw std::runtime_error("Failed to find a suitable pixel format.");
     if (!SetPixelFormat(hdc, pixel_format, &pfd)) throw std::runtime_error("Failed to set the pixel format.");
+    CheckError("SetPixelFormat");
+    
     const auto hglrcTemp = wglCreateContext(hdc);
+    CheckError("wglCreateContext");
     if (hglrcTemp == nullptr) throw std::runtime_error("Failed to create a dummy OpenGL rendering context.");
     if (!wglMakeCurrent(hdc, hglrcTemp)) throw std::runtime_error("Failed to activate dummy OpenGL rendering context.");
+    CheckError("wglMakeCurrent");
 
     //LET'S GET STARTED !
     if (wglewInit() != GLEW_OK) throw std::runtime_error("Cound not initialize WGLEW");
@@ -332,15 +346,15 @@ static inline auto GetMemoryPropertiesGL()
     return memoryProperties;
 }
 
-Queue::Queue(const Instance::Handle& a_Instance, const void* a_ContextHandle)
-    : contextHandle(a_ContextHandle)
+Queue::Queue(const void* a_DeviceHandle, const void* a_ContextHandle)
 {
-    const auto hdc = HDC(a_Instance->displayHandle);
+    const auto hdc = HDC(a_DeviceHandle);
+    const auto hglrc = HGLRC(a_ContextHandle);
     properties.queueCount = 1;
     properties.queueFlags = QueueFlagsBits::Graphics | QueueFlagsBits::Compute | QueueFlagsBits::Transfer | QueueFlagsBits::SparseBinding;
     properties.minImageTransferGranularity = { 1, 1, 1 }; //Queues supporting graphics and/or compute operations must report (1,1,1)
-    PushCommand([this, hdc] {
-        wglMakeCurrent(hdc, HGLRC(contextHandle));
+    PushCommand([hdc, hglrc] {
+        wglMakeCurrent(hdc, hglrc);
         glewExperimental = true;
         if (glewInit() != GLEW_OK) throw std::runtime_error("Cound not initialize GLEW");
     }, true);
@@ -351,10 +365,10 @@ Queue::~Queue()
    
 }
 
-Impl::Impl(const Instance::Handle& a_Instance)
-    : instance(a_Instance)
-    , contextHandle(CreateContext(a_Instance))
-    , queue(a_Instance, contextHandle)
+Impl::Impl(void* const a_DeviceHandle)
+    : deviceHandle(a_DeviceHandle)
+    , contextHandle(CreateContext(deviceHandle))
+    , queue(deviceHandle, contextHandle)
 {
     if (!GLEW_EXT_direct_state_access) throw std::runtime_error("Direct state access extension required !");
     PushCommand(0, 0, [this] {
@@ -372,9 +386,28 @@ Impl::~Impl()
     wglDeleteContext(HGLRC(contextHandle));
 }
 
-Handle Create(const void* a_DisplayHandle)
+void Impl::SetDeviceHandle(void* const a_DeviceHandle)
 {
-	return Handle(new Impl(a_DisplayHandle));
+    PushCommand(0, 0, [this, device = a_DeviceHandle] {
+        if (deviceHandle == device) return;
+        deviceHandle = device;
+        wglMakeCurrent(HDC(deviceHandle), HGLRC(contextHandle));
+        swapInterval = wglGetSwapIntervalEXT();
+    }, false);
+}
+
+void Impl::SetSwapInterval(const int8_t& a_SwapInterval)
+{
+    PushCommand(0, 0, [this, swap = a_SwapInterval] {
+        if (swapInterval == swap) return;
+        swapInterval = swap;
+        wglSwapIntervalEXT(swap);
+    }, false);
+}
+
+Handle Create(void* const a_DeviceHandle)
+{
+	return Handle(new Impl(a_DeviceHandle));
 }
 const MemoryProperties& GetMemoryProperties(const Handle& a_PhysicalDevice)
 {

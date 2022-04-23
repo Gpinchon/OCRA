@@ -7,11 +7,25 @@
 #pragma once
 
 #include <Handle.hpp>
+#include <Image/Image.hpp>
 
-#include <vector>
+#include <GL/WeakHandle.hpp>
 
 OCRA_DECLARE_HANDLE(OCRA::Device);
+OCRA_DECLARE_WEAK_HANDLE(OCRA::Device)
 
 namespace OCRA::Image {
-unsigned GetGLHandle(const Device::Handle& a_Device, const Handle& a_Handle);
+struct Impl
+{
+    Impl(const Device::Handle& a_Device, const Info& a_Info);
+    ~Impl();
+    virtual void Download(const Command::BufferImageCopy& a_Copy, const size_t& a_MemoryOffset) = 0;
+    virtual void Upload(const Command::BufferImageCopy& a_Copy, const size_t& a_MemoryOffset) = 0;
+    const Device::WeakHandle device;
+    const Info info;
+    const uint32_t internalFormat;
+    const uint32_t dataType;
+    const uint32_t dataFormat;
+    const uint32_t handle;
+};
 }
