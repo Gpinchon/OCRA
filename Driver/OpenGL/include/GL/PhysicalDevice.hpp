@@ -10,6 +10,7 @@
 #include <cassert>
 
 OCRA_DECLARE_HANDLE(OCRA::Instance);
+OCRA_DECLARE_WEAK_HANDLE(OCRA::Instance);
 OCRA_DECLARE_HANDLE(OCRA::Queue);
 
 namespace OCRA::PhysicalDevice
@@ -17,19 +18,17 @@ namespace OCRA::PhysicalDevice
 using Command = std::function<void()>;
 struct Queue
 {
-    Queue(const void* a_DisplayHandle, const void* a_ContextHandle);
+    Queue(const Instance::Handle& a_Instance, const void* a_ContextHandle);
     ~Queue();
     inline void PushCommand(const Command& a_Command, const bool& a_Synchronous) {
         workerThread.PushCommand(a_Command, a_Synchronous);
     }
-    const void*             displayHandle;
-    const void*             contextHandle;
     WorkerThread            workerThread;
     QueueFamilyProperties   properties;
 };
 struct Impl
 {
-    Impl(const void* a_DisplayHandle);
+    Impl(const Instance::Handle& a_Instance);
     ~Impl();
     inline void PushCommand(
         const uint32_t& a_FamilyIndex,
@@ -41,7 +40,7 @@ struct Impl
         assert(a_QueueIndex == 0);
         queue.PushCommand(a_Command, a_Synchronous);
     }
-    const void*         displayHandle;
+    Instance::WeakHandle instance;
     const void*         contextHandle;
     Queue               queue;
     Properties          properties;

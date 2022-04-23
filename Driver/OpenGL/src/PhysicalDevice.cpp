@@ -1,5 +1,6 @@
 #include <PhysicalDevice.hpp>
 
+#include <GL/Instance.hpp>
 #include <GL/PhysicalDevice.hpp>
 #include <GL/glew.h>
 #include <GL/wglew.h>
@@ -12,8 +13,9 @@ namespace OCRA::PhysicalDevice
 {
 using Command = std::function<void()>;
 
-static inline auto CreateContext(const void* a_DisplayHandle)
+static inline auto CreateContext(const Instance::Handle& a_Instance)
 {
+    const auto hdc = HDC(a_Instance->displayHandle);
     PIXELFORMATDESCRIPTOR pfd{};
     pfd.nSize = sizeof(pfd);
     pfd.nVersion = 1;
@@ -24,12 +26,12 @@ static inline auto CreateContext(const void* a_DisplayHandle)
     pfd.iLayerType = PFD_MAIN_PLANE;
     pfd.cDepthBits = 24;
     pfd.cStencilBits = 8;
-    int pixel_format = ChoosePixelFormat(HDC(a_DisplayHandle), &pfd);
+    int pixel_format = ChoosePixelFormat(hdc, &pfd);
     if (!pixel_format) throw std::runtime_error("Failed to find a suitable pixel format.");
-    if (!SetPixelFormat(HDC(a_DisplayHandle), pixel_format, &pfd)) throw std::runtime_error("Failed to set the pixel format.");
-    const auto hglrcTemp = wglCreateContext(HDC(a_DisplayHandle));
+    if (!SetPixelFormat(hdc, pixel_format, &pfd)) throw std::runtime_error("Failed to set the pixel format.");
+    const auto hglrcTemp = wglCreateContext(hdc);
     if (hglrcTemp == nullptr) throw std::runtime_error("Failed to create a dummy OpenGL rendering context.");
-    if (!wglMakeCurrent(HDC(a_DisplayHandle), hglrcTemp)) throw std::runtime_error("Failed to activate dummy OpenGL rendering context.");
+    if (!wglMakeCurrent(hdc, hglrcTemp)) throw std::runtime_error("Failed to activate dummy OpenGL rendering context.");
 
     //LET'S GET STARTED !
     if (wglewInit() != GLEW_OK) throw std::runtime_error("Cound not initialize WGLEW");
@@ -37,12 +39,17 @@ static inline auto CreateContext(const void* a_DisplayHandle)
     if (!WGLEW_ARB_create_context_robustness) throw std::runtime_error("Robust context creation not supported !");
     int attribs[] =
     {
-        WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
-        WGL_CONTEXT_MINOR_VERSION_ARB, 3,
-        WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_ROBUST_ACCESS_BIT_ARB,
+        WGL_CONTEXT_MAJOR_VERSION_ARB,  4,
+        WGL_CONTEXT_MINOR_VERSION_ARB,  3,
+        WGL_CONTEXT_PROFILE_MASK_ARB,   WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+#ifdef DEBUG
+        WGL_CONTEXT_FLAGS_ARB,          WGL_CONTEXT_ROBUST_ACCESS_BIT_ARB | WGL_CONTEXT_DEBUF_BIT_ARB,
+#else
+        WGL_CONTEXT_FLAGS_ARB,          WGL_CONTEXT_ROBUST_ACCESS_BIT_ARB,
+#endif //DEBUG
         0
     };
-    auto hglrc = wglCreateContextAttribsARB(HDC(a_DisplayHandle), 0, attribs); //commands execution context
+    auto hglrc = wglCreateContextAttribsARB(hdc, 0, attribs); //commands execution context
     if (hglrc == nullptr) throw std::runtime_error("Failed to create a modern OpenGL rendering context.");
     wglMakeCurrent(nullptr, nullptr);
     wglDeleteContext(hglrcTemp);
@@ -325,16 +332,15 @@ static inline auto GetMemoryPropertiesGL()
     return memoryProperties;
 }
 
-Queue::Queue(const void* a_DisplayHandle, const void* a_ContextHandle)
-    : displayHandle(a_DisplayHandle)
-    , contextHandle(a_ContextHandle)
+Queue::Queue(const Instance::Handle& a_Instance, const void* a_ContextHandle)
+    : contextHandle(a_ContextHandle)
 {
+    const auto hdc = HDC(a_Instance->displayHandle);
     properties.queueCount = 1;
     properties.queueFlags = QueueFlagsBits::Graphics | QueueFlagsBits::Compute | QueueFlagsBits::Transfer | QueueFlagsBits::SparseBinding;
     properties.minImageTransferGranularity = { 1, 1, 1 }; //Queues supporting graphics and/or compute operations must report (1,1,1)
-    PushCommand([this] {
-        wglMakeCurrent(HDC(displayHandle), HGLRC(contextHandle));
-        //eglMakeCurrent(EGLDisplay(displayHandle), EGL_NO_SURFACE, EGL_NO_SURFACE, EGLContext(contextHandle));
+    PushCommand([this, hdc] {
+        wglMakeCurrent(hdc, HGLRC(contextHandle));
         glewExperimental = true;
         if (glewInit() != GLEW_OK) throw std::runtime_error("Cound not initialize GLEW");
     }, true);
@@ -345,10 +351,10 @@ Queue::~Queue()
    
 }
 
-Impl::Impl(const void* a_DisplayHandle)
-    : displayHandle(a_DisplayHandle)
-    , contextHandle(CreateContext(displayHandle))
-    , queue(displayHandle, contextHandle)
+Impl::Impl(const Instance::Handle& a_Instance)
+    : instance(a_Instance)
+    , contextHandle(CreateContext(a_Instance))
+    , queue(a_Instance, contextHandle)
 {
     if (!GLEW_EXT_direct_state_access) throw std::runtime_error("Direct state access extension required !");
     PushCommand(0, 0, [this] {

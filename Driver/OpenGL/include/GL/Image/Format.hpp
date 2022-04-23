@@ -490,4 +490,29 @@ inline auto GetAlphaSize(const Format& format)
         return 0;
     }
 }
+inline auto GetDepthSize(const Format& format)
+{
+    switch (format) {
+    case Format::Uint16_Normalized_Depth:
+        return 16;
+    case Format::Uint24_Normalized_Depth_Uint8_Stencil:
+        return 24;
+    case Format::Float32_Depth:
+    case Format::Float32_Normalized_Depth_Uint8_Stencil:
+        return 32;
+    default:
+        return 0;
+    }
+}
+inline auto GetStencilSize(const Format& format)
+{
+    switch (format) {
+    case Format::Uint24_Normalized_Depth_Uint8_Stencil:
+    case Format::Float32_Normalized_Depth_Uint8_Stencil:
+    case Format::Uint8_Stencil:
+        return 8;
+    default:
+        return 0;
+    }
+}
 }

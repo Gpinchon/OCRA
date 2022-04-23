@@ -13,6 +13,8 @@
 OCRA_DECLARE_HANDLE(OCRA::Device);
 OCRA_DECLARE_HANDLE(OCRA::SwapChain);
 OCRA_DECLARE_HANDLE(OCRA::Surface);
+OCRA_DECLARE_HANDLE(OCRA::Queue);
+OCRA_DECLARE_HANDLE(OCRA::Queue::Semaphore);
 
 namespace OCRA::SwapChain
 {
@@ -61,4 +63,10 @@ struct Info {
     Handle                  oldSwapchain;
 };
 Handle Create(const Device::Handle& a_Device, const Info& a_Info);
+struct PresentInfo {
+    std::vector<Queue::Semaphore>   semaphores;
+    std::vector<SwapChain::Handle>  swapChains;
+    std::vector<uint32_t>           imageIndices;
+};
+void Present(const Queue::Handle& a_Queue, const PresentInfo& a_PresentInfo);
 }
