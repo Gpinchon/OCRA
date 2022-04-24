@@ -33,11 +33,12 @@ int SwapChain()
     wndclass.lpfnWndProc = DefWindowProcA;
     wndclass.hInstance = GetModuleHandle(0);
     wndclass.lpszClassName = "TestWindow";
+    if (!RegisterClass(&wndclass)) throw std::runtime_error("Could not register window class");
     const auto hwnd = CreateWindowEx(
         0,
         wndclass.lpszClassName,
         "Test Window",
-        WS_OVERLAPPEDWINDOW,
+        WS_OVERLAPPEDWINDOW | WS_VISIBLE,
         CW_USEDEFAULT,
         CW_USEDEFAULT,
         CW_USEDEFAULT,
@@ -46,6 +47,8 @@ int SwapChain()
         0,
         wndclass.hInstance,
         0);
+    ShowWindow(hwnd, SW_SHOWDEFAULT);
+    UpdateWindow(hwnd);
     const auto surface = CreateSurface(instance, wndclass.hInstance, hwnd);
     const auto physicalDevice = Instance::EnumeratePhysicalDevices(instance).front();
     const auto device = CreateDevice(physicalDevice);

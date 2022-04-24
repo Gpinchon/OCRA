@@ -21,6 +21,21 @@ bool operator==(const Extent2D& a, const Extent2D& b) {
     return a.height == b.height
         && a.width == b.width;
 }
+static inline auto CreateImages(const Device::Handle& a_Device, const Info& a_Info)
+{
+    std::vector<Image::Handle> images;
+    for (auto i = 0u; i < a_Info.minImageCount; ++i)
+    {
+        Image::Info imageInfo{};
+        imageInfo.type = Image::Type::Image2D;
+        imageInfo.extent.width = a_Info.imageExtent.width;
+        imageInfo.extent.height = a_Info.imageExtent.height;
+        imageInfo.arrayLayers = a_Info.imageArrayLayers;
+        imageInfo.format = a_Info.imageFormat;
+        images.push_back(Image::Create(a_Device, imageInfo));
+    }
+    return images;
+}
 constexpr auto FORMATSMAX = 32;
 struct Impl
 {
@@ -34,11 +49,17 @@ struct Impl
             assert(info.oldSwapchain->info.imageExtent == info.imageExtent);
             assert(info.oldSwapchain->info.imageSharingMode == info.imageSharingMode);
             frameBufferHandle = info.oldSwapchain->frameBufferHandle;
+            if (info.oldSwapchain->info.imageExtent.width >= info.imageExtent.width &&
+                info.oldSwapchain->info.imageExtent.height >= info.imageExtent.height)
+                images = info.oldSwapchain->images;
+            else images = CreateImages(a_Device, a_Info);
             info.oldSwapchain->Retire();
             info.oldSwapchain.reset();
             return;
         }
-        glGenFramebuffers(1, &frameBufferHandle);
+        a_Device->PushCommand(0, 0, [this] {
+            glGenFramebuffers(1, &frameBufferHandle);
+        }, true);
         const auto hdc = GetDC(HWND(info.surface->nativeWindow));
         const auto rBits = GetRedSize(info.imageFormat);
         const auto gBits = GetGreenSize(info.imageFormat);
@@ -81,16 +102,7 @@ struct Impl
         for (auto index = 0u; index < wglFormatsNbr; ++index)
             DescribePixelFormat(hdc, wglFormats[index], sizeof(PIXELFORMATDESCRIPTOR), &pfd[index]);
         SetPixelFormat(hdc, wglFormats[0], &pfd[0]);
-        for (auto i = 0u; i < info.minImageCount; ++i)
-        {
-            Image::Info imageInfo{};
-            imageInfo.type = Image::Type::Image2D;
-            imageInfo.extent.width = info.imageExtent.width;
-            imageInfo.extent.height = info.imageExtent.height;
-            imageInfo.arrayLayers = info.imageArrayLayers;
-            imageInfo.format = info.imageFormat;
-            images.push_back(Image::Create(a_Device, imageInfo));
-        }
+        images = CreateImages(a_Device, a_Info);
     }
     void Retire() {
         retired = true;
@@ -103,6 +115,12 @@ struct Impl
         physicalDevice->SetDeviceHandle(hdc);
         physicalDevice->SetSwapInterval(uint8_t(info.presentMode));
         device.lock()->PushCommand(a_Queue->familyIndex, a_Queue->queueIndex, [this, imageIndex = a_ImageIndex, hdc] {
+            RECT windowRect;
+            GetWindowRect(
+                HWND(info.surface->nativeWindow),
+                &windowRect);
+            const auto windowWidth = windowRect.right - windowRect.left;
+            const auto windowHeight = windowRect.bottom - windowRect.top;
             glBindFramebuffer(GL_READ_FRAMEBUFFER, frameBufferHandle);
             glFramebufferTexture2D(
                 GL_READ_FRAMEBUFFER,
@@ -114,15 +132,15 @@ struct Impl
             glBlitFramebuffer(
                 0,
                 0,
-                info.imageExtent.height,
                 info.imageExtent.width,
+                info.imageExtent.height,
                 0,
                 0,
-                info.imageExtent.height,
-                info.imageExtent.width,
+                windowWidth,
+                windowHeight,
                 GL_COLOR_BUFFER_BIT,
                 GL_NEAREST);
-            wglSwapLayerBuffers(hdc, WGL_SWAP_MAIN_PLANE);
+            SwapBuffers(hdc);
         }, false);
     }
     Info                        info;
