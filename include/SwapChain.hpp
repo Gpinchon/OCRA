@@ -68,6 +68,6 @@ struct PresentInfo {
     std::vector<SwapChain::Handle>          swapChains;
     std::vector<uint32_t>                   imageIndices;
 };
-std::vector<Image::Handle> GetFrameBuffers(const Device::Handle& a_Device, const Handle& a_SwapChain);
+std::vector<Image::Handle> GetImages(const Device::Handle& a_Device, const Handle& a_SwapChain);
 void Present(const Queue::Handle& a_Queue, const PresentInfo& a_PresentInfo);
 }

@@ -17,10 +17,11 @@ struct Impl
     Impl(const Instance::Handle& a_Instance, const void* a_NativeWindow, const std::string& a_Type)
         : type(a_Type)
         , instance(a_Instance)
+        , nativeWindow(a_NativeWindow)
     {}
     const std::string type;
     const Instance::WeakHandle instance;
-    const void* nativeWindow{ nullptr };
+    const void* nativeWindow;
 };
 }
 

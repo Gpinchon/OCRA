@@ -312,4 +312,22 @@ void CopyImageToBuffer(
         glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
     });
 }
+void ClearColorImage(const Command::Buffer::Handle& a_CommandBuffer, const Image::Handle& a_Image, const Image::Layout& a_ImageLayout, const Image::ClearColor& a_Color, const std::vector<Image::Subresource::Range>& a_Ranges)
+{
+    //for (const auto& range : a_Ranges) CheckValidCopy(copy, a_SrcImage);
+    a_CommandBuffer->PushCommand([
+        image = a_Image, clearColor = a_Color, ranges = a_Ranges
+    ](Command::Buffer::ExecutionState&) {
+        for (const auto& range : ranges)
+        {
+            for (uint32_t level = range.baseMipLevel; level < range.levelCount; ++level)
+            glClearTexImage(
+                image->handle,
+                level,
+                image->dataFormat,
+                GetGLClearColorType(image->info.format),
+                &clearColor);
+        }
+    });
+}
 }

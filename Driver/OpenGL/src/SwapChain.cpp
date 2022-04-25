@@ -153,7 +153,7 @@ Handle Create(const Device::Handle& a_Device, const Info& a_Info)
 {
     return Handle(new Impl(a_Device, a_Info));
 }
-std::vector<Image::Handle> GetFrameBuffers(const Device::Handle& a_Device, const Handle& a_SwapChain)
+std::vector<Image::Handle> GetImages(const Device::Handle& a_Device, const Handle& a_SwapChain)
 {
     return { a_SwapChain->images };
 }

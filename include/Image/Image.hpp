@@ -48,10 +48,18 @@ Handle Create(const Device::Handle& a_Device, const Info& a_Info);
 #include <Buffer.hpp>
 #include <Common/Offset3D.hpp>
 #include <Command/Buffer.hpp>
+#include <Image/Layout.hpp>
 
-namespace OCRA::Command
+namespace OCRA::Image
 {
-struct SubresourceLayers {
+union ClearColor {
+    float       float32[4];
+    int32_t     int32[4];
+    uint32_t    uint32[4];
+};
+namespace Subresource
+{
+struct Layers {
     /*
     * //TODO support aspect copy for OGL
     enum class Aspect {
@@ -60,22 +68,40 @@ struct SubresourceLayers {
     */
     uint32_t level{ 0 }; //indicates the base level (mipmap or array layer) used for the copy
 };
+struct Range {
+    uint32_t              baseMipLevel{ 0 };
+    uint32_t              levelCount{ 0 };
+    uint32_t              baseArrayLayer{ 0 };
+    uint32_t              layerCount{ 0 };
+};
+}
+}
+
+namespace OCRA::Command
+{
+
 struct BufferImageCopy {
     uint64_t bufferOffset{ 0 };
     uint32_t bufferRowLength{ 0 };
     uint32_t bufferImageHeight{ 0 };
-    SubresourceLayers imageSubresource;
+    Image::Subresource::Layers imageSubresource;
     Offset3D imageOffset;
     Extent3D imageExtent;
 };
 void CopyBufferToImage(
-    const Command::Buffer::Handle& a_CommandBuffer,
-    const OCRA::Buffer::Handle& a_SrcBuffer,
-    const Image::Handle& a_DstImage,
+    const Command::Buffer::Handle&  a_CommandBuffer,
+    const OCRA::Buffer::Handle&     a_SrcBuffer,
+    const Image::Handle&            a_DstImage,
     const std::vector<BufferImageCopy>& a_Regions);
 void CopyImageToBuffer(
-    const Command::Buffer::Handle& a_CommandBuffer,
-    const OCRA::Buffer::Handle& a_DstBuffer,
-    const Image::Handle& a_SrcImage,
+    const Command::Buffer::Handle&  a_CommandBuffer,
+    const OCRA::Buffer::Handle&     a_DstBuffer,
+    const Image::Handle&            a_SrcImage,
     const std::vector<BufferImageCopy>& a_Regions);
+void ClearColorImage(
+    const Command::Buffer::Handle&  a_CommandBuffer,
+    const Image::Handle&            a_Image,
+    const Image::Layout&            a_ImageLayout,
+    const Image::ClearColor&        a_Color,
+    const std::vector<Image::Subresource::Range>& a_Ranges);
 }

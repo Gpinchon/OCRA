@@ -23,16 +23,6 @@ static inline auto GetPhysicalDevice(const Instance::Handle& a_Instance)
 	return physicalDevices.front();
 }
 
-static inline auto FindQueueFamily(const PhysicalDevice::Handle& a_PhysicalDevice, const PhysicalDevice::QueueFlags& a_QueueProperties)
-{
-	auto& queueProperties = PhysicalDevice::GetQueueFamilyProperties(a_PhysicalDevice);
-	for (auto familyIndex = 0u; familyIndex < queueProperties.size(); ++familyIndex) {
-		if (queueProperties.at(familyIndex).queueFlags == a_QueueProperties)
-			return familyIndex;
-	}
-	return std::numeric_limits<uint32_t>::infinity();
-}
-
 static inline auto FindProperMemoryType(const PhysicalDevice::Handle& a_PhysicalDevice, const PhysicalDevice::MemoryPropertyFlags& a_MemoryProperties)
 {
 	auto& memoryProperties = PhysicalDevice::GetMemoryProperties(a_PhysicalDevice);
