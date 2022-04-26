@@ -9,16 +9,6 @@
 
 namespace OCRA::Buffer
 {
-struct Impl {
-    Impl(Device::Handle a_Device, const Info& a_Info)
-        : info(a_Info)
-    {
-        assert(info.usage != UsageFlagBits::None);
-    }
-    
-    const Info      info;
-    MemoryBinding   memoryBinding;
-};
 Handle Create(
     const Device::Handle&       a_Device,
     const Info&                 a_Info,
@@ -29,11 +19,7 @@ Handle Create(
 void BindMemory(const Device::Handle& a_Device, const Handle& a_Buffer, const Memory::Handle& a_Memory, const size_t& a_MemoryOffset)
 {
     a_Buffer->memoryBinding.memory = a_Memory;
-    a_Buffer->memoryBinding.memoryOffset = a_MemoryOffset;
-}
-const MemoryBinding& GetMemoryBinding(const Handle& a_Buffer)
-{
-    return a_Buffer->memoryBinding;
+    a_Buffer->memoryBinding.offset = a_MemoryOffset;
 }
 }
 
@@ -57,11 +43,11 @@ void CopyBuffer(
         auto& dstMemory = dstBuffer->memoryBinding;
         for (const auto& region : regions) {
             glCopyNamedBufferSubData(
-            Memory::GetGLHandle(srcMemory.memory),
-            Memory::GetGLHandle(dstMemory.memory),
-            region.readOffset + srcMemory.memoryOffset,
-            region.writeOffset + dstMemory.memoryOffset,
-            region.size);
+                srcMemory.memory->handle,
+                dstMemory.memory->handle,
+                region.readOffset + srcMemory.offset,
+                region.writeOffset + dstMemory.offset,
+                region.size);
         }
     });
 }
@@ -75,9 +61,8 @@ void BindIndexBuffer(
         indexBuffer = a_IndexBuffer,
         offset = a_Offset, indexType = GetGLIndexType(a_IndexType)
     ](Buffer::ExecutionState& executionState) {
-        auto& memory = indexBuffer->memoryBinding;
-        executionState.renderPass.indexBufferBinding.buffer = Memory::GetGLHandle(memory.memory);
-        executionState.renderPass.indexBufferBinding.offset = offset + memory.memoryOffset;
+        executionState.renderPass.indexBufferBinding.buffer = indexBuffer;
+        executionState.renderPass.indexBufferBinding.offset = offset;
         executionState.renderPass.indexBufferBinding.type   = indexType;
     });
     
@@ -97,9 +82,9 @@ void BindVertexBuffers(
             for (auto index = 0u; index < vertexBuffers.size(); ++index)
             {
                 const auto binding = firstBinding + index;
-                auto& memory = vertexBuffers.at(index)->memoryBinding;
-                a_ExecutionState.renderPass.vertexInputBindings.at(binding).buffer = Memory::GetGLHandle(memory.memory);
-                a_ExecutionState.renderPass.vertexInputBindings.at(binding).offset = offsets.at(index) + memory.memoryOffset;
+                auto& vertexBuffer = vertexBuffers.at(index);
+                a_ExecutionState.renderPass.vertexInputBindings.at(binding).buffer = vertexBuffer;
+                a_ExecutionState.renderPass.vertexInputBindings.at(binding).offset = offsets.at(index);
             }
         });
 }

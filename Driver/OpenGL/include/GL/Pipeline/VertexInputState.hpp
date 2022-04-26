@@ -11,6 +11,8 @@
 
 #include <GL/Command/ExecutionState.hpp>
 #include <GL/Common/VertexType.hpp>
+#include <GL/Buffer.hpp>
+#include <GL/Memory.hpp>
 #include <GL/glew.h>
 
 namespace OCRA::Pipeline::VertexInputState {
@@ -21,13 +23,14 @@ inline auto Compile(const Device::Handle& a_Device, const Info& a_Info, const Dy
     return [info = a_Info](Command::Buffer::ExecutionState& a_ExecutionState){
         glPrimitiveRestartIndex(info.primitiveRestartIndex);
         for (const auto& bindingDescription : info.bindingDescriptions) {
-            const auto& vertexInputBinding = a_ExecutionState.renderPass.vertexInputBindings.at(bindingDescription.binding);
+            const auto& vertexInput = a_ExecutionState.renderPass.vertexInputBindings.at(bindingDescription.binding);
+            const auto& vertexMemory = vertexInput.buffer->memoryBinding;
             //Is this binding divided by instance or by vertex ?
             const auto divideByInstance = bindingDescription.inputRate == BindingDescription::InputRate::Instance;
             glBindVertexBuffer(
                 bindingDescription.binding,
-                vertexInputBinding.buffer,
-                vertexInputBinding.offset,
+                vertexMemory.memory->handle,
+                vertexMemory.offset + vertexInput.offset,
                 bindingDescription.stride);
             glVertexBindingDivisor(
                 bindingDescription.binding,

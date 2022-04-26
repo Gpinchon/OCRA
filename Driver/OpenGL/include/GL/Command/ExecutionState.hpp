@@ -19,6 +19,7 @@
 #include <array>
 
 OCRA_DECLARE_HANDLE(OCRA::Pipeline);
+OCRA_DECLARE_HANDLE(OCRA::Buffer);
 
 namespace OCRA::Command::Buffer
 {
@@ -46,7 +47,7 @@ struct DynamicStates {
     GLenum frontFace{ GL_CCW };
 };
 struct VertexInputBinding {
-	GLuint buffer{ 0 };
+	Buffer::Handle buffer{ 0 };
 	uint64_t offset{ 0 };
 };
 struct IndexBufferBinding : VertexInputBinding {

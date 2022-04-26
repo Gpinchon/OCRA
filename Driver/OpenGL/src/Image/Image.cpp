@@ -19,9 +19,8 @@
 #include <GL/Command/Buffer.hpp>
 #include <GL/Memory.hpp>
 #include <GL/Device.hpp>
+#include <GL/Common/BufferOffset.hpp>
 #include <GL/glew.h>
-
-#define BUFFER_OFFSET(i) ((char*)NULL + (i))
 
 namespace OCRA::Image {
 static inline auto CreateTexture(const Device::Handle& a_Device)
@@ -288,8 +287,8 @@ void CopyBufferToImage(
         srcBuffer = a_SrcBuffer, dstImage = a_DstImage, regions = a_Regions
     ](Command::Buffer::ExecutionState&) {
         auto& memoryBinding = OCRA::Buffer::GetMemoryBinding(srcBuffer);
-        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, Memory::GetGLHandle(memoryBinding.memory));
-        for (auto& copy : regions) dstImage->Upload(copy, memoryBinding.memoryOffset);
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, memoryBinding.memory->handle);
+        for (auto& copy : regions) dstImage->Upload(copy, memoryBinding.offset);
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
     });
     
@@ -306,9 +305,9 @@ void CopyImageToBuffer(
         dstBuffer = a_DstBuffer, srcImage = a_SrcImage, regions = a_Regions
     ](Command::Buffer::ExecutionState&) {
         auto& memoryBinding = OCRA::Buffer::GetMemoryBinding(dstBuffer);
-        glBindBuffer(GL_PIXEL_PACK_BUFFER, Memory::GetGLHandle(memoryBinding.memory));
+        glBindBuffer(GL_PIXEL_PACK_BUFFER, memoryBinding.memory->handle);
         for (const auto& copy : regions)
-            srcImage->Download(copy, memoryBinding.memoryOffset);
+            srcImage->Download(copy, memoryBinding.offset);
         glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
     });
 }

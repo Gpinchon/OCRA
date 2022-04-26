@@ -3,6 +3,8 @@
 #include <GL/Command/ExecutionState.hpp>
 #include <GL/Command/Buffer.hpp>
 #include <GL/Common/IndexType.hpp>
+#include <GL/Buffer.hpp>
+#include <GL/Common/BufferOffset.hpp>
 
 namespace OCRA::Command
 {
@@ -32,9 +34,7 @@ void Draw(
     command.instanceCount = a_InstanceCount;
     command.first = a_FirstVertex;
     command.baseInstance = a_FirstInstance;
-    a_CommandBuffer->PushCommand([
-        command = command
-        ](Buffer::ExecutionState& executionState) {
+    a_CommandBuffer->PushCommand([command = command](Buffer::ExecutionState& executionState) {
         glDrawArraysIndirect(
             executionState.renderPass.primitiveTopology,
             &command);
@@ -56,15 +56,63 @@ void DrawIndexed(
     command.baseInstance = a_FirstInstance;
     a_CommandBuffer->PushCommand([command = command](Buffer::ExecutionState& executionState) {
             const auto& indexBufferBinding = executionState.renderPass.indexBufferBinding;
-            //OGL does not allow for offset when binding Element Array, emulate it through Draw Indirect
-            const auto offset = indexBufferBinding.offset / GetIndexTypeSize(indexBufferBinding.type);
-            auto innerCommand = command;
-            innerCommand.firstIndex += offset;
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferBinding.buffer);
-            glDrawElementsIndirect(
+            const auto& indexMemoryBinding = indexBufferBinding.buffer->memoryBinding;
+            const auto  indexMemoryOffset = BUFFER_OFFSET(indexBufferBinding.offset + indexMemoryBinding.offset);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexMemoryBinding.memory->handle);
+            glDrawElementsInstancedBaseVertexBaseInstance(
+                executionState.renderPass.primitiveTopology,
+                command.count,
+                indexBufferBinding.type,
+                indexMemoryOffset,
+                command.instanceCount,
+                command.baseVertex,
+                command.baseInstance);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    });
+}
+void DrawIndirect(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const Buffer::Handle& a_Buffer,
+    const uint64_t a_Offset,
+    const uint32_t a_DrawCount,
+    const uint32_t a_Stride)
+{
+    const auto offset = BUFFER_OFFSET(a_Buffer->memoryBinding.offset + a_Offset);
+    a_CommandBuffer->PushCommand([
+        buffer = a_Buffer, offset, drawCount = a_DrawCount, stride = a_Stride
+        ](Buffer::ExecutionState& executionState) {
+            glBindBuffer(GL_DRAW_INDIRECT_BUFFER, buffer->memoryBinding.memory->handle);
+            glMultiDrawArraysIndirect(
+                executionState.renderPass.primitiveTopology,
+                offset,
+                drawCount,
+                stride);
+            glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
+    });
+}
+void DrawIndexedIndirect(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const Buffer::Handle& a_Buffer,
+    const uint64_t a_Offset,
+    const uint32_t a_DrawCount,
+    const uint32_t a_Stride)
+{
+    const auto offset = BUFFER_OFFSET(a_Buffer->memoryBinding.offset + a_Offset);
+    a_CommandBuffer->PushCommand([
+        buffer = a_Buffer, offset, drawCount = a_DrawCount, stride = a_Stride
+        ](Buffer::ExecutionState& executionState) {
+            const auto& indexBufferBinding = executionState.renderPass.indexBufferBinding;
+            const auto& indexMemoryBinding = indexBufferBinding.buffer->memoryBinding;
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexMemoryBinding.memory->handle);
+            glBindBuffer(GL_DRAW_INDIRECT_BUFFER, buffer->memoryBinding.memory->handle);
+            glMultiDrawElementsIndirect(
                 executionState.renderPass.primitiveTopology,
                 indexBufferBinding.type,
-                &command);
+                offset,
+                drawCount,
+                stride);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+            glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
     });
 }
 }

@@ -1,6 +1,7 @@
 #include <FrameBuffer.hpp>
 
 #include <GL/Device.hpp>
+#include <GL/FrameBuffer.hpp>
 #include <GL/Image/View.hpp>
 #include <GL/glew.h>
 
@@ -27,26 +28,16 @@ static inline auto CreateFrameBuffer(const Device::Handle& a_Device, const Info&
     }, true);
     return handle;
 }
-struct Impl {
-    Impl(const Device::Handle& a_Device, const Info& a_Info)
-        : info(a_Info)
-        , device(a_Device)
-        , handle(CreateFrameBuffer(a_Device, a_Info))
-    {}
-    Impl(const Device::Handle& a_Device)
-        : info()
-        , device(a_Device)
-        , handle(0)
-    {}
-    ~Impl() {
-        device.lock()->PushCommand(0, 0, [handle = handle] {
-            glDeleteFramebuffers(1, &handle);
-        }, false);
-    }
-    const Device::WeakHandle device;
-    const Info info;
-    const GLuint handle{ 0 };
-};
+Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
+    : info(a_Info)
+    , device(a_Device)
+    , handle(CreateFrameBuffer(a_Device, a_Info))
+{}
+Impl::~Impl() {
+    device.lock()->PushCommand(0, 0, [handle = handle] {
+        glDeleteFramebuffers(1, &handle);
+    }, false);
+}
 Handle Create(
     const Device::Handle&       a_Device,
     const Info&                 a_Info,

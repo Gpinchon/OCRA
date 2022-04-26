@@ -140,6 +140,7 @@ struct Impl
                 windowHeight,
                 GL_COLOR_BUFFER_BIT,
                 GL_NEAREST);
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
             SwapBuffers(hdc);
         }, false);
     }
