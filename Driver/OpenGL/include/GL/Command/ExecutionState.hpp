@@ -47,7 +47,7 @@ struct DynamicStates {
     GLenum frontFace{ GL_CCW };
 };
 struct VertexInputBinding {
-	Buffer::Handle buffer{ 0 };
+	OCRA::Buffer::Handle buffer{ 0 };
 	uint64_t offset{ 0 };
 };
 struct IndexBufferBinding : VertexInputBinding {

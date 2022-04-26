@@ -101,7 +101,8 @@ struct Impl
         PIXELFORMATDESCRIPTOR pfd[FORMATSMAX]{};
         for (auto index = 0u; index < wglFormatsNbr; ++index)
             DescribePixelFormat(hdc, wglFormats[index], sizeof(PIXELFORMATDESCRIPTOR), &pfd[index]);
-        SetPixelFormat(hdc, wglFormats[0], &pfd[0]);
+        if (!SetPixelFormat(hdc, wglFormats[0], &pfd[0]))
+            throw std::runtime_error("Failed to set Pixel Format");
         images = CreateImages(a_Device, a_Info);
     }
     void Retire() {
@@ -141,8 +142,9 @@ struct Impl
                 GL_COLOR_BUFFER_BIT,
                 GL_NEAREST);
             glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+            assert(glGetError() == GL_NO_ERROR);
             SwapBuffers(hdc);
-        }, false);
+        }, true);
     }
     Info                        info;
     const Device::WeakHandle    device;

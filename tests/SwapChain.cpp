@@ -22,8 +22,8 @@ static inline auto CreateSurface(const Instance::Handle& a_Instance, const HINST
 static inline auto CreateSwapChain(const Device::Handle& a_Device, const Surface::Handle& a_Surface)
 {
     SwapChain::Info info{};
-    info.imageFormat = Image::Format::Int8_Normalized_RGBA;
-    info.minImageCount = 2;
+    info.imageFormat = Image::Format::Uint8_Normalized_RGBA;
+    info.minImageCount = 1;
     info.surface = a_Surface;
     return SwapChain::Create(a_Device, info);
 }
@@ -58,7 +58,7 @@ static inline auto CreateClearCommandBuffer(const Device::Handle& a_Device, Comm
 
 bool close = false;
 
-LRESULT Wndproc(
+LRESULT CALLBACK Wndproc(
     HWND hwnd,        // handle to window
     UINT uMsg,        // message identifier
     WPARAM wParam,    // first message parameter
@@ -66,26 +66,9 @@ LRESULT Wndproc(
 {
     switch (uMsg)
     {
-    case WM_CREATE:
-        // Initialize the window. 
-        return 0;
-
-    case WM_PAINT:
-        // Paint the window's client area. 
-        return 0;
-
-    case WM_SIZE:
-        // Set the size and position of the window. 
-        return 0;
-
     case WM_CLOSE:
         close = true;
-        return 0;
-
-        // 
-        // Process other messages. 
-        // 
-
+        break;
     default:
         return DefWindowProc(hwnd, uMsg, wParam, lParam);
     }
@@ -94,26 +77,33 @@ LRESULT Wndproc(
 
 int SwapChain()
 {
+    {
+        const auto error = GetLastError();
+        std::cout << "Error in Function = WinMain() at line = " << __LINE__ - 1 << ", with error code = " << error << std::endl;
+        if (error) throw std::runtime_error("Could not register window class");
+    }
 	int ret = 0;
-    WNDCLASSA wndclass{};
-    wndclass.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+    WNDCLASSEX wndclass{};
+    std::memset(&wndclass, 0, sizeof(wndclass));
+    wndclass.cbSize = sizeof(wndclass);
+    wndclass.style = CS_HREDRAW | CS_VREDRAW;
     wndclass.lpfnWndProc = Wndproc;
     wndclass.hInstance = GetModuleHandle(0);
     wndclass.lpszClassName = "TestWindow";
-    if (!RegisterClass(&wndclass)) throw std::runtime_error("Could not register window class");
+    if (!RegisterClassEx(&wndclass)) {
+        const auto error = GetLastError();
+        std::cout << "Error in Function = " << __FUNCTION__ << " at line = " << __LINE__ - 1 << ", with error code = " << error << std::endl;
+        throw std::runtime_error("Could not register window class");
+    }
     const auto hwnd = CreateWindowEx(
         0,
         wndclass.lpszClassName,
         "Test Window",
-        WS_OVERLAPPEDWINDOW | WS_VISIBLE,
-        CW_USEDEFAULT,
-        CW_USEDEFAULT,
-        CW_USEDEFAULT,
-        CW_USEDEFAULT,
-        0,
-        0,
-        wndclass.hInstance,
-        0);
+        WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+        nullptr, nullptr, wndclass.hInstance, nullptr);
+    ShowWindow(hwnd, SW_SHOWDEFAULT);
+    UpdateWindow(hwnd);
     const auto instance = CreateInstance("Test_SwapChain");
     const auto physicalDevice = Instance::EnumeratePhysicalDevices(instance).front();
     const auto device = CreateDevice(physicalDevice);
@@ -124,23 +114,16 @@ int SwapChain()
     const auto commandPool = CreateCommandPool(device, queueFamily);
     const auto swapChainImage = SwapChain::GetImages(device, swapChain).front();
     const auto commandBuffer = CreateClearCommandBuffer(device, commandPool, swapChainImage);
-    ExecuteCommands(queue, commandBuffer);
     SwapChain::PresentInfo presentInfo;
     presentInfo.imageIndices = { 0 };
     presentInfo.swapChains = { swapChain };
-    ShowWindow(hwnd, SW_SHOWDEFAULT);
-    //UpdateWindow(hwnd);
     MSG msg = { };
     while (!close) {
-        // if there's a message for us, then translate it and 
-        // dispatch it
-        if (GetMessage(&msg, hwnd, 0, 0)) {
-            TranslateMessage(&msg);
+        while (msg.message != WM_QUIT && PeekMessage(&msg, hwnd, 0, 0, PM_REMOVE))
             DispatchMessage(&msg);
-        }
-        // otherwise, the window has been closed and isn't
-        // receiving any more messages
-        else close = true;
+        if (msg.message == WM_QUIT)
+            close = true;
+        ExecuteCommands(queue, commandBuffer);
         SwapChain::Present(queue, presentInfo);
         _sleep(15);
     }

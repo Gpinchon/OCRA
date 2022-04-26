@@ -25,15 +25,17 @@ static inline auto CreateContext(const void* a_DeviceHandle)
 {
     const auto hdc = HDC(a_DeviceHandle);
     PIXELFORMATDESCRIPTOR pfd{};
+    std::memset(&pfd, 0, sizeof(pfd));
     pfd.nSize = sizeof(pfd);
     pfd.nVersion = 1;
     pfd.iPixelType = PFD_TYPE_RGBA;
     pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
     pfd.cColorBits = 32;
+    pfd.cRedBits = 8;
+    pfd.cGreenBits = 8;
+    pfd.cBlueBits = 8;
     pfd.cAlphaBits = 8;
     pfd.iLayerType = PFD_MAIN_PLANE;
-    pfd.cDepthBits = 24;
-    pfd.cStencilBits = 8;
     int pixel_format = ChoosePixelFormat(hdc, &pfd);
     SetLastError(ERROR_SUCCESS);
     CheckError("ChoosePixelFormat");

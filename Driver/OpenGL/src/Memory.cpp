@@ -3,6 +3,8 @@
 
 #include <GL/Device.hpp>
 #include <GL/WeakHandle.hpp>
+#include <GL/Memory.hpp>
+
 #include <GL/glew.h>
 
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);

@@ -17,25 +17,21 @@ Impl::Impl(const Info& a_Info)
     , id(s_ID++)
 {
     std::string windowClassName = "DummyWindow" + std::to_string(id);
-    WNDCLASSA wndclass{};
-    wndclass.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+    WNDCLASSEX wndclass{};
+    std::memset(&wndclass, 0, sizeof(wndclass));
+    wndclass.cbSize = sizeof(wndclass);
+    wndclass.style = CS_HREDRAW | CS_VREDRAW;
     wndclass.lpfnWndProc = DefWindowProcA;
     wndclass.hInstance = GetModuleHandle(0);
     wndclass.lpszClassName = windowClassName.c_str();
-    if (!RegisterClass(&wndclass)) throw std::runtime_error("Could not register window class");
+    if (!RegisterClassEx(&wndclass)) throw std::runtime_error("Could not register window class");
     dummyWindow = CreateWindowEx(
         0,
         wndclass.lpszClassName,
         "Dummy Window",
         0,
-        CW_USEDEFAULT,
-        CW_USEDEFAULT,
-        CW_USEDEFAULT,
-        CW_USEDEFAULT,
-        0,
-        0,
-        wndclass.hInstance,
-        0);
+        CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+        nullptr, nullptr, wndclass.hInstance, nullptr);
     dummyDevice = GetDC(HWND(dummyWindow));
     physicalDevices.push_back(PhysicalDevice::Create(dummyDevice));
 }

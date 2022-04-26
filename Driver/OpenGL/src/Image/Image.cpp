@@ -286,7 +286,7 @@ void CopyBufferToImage(
     a_CommandBuffer->PushCommand([
         srcBuffer = a_SrcBuffer, dstImage = a_DstImage, regions = a_Regions
     ](Command::Buffer::ExecutionState&) {
-        auto& memoryBinding = OCRA::Buffer::GetMemoryBinding(srcBuffer);
+        const auto& memoryBinding = srcBuffer->memoryBinding;
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, memoryBinding.memory->handle);
         for (auto& copy : regions) dstImage->Upload(copy, memoryBinding.offset);
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
@@ -304,7 +304,7 @@ void CopyImageToBuffer(
     a_CommandBuffer->PushCommand([
         dstBuffer = a_DstBuffer, srcImage = a_SrcImage, regions = a_Regions
     ](Command::Buffer::ExecutionState&) {
-        auto& memoryBinding = OCRA::Buffer::GetMemoryBinding(dstBuffer);
+        const auto& memoryBinding = dstBuffer->memoryBinding;
         glBindBuffer(GL_PIXEL_PACK_BUFFER, memoryBinding.memory->handle);
         for (const auto& copy : regions)
             srcImage->Download(copy, memoryBinding.offset);
@@ -317,15 +317,24 @@ void ClearColorImage(const Command::Buffer::Handle& a_CommandBuffer, const Image
     a_CommandBuffer->PushCommand([
         image = a_Image, clearColor = a_Color, ranges = a_Ranges
     ](Command::Buffer::ExecutionState&) {
+        glClearTexImageEXT(
+            image->handle,
+            0,
+            GL_RGBA,
+            GL_FLOAT,
+            nullptr);
+        assert(glGetError() == GL_NO_ERROR);
+        return;
         for (const auto& range : ranges)
         {
+            Image::ClearColor color{ 0, 0, 0, 0 };
             for (uint32_t level = range.baseMipLevel; level < range.levelCount; ++level)
-            glClearTexImage(
-                image->handle,
-                level,
-                image->dataFormat,
-                GetGLClearColorType(image->info.format),
-                &clearColor);
+                glClearTexImage(
+                        image->handle,
+                        level,
+                        image->dataFormat,
+                        GetGLClearColorType(image->info.format),
+                        &clearColor);
         }
     });
 }

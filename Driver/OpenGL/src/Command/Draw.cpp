@@ -3,8 +3,9 @@
 #include <GL/Command/ExecutionState.hpp>
 #include <GL/Command/Buffer.hpp>
 #include <GL/Common/IndexType.hpp>
-#include <GL/Buffer.hpp>
 #include <GL/Common/BufferOffset.hpp>
+#include <GL/Buffer.hpp>
+#include <GL/Memory.hpp>
 
 namespace OCRA::Command
 {
@@ -72,7 +73,7 @@ void DrawIndexed(
 }
 void DrawIndirect(
     const Command::Buffer::Handle& a_CommandBuffer,
-    const Buffer::Handle& a_Buffer,
+    const OCRA::Buffer::Handle& a_Buffer,
     const uint64_t a_Offset,
     const uint32_t a_DrawCount,
     const uint32_t a_Stride)
@@ -92,7 +93,7 @@ void DrawIndirect(
 }
 void DrawIndexedIndirect(
     const Command::Buffer::Handle& a_CommandBuffer,
-    const Buffer::Handle& a_Buffer,
+    const OCRA::Buffer::Handle& a_Buffer,
     const uint64_t a_Offset,
     const uint32_t a_DrawCount,
     const uint32_t a_Stride)
