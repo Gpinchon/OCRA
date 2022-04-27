@@ -25,6 +25,8 @@ static inline auto CreateSwapChain(const Device::Handle& a_Device, const Surface
     info.imageFormat = Image::Format::Uint8_Normalized_RGBA;
     info.minImageCount = 1;
     info.surface = a_Surface;
+    info.imageExtent.width  = 1920;
+    info.imageExtent.height = 1080;
     return SwapChain::Create(a_Device, info);
 }
 
@@ -118,6 +120,7 @@ int SwapChain()
     presentInfo.imageIndices = { 0 };
     presentInfo.swapChains = { swapChain };
     MSG msg = { };
+    const auto hdc = GetDC(hwnd);
     while (!close) {
         while (msg.message != WM_QUIT && PeekMessage(&msg, hwnd, 0, 0, PM_REMOVE))
             DispatchMessage(&msg);

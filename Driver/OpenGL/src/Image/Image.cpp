@@ -50,7 +50,8 @@ struct Texture : Impl {
     Texture(const Device::Handle& a_Device, const Info& a_Info, const GLenum& a_Target)
         : Impl(a_Device, a_Info)
         , target(a_Target)
-    {}
+    {
+    }
     virtual void Download(const Command::BufferImageCopy& a_Copy, const size_t& a_MemoryOffset) override {
         if constexpr(Compressed) glGetCompressedTextureSubImage(
             handle,
@@ -93,13 +94,15 @@ struct Texture1D : Texture<Compressed>
         : Texture<Compressed>(a_Device, a_Info, GL_TEXTURE_1D)
     {
         if (info.samples == Samples::Samples1) {
-            Bind(); //initialize texture object
-            glTexStorage1D(
-                target,
-                info.mipLevels,
-                internalFormat,
-                info.extent.width);
-            Unbind(); //unbind texture
+            device.lock()->PushCommand(0, 0, [this] {
+                Bind(); //initialize texture object
+                glTexStorage1D(
+                    target,
+                    info.mipLevels,
+                    internalFormat,
+                    info.extent.width);
+                Unbind(); //unbind texture
+            }, true);
         }
         else throw std::runtime_error("Cannot create multisampled 1D textures");
     }
@@ -133,22 +136,24 @@ struct Texture2D : Texture<Compressed>
     Texture2D(const Device::Handle& a_Device, const Info& a_Info)
         : Texture<Compressed>(a_Device, a_Info, a_Info.samples == Samples::Samples1 ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE)
     {
-        Bind();//initialize texture object
-        if (info.samples == Samples::Samples1)
-            glTexStorage2D(
-                target,
-                info.mipLevels,
-                internalFormat,
-                info.extent.width,
-                info.extent.height);
-        else glTexStorage2DMultisample(
+        device.lock()->PushCommand(0, 0, [this] {
+            Bind();//initialize texture object
+            if (info.samples == Samples::Samples1)
+                glTexStorage2D(
+                    target,
+                    info.mipLevels,
+                    internalFormat,
+                    info.extent.width,
+                    info.extent.height);
+            else glTexStorage2DMultisample(
                 target,
                 uint32_t(info.samples),
                 internalFormat,
                 info.extent.width,
                 info.extent.height,
                 info.fixedSampleLocations);
-        Unbind();
+            Unbind();
+        }, true);
     }
     virtual void Upload(const Command::BufferImageCopy& a_Copy, const size_t& a_MemoryOffset) override
     {
@@ -184,16 +189,17 @@ struct Texture3D : Texture<Compressed>
     Texture3D(const Device::Handle& a_Device, const Info& a_Info)
     : Texture<Compressed>(a_Device, a_Info, a_Info.samples == Samples::Samples1 ? GL_TEXTURE_2D_ARRAY : GL_TEXTURE_2D_MULTISAMPLE_ARRAY)
     {
-        Bind();//initialize texture object
-        if (info.samples == Samples::Samples1)
-            glTexStorage3D(
-                target,
-                info.mipLevels,
-                internalFormat,
-                info.extent.width,
-                info.extent.height,
-                info.extent.depth);
-        else glTexStorage3DMultisample(
+        device.lock()->PushCommand(0, 0, [this] {
+            Bind();//initialize texture object
+            if (info.samples == Samples::Samples1)
+                glTexStorage3D(
+                    target,
+                    info.mipLevels,
+                    internalFormat,
+                    info.extent.width,
+                    info.extent.height,
+                    info.extent.depth);
+            else glTexStorage3DMultisample(
                 target,
                 uint32_t(info.samples),
                 info.mipLevels,
@@ -201,7 +207,8 @@ struct Texture3D : Texture<Compressed>
                 info.extent.width,
                 info.extent.height,
                 info.fixedSampleLocations);
-        Unbind();
+            Unbind();
+        }, true);
     }
     virtual void Upload(const Command::BufferImageCopy& a_Copy, const size_t& a_MemoryOffset) override
     {

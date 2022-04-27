@@ -30,6 +30,7 @@ static inline auto CreateImages(const Device::Handle& a_Device, const Info& a_In
         imageInfo.type = Image::Type::Image2D;
         imageInfo.extent.width = a_Info.imageExtent.width;
         imageInfo.extent.height = a_Info.imageExtent.height;
+        imageInfo.mipLevels = 1;
         imageInfo.arrayLayers = a_Info.imageArrayLayers;
         imageInfo.format = a_Info.imageFormat;
         images.push_back(Image::Create(a_Device, imageInfo));
@@ -60,7 +61,7 @@ struct Impl
         a_Device->PushCommand(0, 0, [this] {
             glGenFramebuffers(1, &frameBufferHandle);
         }, true);
-        const auto hdc = GetDC(HWND(info.surface->nativeWindow));
+        const auto hdc = HDC(std::static_pointer_cast<Surface::Win32::Impl>(info.surface)->hdc);
         const auto rBits = GetRedSize(info.imageFormat);
         const auto gBits = GetGreenSize(info.imageFormat);
         const auto bBits = GetBlueSize(info.imageFormat);
@@ -112,7 +113,7 @@ struct Impl
         assert(!retired);
         const auto deviceHandle = device.lock();
         const auto physicalDevice = deviceHandle->physicalDevice.lock();
-        const auto hdc = GetDC(HWND(info.surface->nativeWindow));
+        const auto hdc = HDC(std::static_pointer_cast<Surface::Win32::Impl>(info.surface)->hdc);
         physicalDevice->SetDeviceHandle(hdc);
         physicalDevice->SetSwapInterval(uint8_t(info.presentMode));
         device.lock()->PushCommand(a_Queue->familyIndex, a_Queue->queueIndex, [this, imageIndex = a_ImageIndex, hdc] {
@@ -122,6 +123,7 @@ struct Impl
                 &windowRect);
             const auto windowWidth = windowRect.right - windowRect.left;
             const auto windowHeight = windowRect.bottom - windowRect.top;
+            glDrawBuffer(GL_FRONT_AND_BACK);
             glBindFramebuffer(GL_READ_FRAMEBUFFER, frameBufferHandle);
             glFramebufferTexture2D(
                 GL_READ_FRAMEBUFFER,
@@ -133,8 +135,8 @@ struct Impl
             glBlitFramebuffer(
                 0,
                 0,
-                info.imageExtent.width,
-                info.imageExtent.height,
+                windowWidth,
+                windowHeight,
                 0,
                 0,
                 windowWidth,
@@ -142,7 +144,12 @@ struct Impl
                 GL_COLOR_BUFFER_BIT,
                 GL_NEAREST);
             glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-            SwapBuffers(hdc);
+            //if (!wglSwapLayerBuffers(hdc, WGL_SWAP_MAIN_PLANE))
+            if (!SwapBuffers(hdc))
+            {
+                const auto error = GetLastError();
+                assert(error == 0);
+            }
         }, true);
     }
     Info                        info;

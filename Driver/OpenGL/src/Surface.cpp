@@ -16,7 +16,12 @@ namespace OCRA::Surface::Win32
 {
 Impl::Impl(const Instance::Handle& a_Instance, const Info& a_Info)
 	: Surface::Impl(a_Instance, a_Info.hwnd, "Win32")
+	, hdc(GetDC(HWND(nativeWindow)))
 {
+}
+Impl::~Impl()
+{
+	ReleaseDC(HWND(nativeWindow), HDC(hdc));
 }
 Handle Create(const Instance::Handle& a_Instance, const Info& a_Info)
 {

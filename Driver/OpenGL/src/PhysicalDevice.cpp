@@ -6,6 +6,7 @@
 #include <GL/wglew.h>
 
 #include <stdexcept>
+#include <iostream>
 
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Instance);
 
@@ -59,7 +60,7 @@ static inline auto CreateContext(const void* a_DeviceHandle)
         WGL_CONTEXT_MINOR_VERSION_ARB,  3,
         WGL_CONTEXT_PROFILE_MASK_ARB,   WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
 #ifdef DEBUG
-        WGL_CONTEXT_FLAGS_ARB,          WGL_CONTEXT_ROBUST_ACCESS_BIT_ARB | WGL_CONTEXT_DEBUF_BIT_ARB,
+        WGL_CONTEXT_FLAGS_ARB,          WGL_CONTEXT_ROBUST_ACCESS_BIT_ARB | WGL_CONTEXT_DEBUG_BIT_ARB,
 #else
         WGL_CONTEXT_FLAGS_ARB,          WGL_CONTEXT_ROBUST_ACCESS_BIT_ARB,
 #endif //DEBUG
