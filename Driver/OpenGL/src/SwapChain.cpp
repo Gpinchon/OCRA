@@ -142,7 +142,6 @@ struct Impl
                 GL_COLOR_BUFFER_BIT,
                 GL_NEAREST);
             glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-            assert(glGetError() == GL_NO_ERROR);
             SwapBuffers(hdc);
         }, true);
     }

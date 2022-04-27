@@ -317,14 +317,6 @@ void ClearColorImage(const Command::Buffer::Handle& a_CommandBuffer, const Image
     a_CommandBuffer->PushCommand([
         image = a_Image, clearColor = a_Color, ranges = a_Ranges
     ](Command::Buffer::ExecutionState&) {
-        glClearTexImageEXT(
-            image->handle,
-            0,
-            GL_RGBA,
-            GL_FLOAT,
-            nullptr);
-        assert(glGetError() == GL_NO_ERROR);
-        return;
         for (const auto& range : ranges)
         {
             Image::ClearColor color{ 0, 0, 0, 0 };

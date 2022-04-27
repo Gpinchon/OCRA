@@ -348,6 +348,23 @@ static inline auto GetMemoryPropertiesGL()
     return memoryProperties;
 }
 
+void GLAPIENTRY MessageCallback(
+    GLenum source,
+    GLenum type,
+    GLenum id,
+    GLenum severity,
+    GLsizei length,
+    const GLchar* message,
+    const void* userParam)
+{
+    std::cerr << "GL CALLBACK : " << (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "") << "\n" <<
+        " type     = " << type << "\n" <<
+        " severity = " << severity << "\n" <<
+        " message  = " << message << std::endl;
+    assert(type != GL_DEBUG_TYPE_ERROR);
+
+}
+
 Queue::Queue(const void* a_DeviceHandle, const void* a_ContextHandle)
 {
     const auto hdc = HDC(a_DeviceHandle);
@@ -359,6 +376,10 @@ Queue::Queue(const void* a_DeviceHandle, const void* a_ContextHandle)
         wglMakeCurrent(hdc, hglrc);
         glewExperimental = true;
         if (glewInit() != GLEW_OK) throw std::runtime_error("Cound not initialize GLEW");
+#ifdef DEBUG
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        glDebugMessageCallback(MessageCallback, 0);
+#endif DEBUG
     }, true);
 }
 
