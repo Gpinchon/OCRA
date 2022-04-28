@@ -25,7 +25,7 @@ static inline auto CreateSwapChain(const Device::Handle& a_Device, const Surface
     info.oldSwapchain = a_OldSwapChain;
     info.presentMode = SwapChain::PresentMode::Immediate;
     info.imageFormat = Image::Format::Uint8_Normalized_RGBA;
-    info.minImageCount = 1;
+    info.minImageCount = 2;
     info.surface = a_Surface;
     info.imageExtent.width  = a_Width;
     info.imageExtent.height = a_Height;
@@ -133,26 +133,25 @@ int SwapChain()
     SwapChain::Handle swapChain;
     SwapChain::PresentInfo presentInfo;
     Image::Handle oldImage = nullptr;
-    presentInfo.imageIndices = { 0 };
+    uint32_t frameIndex = 0;
     {
         MSG msg = { 0 };
         while (!close) {
             while (PeekMessage(&msg, hwnd, 0, 0, PM_REMOVE))
                 DispatchMessage(&msg);
+            const auto swapChainImageIndex = frameIndex % 2;
+            presentInfo.imageIndices = { swapChainImageIndex };
             if (recreatSwapChain)
             {
                 swapChain = CreateSwapChain(device, surface, swapChain, width, height);
                 presentInfo.swapChains = { swapChain };
-                const auto swapChainImage = SwapChain::GetImages(device, swapChain).front();
-                if (oldImage != swapChainImage) {
-                    const auto commandBuffer = CreateClearCommandBuffer(device, commandPool, swapChainImage);
-                    ExecuteCommands(queue, commandBuffer);
-                    oldImage = swapChainImage;
-                }
                 recreatSwapChain = false;
             }
+            const auto swapChainImage = SwapChain::GetImages(device, swapChain).at(swapChainImageIndex);
+            const auto commandBuffer = CreateClearCommandBuffer(device, commandPool, swapChainImage);
+            ExecuteCommands(queue, commandBuffer);
             SwapChain::Present(queue, presentInfo);
-            _sleep(15);
+            ++frameIndex;
         }
         DestroyWindow(hwnd);
         UnregisterClass(wndclass.lpszClassName, wndclass.hInstance);
