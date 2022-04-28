@@ -116,6 +116,7 @@ set(OCRA_IMPL_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Command/Pool.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Common/Blend.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Common/Compare.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Common/Error.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Common/IndexType.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Common/Logic.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Common/MemoryPool.hpp
@@ -158,6 +159,7 @@ set(OCRA_IMPL_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Query.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Scissor.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/ViewPort.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Error.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Image/Image.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Image/View.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/Graphics.cpp

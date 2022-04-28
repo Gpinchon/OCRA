@@ -1,5 +1,6 @@
 #include <PhysicalDevice.hpp>
 
+#include <GL/Common/Error.hpp>
 #include <GL/Instance.hpp>
 #include <GL/PhysicalDevice.hpp>
 #include <GL/glew.h>
@@ -14,47 +15,11 @@ namespace OCRA::PhysicalDevice
 {
 using Command = std::function<void()>;
 
-static inline void CheckError(const std::string& a_ProcedureName)
-{
-    const auto errorCode = GetLastError();
-    SetLastError(ERROR_SUCCESS);
-    if (errorCode != ERROR_SUCCESS)
-        throw std::runtime_error(a_ProcedureName + " failed with code : " + std::to_string(errorCode));
-}
-
 static inline auto CreateContext(const void* a_DeviceHandle)
 {
-    const auto hdc = HDC(a_DeviceHandle);
-    PIXELFORMATDESCRIPTOR pfd{};
-    std::memset(&pfd, 0, sizeof(pfd));
-    pfd.nSize = sizeof(pfd);
-    pfd.nVersion = 1;
-    pfd.iPixelType = PFD_TYPE_RGBA;
-    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-    pfd.cColorBits = 32;
-    pfd.cRedBits = 8;
-    pfd.cGreenBits = 8;
-    pfd.cBlueBits = 8;
-    pfd.cAlphaBits = 8;
-    pfd.iLayerType = PFD_MAIN_PLANE;
-    int pixel_format = ChoosePixelFormat(hdc, &pfd);
-    SetLastError(ERROR_SUCCESS);
-    CheckError("ChoosePixelFormat");
-    if (!pixel_format) throw std::runtime_error("Failed to find a suitable pixel format.");
-    if (!SetPixelFormat(hdc, pixel_format, &pfd)) throw std::runtime_error("Failed to set the pixel format.");
-    CheckError("SetPixelFormat");
-    
-    const auto hglrcTemp = wglCreateContext(hdc);
-    CheckError("wglCreateContext");
-    if (hglrcTemp == nullptr) throw std::runtime_error("Failed to create a dummy OpenGL rendering context.");
-    if (!wglMakeCurrent(hdc, hglrcTemp)) throw std::runtime_error("Failed to activate dummy OpenGL rendering context.");
-    CheckError("wglMakeCurrent");
-
-    //LET'S GET STARTED !
-    if (wglewInit() != GLEW_OK) throw std::runtime_error("Cound not initialize WGLEW");
     if (!WGLEW_ARB_create_context) throw std::runtime_error("Modern context creation not supported !");
     if (!WGLEW_ARB_create_context_robustness) throw std::runtime_error("Robust context creation not supported !");
-    int attribs[] =
+    const int attribs[] =
     {
         WGL_CONTEXT_MAJOR_VERSION_ARB,  4,
         WGL_CONTEXT_MINOR_VERSION_ARB,  3,
@@ -67,9 +32,8 @@ static inline auto CreateContext(const void* a_DeviceHandle)
         0
     };
     auto hglrc = wglCreateContextAttribsARB(hdc, 0, attribs); //commands execution context
-    if (hglrc == nullptr) throw std::runtime_error("Failed to create a modern OpenGL rendering context.");
-    wglMakeCurrent(nullptr, nullptr);
-    wglDeleteContext(hglrcTemp);
+    WIN32_CHECK_ERROR(hglrc != nullptr);
+    
     return hglrc;
 }
 
@@ -375,8 +339,6 @@ Queue::Queue(const void* a_DeviceHandle, const void* a_ContextHandle)
     properties.minImageTransferGranularity = { 1, 1, 1 }; //Queues supporting graphics and/or compute operations must report (1,1,1)
     PushCommand([hdc, hglrc] {
         wglMakeCurrent(hdc, hglrc);
-        glewExperimental = true;
-        if (glewInit() != GLEW_OK) throw std::runtime_error("Cound not initialize GLEW");
 #ifdef DEBUG
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
         glDebugMessageCallback(MessageCallback, 0);

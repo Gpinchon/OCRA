@@ -1,6 +1,7 @@
 #include <SwapChain.hpp>
 #include <Image/Image.hpp>
 
+#include <GL/Common/Error.hpp>
 #include <GL/Queue/Semaphore.hpp>
 #include <GL/Queue/Queue.hpp>
 #include <GL/PhysicalDevice.hpp>
@@ -71,6 +72,9 @@ struct Impl
         const auto glDataType = GetGLDataType(info.imageFormat);
         const auto fRGBA = glDataType == GL_HALF_FLOAT || glDataType == GL_FLOAT;
         const auto sRGB = info.imageColorSpace == Image::ColorSpace::sRGB;
+        PIXELFORMATDESCRIPTOR pfd;
+        std::memset(&pfd, 0, sizeof(pfd));
+
         const int attribIList[] = {
             WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
             WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
@@ -87,23 +91,29 @@ struct Impl
             WGL_STENCIL_BITS_EXT,   sBits,
             0
         };
-        const float attribFList[] = {
-            0
-        };
-        int32_t  wglFormats[FORMATSMAX];
-        uint32_t wglFormatsNbr = 0;
-        wglChoosePixelFormatARB(hdc,
-            attribIList,
-            attribFList,
-            FORMATSMAX,
-            wglFormats,
-            &wglFormatsNbr);
-        if (wglFormatsNbr == 0) throw std::runtime_error("Could not find pixel format");
-        PIXELFORMATDESCRIPTOR pfd[FORMATSMAX]{};
-        for (auto index = 0u; index < wglFormatsNbr; ++index)
-            DescribePixelFormat(hdc, wglFormats[index], sizeof(PIXELFORMATDESCRIPTOR), &pfd[index]);
-        if (!SetPixelFormat(hdc, wglFormats[0], &pfd[0]))
-            throw std::runtime_error("Failed to set Pixel Format");
+        int32_t  pixelFormat = 0;
+        uint32_t pixelFormatNbr = 0;
+        WIN32_CHECK_ERROR(wglChoosePixelFormatARB(hdc, attribIList, nullptr, 1, pixelFormat, &pixelFormatNbr));
+        WIN32_CHECK_ERROR(pixelFormatNbr != 0);
+
+        /*
+        pfd.nSize = sizeof(pfd);
+        pfd.nVersion = 1;
+        pfd.iPixelType   = PFD_TYPE_RGBA;
+        pfd.dwFlags      = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER | PFD_GENERIC_ACCELERATED;
+        pfd.cColorBits   = rBits + gBits + bBits + aBits;
+        pfd.cRedBits     = rBits;
+        pfd.cGreenBits   = gBits;
+        pfd.cBlueBits    = bBits;
+        pfd.cAlphaBits   = aBits;
+        pfd.cDepthBits   = dBits;
+        pfd.cStencilBits = sBits;
+        const auto pixelFormat = ChoosePixelFormat(hdc, &pfd);
+        */
+
+        WIN32_CHECK_ERROR(pixelFormat != 0);
+        WIN32_CHECK_ERROR(DescribePixelFormat(hdc, pixelFormat, sizeof(pfd), &pfd));
+        WIN32_CHECK_ERROR(SetPixelFormat(hdc, pixelFormat, &pfd));
         images = CreateImages(a_Device, a_Info);
     }
     void Retire() {
@@ -145,11 +155,7 @@ struct Impl
                 GL_NEAREST);
             glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
             //if (!wglSwapLayerBuffers(hdc, WGL_SWAP_MAIN_PLANE))
-            if (!SwapBuffers(hdc))
-            {
-                const auto error = GetLastError();
-                assert(error == 0);
-            }
+            WIN32_CHECK_ERROR(SwapBuffers(hdc));
         }, true);
     }
     Info                        info;

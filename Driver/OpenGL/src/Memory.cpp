@@ -52,18 +52,16 @@ Handle Allocate(const Device::Handle& a_Device, const Info& a_Info)
     return Handle(new Impl(a_Device, a_Info));
 }
 void* Map(
-    const Device::Handle&  a_Device,
-    const Handle&          a_Memory,
-    const uint64_t&        a_Offset,
-    const uint64_t&        a_Length)
+    const Device::Handle&   a_Device,
+    const MappedRange&      a_MemoryRange);
 {
     void* ptr{ nullptr };
-    a_Device->PushCommand(0, 0, [a_Memory, a_Offset, a_Length, &ptr] {
+    a_Device->PushCommand(0, 0, [a_MemoryRange, &ptr] {
         ptr = glMapNamedBufferRangeEXT(
-            a_Memory->handle,
-            a_Offset,
-            a_Length,
-            a_Memory->mapFlags);
+            a_MemoryRange.memory->handle,
+            a_MemoryRange.offset,
+            a_MemoryRange.length,
+            a_MemoryRange.memory->mapFlags);
     }, true);
     return ptr;
 }
@@ -71,9 +69,20 @@ void Unmap(
     const Device::Handle&  a_Device,
     const Handle&          a_Memory)
 {
-    a_Device->PushCommand(0, 0, [a_Memory] {
-        glUnmapNamedBufferEXT(a_Memory->handle);
+    a_Device->PushCommand(0, 0, [memory = a_Memory] {
+        glUnmapNamedBufferEXT(memory->handle);
     }, false);
-    
+}
+void FlushMappedRanges(
+    const Device::Handle&           a_Device,
+    const std::vector<MappedRange>& a_Ranges)
+{
+    a_Device->PushCommand(0, 0, [ranges = a_Ranges] {
+        for (const auto& range : ranges)
+            glFlushMappedNamedBufferRangeEXT(
+                range.memory->handle,
+                range.offset,
+                range.length);
+    }, false);
 }
 }

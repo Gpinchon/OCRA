@@ -59,6 +59,7 @@ static inline auto CreateClearCommandBuffer(const Device::Handle& a_Device, Comm
 }
 
 bool close = false;
+bool created = false;
 
 LRESULT CALLBACK Wndproc(
     HWND hwnd,        // handle to window
@@ -68,22 +69,21 @@ LRESULT CALLBACK Wndproc(
 {
     switch (uMsg)
     {
+
     case WM_CLOSE:
         close = true;
+        break;
+    case WM_CREATE:
+        created = true;
         break;
     default:
         return DefWindowProc(hwnd, uMsg, wParam, lParam);
     }
     return 0;
 }
-
+//SEE tilkinsc e9ecf0e1653df40afdb9d62ff6d7b5cc
 int SwapChain()
 {
-    {
-        const auto error = GetLastError();
-        std::cout << "Error in Function = WinMain() at line = " << __LINE__ - 1 << ", with error code = " << error << std::endl;
-        if (error) throw std::runtime_error("Could not register window class");
-    }
 	int ret = 0;
     WNDCLASSEX wndclass{};
     std::memset(&wndclass, 0, sizeof(wndclass));
@@ -93,8 +93,7 @@ int SwapChain()
     wndclass.hInstance = GetModuleHandle(0);
     wndclass.lpszClassName = "TestWindow";
     if (!RegisterClassEx(&wndclass)) {
-        const auto error = GetLastError();
-        std::cout << "Error in Function = " << __FUNCTION__ << " at line = " << __LINE__ - 1 << ", with error code = " << error << std::endl;
+        std::cerr << "Error in Function = " << __FUNCTION__ << " at line = " << __LINE__ << ", with error code = " << GetLastError() << std::endl;
         throw std::runtime_error("Could not register window class");
     }
     const auto hwnd = CreateWindowEx(
@@ -104,6 +103,12 @@ int SwapChain()
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
         nullptr, nullptr, wndclass.hInstance, nullptr);
+    //Wait for the window to be created
+    {
+        MSG msg = { 0 };
+        while (!created && PeekMessage(&msg, hwnd, 0, 0, PM_NOYIELD | PM_REMOVE))
+            DispatchMessage(&msg);
+    }
     ShowWindow(hwnd, SW_SHOWDEFAULT);
     UpdateWindow(hwnd);
     const auto instance = CreateInstance("Test_SwapChain");
@@ -119,18 +124,20 @@ int SwapChain()
     SwapChain::PresentInfo presentInfo;
     presentInfo.imageIndices = { 0 };
     presentInfo.swapChains = { swapChain };
-    MSG msg = { };
-    const auto hdc = GetDC(hwnd);
-    while (!close) {
-        while (msg.message != WM_QUIT && PeekMessage(&msg, hwnd, 0, 0, PM_REMOVE))
-            DispatchMessage(&msg);
-        if (msg.message == WM_QUIT)
-            close = true;
-        ExecuteCommands(queue, commandBuffer);
-        SwapChain::Present(queue, presentInfo);
-        _sleep(15);
+    {
+        MSG msg = { 0 };
+        while (!close) {
+            while (PeekMessage(&msg, hwnd, 0, 0, PM_REMOVE))
+                DispatchMessage(&msg);
+            if (msg.message == WM_QUIT)
+                close = true;
+            ExecuteCommands(queue, commandBuffer);
+            SwapChain::Present(queue, presentInfo);
+            _sleep(15);
+        }
+        DestroyWindow(hwnd);
+        UnregisterClass(wndclass.lpszClassName, wndclass.hInstance);
     }
-    DestroyWindow(hwnd);
-    UnregisterClass(wndclass.lpszClassName, wndclass.hInstance);
+    
 	return ret;
 }

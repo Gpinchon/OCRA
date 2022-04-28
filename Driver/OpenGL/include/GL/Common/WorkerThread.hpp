@@ -23,12 +23,19 @@ public:
                     return !_queue.empty() || _stop;
                 });
                 if (_stop) return;
-                _queue.front().fn();
-                if (_queue.front().notify) {
-                    _finishedTasks.insert(_queue.front().id);
-                    _taskCv.notify_all();
+                auto queue = std::move(_queue);
+                _queue.clear();
+                lock.unlock();
+                while (!queue.empty()) {
+                    queue.front().fn();
+                    if (queue.front().notify) {
+                        std::unique_lock<std::mutex> lock(_taskMtx);
+                        _finishedTasks.insert(queue.front().id);
+                        _taskCv.notify_all();
+                    }
+                    queue.pop();
                 }
-                _queue.pop();
+                lock.lock();
             }
         });
     }
@@ -40,12 +47,15 @@ public:
     }
     inline void PushCommand(const std::function<void()>& a_Command, const bool a_Synchronous)
     {
-        std::unique_lock<std::mutex> lock(_mtx);
+        
         const auto commandID = _commandID++;
+        _mtx.lock();
         _queue.push({ a_Command, commandID, a_Synchronous });
+        _mtx.unlock();
         _cv.notify_one();
         if (a_Synchronous) {
-            _taskCv.wait(lock, [this, &commandID] {
+            std::unique_lock<std::mutex> taskLock(_taskMtx);
+            _taskCv.wait(taskLock, [this, &commandID] {
                 const auto done = _finishedTasks.find(commandID) != _finishedTasks.end();
                 if (done) _finishedTasks.erase(commandID);
                 return done;
@@ -57,6 +67,7 @@ private:
     std::condition_variable _cv;
     std::queue<Command> _queue;
 
+    std::mutex _taskMtx;
     std::condition_variable _taskCv;
     std::set<uint64_t> _finishedTasks;
 

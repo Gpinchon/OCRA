@@ -1,0 +1,15 @@
+#pragma once
+
+#include <string>
+
+#ifdef DEBUG
+//Similar to assert except it attempts to GetLastError to find more intel
+#define WIN32_CHECK_ERROR(condition) if (!condition) { OCRA::Win32::CheckError(__FILE__, __LINE__, #condition) };
+#else
+#define WIN32_CHECK_ERROR(condition) if (!condition) {};
+#endif //DEBUG
+
+namespace OCRA::Win32
+{
+    void CheckError(const std::string& a_File, const uint32_t& a_Line, const std::string& a_Procedure)
+}
