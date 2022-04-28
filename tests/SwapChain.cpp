@@ -139,8 +139,6 @@ int SwapChain()
         while (!close) {
             while (PeekMessage(&msg, hwnd, 0, 0, PM_REMOVE))
                 DispatchMessage(&msg);
-            if (msg.message == WM_QUIT)
-                close = true;
             if (recreatSwapChain)
             {
                 swapChain = CreateSwapChain(device, surface, swapChain, width, height);
