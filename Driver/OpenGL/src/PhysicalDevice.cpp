@@ -1,5 +1,6 @@
 #include <PhysicalDevice.hpp>
 
+#include <GL/Common/DefaultPixelFormat.hpp>
 #include <GL/Common/Error.hpp>
 #include <GL/Instance.hpp>
 #include <GL/PhysicalDevice.hpp>
@@ -17,6 +18,7 @@ using Command = std::function<void()>;
 
 static inline auto CreateContext(const void* a_DeviceHandle)
 {
+    Win32::SetDefaultPixelFormat(a_DeviceHandle);
     if (!WGLEW_ARB_create_context) throw std::runtime_error("Modern context creation not supported !");
     if (!WGLEW_ARB_create_context_robustness) throw std::runtime_error("Robust context creation not supported !");
     const int attribs[] =
@@ -31,9 +33,8 @@ static inline auto CreateContext(const void* a_DeviceHandle)
 #endif //DEBUG
         0
     };
-    auto hglrc = wglCreateContextAttribsARB(hdc, 0, attribs); //commands execution context
+    auto hglrc = wglCreateContextAttribsARB(HDC(a_DeviceHandle), 0, attribs); //commands execution context
     WIN32_CHECK_ERROR(hglrc != nullptr);
-    
     return hglrc;
 }
 
@@ -377,7 +378,7 @@ void Impl::SetDeviceHandle(void* const a_DeviceHandle)
     PushCommand(0, 0, [this, device = a_DeviceHandle] {
         if (deviceHandle == device) return;
         deviceHandle = device;
-        wglMakeCurrent(HDC(deviceHandle), HGLRC(contextHandle));
+        WIN32_CHECK_ERROR(wglMakeCurrent(HDC(deviceHandle), HGLRC(contextHandle)) != 0);
         swapInterval = wglGetSwapIntervalEXT();
     }, false);
 }

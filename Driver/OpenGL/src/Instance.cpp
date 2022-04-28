@@ -3,14 +3,15 @@
 #include <GL/Instance.hpp>
 #include <GL/PhysicalDevice.hpp>
 #include <GL/Common/Error.hpp>
+#include <GL/glew.h>
+#include <GL/wglew.h>
 
 #include <windows.h>
-
 #include <stdexcept>
 
 static bool windowCreated = false;
 
-LRESULT CALLBACK Wndproc(
+LRESULT CALLBACK TempWndproc(
     HWND hwnd,        // handle to window
     UINT uMsg,        // message identifier
     WPARAM wParam,    // first message parameter
@@ -40,7 +41,7 @@ Impl::Impl(const Info& a_Info)
     std::memset(&wndclass, 0, sizeof(wndclass));
     wndclass.cbSize = sizeof(wndclass);
     wndclass.style = CS_HREDRAW | CS_VREDRAW;
-    wndclass.lpfnWndProc = Wndproc;
+    wndclass.lpfnWndProc = TempWndproc;
     wndclass.hInstance = GetModuleHandle(0);
     wndclass.lpszClassName = windowClassName.c_str();
     WIN32_CHECK_ERROR(RegisterClassEx(&wndclass));
@@ -55,7 +56,7 @@ Impl::Impl(const Info& a_Info)
     //Wait for the window to be created
     {
         MSG msg = { 0 };
-        while (!windowCreated && PeekMessage(&msg, dummyWindow, 0, 0, PM_NOYIELD | PM_REMOVE))
+        while (!windowCreated && PeekMessage(&msg, HWND(dummyWindow), 0, 0, PM_NOYIELD | PM_REMOVE))
             DispatchMessage(&msg);
         windowCreated = false;
     }

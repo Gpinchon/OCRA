@@ -23,8 +23,8 @@ public:
                     return !_queue.empty() || _stop;
                 });
                 if (_stop) return;
-                auto queue = std::move(_queue);
-                _queue.clear();
+                std::queue<Command> queue{};
+                _queue.swap(queue);
                 lock.unlock();
                 while (!queue.empty()) {
                     queue.front().fn();

@@ -53,7 +53,7 @@ Handle Allocate(const Device::Handle& a_Device, const Info& a_Info)
 }
 void* Map(
     const Device::Handle&   a_Device,
-    const MappedRange&      a_MemoryRange);
+    const MappedRange&      a_MemoryRange)
 {
     void* ptr{ nullptr };
     a_Device->PushCommand(0, 0, [a_MemoryRange, &ptr] {

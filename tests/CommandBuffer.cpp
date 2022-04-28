@@ -129,13 +129,21 @@ int CommandBuffer()
 	Buffer::BindMemory(device, buffer2, memory, chunkSize * 2);
 	//write some value to the buffer0
 	{
-		auto bufferPtr = Memory::Map(device, memory, chunkSize * 0, chunkSize);
+		Memory::MappedRange mappedRange;
+		mappedRange.memory = memory;
+		mappedRange.offset = chunkSize * 0;
+		mappedRange.length = chunkSize;
+		auto bufferPtr = Memory::Map(device, mappedRange);
 		memcpy(bufferPtr, sentence0.c_str(), sentence0.size());
 		Memory::Unmap(device, memory);
 	}
 	//write some value to the buffer1
 	{
-		auto bufferPtr = Memory::Map(device, memory, chunkSize * 1, chunkSize);
+		Memory::MappedRange mappedRange;
+		mappedRange.memory = memory;
+		mappedRange.offset = chunkSize * 1;
+		mappedRange.length = chunkSize;
+		auto bufferPtr = Memory::Map(device, mappedRange);
 		memcpy(bufferPtr, sentence1.c_str(), sentence1.size());
 		Memory::Unmap(device, memory);
 	}
@@ -164,13 +172,21 @@ int CommandBuffer()
 	std::cout << "===== Check if sentences were swapped =====\n";
 	int success = 0;
 	{
-		std::string buffer0String = (char*)Memory::Map(device, memory, chunkSize * 0, chunkSize);
+		Memory::MappedRange mappedRange;
+		mappedRange.memory = memory;
+		mappedRange.offset = chunkSize * 0;
+		mappedRange.length = chunkSize;
+		std::string buffer0String = (char*)Memory::Map(device, mappedRange);
 		success += buffer0String == sentence1 ? 0 : 1;
 		std::cout << "  Buffer 0 value : " << buffer0String << "\n";
 		Memory::Unmap(device, memory);
 	}
 	{
-		std::string buffer1String = (char*)Memory::Map(device, memory, chunkSize * 1, chunkSize);
+		Memory::MappedRange mappedRange;
+		mappedRange.memory = memory;
+		mappedRange.offset = chunkSize * 1;
+		mappedRange.length = chunkSize;
+		std::string buffer1String = (char*)Memory::Map(device, mappedRange);
 		success += buffer1String == sentence0 ? 0 : 1;
 		std::cout << "  Buffer 1 value : " << buffer1String << "\n";
 		Memory::Unmap(device, memory);

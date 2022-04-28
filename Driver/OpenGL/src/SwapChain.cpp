@@ -1,6 +1,7 @@
 #include <SwapChain.hpp>
 #include <Image/Image.hpp>
 
+#include <GL/Common/DefaultPixelFormat.hpp>
 #include <GL/Common/Error.hpp>
 #include <GL/Queue/Semaphore.hpp>
 #include <GL/Queue/Queue.hpp>
@@ -48,12 +49,14 @@ struct Impl
         if (info.oldSwapchain != nullptr) {
             assert(info.oldSwapchain->info.imageFormat == info.imageFormat);
             assert(info.oldSwapchain->info.imageColorSpace == info.imageColorSpace);
-            assert(info.oldSwapchain->info.imageExtent == info.imageExtent);
+            //assert(info.oldSwapchain->info.imageExtent == info.imageExtent);
             assert(info.oldSwapchain->info.imageSharingMode == info.imageSharingMode);
             frameBufferHandle = info.oldSwapchain->frameBufferHandle;
             if (info.oldSwapchain->info.imageExtent.width >= info.imageExtent.width &&
-                info.oldSwapchain->info.imageExtent.height >= info.imageExtent.height)
+                info.oldSwapchain->info.imageExtent.height >= info.imageExtent.height) {
+                info.imageExtent = info.oldSwapchain->info.imageExtent;
                 images = info.oldSwapchain->images;
+            }
             else images = CreateImages(a_Device, a_Info);
             info.oldSwapchain->Retire();
             info.oldSwapchain.reset();
@@ -62,58 +65,7 @@ struct Impl
         a_Device->PushCommand(0, 0, [this] {
             glGenFramebuffers(1, &frameBufferHandle);
         }, true);
-        const auto hdc = HDC(std::static_pointer_cast<Surface::Win32::Impl>(info.surface)->hdc);
-        const auto rBits = GetRedSize(info.imageFormat);
-        const auto gBits = GetGreenSize(info.imageFormat);
-        const auto bBits = GetBlueSize(info.imageFormat);
-        const auto aBits = GetAlphaSize(info.imageFormat);
-        const auto dBits = GetDepthSize(info.imageFormat);
-        const auto sBits = GetStencilSize(info.imageFormat);
-        const auto glDataType = GetGLDataType(info.imageFormat);
-        const auto fRGBA = glDataType == GL_HALF_FLOAT || glDataType == GL_FLOAT;
-        const auto sRGB = info.imageColorSpace == Image::ColorSpace::sRGB;
-        PIXELFORMATDESCRIPTOR pfd;
-        std::memset(&pfd, 0, sizeof(pfd));
-
-        const int attribIList[] = {
-            WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
-            WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
-            WGL_DOUBLE_BUFFER_ARB,  GL_TRUE,
-            WGL_ACCELERATION_ARB,   WGL_FULL_ACCELERATION_ARB,
-            WGL_COLORSPACE_EXT,     sRGB ? WGL_COLORSPACE_SRGB_EXT : WGL_COLORSPACE_LINEAR_EXT,
-            WGL_PIXEL_TYPE_ARB,     fRGBA ? WGL_TYPE_RGBA_FLOAT_ARB : WGL_TYPE_RGBA_ARB,
-            WGL_COLOR_BITS_ARB,     rBits + gBits + bBits + aBits,
-            WGL_RED_BITS_EXT,       rBits,
-            WGL_GREEN_BITS_EXT,     gBits,
-            WGL_BLUE_BITS_EXT,      bBits,
-            WGL_ALPHA_BITS_EXT,     aBits,
-            WGL_DEPTH_BITS_EXT,     dBits,
-            WGL_STENCIL_BITS_EXT,   sBits,
-            0
-        };
-        int32_t  pixelFormat = 0;
-        uint32_t pixelFormatNbr = 0;
-        WIN32_CHECK_ERROR(wglChoosePixelFormatARB(hdc, attribIList, nullptr, 1, pixelFormat, &pixelFormatNbr));
-        WIN32_CHECK_ERROR(pixelFormatNbr != 0);
-
-        /*
-        pfd.nSize = sizeof(pfd);
-        pfd.nVersion = 1;
-        pfd.iPixelType   = PFD_TYPE_RGBA;
-        pfd.dwFlags      = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER | PFD_GENERIC_ACCELERATED;
-        pfd.cColorBits   = rBits + gBits + bBits + aBits;
-        pfd.cRedBits     = rBits;
-        pfd.cGreenBits   = gBits;
-        pfd.cBlueBits    = bBits;
-        pfd.cAlphaBits   = aBits;
-        pfd.cDepthBits   = dBits;
-        pfd.cStencilBits = sBits;
-        const auto pixelFormat = ChoosePixelFormat(hdc, &pfd);
-        */
-
-        WIN32_CHECK_ERROR(pixelFormat != 0);
-        WIN32_CHECK_ERROR(DescribePixelFormat(hdc, pixelFormat, sizeof(pfd), &pfd));
-        WIN32_CHECK_ERROR(SetPixelFormat(hdc, pixelFormat, &pfd));
+        Win32::SetDefaultPixelFormat(std::static_pointer_cast<Surface::Win32::Impl>(info.surface)->hdc);
         images = CreateImages(a_Device, a_Info);
     }
     void Retire() {
@@ -133,7 +85,6 @@ struct Impl
                 &windowRect);
             const auto windowWidth = windowRect.right - windowRect.left;
             const auto windowHeight = windowRect.bottom - windowRect.top;
-            glDrawBuffer(GL_FRONT_AND_BACK);
             glBindFramebuffer(GL_READ_FRAMEBUFFER, frameBufferHandle);
             glFramebufferTexture2D(
                 GL_READ_FRAMEBUFFER,

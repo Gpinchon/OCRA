@@ -19,14 +19,16 @@ static inline auto CreateSurface(const Instance::Handle& a_Instance, const HINST
     return Surface::Win32::Create(a_Instance, info);
 }
 
-static inline auto CreateSwapChain(const Device::Handle& a_Device, const Surface::Handle& a_Surface)
+static inline auto CreateSwapChain(const Device::Handle& a_Device, const Surface::Handle& a_Surface, const SwapChain::Handle& a_OldSwapChain, const uint32_t& a_Width, const uint32_t& a_Height)
 {
     SwapChain::Info info{};
+    info.oldSwapchain = a_OldSwapChain;
+    info.presentMode = SwapChain::PresentMode::Immediate;
     info.imageFormat = Image::Format::Uint8_Normalized_RGBA;
     info.minImageCount = 1;
     info.surface = a_Surface;
-    info.imageExtent.width  = 1920;
-    info.imageExtent.height = 1080;
+    info.imageExtent.width  = a_Width;
+    info.imageExtent.height = a_Height;
     return SwapChain::Create(a_Device, info);
 }
 
@@ -60,6 +62,9 @@ static inline auto CreateClearCommandBuffer(const Device::Handle& a_Device, Comm
 
 bool close = false;
 bool created = false;
+bool recreatSwapChain = true;
+uint32_t width = 0;
+uint32_t height = 0;
 
 LRESULT CALLBACK Wndproc(
     HWND hwnd,        // handle to window
@@ -69,7 +74,11 @@ LRESULT CALLBACK Wndproc(
 {
     switch (uMsg)
     {
-
+    case WM_SIZE :
+        width = LOWORD(lParam);
+        height = HIWORD(lParam);
+        recreatSwapChain = true;
+        break;
     case WM_CLOSE:
         close = true;
         break;
@@ -117,13 +126,14 @@ int SwapChain()
     const auto queueFamily = FindQueueFamily(physicalDevice, PhysicalDevice::QueueFlagsBits::Transfer);
     const auto queue = Device::GetQueue(device, queueFamily, 0); //Get first available queue
     const auto surface = CreateSurface(instance, wndclass.hInstance, hwnd);
-    const auto swapChain = CreateSwapChain(device, surface);
+    
     const auto commandPool = CreateCommandPool(device, queueFamily);
-    const auto swapChainImage = SwapChain::GetImages(device, swapChain).front();
-    const auto commandBuffer = CreateClearCommandBuffer(device, commandPool, swapChainImage);
+    
+    
+    SwapChain::Handle swapChain;
     SwapChain::PresentInfo presentInfo;
+    Image::Handle oldImage = nullptr;
     presentInfo.imageIndices = { 0 };
-    presentInfo.swapChains = { swapChain };
     {
         MSG msg = { 0 };
         while (!close) {
@@ -131,7 +141,18 @@ int SwapChain()
                 DispatchMessage(&msg);
             if (msg.message == WM_QUIT)
                 close = true;
-            ExecuteCommands(queue, commandBuffer);
+            if (recreatSwapChain)
+            {
+                swapChain = CreateSwapChain(device, surface, swapChain, width, height);
+                presentInfo.swapChains = { swapChain };
+                const auto swapChainImage = SwapChain::GetImages(device, swapChain).front();
+                if (oldImage != swapChainImage) {
+                    const auto commandBuffer = CreateClearCommandBuffer(device, commandPool, swapChainImage);
+                    ExecuteCommands(queue, commandBuffer);
+                    oldImage = swapChainImage;
+                }
+                recreatSwapChain = false;
+            }
             SwapChain::Present(queue, presentInfo);
             _sleep(15);
         }
