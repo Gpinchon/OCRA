@@ -8,7 +8,7 @@ namespace OCRA {
 template<typename T, size_t ArenaSize>
 struct MemoryPool {
 	using value_type = T;
-	struct Item {
+	union Item {
 		using storage_type = std::byte[sizeof(value_type)];
 		inline value_type* GetStorage() { return reinterpret_cast<value_type*>(data); }
 		Item* next;

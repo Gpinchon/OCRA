@@ -16,8 +16,11 @@ namespace OCRA::PhysicalDevice
 using Command = std::function<void()>;
 struct Queue
 {
-    Queue(const void* a_DeviceHandle, const void* a_ContextHandle);
-    ~Queue();
+    Queue() {
+        properties.queueCount = 1;
+        properties.queueFlags = QueueFlagsBits::Graphics | QueueFlagsBits::Compute | QueueFlagsBits::Transfer | QueueFlagsBits::SparseBinding;
+        properties.minImageTransferGranularity = { 1, 1, 1 }; //Queues supporting graphics and/or compute operations must report (1,1,1)
+    };
     inline void PushCommand(const Command& a_Command, const bool& a_Synchronous) {
         workerThread.PushCommand(a_Command, a_Synchronous);
     }

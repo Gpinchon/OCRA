@@ -18,49 +18,50 @@ public:
     inline WorkerThread() {
         _thread = std::thread([this] {
             std::unique_lock<std::mutex> lock(_mtx);
-            while (true) {
+            while (!_stop) {
                 _cv.wait(lock, [this] {
                     return !_queue.empty() || _stop;
                 });
-                if (_stop) return;
-                std::queue<Command> queue{};
+                std::queue<Command> queue;
                 _queue.swap(queue);
                 lock.unlock();
+                _taskMtx.lock();
                 while (!queue.empty()) {
                     queue.front().fn();
-                    if (queue.front().notify) {
-                        std::unique_lock<std::mutex> lock(_taskMtx);
+                    if (queue.front().notify)
                         _finishedTasks.insert(queue.front().id);
-                        _taskCv.notify_all();
-                    }
                     queue.pop();
                 }
+                _taskMtx.unlock();
+                if (!_finishedTasks.empty()) _taskCv.notify_all();
                 lock.lock();
             }
         });
     }
     inline ~WorkerThread() {
-        //std::unique_lock<std::mutex> lock(_mtx);
         _stop = true;
         _cv.notify_one();
         _thread.join();
     }
     inline void PushCommand(const std::function<void()>& a_Command, const bool a_Synchronous)
     {
-        
         const auto commandID = _commandID++;
         _mtx.lock();
         _queue.push({ a_Command, commandID, a_Synchronous });
         _mtx.unlock();
         _cv.notify_one();
         if (a_Synchronous) {
-            std::unique_lock<std::mutex> taskLock(_taskMtx);
-            _taskCv.wait(taskLock, [this, &commandID] {
+            _taskCv.wait(std::unique_lock<std::mutex>(_taskMtx), [this, &commandID] {
                 const auto done = _finishedTasks.find(commandID) != _finishedTasks.end();
                 if (done) _finishedTasks.erase(commandID);
                 return done;
             });
         }
+    }
+    //Pushes an empty synchronous command to wait for the thread to be done
+    inline void Wait()
+    {
+        PushCommand([]{}, true);
     }
 private:
     std::mutex _mtx;

@@ -14,30 +14,33 @@
 OCRA_DECLARE_HANDLE(OCRA::Command::Buffer);
 OCRA_DECLARE_HANDLE(OCRA::Device);
 
-//Command Buffer relative commands
-namespace OCRA::Command
+namespace OCRA::Command::Buffer
 {
-using CommandBufferUsageFlags = std::bitset<3>;
-namespace CommandBufferUsageFlagBits {
-static CommandBufferUsageFlags None = 0b000;
-static CommandBufferUsageFlags OneTimeSubmit = 0b100;
-static CommandBufferUsageFlags RenderPassContinue = 0b010;
-static CommandBufferUsageFlags SimultaneousUse = 0b001;
+using UsageFlags = std::bitset<3>;
+namespace UsageFlagBits {
+static UsageFlags None = 0b000;
+static UsageFlags OneTimeSubmit = 0b100;
+static UsageFlags RenderPassContinue = 0b010;
+static UsageFlags SimultaneousUse = 0b001;
 };
-struct CommandBufferBeginInfo
+struct BeginInfo
 {
-	CommandBufferUsageFlags flags{ CommandBufferUsageFlagBits::None };
+	UsageFlags flags{ UsageFlagBits::None };
 };
 //Begin Command Buffer recording, switching it to Recording state
-void BeginCommandBuffer(
-	const Buffer::Handle& a_CommandBuffer,
-	const CommandBufferBeginInfo& a_BeginInfo);
+void Begin(
+	const Handle& a_CommandBuffer,
+	const BeginInfo& a_BeginInfo);
 //End Command Buffer recording, switching it to Executable state
-void EndCommandBuffer(const Buffer::Handle& a_CommandBuffer);
+void End(const Handle& a_CommandBuffer);
 //Reset Command Buffer to Initial state
-void ResetCommandBuffer(const Buffer::Handle& a_CommandBuffer);
+void Reset(const Handle& a_CommandBuffer);
+}
+
+namespace OCRA::Command
+{
 //Add a secondary Command Buffer to execute
-void ExecuteCommands(
-	const Buffer::Handle& a_CommandBuffer,
-	const Buffer::Handle& a_SecondaryCommandBuffer);
+void ExecuteCommandBuffer(
+	const Handle& a_CommandBuffer,
+	const Handle& a_SecondaryCommandBuffer);
 }

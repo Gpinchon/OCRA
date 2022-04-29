@@ -15,18 +15,22 @@
 #include <functional>
 #include <array>
 
-namespace OCRA::Command
+namespace OCRA::Command::Buffer
 {
-void BeginCommandBuffer(const Buffer::Handle& a_CommandBuffer, const CommandBufferBeginInfo& a_BeginInfo) {
+void Begin(const Handle& a_CommandBuffer, const BeginInfo& a_BeginInfo) {
 	a_CommandBuffer->Begin(a_BeginInfo);
 }
-void EndCommandBuffer(const Buffer::Handle& a_CommandBuffer) {
+void End(const Handle& a_CommandBuffer) {
 	a_CommandBuffer->End();
 }
-void ResetCommandBuffer(const Buffer::Handle& a_CommandBuffer) {
+void Reset(const Handle& a_CommandBuffer) {
 	a_CommandBuffer->Reset();
 }
-void ExecuteCommands(
+}
+
+namespace OCRA::Command
+{
+void ExecuteCommandBuffer(
 	const Buffer::Handle& a_CommandBuffer,
 	const Buffer::Handle& a_SecondaryCommandBuffer)
 {
@@ -65,7 +69,7 @@ void OCRA::Command::Buffer::Impl::Invalidate()
     executionState = {};
 }
 
-void OCRA::Command::Buffer::Impl::Begin(const CommandBufferBeginInfo& a_BeginInfo)
+void OCRA::Command::Buffer::Impl::Begin(const Buffer::BeginInfo& a_BeginInfo)
 {
     assert(state == State::Initial);
     state = State::Recording;
@@ -78,28 +82,25 @@ void OCRA::Command::Buffer::Impl::End()
     state = State::Executable;
 }
 
-void OCRA::Command::Buffer::Impl::Execute()
+void OCRA::Command::Buffer::Impl::ExecutePrimary()
 {
-    assert(state == State::Executable);
     assert(level == Level::Primary);
-    state = State::Pending;
     Execute(executionState);
 }
 
 void OCRA::Command::Buffer::Impl::ExecuteSecondary(ExecutionState& a_ExecutionState)
 {
-    assert(state == State::Executable);
     assert(level == Level::Secondary);
-    state = State::Pending;
     Execute(a_ExecutionState);
-    if ((beginInfo.flags & CommandBufferUsageFlagBits::OneTimeSubmit) != 0)
-        Invalidate();
 }
 
 void OCRA::Command::Buffer::Impl::Execute(ExecutionState& a_ExecutionState)
 {
-    assert(state == State::Pending);
+    assert(state == State::Executable);
+    state = State::Pending;
     for (const auto& command : commands)
         command(a_ExecutionState);
-    state = State::Executable;
+    if ((beginInfo.flags & UsageFlagBits::OneTimeSubmit) != 0)
+        Invalidate();
+    else state = State::Executable;
 }

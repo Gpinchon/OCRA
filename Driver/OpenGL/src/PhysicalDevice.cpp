@@ -328,37 +328,19 @@ void GLAPIENTRY MessageCallback(
         " severity = " << severity << "\n" <<
         " message  = " << message << std::endl;
     assert(type != GL_DEBUG_TYPE_ERROR);
-
-}
-
-Queue::Queue(const void* a_DeviceHandle, const void* a_ContextHandle)
-{
-    const auto hdc = HDC(a_DeviceHandle);
-    const auto hglrc = HGLRC(a_ContextHandle);
-    properties.queueCount = 1;
-    properties.queueFlags = QueueFlagsBits::Graphics | QueueFlagsBits::Compute | QueueFlagsBits::Transfer | QueueFlagsBits::SparseBinding;
-    properties.minImageTransferGranularity = { 1, 1, 1 }; //Queues supporting graphics and/or compute operations must report (1,1,1)
-    PushCommand([hdc, hglrc] {
-        wglMakeCurrent(hdc, hglrc);
-#ifdef DEBUG
-        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-        glDebugMessageCallback(MessageCallback, 0);
-#endif DEBUG
-    }, true);
-}
-
-Queue::~Queue()
-{
-   
 }
 
 Impl::Impl(void* const a_DeviceHandle)
     : deviceHandle(a_DeviceHandle)
     , contextHandle(CreateContext(deviceHandle))
-    , queue(deviceHandle, contextHandle)
 {
     if (!GLEW_EXT_direct_state_access) throw std::runtime_error("Direct state access extension required !");
-    PushCommand(0, 0, [this] {
+    queue.PushCommand(0, 0, [this] {
+        WIN32_CHECK_ERROR(wglMakeCurrent(HDC(deviceHandle), HGLRC(contextHandle)));
+#ifdef DEBUG
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        glDebugMessageCallback(MessageCallback, 0);
+#endif DEBUG
         properties = GetPhysicalDevicePropertiesGL();
         features = GetPhysicalDeviceFeaturesGL(properties);
         memoryProperties = GetMemoryPropertiesGL();

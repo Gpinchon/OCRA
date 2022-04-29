@@ -1,7 +1,6 @@
 #include <SwapChain.hpp>
 #include <Image/Image.hpp>
 
-#include <GL/Common/DefaultPixelFormat.hpp>
 #include <GL/Common/Error.hpp>
 #include <GL/Queue/Semaphore.hpp>
 #include <GL/Queue/Queue.hpp>
@@ -39,22 +38,30 @@ static inline auto CreateImages(const Device::Handle& a_Device, const Info& a_In
     }
     return images;
 }
-constexpr auto FORMATSMAX = 32;
+
+static inline auto CanRecycleOldSwapChainImages(
+    const Info& a_OldInfo, const Extent2D& a_OldExtent,
+    const Info& a_Info)
+{
+    return a_OldExtent.width          >= a_Info.imageExtent.width
+        && a_OldExtent.height         >= a_Info.imageExtent.height
+        && a_OldInfo.minImageCount    >= a_Info.minImageCount
+        && a_OldInfo.imageFormat      == a_Info.imageFormat
+        && a_OldInfo.imageColorSpace  == a_Info.imageColorSpace
+        && a_OldInfo.imageSharingMode == a_Info.imageSharingMode;
+}
+
 struct Impl
 {
     Impl(const Device::Handle& a_Device, const Info& a_Info)
         : info(a_Info)
         , device(a_Device)
+        , realExtent(info.imageExtent)
     {
         if (info.oldSwapchain != nullptr) {
-            assert(info.oldSwapchain->info.imageFormat == info.imageFormat);
-            assert(info.oldSwapchain->info.imageColorSpace == info.imageColorSpace);
-            //assert(info.oldSwapchain->info.imageExtent == info.imageExtent);
-            assert(info.oldSwapchain->info.imageSharingMode == info.imageSharingMode);
             frameBufferHandle = info.oldSwapchain->frameBufferHandle;
-            if (info.oldSwapchain->info.imageExtent.width >= info.imageExtent.width &&
-                info.oldSwapchain->info.imageExtent.height >= info.imageExtent.height) {
-                info.imageExtent = info.oldSwapchain->info.imageExtent;
+            if (CanRecycleOldSwapChainImages(info.oldSwapchain->info, info.oldSwapchain->realExtent, info)) {
+                realExtent = info.oldSwapchain->realExtent;
                 images = info.oldSwapchain->images;
             }
             else images = CreateImages(a_Device, a_Info);
@@ -65,11 +72,17 @@ struct Impl
         a_Device->PushCommand(0, 0, [this] {
             glGenFramebuffers(1, &frameBufferHandle);
         }, true);
-        Win32::SetDefaultPixelFormat(std::static_pointer_cast<Surface::Win32::Impl>(info.surface)->hdc);
         images = CreateImages(a_Device, a_Info);
+    }
+    ~Impl() {
+        if (frameBufferHandle != 0)
+            device.lock()->PushCommand(0, 0, [&frameBufferHandle] {
+                glDeleteFramebuffers(1, &frameBufferHandle);
+            }, false);
     }
     void Retire() {
         retired = true;
+        frameBufferHandle = 0;
     }
     void Present(const Queue::Handle& a_Queue, const uint32_t& a_ImageIndex) {
         assert(!retired);
@@ -105,7 +118,6 @@ struct Impl
                 GL_COLOR_BUFFER_BIT,
                 GL_NEAREST);
             glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-            //if (!wglSwapLayerBuffers(hdc, WGL_SWAP_MAIN_PLANE))
             WIN32_CHECK_ERROR(SwapBuffers(hdc));
         }, true);
     }
@@ -113,6 +125,7 @@ struct Impl
     const Device::WeakHandle    device;
     bool                        retired{ false };
     std::vector<Image::Handle>  images;
+    Extent2D                    realExtent;
     uint32_t                    frameBufferHandle;
 };
 Handle Create(const Device::Handle& a_Device, const Info& a_Info)

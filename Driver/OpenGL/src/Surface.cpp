@@ -1,5 +1,6 @@
 #include <Surface.hpp>
 
+#include <GL/Common/DefaultPixelFormat.hpp>
 #include <GL/Instance.hpp>
 #include <GL/WeakHandle.hpp>
 #include <GL/Surface.hpp>
@@ -18,6 +19,7 @@ Impl::Impl(const Instance::Handle& a_Instance, const Info& a_Info)
 	: Surface::Impl(a_Instance, a_Info.hwnd, "Win32")
 	, hdc(GetDC(HWND(nativeWindow)))
 {
+	Win32::SetDefaultPixelFormat(HDC(hdc));
 }
 Impl::~Impl()
 {

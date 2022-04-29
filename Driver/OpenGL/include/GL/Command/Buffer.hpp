@@ -26,9 +26,9 @@ struct Impl
 	~Impl() { Invalidate(); }
 	void Reset();
 	void Invalidate();
-	void Begin(const CommandBufferBeginInfo& a_BeginInfo);
+	void Begin(const Buffer::BeginInfo& a_BeginInfo);
 	void End();
-	void Execute();
+	void ExecutePrimary();
 	void ExecuteSecondary(ExecutionState& a_ExecutionState);
 	void Execute(ExecutionState& a_ExecutionState);
 	//moved into header and inline function for performance
@@ -41,12 +41,12 @@ struct Impl
 	State state{ State::Initial };
 	std::vector<Command> commands;
 	std::vector<Handle> secondaryBuffers;
-	CommandBufferBeginInfo beginInfo;
+	Buffer::BeginInfo beginInfo;
 	ExecutionState executionState{};
 };
 static inline void Execute(const std::vector<Handle>& a_CommandBuffers) {
 	for (const auto& commandBuffer : a_CommandBuffers) {
-		commandBuffer->Execute();
+		commandBuffer->ExecutePrimary();
 	}
 }
 }
