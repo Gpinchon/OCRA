@@ -22,6 +22,7 @@ enum class Level {
 };
 struct Impl
 {
+	Impl() : level(Level::Unknown) {}
 	Impl(const Level a_Level) : level(a_Level) {}
 	~Impl() { Invalidate(); }
 	void Reset();

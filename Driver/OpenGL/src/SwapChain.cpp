@@ -76,7 +76,7 @@ struct Impl
     }
     ~Impl() {
         if (frameBufferHandle != 0)
-            device.lock()->PushCommand(0, 0, [&frameBufferHandle] {
+            device.lock()->PushCommand(0, 0, [frameBufferHandle = frameBufferHandle] {
                 glDeleteFramebuffers(1, &frameBufferHandle);
             }, false);
     }
@@ -132,9 +132,9 @@ Handle Create(const Device::Handle& a_Device, const Info& a_Info)
 {
     return Handle(new Impl(a_Device, a_Info));
 }
-std::vector<Image::Handle> GetImages(const Device::Handle& a_Device, const Handle& a_SwapChain)
+const std::vector<Image::Handle>& GetImages(const Device::Handle& a_Device, const Handle& a_SwapChain)
 {
-    return { a_SwapChain->images };
+    return a_SwapChain->images;
 }
 void Present(const Queue::Handle& a_Queue, const PresentInfo& a_PresentInfo)
 {

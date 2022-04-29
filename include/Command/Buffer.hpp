@@ -28,9 +28,8 @@ struct BeginInfo
 	UsageFlags flags{ UsageFlagBits::None };
 };
 //Begin Command Buffer recording, switching it to Recording state
-void Begin(
-	const Handle& a_CommandBuffer,
-	const BeginInfo& a_BeginInfo);
+void Begin(const Handle& a_CommandBuffer,
+		   const BeginInfo& a_BeginInfo);
 //End Command Buffer recording, switching it to Executable state
 void End(const Handle& a_CommandBuffer);
 //Reset Command Buffer to Initial state
@@ -41,6 +40,6 @@ namespace OCRA::Command
 {
 //Add a secondary Command Buffer to execute
 void ExecuteCommandBuffer(
-	const Handle& a_CommandBuffer,
-	const Handle& a_SecondaryCommandBuffer);
+	const Buffer::Handle& a_CommandBuffer,
+	const Buffer::Handle& a_SecondaryCommandBuffer);
 }

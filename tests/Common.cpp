@@ -4,6 +4,8 @@
 #include <Queue/Queue.hpp>
 #include <Command/Pool.hpp>
 #include <Surface.hpp>
+#include <SwapChain.hpp>
+#include <Memory.hpp>
 
 #include <iostream>
 #include <vector>
@@ -35,7 +37,6 @@ std::vector<Queue::Info> GetQueueInfos(const PhysicalDevice::Handle& a_PhysicalD
     std::vector<Queue::Info> queueInfos;
     auto& queueFamilies = PhysicalDevice::GetQueueFamilyProperties(a_PhysicalDevice);
     uint32_t familyIndex = 0;
-    std::cout << "==== Queue Families ====\n";
     for (auto& queueFamily : queueFamilies)
     {
         Queue::Info queueInfo;
@@ -43,6 +44,18 @@ std::vector<Queue::Info> GetQueueInfos(const PhysicalDevice::Handle& a_PhysicalD
         queueInfo.queueFamilyIndex = familyIndex;
         queueInfo.queuePriorities.resize(queueFamily.queueCount, 1.f);
         queueInfos.push_back(queueInfo);
+        ++familyIndex;
+    }
+    return queueInfos;
+}
+
+void PrintQueueInfos(const PhysicalDevice::Handle& a_PhysicalDevice)
+{
+    const auto& queueFamilies = PhysicalDevice::GetQueueFamilyProperties(a_PhysicalDevice);
+    uint32_t familyIndex = 0;
+    std::cout << "==== Queue Families ====\n";
+    for (auto& queueFamily : queueFamilies)
+    {
         std::cout << " ==================\n";
         std::cout << "  Index         : " << familyIndex << "\n";
         std::cout << "  Count         : " << queueFamily.queueCount << "\n";
@@ -57,7 +70,6 @@ std::vector<Queue::Info> GetQueueInfos(const PhysicalDevice::Handle& a_PhysicalD
     }
     std::cout << "========================\n";
     std::cout << "\n";
-    return queueInfos;
 }
 
 Device::Handle CreateDevice(const PhysicalDevice::Handle& a_PhysicalDevice)
@@ -129,11 +141,11 @@ uint32_t FindProperMemoryType(const PhysicalDevice::Handle& a_PhysicalDevice, co
     }
     return std::numeric_limits<uint32_t>::infinity();
 }
-Memory::Handle AllocateMemory(const Device::Handle& a_Device, const uint64_t& a_Size, const PhysicalDevice::MemoryPropertyFlags& a_MemoryProperties)
+Memory::Handle AllocateMemory(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const uint64_t& a_Size, const PhysicalDevice::MemoryPropertyFlags& a_MemoryProperties)
 {
     Memory::Info memoryInfo;
-    memoryInfo.memoryTypeIndex = FindProperMemoryType(physicalDevice, a_MemoryProperties);
+    memoryInfo.memoryTypeIndex = FindProperMemoryType(a_PhysicalDevice, a_MemoryProperties);
     memoryInfo.size = a_Size;
-    auto memory = Memory::Allocate(device, memoryInfo);
+    return Memory::Allocate(a_Device, memoryInfo);
 }
 }

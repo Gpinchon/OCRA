@@ -17,7 +17,7 @@ using namespace OCRA;
 static inline auto RecordClearCommandBuffer(Command::Buffer::Handle a_CommandBuffer, const Image::Handle& a_Image)
 {
     Command::Buffer::BeginInfo bufferBeginInfo;
-    Command::Buffer::BeginInfo.flags = Command::Buffer::UsageFlagBits::None;
+    bufferBeginInfo.flags = Command::Buffer::UsageFlagBits::None;
     Command::Buffer::Begin(a_CommandBuffer, bufferBeginInfo);
     {
         Image::ClearColor clearColor{ 1.f, 0.f, 0.f, 1.f };
@@ -61,17 +61,7 @@ LRESULT CALLBACK Wndproc(
 
 int SwapChain()
 {
-    //basic setup as usual
-    const auto instance = CreateInstance("Test_SwapChain");
-    const auto surface = CreateSurface(instance, wndclass.hInstance, hwnd);
-    const auto physicalDevice = Instance::EnumeratePhysicalDevices(instance).front();
-    const auto device = CreateDevice(physicalDevice);
-    const auto queueFamily = FindQueueFamily(physicalDevice, PhysicalDevice::QueueFlagsBits::Transfer);
-    const auto queue = Device::GetQueue(device, queueFamily, 0); //Get first available queue
-    const auto commandPool = CreateCommandPool(device, queueFamily);
-    const auto commandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Primary);
-
-	int ret = 0;
+    int ret = 0;
     WNDCLASSEX wndclass{};
     std::memset(&wndclass, 0, sizeof(wndclass));
     wndclass.cbSize = sizeof(wndclass);
@@ -90,15 +80,29 @@ int SwapChain()
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
         nullptr, nullptr, wndclass.hInstance, nullptr);
+    MSG msg = { 0 };
+    while (!created && PeekMessage(&msg, hwnd, 0, 0, PM_REMOVE))
+        DispatchMessage(&msg);
 
+    //basic setup as usual
+    const auto instance = CreateInstance("Test_SwapChain");
+    const auto surface = CreateSurface(instance, wndclass.hInstance, hwnd);
+    const auto physicalDevice = Instance::EnumeratePhysicalDevices(instance).front();
+    const auto device = CreateDevice(physicalDevice);
+    const auto queueFamily = FindQueueFamily(physicalDevice, PhysicalDevice::QueueFlagsBits::Transfer);
+    const auto queue = Device::GetQueue(device, queueFamily, 0); //Get first available queue
+    const auto commandPool = CreateCommandPool(device, queueFamily);
+    //const auto commandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Primary);
+
+    Command::Buffer::Handle commandBuffer;
     SwapChain::Handle       swapChain;
     SwapChain::PresentInfo  presentInfo;
     uint32_t frameIndex = 0;
-    MSG msg = { 0 };
+    
     ShowWindow(hwnd, SW_SHOWDEFAULT);
     UpdateWindow(hwnd);
     while (!close) {
-        while (!created && PeekMessage(&msg, hwnd, 0, 0, PM_REMOVE))
+        while (PeekMessage(&msg, hwnd, 0, 0, PM_REMOVE))
             DispatchMessage(&msg);
         const auto swapChainImageIndex = frameIndex++ % SWAPCHAIN_IMAGE_NBR;
         presentInfo.imageIndices = { swapChainImageIndex };
@@ -107,10 +111,12 @@ int SwapChain()
             recreateSwapChain = false;
             swapChain = CreateSwapChain(device, surface, swapChain, width, height, SWAPCHAIN_IMAGE_NBR);
             presentInfo.swapChains = { swapChain };
-            const auto swapChainImage = SwapChain::GetImages(device, swapChain).at(swapChainImageIndex);
-            Command::Buffer::Reset(commandBuffer);
-            RecordClearCommandBuffer(commandBuffer, swapChainImage);
         }
+        const auto swapChainImage = SwapChain::GetImages(device, swapChain).at(swapChainImageIndex);
+        if (commandBuffer == nullptr)
+            commandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Primary);
+        else Command::Buffer::Reset(commandBuffer);
+        RecordClearCommandBuffer(commandBuffer, swapChainImage);
         SubmitCommandBuffer(queue, commandBuffer);
         SwapChain::Present(queue, presentInfo);
     }

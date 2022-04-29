@@ -335,7 +335,7 @@ Impl::Impl(void* const a_DeviceHandle)
     , contextHandle(CreateContext(deviceHandle))
 {
     if (!GLEW_EXT_direct_state_access) throw std::runtime_error("Direct state access extension required !");
-    queue.PushCommand(0, 0, [this] {
+    PushCommand(0, 0, [this] {
         WIN32_CHECK_ERROR(wglMakeCurrent(HDC(deviceHandle), HGLRC(contextHandle)));
 #ifdef DEBUG
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);

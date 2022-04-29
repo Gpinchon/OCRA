@@ -141,12 +141,14 @@ Handle Create(
     const Device::Handle&   a_Device,
     const Info&             a_Info)
 {
+    Handle queryPool;
     if (a_Info.type == Type::Occlusion)
-        return Handle(new Impl(a_Device, a_Info.count, std::vector<GLenum>(a_Info.count, GL_SAMPLES_PASSED), Type::Occlusion));
+        queryPool = Handle(new Impl(a_Device, a_Info.count, std::vector<GLenum>(a_Info.count, GL_SAMPLES_PASSED), Type::Occlusion));
     if (a_Info.type == Type::TimeStamp)
-        return Handle(new Impl(a_Device, a_Info.count, std::vector<GLenum>(a_Info.count, GL_TIME_ELAPSED), Type::TimeStamp));
+        queryPool = Handle(new Impl(a_Device, a_Info.count, std::vector<GLenum>(a_Info.count, GL_TIME_ELAPSED), Type::TimeStamp));
     if (a_Info.type == Type::PipelineStatistics)
-        return Handle(new PipelineStatistics(a_Device, a_Info));
+        queryPool = Handle(new PipelineStatistics(a_Device, a_Info));
+    return queryPool;
 }
 void GetResult(
     const Handle&   a_QueryPool,

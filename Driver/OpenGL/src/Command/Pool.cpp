@@ -20,9 +20,9 @@ struct Impl
     Impl(const Device::Handle& a_Device, const Info& a_Info)
         : info(a_Info)
     {}
-    std::pmr::synchronized_pool_resource memoryPool;
-    std::pmr::polymorphic_allocator<Buffer::Impl>    bufferAllocator(&memoryPool);
-    std::pmr::polymorphic_allocator<Buffer::Command> commandAllocator(&memoryPool);
+    std::pmr::unsynchronized_pool_resource memoryPool;
+    std::pmr::polymorphic_allocator<Buffer::Impl>    bufferAllocator{ &memoryPool };
+    //std::pmr::polymorphic_allocator<Buffer::Command> commandAllocator{ &memoryPool };
     const Info info;
 };
 Handle Create(
@@ -41,7 +41,7 @@ std::vector<Buffer::Handle> AllocateBuffer(const Device::Handle& a_Device, const
     std::vector<Buffer::Handle> commandBuffers;
     commandBuffers.reserve(a_Info.count);
     for (auto i = 0u; i < a_Info.count; ++i) {
-        auto buffer = std::allocate_shared<Buffer::Impl>(a_Info.pool->bufferAllocator, a_Info.level);
+        auto buffer = std::allocate_shared<Buffer::Impl>(a_Info.pool->bufferAllocator, Buffer::Level(a_Info.level));
         commandBuffers.push_back(buffer);
     }
     return commandBuffers;

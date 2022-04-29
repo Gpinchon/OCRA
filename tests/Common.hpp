@@ -54,6 +54,8 @@ SwapChain::Handle CreateSwapChain(
 Device::Handle CreateDevice(const PhysicalDevice::Handle& a_PhysicalDevice);
 //Get queues from Physical Device
 std::vector<Queue::Info> GetQueueInfos(const PhysicalDevice::Handle& a_PhysicalDevice);
+//Prints queues informations to the console
+void PrintQueueInfos(const PhysicalDevice::Handle& a_PhysicalDevice);
 //Find suitable queue for the specified flags
 uint32_t FindQueueFamily(const PhysicalDevice::Handle& a_PhysicalDevice, const PhysicalDevice::QueueFlags& a_QueueProperties);
 //Create a command pool from the queuefamily
@@ -65,5 +67,5 @@ void SubmitCommandBuffer(const Queue::Handle& a_Queue, const Command::Buffer::Ha
 //Returns the index of a memory type with specified properties
 uint32_t FindProperMemoryType(const PhysicalDevice::Handle& a_PhysicalDevice, const PhysicalDevice::MemoryPropertyFlags& a_MemoryProperties);
 //allocate GPU memory with the specified properties
-Memory::Handle AllocateMemory(const Device::Handle& a_Device, const uint64_t& a_Size, const PhysicalDevice::MemoryPropertyFlags& a_MemoryProperties);
+Memory::Handle AllocateMemory(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const uint64_t& a_Size, const PhysicalDevice::MemoryPropertyFlags& a_MemoryProperties);
 }

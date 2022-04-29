@@ -10,6 +10,7 @@ using namespace OCRA;
 
 static inline void ListQueues(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device)
 {
+	PrintQueueInfos(a_PhysicalDevice);
 	std::cout << "===== Device's Queues =====\n";
 	for (const auto& queueInfo : GetQueueInfos(a_PhysicalDevice))
 	{
@@ -29,8 +30,8 @@ static inline void ListQueues(const PhysicalDevice::Handle& a_PhysicalDevice, co
 int Queue()
 {
 	const auto instance = CreateInstance("Test_Queue");
-	const auto physicalDevice = Instance::EnumeratePhysicalDevices(a_Instance).front();
-	ListQueues(CreateDevice(physicalDevice));
+	const auto physicalDevice = Instance::EnumeratePhysicalDevices(instance).front();
+	ListQueues(physicalDevice, CreateDevice(physicalDevice));
 	std::cout << std::endl;
 	return 0;
 }

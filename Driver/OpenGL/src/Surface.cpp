@@ -19,7 +19,7 @@ Impl::Impl(const Instance::Handle& a_Instance, const Info& a_Info)
 	: Surface::Impl(a_Instance, a_Info.hwnd, "Win32")
 	, hdc(GetDC(HWND(nativeWindow)))
 {
-	Win32::SetDefaultPixelFormat(HDC(hdc));
+	OCRA::Win32::SetDefaultPixelFormat(hdc);
 }
 Impl::~Impl()
 {

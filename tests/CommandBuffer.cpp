@@ -90,17 +90,17 @@ static inline void RecordSwapCommandBuffer(
     const Buffer::Handle& a_Buffer1,
     const Buffer::Handle& a_BufferT)
 {
-    Command::Buffer::BeginInfo Buffer::BeginInfo;
-    Buffer::BeginInfo.flags = Command::UsageFlagBits::None;
-    Command::Buffer::Begin(commandBuffer, Buffer::BeginInfo);
+    Command::Buffer::BeginInfo bufferbeginInfo;
+    bufferbeginInfo.flags = Command::Buffer::UsageFlagBits::None;
+    Command::Buffer::Begin(a_CommandBuffer, bufferbeginInfo);
     {
         Command::BufferCopyRegion copyRegions;
         copyRegions.size = CHUNK_SIZE;
-        Command::CopyBuffer(commandBuffer, a_Buffer0, a_BufferT, { copyRegions });
-        Command::CopyBuffer(commandBuffer, a_Buffer1, a_Buffer0, { copyRegions });
-        Command::CopyBuffer(commandBuffer, a_BufferT, a_Buffer1, { copyRegions });
+        Command::CopyBuffer(a_CommandBuffer, a_Buffer0, a_BufferT, { copyRegions });
+        Command::CopyBuffer(a_CommandBuffer, a_Buffer1, a_Buffer0, { copyRegions });
+        Command::CopyBuffer(a_CommandBuffer, a_BufferT, a_Buffer1, { copyRegions });
     }
-    Command::Buffer::End(commandBuffer);
+    Command::Buffer::End(a_CommandBuffer);
 }
 
 int CommandBuffer()
@@ -110,7 +110,7 @@ int CommandBuffer()
     const auto device = CreateDevice(physicalDevice);
     const auto queueFamily = FindQueueFamily(physicalDevice, PhysicalDevice::QueueFlagsBits::Transfer);
     const auto queue = Device::GetQueue(device, queueFamily, 0); //Get first available queue
-    const auto memory = AllocateMemory(device, CHUNK_SIZE * 3, PhysicalDevice::MemoryPropertyFlagBits::HostVisible | PhysicalDevice::MemoryPropertyFlagBits::HostCached);
+    const auto memory = AllocateMemory(physicalDevice, device, CHUNK_SIZE * 3, PhysicalDevice::MemoryPropertyFlagBits::HostVisible | PhysicalDevice::MemoryPropertyFlagBits::HostCached);
     const auto commandPool = CreateCommandPool(device, queueFamily);
     const auto commandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Primary);
 
