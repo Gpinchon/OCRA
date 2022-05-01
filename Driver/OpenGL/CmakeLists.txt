@@ -136,14 +136,8 @@ set(OCRA_IMPL_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/VertexInputState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/ViewPortState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Shader/Stage.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/Error.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/Instance.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/OpenGL.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/PhysicalDevice.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/Surface.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/SwapChain.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/Window.hpp
 )
+
 set(OCRA_IMPL_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Buffer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Device.cpp
@@ -169,6 +163,19 @@ set(OCRA_IMPL_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/Pipeline.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Shader/Stage.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Shader/Module.cpp
+)
+
+if (WIN32)
+set(OCRA_IMPL_HEADER_FILES ${OCRA_IMPL_HEADER_FILES}
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/Error.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/Instance.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/OpenGL.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/PhysicalDevice.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/Surface.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/SwapChain.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/Window.hpp
+)
+set(OCRA_IMPL_SOURCE_FILES ${OCRA_IMPL_SOURCE_FILES}
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Win32/Error.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Win32/Instance.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Win32/OpenGL.cpp
@@ -177,6 +184,7 @@ set(OCRA_IMPL_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Win32/SwapChain.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Win32/Window.cpp
 )
+endif(WIN32)
 
 add_library(OCRAImpl ${OCRA_IMPL_SOURCE_FILES} ${OCRA_IMPL_HEADER_FILES})
 target_include_directories(OCRAImpl PRIVATE

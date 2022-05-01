@@ -1,13 +1,12 @@
 #pragma once
 
+#include <GL/Win32/SwapChain.hpp>
 #include <GL/Image/Image.hpp>
 #include <GL/Queue/Queue.hpp>
 #include <GL/Device.hpp>
 #include <GL/PhysicalDevice.hpp>
-
-#include <GL/Win32/SwapChain.hpp>
-#include <GL/Win32/Error.hpp>
 #include <GL/Surface.hpp>
+
 #include <GL/glew.h>
 #include <GL/wglew.h>
 
