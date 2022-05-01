@@ -4,6 +4,8 @@
 #include <GL/QueryPool.hpp>
 #include <GL/glew.h>
 
+#include <stdexcept>
+
 namespace OCRA::QueryPool
 {
 static inline auto GetQueryObject32(GLuint a_ID, GLenum a_Parameter)
@@ -141,14 +143,16 @@ Handle Create(
     const Device::Handle&   a_Device,
     const Info&             a_Info)
 {
-    Handle queryPool;
-    if (a_Info.type == Type::Occlusion)
-        queryPool = Handle(new Impl(a_Device, a_Info.count, std::vector<GLenum>(a_Info.count, GL_SAMPLES_PASSED), Type::Occlusion));
-    if (a_Info.type == Type::TimeStamp)
-        queryPool = Handle(new Impl(a_Device, a_Info.count, std::vector<GLenum>(a_Info.count, GL_TIME_ELAPSED), Type::TimeStamp));
-    if (a_Info.type == Type::PipelineStatistics)
-        queryPool = Handle(new PipelineStatistics(a_Device, a_Info));
-    return queryPool;
+    switch (a_Info.type) {
+    case(Type::Occlusion) :
+        return Handle(new Impl(a_Device, a_Info.count, std::vector<GLenum>(a_Info.count, GL_SAMPLES_PASSED), Type::Occlusion));
+    case(Type::TimeStamp):
+        return Handle(new Impl(a_Device, a_Info.count, std::vector<GLenum>(a_Info.count, GL_TIME_ELAPSED), Type::TimeStamp));
+    case(Type::PipelineStatistics):
+        return Handle(new PipelineStatistics(a_Device, a_Info));
+    default:
+        throw std::runtime_error("Unknown Barrier type");
+    }
 }
 void GetResult(
     const Handle&   a_QueryPool,

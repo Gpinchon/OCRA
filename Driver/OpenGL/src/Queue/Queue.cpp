@@ -30,7 +30,7 @@ static inline void Execute(
 				std::static_pointer_cast<Semaphore::Timeline>(semaphore)->WaitDevice(semaphoreValue);
 			}
 		}
-		Command::Buffer::Execute(submitInfo.commandBuffers);
+		OCRA::Command::Buffer::Execute(submitInfo.commandBuffers);
 		for (auto semaphoreIndex = 0u; semaphoreIndex < submitInfo.signalSemaphores.size(); ++semaphoreIndex)
 		{
 			auto& semaphore = submitInfo.signalSemaphores.at(semaphoreIndex);
@@ -50,8 +50,7 @@ void Submit(
 	const std::vector<SubmitInfo>& a_SubmitInfos,
 	const Fence::Handle& a_Fence)
 {
-	a_Queue->device.lock()->PushCommand(a_Queue->familyIndex, a_Queue->queueIndex,
-	[queue = a_Queue, submitInfos = a_SubmitInfos, fence = a_Fence] {
+	a_Queue->PushCommand([queue = a_Queue, submitInfos = a_SubmitInfos, fence = a_Fence] {
 		Execute(queue, submitInfos, fence);
 	}, false);
 }

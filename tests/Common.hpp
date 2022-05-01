@@ -42,7 +42,7 @@ struct VerboseTimer : Timer
 //Create an instance with app name a_Name
 Instance::Handle CreateInstance(const std::string& a_Name);
 //Creates a surface using the specified instance and window handles;
-Surface::Handle CreateSurface(const Instance::Handle& a_Instance, const void* a_HINSTANCE, const void* a_HWND);
+Surface::Handle CreateSurface(const Instance::Handle& a_Instance, void* const a_HINSTANCE, void* const a_HWND);
 //Creates or recreates a swapchain
 SwapChain::Handle CreateSwapChain(
 	const Device::Handle& a_Device,

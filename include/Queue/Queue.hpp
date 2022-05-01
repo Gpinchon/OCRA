@@ -19,8 +19,8 @@ OCRA_DECLARE_HANDLE(OCRA::Command::Buffer);
 namespace OCRA::Queue
 {
 struct Info {
-	uint32_t                    queueFamilyIndex;
-	uint32_t                    queueCount;
+	uint32_t                    queueFamilyIndex{ 0 };
+	uint32_t                    queueCount{ 0 };
 	std::vector<float>          queuePriorities;
 };
 /**
@@ -34,7 +34,7 @@ struct SubmitInfo
 {
 	std::optional<TimelineSemaphoreSubmitInfo> timelineSemaphoreValues;
 	std::vector<Semaphore::Handle>			waitSemaphores;
-	std::vector<Command::Buffer::Handle>	commandBuffers;
+	std::vector<OCRA::Command::Buffer::Handle>	commandBuffers;
 	std::vector<Semaphore::Handle>			signalSemaphores;
 };
 void Submit(

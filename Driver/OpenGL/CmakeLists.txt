@@ -116,11 +116,8 @@ set(OCRA_IMPL_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Command/Pool.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Common/Blend.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Common/Compare.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Common/DefaultPixelFormat.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Common/Error.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Common/IndexType.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Common/Logic.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Common/MemoryPool.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Common/Stencil.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Common/VertexType.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Image/Format.hpp
@@ -139,6 +136,13 @@ set(OCRA_IMPL_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/VertexInputState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/ViewPortState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Shader/Stage.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/Error.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/Instance.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/OpenGL.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/PhysicalDevice.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/Surface.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/SwapChain.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/Window.hpp
 )
 set(OCRA_IMPL_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Buffer.cpp
@@ -148,7 +152,6 @@ set(OCRA_IMPL_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Memory.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/PhysicalDevice.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/QueryPool.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Surface.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/SwapChain.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Queue/Fence.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Queue/Queue.cpp
@@ -160,14 +163,19 @@ set(OCRA_IMPL_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Query.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Scissor.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/ViewPort.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Common/Error.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Common/DefaultPixelFormat.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Image/Image.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Image/View.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/Graphics.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/Pipeline.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Shader/Stage.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Shader/Module.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Win32/Error.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Win32/Instance.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Win32/OpenGL.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Win32/PhysicalDevice.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Win32/Surface.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Win32/SwapChain.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Win32/Window.cpp
 )
 
 add_library(OCRAImpl ${OCRA_IMPL_SOURCE_FILES} ${OCRA_IMPL_HEADER_FILES})

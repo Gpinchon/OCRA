@@ -1,16 +1,18 @@
 #include <SwapChain.hpp>
 #include <Image/Image.hpp>
 
-#include <GL/Common/Error.hpp>
 #include <GL/Queue/Semaphore.hpp>
 #include <GL/Queue/Queue.hpp>
 #include <GL/PhysicalDevice.hpp>
+#include <GL/SwapChain.hpp>
 #include <GL/Surface.hpp>
 #include <GL/Device.hpp>
 #include <GL/Image/Image.hpp>
 #include <GL/Image/Format.hpp>
 #include <GL/WeakHandle.hpp>
-#include <GL/wglew.h>
+#ifdef _WIN32
+#include <GL/Win32/SwapChain.hpp>
+#endif //_WIN32
 
 #include <stdexcept>
 
@@ -51,86 +53,40 @@ static inline auto CanRecycleOldSwapChainImages(
         && a_OldInfo.imageSharingMode == a_Info.imageSharingMode;
 }
 
-struct Impl
+Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
+    : info(a_Info)
+    , device(a_Device)
+    , realExtent(info.imageExtent)
 {
-    Impl(const Device::Handle& a_Device, const Info& a_Info)
-        : info(a_Info)
-        , device(a_Device)
-        , realExtent(info.imageExtent)
-    {
-        if (info.oldSwapchain != nullptr) {
-            frameBufferHandle = info.oldSwapchain->frameBufferHandle;
-            if (CanRecycleOldSwapChainImages(info.oldSwapchain->info, info.oldSwapchain->realExtent, info)) {
-                realExtent = info.oldSwapchain->realExtent;
-                images = info.oldSwapchain->images;
-            }
-            else images = CreateImages(a_Device, a_Info);
-            info.oldSwapchain->Retire();
-            info.oldSwapchain.reset();
-            return;
+    if (info.oldSwapchain != nullptr) {
+        frameBufferHandle = info.oldSwapchain->frameBufferHandle;
+        if (CanRecycleOldSwapChainImages(info.oldSwapchain->info, info.oldSwapchain->realExtent, info)) {
+            realExtent = info.oldSwapchain->realExtent;
+            images = info.oldSwapchain->images;
         }
-        a_Device->PushCommand(0, 0, [this] {
-            glGenFramebuffers(1, &frameBufferHandle);
-        }, true);
-        images = CreateImages(a_Device, a_Info);
+        else images = CreateImages(a_Device, a_Info);
+        info.oldSwapchain->Retire();
+        info.oldSwapchain.reset();
+        return;
     }
-    ~Impl() {
-        if (frameBufferHandle != 0)
-            device.lock()->PushCommand(0, 0, [frameBufferHandle = frameBufferHandle] {
-                glDeleteFramebuffers(1, &frameBufferHandle);
-            }, false);
-    }
-    void Retire() {
-        retired = true;
-        frameBufferHandle = 0;
-    }
-    void Present(const Queue::Handle& a_Queue, const uint32_t& a_ImageIndex) {
-        assert(!retired);
-        const auto deviceHandle = device.lock();
-        const auto physicalDevice = deviceHandle->physicalDevice.lock();
-        const auto hdc = HDC(std::static_pointer_cast<Surface::Win32::Impl>(info.surface)->hdc);
-        physicalDevice->SetDeviceHandle(hdc);
-        physicalDevice->SetSwapInterval(uint8_t(info.presentMode));
-        device.lock()->PushCommand(a_Queue->familyIndex, a_Queue->queueIndex, [this, imageIndex = a_ImageIndex, hdc] {
-            RECT windowRect;
-            GetWindowRect(
-                HWND(info.surface->nativeWindow),
-                &windowRect);
-            const auto windowWidth = windowRect.right - windowRect.left;
-            const auto windowHeight = windowRect.bottom - windowRect.top;
-            glBindFramebuffer(GL_READ_FRAMEBUFFER, frameBufferHandle);
-            glFramebufferTexture2D(
-                GL_READ_FRAMEBUFFER,
-                GL_COLOR_ATTACHMENT0,
-                GL_TEXTURE_2D,
-                images.at(imageIndex)->handle,
-                0);
-            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-            glBlitFramebuffer(
-                0,
-                0,
-                windowWidth,
-                windowHeight,
-                0,
-                0,
-                windowWidth,
-                windowHeight,
-                GL_COLOR_BUFFER_BIT,
-                GL_NEAREST);
-            glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-            WIN32_CHECK_ERROR(SwapBuffers(hdc));
-        }, true);
-    }
-    Info                        info;
-    const Device::WeakHandle    device;
-    bool                        retired{ false };
-    std::vector<Image::Handle>  images;
-    Extent2D                    realExtent;
-    uint32_t                    frameBufferHandle;
-};
+    a_Device->PushCommand(0, 0, [this] {
+        glGenFramebuffers(1, &frameBufferHandle);
+    }, true);
+    images = CreateImages(a_Device, a_Info);
+}
+
+Impl::~Impl() {
+    if (frameBufferHandle != 0)
+        device.lock()->PushCommand(0, 0, [frameBufferHandle = frameBufferHandle] {
+            glDeleteFramebuffers(1, &frameBufferHandle);
+        }, false);
+}
+
 Handle Create(const Device::Handle& a_Device, const Info& a_Info)
 {
-    return Handle(new Impl(a_Device, a_Info));
+#ifdef _WIN32
+    return Handle(new Win32::SwapChain::Impl(a_Device, a_Info));
+#endif //_WIN32
 }
 const std::vector<Image::Handle>& GetImages(const Device::Handle& a_Device, const Handle& a_SwapChain)
 {

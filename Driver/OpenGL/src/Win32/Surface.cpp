@@ -1,17 +1,12 @@
 #include <Surface.hpp>
-
-#include <GL/Common/DefaultPixelFormat.hpp>
-#include <GL/Instance.hpp>
-#include <GL/WeakHandle.hpp>
 #include <GL/Surface.hpp>
+#include <GL/WeakHandle.hpp>
+#include <GL/Win32/Surface.hpp>
+#include <GL/Win32/Window.hpp>
 
-#include <string>
-#include <stdexcept>
+#include <windows.h>
 
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Instance);
-
-#ifdef _WIN32
-#include <windows.h>
 
 namespace OCRA::Surface::Win32
 {
@@ -19,15 +14,21 @@ Impl::Impl(const Instance::Handle& a_Instance, const Info& a_Info)
 	: Surface::Impl(a_Instance, a_Info.hwnd, "Win32")
 	, hdc(GetDC(HWND(nativeWindow)))
 {
-	OCRA::Win32::SetDefaultPixelFormat(hdc);
+	Window::Win32::SetDefaultPixelFormat(hdc);
+}
+Impl::Impl(const void* a_WND)
+	: Surface::Impl(nullptr, a_WND, "Win32")
+	, hdc(GetDC(HWND(nativeWindow)))
+{
+	Window::Win32::SetDefaultPixelFormat(nativeWindow);
 }
 Impl::~Impl()
 {
 	ReleaseDC(HWND(nativeWindow), HDC(hdc));
+	DeleteDC(HDC(hdc));
 }
 Handle Create(const Instance::Handle& a_Instance, const Info& a_Info)
 {
 	return Handle(new Impl(a_Instance, a_Info));
 }
 }
-#endif

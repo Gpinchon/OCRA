@@ -9,7 +9,9 @@
 #include <functional>
 #include <cassert>
 
-OCRA_DECLARE_HANDLE(OCRA::Queue);
+OCRA_DECLARE_HANDLE(OCRA::Surface);
+OCRA_DECLARE_HANDLE(OCRA::Instance);
+OCRA_DECLARE_WEAK_HANDLE(OCRA::Instance);
 
 namespace OCRA::PhysicalDevice
 {
@@ -29,27 +31,29 @@ struct Queue
 };
 struct Impl
 {
-    Impl(void* const a_DeviceHandle);
-    ~Impl();
+    enum class Type {
+        Win32,
+        MaxValue
+    };
+    Impl(const Type& a_Type, const Instance::Handle& a_Instance, const void* a_ContextHandle);
     inline void PushCommand(
-        const uint32_t& a_FamilyIndex,
-        const uint32_t& a_QueueIndex,
         const Command& a_Command,
         const bool a_Synchronous)
     {
-        assert(a_FamilyIndex == 0);
-        assert(a_QueueIndex == 0);
         queue.PushCommand(a_Command, a_Synchronous);
     }
-    void SetDeviceHandle(void* const a_DeviceHandle);
-    void SetSwapInterval(const int8_t& a_SwapInterval);
-    int8_t              swapInterval{ 0 };
-    void*               deviceHandle;
+    void GetProperties();
+    void ResetSurface();
+    virtual void SetSurface(const Surface::Handle& a_Surface) = 0;
+    virtual void SwapBuffers(const uint8_t a_SwapInterval) = 0;
+    const Instance::WeakHandle instance;
+    const Type          type;
     const void*         contextHandle;
+    Surface::Handle     currentSurface;
+    int8_t              swapInterval{ -2 };
     Queue               queue;
     Properties          properties;
     Features            features;
     MemoryProperties    memoryProperties;
 };
-Handle Create(void* const a_DeviceHandle);
 }

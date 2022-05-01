@@ -1,42 +1,19 @@
 #include <PhysicalDevice.hpp>
 
-#include <GL/Common/DefaultPixelFormat.hpp>
-#include <GL/Common/Error.hpp>
-#include <GL/Instance.hpp>
 #include <GL/PhysicalDevice.hpp>
+#include <GL/Instance.hpp>
+#include <GL/Surface.hpp>
 #include <GL/glew.h>
-#include <GL/wglew.h>
 
 #include <stdexcept>
 #include <iostream>
+#include <sstream>
 
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Instance);
 
 namespace OCRA::PhysicalDevice
 {
 using Command = std::function<void()>;
-
-static inline auto CreateContext(const void* a_DeviceHandle)
-{
-    Win32::SetDefaultPixelFormat(a_DeviceHandle);
-    if (!WGLEW_ARB_create_context) throw std::runtime_error("Modern context creation not supported !");
-    if (!WGLEW_ARB_create_context_robustness) throw std::runtime_error("Robust context creation not supported !");
-    const int attribs[] =
-    {
-        WGL_CONTEXT_MAJOR_VERSION_ARB,  4,
-        WGL_CONTEXT_MINOR_VERSION_ARB,  3,
-        WGL_CONTEXT_PROFILE_MASK_ARB,   WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-#ifdef DEBUG
-        WGL_CONTEXT_FLAGS_ARB,          WGL_CONTEXT_ROBUST_ACCESS_BIT_ARB | WGL_CONTEXT_DEBUG_BIT_ARB,
-#else
-        WGL_CONTEXT_FLAGS_ARB,          WGL_CONTEXT_ROBUST_ACCESS_BIT_ARB,
-#endif //DEBUG
-        0
-    };
-    auto hglrc = wglCreateContextAttribsARB(HDC(a_DeviceHandle), 0, attribs); //commands execution context
-    WIN32_CHECK_ERROR(hglrc != nullptr);
-    return hglrc;
-}
 
 static inline auto GetInteger(const GLenum& state)
 {
@@ -323,20 +300,29 @@ void GLAPIENTRY MessageCallback(
     const GLchar* message,
     const void* userParam)
 {
-    std::cerr << "GL CALLBACK : " << (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "") << "\n" <<
-        " type     = " << type << "\n" <<
-        " severity = " << severity << "\n" <<
-        " message  = " << message << std::endl;
-    assert(type != GL_DEBUG_TYPE_ERROR);
+    if (type == GL_DEBUG_TYPE_ERROR)
+    {
+        std::stringstream ss;
+        ss << "GL CALLBACK : **GL ERROR * *\n" <<
+            " type     = " << type << "\n" <<
+            " severity = " << severity << "\n" <<
+            " message  = " << message;
+        std::cerr << ss.str() << std::endl;
+        throw std::runtime_error(ss.str());
+    }
 }
 
-Impl::Impl(void* const a_DeviceHandle)
-    : deviceHandle(a_DeviceHandle)
-    , contextHandle(CreateContext(deviceHandle))
+Impl::Impl(const Type& a_Type, const Instance::Handle& a_Instance, const void* a_ContextHandle)
+    : instance(a_Instance)
+    , type(a_Type)
+    , contextHandle(a_ContextHandle)
 {
     if (!GLEW_EXT_direct_state_access) throw std::runtime_error("Direct state access extension required !");
-    PushCommand(0, 0, [this] {
-        WIN32_CHECK_ERROR(wglMakeCurrent(HDC(deviceHandle), HGLRC(contextHandle)));
+}
+
+void Impl::GetProperties()
+{
+    PushCommand([this] {
 #ifdef DEBUG
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
         glDebugMessageCallback(MessageCallback, 0);
@@ -347,37 +333,11 @@ Impl::Impl(void* const a_DeviceHandle)
     }, true);
 }
 
-Impl::~Impl()
+void Impl::ResetSurface()
 {
-    PushCommand(0, 0, [this] {
-        wglMakeCurrent(nullptr, nullptr);
-    }, true);
-    wglDeleteContext(HGLRC(contextHandle));
+    SetSurface(instance.lock()->defaultSurface);
 }
 
-void Impl::SetDeviceHandle(void* const a_DeviceHandle)
-{
-    PushCommand(0, 0, [this, device = a_DeviceHandle] {
-        if (deviceHandle == device) return;
-        deviceHandle = device;
-        WIN32_CHECK_ERROR(wglMakeCurrent(HDC(deviceHandle), HGLRC(contextHandle)) != 0);
-        swapInterval = wglGetSwapIntervalEXT();
-    }, false);
-}
-
-void Impl::SetSwapInterval(const int8_t& a_SwapInterval)
-{
-    PushCommand(0, 0, [this, swap = a_SwapInterval] {
-        if (swapInterval == swap) return;
-        swapInterval = swap;
-        wglSwapIntervalEXT(swap);
-    }, false);
-}
-
-Handle Create(void* const a_DeviceHandle)
-{
-	return Handle(new Impl(a_DeviceHandle));
-}
 const MemoryProperties& GetMemoryProperties(const Handle& a_PhysicalDevice)
 {
     return a_PhysicalDevice->memoryProperties;

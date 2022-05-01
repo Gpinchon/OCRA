@@ -9,7 +9,6 @@
 
 #include <iostream>
 #include <vector>
-#include <windows.h>
 
 namespace OCRA
 {
@@ -112,11 +111,11 @@ void SubmitCommandBuffer(const Queue::Handle& a_Queue, const Command::Buffer::Ha
     Queue::Submit(a_Queue, { submitInfo });
 }
 
-Surface::Handle CreateSurface(const Instance::Handle& a_Instance, const void* a_HINSTANCE, const void* a_HWND)
+Surface::Handle CreateSurface(const Instance::Handle& a_Instance, void* const a_HINSTANCE, void* const a_HWND)
 {
     Surface::Win32::Info info{};
-    info.hinstance = HINSTANCE(a_HINSTANCE);
-    info.hwnd = HWND(a_HWND);
+    info.hinstance = a_HINSTANCE;
+    info.hwnd = a_HWND;
     return Surface::Win32::Create(a_Instance, info);
 }
 
