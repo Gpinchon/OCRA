@@ -2,7 +2,6 @@
 
 #include <GL/PhysicalDevice.hpp>
 #include <GL/Instance.hpp>
-#include <GL/Surface.hpp>
 #include <GL/glew.h>
 
 #include <stdexcept>
