@@ -14,13 +14,6 @@ Impl::Impl(const Instance::Handle& a_Instance, const Info& a_Info)
 	: Surface::Impl(a_Instance, a_Info.hwnd, "Win32")
 	, hdc(GetDC(HWND(nativeWindow)))
 {
-	Window::Win32::SetDefaultPixelFormat(hdc);
-}
-Impl::Impl(const void* a_WND)
-	: Surface::Impl(nullptr, a_WND, "Win32")
-	, hdc(GetDC(HWND(nativeWindow)))
-{
-	Window::Win32::SetDefaultPixelFormat(nativeWindow);
 }
 uiExtent2D Impl::GetExtent()
 {

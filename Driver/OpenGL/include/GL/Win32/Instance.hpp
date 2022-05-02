@@ -9,7 +9,7 @@ struct Impl : Instance::Impl
 	Impl(const Info& a_Info);
     ~Impl();
     //required for OGL context creation on Windows
-    void* dummyWindow;
+    void* hwnd;
 };
 Handle Create(const Info& a_Info);
 }

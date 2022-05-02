@@ -110,6 +110,7 @@ set(OCRA_IMPL_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/ObjectPool.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/PhysicalDevice.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Surface.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/SwapChain.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/WeakHandle.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Command/Buffer.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Command/ExecutionState.hpp
@@ -172,6 +173,7 @@ set(OCRA_IMPL_HEADER_FILES ${OCRA_IMPL_HEADER_FILES}
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/OpenGL.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/PhysicalDevice.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/Surface.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/SwapChain.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/Window.hpp
 )
 set(OCRA_IMPL_SOURCE_FILES ${OCRA_IMPL_SOURCE_FILES}
@@ -180,6 +182,7 @@ set(OCRA_IMPL_SOURCE_FILES ${OCRA_IMPL_SOURCE_FILES}
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Win32/OpenGL.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Win32/PhysicalDevice.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Win32/Surface.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Win32/SwapChain.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Win32/Window.cpp
 )
 endif(WIN32)

@@ -15,7 +15,6 @@ struct Impl
     Impl(const Info& a_Info);
     const uint32_t  id;
     const Info      info;
-    Surface::Handle defaultSurface;
     std::vector<PhysicalDevice::Handle> physicalDevices;
     static constexpr auto type{ "OpenGL" };
 };

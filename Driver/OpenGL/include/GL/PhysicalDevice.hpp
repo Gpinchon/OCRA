@@ -32,11 +32,7 @@ struct Queue
 };
 struct Impl
 {
-    enum class Type {
-        Win32,
-        MaxValue
-    };
-    Impl(const Type& a_Type, const Instance::Handle& a_Instance, const void* a_ContextHandle);
+    Impl(const Instance::Handle& a_Instance);
     inline void PushCommand(
         const Command& a_Command,
         const bool a_Synchronous)
@@ -44,17 +40,10 @@ struct Impl
         queue.PushCommand(a_Command, a_Synchronous);
     }
     void GetProperties();
-    void ResetSurface();
-    virtual void SetSurface(const Surface::Handle& a_Surface) = 0;
-    virtual void SwapBuffers(const uint8_t a_SwapInterval) = 0;
     const Instance::WeakHandle instance;
-    const Type          type;
-    const void*         contextHandle;
-    Surface::WeakHandle currentSurface;
-    int8_t              swapInterval{ -2 };
-    Queue               queue;
-    Properties          properties;
-    Features            features;
-    MemoryProperties    memoryProperties;
+    Queue                 queue;
+    Properties            properties;
+    Features              features;
+    MemoryProperties      memoryProperties;
 };
 }

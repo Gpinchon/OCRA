@@ -12,7 +12,7 @@ struct Impl : PhysicalDevice::Impl
 {
     Impl(const Instance::Handle& a_Instance);
     ~Impl();
-    virtual void SetSurface(const Surface::Handle& a_Surface) override;
-    virtual void SwapBuffers(const uint8_t a_SwapInterval) override;
+    const void* hdc;
+    void* contextHandle;
 };
 }

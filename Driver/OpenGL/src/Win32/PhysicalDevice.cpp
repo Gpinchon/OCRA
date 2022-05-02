@@ -1,8 +1,10 @@
 #include <GL/Instance.hpp>
+#include <GL/Win32/Instance.hpp>
 #include <GL/Win32/PhysicalDevice.hpp>
 #include <GL/Win32/OpenGL.hpp>
 #include <GL/Win32/Error.hpp>
 #include <GL/Win32/Surface.hpp>
+#include <GL/Surface.hpp>
 
 #include <GL/glew.h>
 #include <GL/wglew.h>
@@ -10,9 +12,14 @@
 namespace OCRA::PhysicalDevice::Win32
 {
 Impl::Impl(const Instance::Handle& a_Instance)
-    : PhysicalDevice::Impl(Type::Win32, a_Instance, OpenGL::Win32::CreateContext(std::static_pointer_cast<Surface::Win32::Impl>(a_Instance->defaultSurface)->hdc))
+    : PhysicalDevice::Impl(a_Instance)
+    , hdc(GetDC(HWND(std::static_pointer_cast<Instance::Win32::Impl>(a_Instance)->hwnd)))
 {
-    ResetSurface();
+    OpenGL::Win32::SetDefaultPixelFormat(hdc);
+    contextHandle = OpenGL::Win32::CreateContext(hdc);
+    PushCommand([this] {
+        WIN32_CHECK_ERROR(wglMakeCurrent(HDC(hdc), HGLRC(contextHandle)));
+    }, false);
     GetProperties();
 }
 Impl::~Impl()
@@ -21,26 +28,5 @@ Impl::~Impl()
         wglMakeCurrent(nullptr, nullptr);
     }, true);
     WIN32_CHECK_ERROR(wglDeleteContext(HGLRC(contextHandle)));
-}
-void Impl::SetSurface(const Surface::Handle& a_Surface)
-{
-    PushCommand([this, newSurface = a_Surface] {
-        if (newSurface != currentSurface.lock()) {
-            currentSurface = newSurface;
-            const auto hdc = HDC(std::static_pointer_cast<Surface::Win32::Impl>(currentSurface.lock())->hdc);
-            WIN32_CHECK_ERROR(wglMakeCurrent(hdc, HGLRC(contextHandle)));
-        }
-    }, false);
-}
-void Impl::SwapBuffers(const uint8_t a_SwapInterval)
-{
-    const auto hdc = HDC(std::static_pointer_cast<Surface::Win32::Impl>(currentSurface.lock())->hdc);
-    PushCommand([this, hdc, newSwapInterval = a_SwapInterval] {
-        if (newSwapInterval != swapInterval) {
-            swapInterval = newSwapInterval;
-            wglSwapIntervalEXT(swapInterval);
-        }
-        wglSwapLayerBuffers(hdc, WGL_SWAP_MAIN_PLANE);
-    }, true);
 }
 }

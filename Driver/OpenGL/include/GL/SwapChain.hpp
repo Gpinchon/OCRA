@@ -14,18 +14,15 @@ namespace OCRA::SwapChain
 struct Impl
 {
     Impl(const Device::Handle& a_Device, const Info& a_Info);
-    ~Impl();
     //retired SwapChains loose ownership of their FB and get unusable
-    void Retire() {
+    virtual void Retire() {
         retired = true;
-        frameBufferHandle = 0;
     }
-    void Present(const Queue::Handle& a_Queue, const uint32_t& a_ImageIndex);
+    virtual void Present(const Queue::Handle& a_Queue, const uint32_t& a_ImageIndex) = 0;
     Info                        info;
     const Device::WeakHandle    device;
     bool                        retired{ false };
     std::vector<Image::Handle>  images;
     Extent2D                    realExtent;
-    uint32_t                    frameBufferHandle;
 };
 }

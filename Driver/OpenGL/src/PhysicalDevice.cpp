@@ -312,10 +312,8 @@ void GLAPIENTRY MessageCallback(
     }
 }
 
-Impl::Impl(const Type& a_Type, const Instance::Handle& a_Instance, const void* a_ContextHandle)
+Impl::Impl(const Instance::Handle& a_Instance)
     : instance(a_Instance)
-    , type(a_Type)
-    , contextHandle(a_ContextHandle)
 {
     if (!GLEW_EXT_direct_state_access) throw std::runtime_error("Direct state access extension required !");
 }
@@ -331,11 +329,6 @@ void Impl::GetProperties()
         features = GetPhysicalDeviceFeaturesGL(properties);
         memoryProperties = GetMemoryPropertiesGL();
     }, true);
-}
-
-void Impl::ResetSurface()
-{
-    SetSurface(instance.lock()->defaultSurface);
 }
 
 const MemoryProperties& GetMemoryProperties(const Handle& a_PhysicalDevice)

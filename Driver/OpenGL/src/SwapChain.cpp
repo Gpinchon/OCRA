@@ -1,6 +1,8 @@
 #include <SwapChain.hpp>
 #include <Image/Image.hpp>
 
+#include <GL/Win32/SwapChain.hpp>
+
 #include <GL/Queue/Semaphore.hpp>
 #include <GL/Queue/Queue.hpp>
 #include <GL/PhysicalDevice.hpp>
@@ -59,63 +61,22 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
     , realExtent(info.imageExtent)
 {
     if (info.oldSwapchain != nullptr) {
-        frameBufferHandle = info.oldSwapchain->frameBufferHandle;
         if (CanRecycleOldSwapChainImages(info.oldSwapchain->info, info.oldSwapchain->realExtent, info)) {
             realExtent = info.oldSwapchain->realExtent;
             images = info.oldSwapchain->images;
         }
         else images = CreateImages(a_Device, a_Info);
-        info.oldSwapchain->Retire();
-        info.oldSwapchain.reset();
         return;
     }
-    a_Device->PushCommand([this] {
-        glGenFramebuffers(1, &frameBufferHandle);
-    }, true);
     images = CreateImages(a_Device, a_Info);
 }
 
-Impl::~Impl() {
-    if (frameBufferHandle != 0)
-        device.lock()->PushCommand([frameBufferHandle = frameBufferHandle] {
-            glDeleteFramebuffers(1, &frameBufferHandle);
-        }, false);
-}
-
-void Impl::Present(const Queue::Handle& a_Queue, const uint32_t& a_ImageIndex)
-{
-    assert(!retired);
-    const auto physicalDevice = device.lock()->physicalDevice.lock();
-    const auto surfaceRect = info.surface->GetExtent();
-    physicalDevice->SetSurface(info.surface);
-    a_Queue->PushCommand([this, imageIndex = a_ImageIndex, surfaceRect] {
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, frameBufferHandle);
-        glFramebufferTexture2D(
-            GL_READ_FRAMEBUFFER,
-            GL_COLOR_ATTACHMENT0,
-            GL_TEXTURE_2D,
-            images.at(imageIndex)->handle,
-            0);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-        glBlitFramebuffer(
-            0,
-            0,
-            surfaceRect.width,
-            surfaceRect.height,
-            0,
-            0,
-            surfaceRect.width,
-            surfaceRect.height,
-            GL_COLOR_BUFFER_BIT,
-            GL_NEAREST);
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-    }, false);
-    physicalDevice->SwapBuffers(info.presentMode);
-}
 
 Handle Create(const Device::Handle& a_Device, const Info& a_Info)
 {
-    return Handle(new Impl(a_Device, a_Info));
+#ifdef _WIN32
+    return Handle(new SwapChain::Win32::Impl(a_Device, a_Info));
+#endif //_WIN32
 }
 const std::vector<Image::Handle>& GetImages(const Device::Handle& a_Device, const Handle& a_SwapChain)
 {
