@@ -10,5 +10,7 @@ struct Extent<2, T> {
 	constexpr auto length() { return 2; }
 	struct { T width, height; };
 };
-typedef Extent<2, float> Extent2D;
+typedef Extent<2, float>    Extent2D;
+typedef Extent<2, int32_t>  iExtent2D;
+typedef Extent<2, uint32_t> uiExtent2D;
 }

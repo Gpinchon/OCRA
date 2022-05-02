@@ -33,10 +33,30 @@ bool recreateSwapChain = true;
 uint32_t width = 0;
 uint32_t height = 0;
 
+#include <Pipeline/Graphics.hpp>
+
+void CreateGraphicsPipeline()
+{
+    Pipeline::Graphics::Info graphicsPipelineInfo;
+    ViewPort viewport;
+    iRect2D  scissor;
+    viewport.rect.offset = { 0, 0 };
+    viewport.rect.extent = { width, height };
+    viewport.depthRange  = { 0, 1 };
+    scissor.offset = { 0, 0 };
+    scissor.extent = { width, height };
+    graphicsPipelineInfo.inputAssemblyState.primitiveRestartEnable = false;
+    graphicsPipelineInfo.viewPortState.viewPorts = { viewport };
+    graphicsPipelineInfo.viewPortState.scissors  = { scissor };
+    graphicsPipelineInfo.dynamicState.dynamicStates = { Pipeline::DynamicState::State::Viewport, Pipeline::DynamicState::State::Scissor };
+    //Everything else is left by default for now
+
+}
+
 int SwapChain()
 {
     int ret = 0;
-    const auto window = Window("Test_SwapChain", 1280, 720);
+    const auto window = Window("Test_GraphicsPipeline", 1280, 720);
     window.OnResize = [](const Window&, const uint32_t a_Width, const uint32_t a_Height){
         recreateSwapChain = true;
         width = a_Width;
@@ -46,7 +66,7 @@ int SwapChain()
         close = true;
     };
     //basic setup as usual
-    const auto instance = CreateInstance("Test_SwapChain");
+    const auto instance = CreateInstance("Test_GraphicsPipeline");
     const auto surface = CreateSurface(instance, GetModuleHandle(0), window->nativeHandle);
     const auto physicalDevice = Instance::EnumeratePhysicalDevices(instance).front();
     const auto device = CreateDevice(physicalDevice);
@@ -78,5 +98,5 @@ int SwapChain()
         SubmitCommandBuffer(queue, commandBuffer);
         SwapChain::Present(queue, presentInfo);
     }
-	return ret;
+    return ret;
 }

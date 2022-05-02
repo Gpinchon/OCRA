@@ -31,7 +31,7 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
         allocationFlags |= GL_MAP_COHERENT_BIT | GL_MAP_PERSISTENT_BIT;
         mapFlags |= GL_MAP_COHERENT_BIT;
     }
-    a_Device->PushCommand(0, 0, [this, allocationFlags] {
+    a_Device->PushCommand([this, allocationFlags] {
         glCreateBuffers(1, &handle);
         glNamedBufferStorageEXT(
             handle,
@@ -42,7 +42,7 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
 }
 Impl::~Impl()
 {
-    device.lock()->PushCommand(0, 0, [handle = handle] {
+    device.lock()->PushCommand([handle = handle] {
         glDeleteBuffers(1, &handle);
     }, false);
     
@@ -56,7 +56,7 @@ void* Map(
     const MappedRange&      a_MemoryRange)
 {
     void* ptr{ nullptr };
-    a_Device->PushCommand(0, 0, [a_MemoryRange, &ptr] {
+    a_Device->PushCommand([a_MemoryRange, &ptr] {
         ptr = glMapNamedBufferRangeEXT(
             a_MemoryRange.memory->handle,
             a_MemoryRange.offset,
@@ -69,7 +69,7 @@ void Unmap(
     const Device::Handle&  a_Device,
     const Handle&          a_Memory)
 {
-    a_Device->PushCommand(0, 0, [memory = a_Memory] {
+    a_Device->PushCommand([memory = a_Memory] {
         glUnmapNamedBufferEXT(memory->handle);
     }, false);
 }
@@ -77,7 +77,7 @@ void FlushMappedRanges(
     const Device::Handle&           a_Device,
     const std::vector<MappedRange>& a_Ranges)
 {
-    a_Device->PushCommand(0, 0, [ranges = a_Ranges] {
+    a_Device->PushCommand([ranges = a_Ranges] {
         for (const auto& range : ranges)
             glFlushMappedNamedBufferRangeEXT(
                 range.memory->handle,

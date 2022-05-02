@@ -47,7 +47,7 @@ GLenum GetGLType(const Type& a_Type)
 static inline auto CreateImageView(const Device::Handle& a_Device, const Info& a_Info)
 {
 	uint32_t handle = 0;
-	a_Device->PushCommand(0, 0, [&handle, a_Device, a_Info] {
+	a_Device->PushCommand([&handle, a_Device, a_Info] {
 		glGenTextures(1, &handle);
 		glTextureView(
 			handle,
@@ -72,7 +72,7 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
 {}
 Impl::~Impl()
 {
-	device.lock()->PushCommand(0, 0, [handle = handle] {
+	device.lock()->PushCommand([handle = handle] {
 		glDeleteTextures(1, &handle);
 	}, false);
 }

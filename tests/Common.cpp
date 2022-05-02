@@ -1,3 +1,4 @@
+#include <Common.hpp>
 #include <Instance.hpp>
 #include <PhysicalDevice.hpp>
 #include <Device.hpp>
@@ -12,6 +13,100 @@
 
 namespace OCRA
 {
+LRESULT CALLBACK TestWndproc(
+    HWND hwnd,        // handle to window
+    UINT uMsg,        // message identifier
+    WPARAM wParam,    // first message parameter
+    LPARAM lParam)    // second message parameter
+{
+    const auto window = GetWindowLongPtr(hwnd, GWLP_USERDATA);
+    switch (uMsg)
+    {
+    case WM_SIZE :
+        width = LOWORD(lParam);
+        height = HIWORD(lParam);
+        if (window->OnResize)
+            window->OnResize(*window, width, height);
+        break;
+    case WM_CLOSE:
+        if (window->OnClose)
+            window->OnClose(*window);
+        break;
+    case WM_CREATE:
+        if (window->OnCreate)
+            window->OnCreate(*window);
+        break;
+    default:
+        return DefWindowProc(hwnd, uMsg, wParam, lParam);
+    }
+    return 0;
+}
+struct WindowClass : WNDCLASSEX
+{
+    WindowClass()
+    {
+        std::memset(&this, 0, sizeof(wndclass));
+        cbSize = sizeof(wndclass);
+        style = CS_HREDRAW | CS_VREDRAW;
+        lpfnWndProc = TestWndproc;
+        hInstance = GetModuleHandle(0);
+        lpszClassName = "TestWindow";
+        if (!RegisterClassEx(&wndclass)) {
+            std::cerr << "Error in Function = " << __FUNCTION__ << " at line = " << __LINE__ << ", with error code = " << GetLastError() << std::endl;
+            throw std::runtime_error("Could not register window class");
+        }
+    }
+    ~WindowClass()
+    {
+        UnregisterClass(lpszClassName, hInstance);
+    }
+}
+
+static inline auto& GetWindowClass()
+{
+    static WindowClass wndclass;
+    return wndclass;
+}
+
+Window::Window(const std::string& name, const uint32_t width, const uint32_t height)
+{
+    const auto& wndclass = GetWindowClass();
+    const auto hwnd = CreateWindowEx(
+        0,
+        wndclass.lpszClassName,
+        "Test Window",
+        WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+        nullptr, nullptr, wndclass.hInstance, nullptr);
+    SetWindowLongPtr(hwnd, GWLP_USERDATA, this);
+    while (!created && PeekMessage(&msg, hwnd, 0, 0, PM_REMOVE))
+        DispatchMessage(&msg);
+    nativeHandle = hwnd;
+}
+
+Window::~Window()
+{
+    DestroyWindow(HWND(nativeHandle));
+}
+
+bool Window::PushEvents()
+{
+    MSG msg{ 0 };
+    while (PeekMessage(&msg, hwnd, 0, 0, PM_REMOVE))
+        DispatchMessage(&msg);
+}
+
+void Window::Show()
+{
+    ShowWindow(HWND(nativeHandle), SW_SHOWDEFAULT);
+    UpdateWindow(HWND(nativeHandle));
+}
+
+void Window::Update()
+{
+    UpdateWindow(HWND(nativeHandle));
+}
+
 //Create OCRA Instance
 Instance::Handle CreateInstance(const std::string& a_Name)
 {

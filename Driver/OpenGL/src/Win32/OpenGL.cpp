@@ -8,19 +8,19 @@
 
 namespace OCRA::OpenGL::Win32
 {
-static bool s_Initialized = false;
 void Initialize()
 {
-    if (s_Initialized) return;
+    static bool s_Initialized = false;
+    if (s_Initialized) return; //we only need to initialize OGL once for the whole execution
     WNDCLASSEX wndclass{};
     std::memset(&wndclass, 0, sizeof(wndclass));
     wndclass.cbSize = sizeof(wndclass);
     wndclass.style = CS_HREDRAW | CS_VREDRAW;
     wndclass.lpfnWndProc = DefWindowProc;
     wndclass.hInstance = GetModuleHandle(0);
-    wndclass.lpszClassName = "OpenGLWindow";
+    wndclass.lpszClassName = "OpenGL::Initialize";
     WIN32_CHECK_ERROR(RegisterClassEx(&wndclass));
-    const auto tempHWND = HWND(Window::Win32::Create("OpenGLWindow", "OpenGLWindow"));
+    const auto tempHWND = HWND(Window::Win32::Create("OpenGL::Initialize", "OpenGL::Initialize"));
     const auto tempDC = GetDC(tempHWND);
     {
         PIXELFORMATDESCRIPTOR pfd;
@@ -39,14 +39,14 @@ void Initialize()
     glewExperimental = true;
     WIN32_CHECK_ERROR(tempHGLRC != nullptr);
     WIN32_CHECK_ERROR(wglMakeCurrent(tempDC, tempHGLRC));
-    WIN32_CHECK_ERROR(glewInit() == GLEW_OK);
-    WIN32_CHECK_ERROR(wglewInit() == GLEW_OK);
+    WIN32_CHECK_ERROR(glewInit() == GLEW_OK); //load OGL extensions
+    WIN32_CHECK_ERROR(wglewInit() == GLEW_OK);//load WGL extensions
     wglMakeCurrent(nullptr, nullptr);
     wglDeleteContext(tempHGLRC);
     ReleaseDC(tempHWND, tempDC);
     DestroyWindow(tempHWND);
-    UnregisterClass("OpenGLWindow", GetModuleHandle(0));
-    s_Initialized = true;
+    UnregisterClass("OpenGL::Initialize", GetModuleHandle(0));
+    s_Initialized = true; //OGL was initialized, no need to do it again next time
 }
 void* CreateContext(const void* a_HDC)
 {
@@ -64,7 +64,7 @@ void* CreateContext(const void* a_HDC)
 #endif //DEBUG
         0
     };
-    auto hglrc = wglCreateContextAttribsARB(HDC(a_HDC), 0, attribs); //commands execution context
+    auto hglrc = wglCreateContextAttribsARB(HDC(a_HDC), 0, attribs);
     WIN32_CHECK_ERROR(hglrc != nullptr);
     return hglrc;
 }

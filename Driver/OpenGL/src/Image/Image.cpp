@@ -26,7 +26,7 @@ namespace OCRA::Image {
 static inline auto CreateTexture(const Device::Handle& a_Device)
 {
     uint32_t handle = 0;
-    a_Device->PushCommand(0, 0, [&handle] {
+    a_Device->PushCommand([&handle] {
         glGenTextures(1, &handle);
     }, true);
     return handle;
@@ -40,7 +40,7 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
     , handle(CreateTexture(a_Device))
 {}
 Impl::~Impl() {
-    device.lock()->PushCommand(0, 0, [handle = handle] {
+    device.lock()->PushCommand([handle = handle] {
         glDeleteTextures(1, &handle);
     }, false);
 }
@@ -94,7 +94,7 @@ struct Texture1D : Texture<Compressed>
         : Texture<Compressed>(a_Device, a_Info, GL_TEXTURE_1D)
     {
         if (info.samples == Samples::Samples1) {
-            device.lock()->PushCommand(0, 0, [this] {
+            device.lock()->PushCommand([this] {
                 Bind(); //initialize texture object
                 glTexStorage1D(
                     target,
@@ -136,7 +136,7 @@ struct Texture2D : Texture<Compressed>
     Texture2D(const Device::Handle& a_Device, const Info& a_Info)
         : Texture<Compressed>(a_Device, a_Info, a_Info.samples == Samples::Samples1 ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE)
     {
-        device.lock()->PushCommand(0, 0, [this] {
+        device.lock()->PushCommand([this] {
             Bind();//initialize texture object
             if (info.samples == Samples::Samples1)
                 glTexStorage2D(
@@ -189,7 +189,7 @@ struct Texture3D : Texture<Compressed>
     Texture3D(const Device::Handle& a_Device, const Info& a_Info)
     : Texture<Compressed>(a_Device, a_Info, a_Info.samples == Samples::Samples1 ? GL_TEXTURE_2D_ARRAY : GL_TEXTURE_2D_MULTISAMPLE_ARRAY)
     {
-        device.lock()->PushCommand(0, 0, [this] {
+        device.lock()->PushCommand([this] {
             Bind();//initialize texture object
             if (info.samples == Samples::Samples1)
                 glTexStorage3D(

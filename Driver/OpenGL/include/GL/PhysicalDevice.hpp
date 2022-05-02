@@ -12,6 +12,7 @@
 OCRA_DECLARE_HANDLE(OCRA::Surface);
 OCRA_DECLARE_HANDLE(OCRA::Instance);
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Instance);
+OCRA_DECLARE_WEAK_HANDLE(OCRA::Surface);
 
 namespace OCRA::PhysicalDevice
 {
@@ -49,7 +50,7 @@ struct Impl
     const Instance::WeakHandle instance;
     const Type          type;
     const void*         contextHandle;
-    Surface::Handle     currentSurface;
+    Surface::WeakHandle currentSurface;
     int8_t              swapInterval{ -2 };
     Queue               queue;
     Properties          properties;

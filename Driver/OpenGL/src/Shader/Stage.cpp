@@ -52,7 +52,7 @@ struct Impl {
             constantValue.push_back(value);
             constantIndex.push_back(entry.constantID);
         }
-        a_Device->PushCommand(0, 0, [this, moduleInfo = Module::GetInfo(info.module), constantIndex, constantValue] {
+        a_Device->PushCommand([this, moduleInfo = Module::GetInfo(info.module), constantIndex, constantValue] {
             const auto shader = glCreateShader(GetGLStage(info.stage));
             glProgramParameteri(program, GL_PROGRAM_SEPARABLE, GL_TRUE);
             //ARB_gl_spirv
@@ -70,7 +70,7 @@ struct Impl {
     }
     ~Impl()
     {
-        device.lock()->PushCommand(0, 0, [program = program] {
+        device.lock()->PushCommand([program = program] {
             glDeleteProgram(program);
         }, false);
     }

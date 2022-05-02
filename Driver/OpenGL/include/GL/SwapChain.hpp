@@ -15,11 +15,12 @@ struct Impl
 {
     Impl(const Device::Handle& a_Device, const Info& a_Info);
     ~Impl();
+    //retired SwapChains loose ownership of their FB and get unusable
     void Retire() {
         retired = true;
         frameBufferHandle = 0;
     }
-    virtual void Present(const Queue::Handle& a_Queue, const uint32_t& a_ImageIndex) = 0;
+    void Present(const Queue::Handle& a_Queue, const uint32_t& a_ImageIndex);
     Info                        info;
     const Device::WeakHandle    device;
     bool                        retired{ false };

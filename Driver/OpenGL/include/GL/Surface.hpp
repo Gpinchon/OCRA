@@ -2,10 +2,13 @@
 
 #include <Handle.hpp>
 #include <Surface.hpp>
+#include <Common/Rect2D.hpp>
 
 #include <GL/WeakHandle.hpp>
 
+#include <functional>
 #include <string>
+#include <vector>
 
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Instance);
 OCRA_DECLARE_HANDLE(OCRA::Instance);
@@ -19,6 +22,10 @@ struct Impl
         , instance(a_Instance)
         , nativeWindow(a_NativeWindow)
     {}
+    ~Impl() { if (onDestroy) onDestroy(this); }
+    //returns the nativeWindow drawing rect
+    uiRect2D GetRect() = 0;
+    std::function<void(Impl*)> onDestroy; //used to notify the PhysicalDevice
     const std::string type;
     const Instance::WeakHandle instance;
     const void* nativeWindow;

@@ -12,7 +12,7 @@ namespace OCRA::FrameBuffer {
 static inline auto CreateFrameBuffer(const Device::Handle& a_Device, const Info& a_Info)
 {
     GLuint handle = 0;
-    a_Device->PushCommand(0, 0, [a_Info, &handle] {
+    a_Device->PushCommand([a_Info, &handle] {
         glGenFramebuffers(1, &handle);
         glNamedFramebufferParameteriEXT(handle, GL_FRAMEBUFFER_DEFAULT_WIDTH, a_Info.extent.width);
         glNamedFramebufferParameteriEXT(handle, GL_FRAMEBUFFER_DEFAULT_HEIGHT, a_Info.extent.height);
@@ -34,7 +34,7 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
     , handle(CreateFrameBuffer(a_Device, a_Info))
 {}
 Impl::~Impl() {
-    device.lock()->PushCommand(0, 0, [handle = handle] {
+    device.lock()->PushCommand([handle = handle] {
         glDeleteFramebuffers(1, &handle);
     }, false);
 }

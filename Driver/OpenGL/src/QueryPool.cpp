@@ -23,7 +23,7 @@ static inline auto GetQueryObject64(GLuint a_ID, GLenum a_Parameter)
 static inline auto GenQueries(const Device::Handle& a_Device, const uint32_t& a_Count)
 {
     std::vector<GLuint> handles(a_Count);
-    a_Device->PushCommand(0, 0, [data = handles.data(), a_Count]{
+    a_Device->PushCommand([data = handles.data(), a_Count]{
         glGenQueries(a_Count, data);
     }, true);
     return handles;
@@ -63,7 +63,7 @@ Impl::Impl(const Device::Handle& a_Device, const uint32_t& a_Count, const std::v
 {}
 Impl::~Impl()
 {
-    device.lock()->PushCommand(0, 0, [handles = handles] {
+    device.lock()->PushCommand([handles = handles] {
         for (const auto& handle : handles)
             glDeleteQueries(1, &handle);
     }, true);
@@ -76,7 +76,7 @@ void Impl::GetResult(
         const size_t& a_Stride,
         const QueryResultFlags& a_Flags)
 {
-    device.lock()->PushCommand(0, 0, [
+    device.lock()->PushCommand([
         this,
         &a_FirstQuery,
         &a_QueryCount,
@@ -111,7 +111,7 @@ void PipelineStatistics::GetResult(
         const size_t& a_Stride,
         const QueryResultFlags& a_Flags)
 {
-    device.lock()->PushCommand(0, 0, [
+    device.lock()->PushCommand([
         this,
         &a_FirstQuery,
         &a_QueryCount,

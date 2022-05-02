@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 #include <bitset>
+#include <functional>
 
 OCRA_DECLARE_HANDLE(OCRA::Instance);
 OCRA_DECLARE_HANDLE(OCRA::PhysicalDevice);
@@ -38,6 +39,20 @@ struct VerboseTimer : Timer
 	}
 	const std::string name;
 };
+
+struct Window
+{
+	Window(const std::string& name, const uint32_t width, const uint32_t height);
+	~Window();
+	bool PushEvents();
+	void Show();
+	void Update();
+	std::function<void(const Window&, const uint32_t, const uint32_t)> OnResize;
+	std::function<void(const Window&)> OnClose;
+	std::function<void(const Window&)> OnCreate;
+	const void* nativeHandle;
+	bool created{ false };
+}
 
 //Create an instance with app name a_Name
 Instance::Handle CreateInstance(const std::string& a_Name);

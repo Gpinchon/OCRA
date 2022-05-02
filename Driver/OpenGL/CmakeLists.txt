@@ -172,7 +172,6 @@ set(OCRA_IMPL_HEADER_FILES ${OCRA_IMPL_HEADER_FILES}
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/OpenGL.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/PhysicalDevice.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/Surface.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/SwapChain.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/Window.hpp
 )
 set(OCRA_IMPL_SOURCE_FILES ${OCRA_IMPL_SOURCE_FILES}
@@ -181,17 +180,26 @@ set(OCRA_IMPL_SOURCE_FILES ${OCRA_IMPL_SOURCE_FILES}
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Win32/OpenGL.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Win32/PhysicalDevice.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Win32/Surface.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Win32/SwapChain.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Win32/Window.cpp
 )
 endif(WIN32)
+
+if (WIN32)
+find_library(D3D11_LIBRARY
+  NAMES d3d11.lib
+  PATHS "$ENV{DXSDK_DIR}/lib/x86"
+  DOC   "Where the D3D11 library resides"
+)
+endif (WIN32)
 
 add_library(OCRAImpl ${OCRA_IMPL_SOURCE_FILES} ${OCRA_IMPL_HEADER_FILES})
 target_include_directories(OCRAImpl PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}/include"
   "${CMAKE_CURRENT_SOURCE_DIR}/../../include"
 )
-target_link_libraries(OCRAImpl PUBLIC GLEW::GLEW)
+if (WIN32)
+target_link_libraries(OCRAImpl PUBLIC GLEW::GLEW D3D11_LIBRARY)
+endif (WIN32)
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 
