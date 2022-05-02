@@ -7,6 +7,7 @@ namespace OCRA::Surface::Win32
         Impl(const Instance::Handle& a_Instance, const Info& a_Info);
         Impl(const void* a_WND);
         ~Impl();
+        virtual uiExtent2D GetExtent() override;
         const void* hdc;
     };
 }

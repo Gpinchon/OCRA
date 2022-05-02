@@ -24,12 +24,10 @@ Impl::~Impl()
 }
 void Impl::SetSurface(const Surface::Handle& a_Surface)
 {
-    const auto hdc = HDC(std::static_pointer_cast<Surface::Win32::Impl>(currentSurface.lock())->hdc);
-    PushCommand([this, hdc, newSurface = a_Surface] {
-        if (newSurface != currentSurface) {
-            currentSurface.onDestroy = {};
+    PushCommand([this, newSurface = a_Surface] {
+        if (newSurface != currentSurface.lock()) {
             currentSurface = newSurface;
-            currentSurface.onDestroy = [this](Surface::Impl*){ ResetSurface(); };
+            const auto hdc = HDC(std::static_pointer_cast<Surface::Win32::Impl>(currentSurface.lock())->hdc);
             WIN32_CHECK_ERROR(wglMakeCurrent(hdc, HGLRC(contextHandle)));
         }
     }, false);

@@ -10,24 +10,25 @@
 
 #include <iostream>
 #include <vector>
+#include <windows.h>
 
-namespace OCRA
-{
 LRESULT CALLBACK TestWndproc(
     HWND hwnd,        // handle to window
     UINT uMsg,        // message identifier
     WPARAM wParam,    // first message parameter
     LPARAM lParam)    // second message parameter
 {
-    const auto window = GetWindowLongPtr(hwnd, GWLP_USERDATA);
+    const auto window = (OCRA::Window*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
+    if (window == nullptr) return DefWindowProc(hwnd, uMsg, wParam, lParam);
     switch (uMsg)
     {
-    case WM_SIZE :
-        width = LOWORD(lParam);
-        height = HIWORD(lParam);
+    case WM_SIZE: {
+        const auto width = LOWORD(lParam);
+        const auto height = HIWORD(lParam);
         if (window->OnResize)
             window->OnResize(*window, width, height);
         break;
+    }
     case WM_CLOSE:
         if (window->OnClose)
             window->OnClose(*window);
@@ -41,17 +42,21 @@ LRESULT CALLBACK TestWndproc(
     }
     return 0;
 }
+
+namespace OCRA
+{
+
 struct WindowClass : WNDCLASSEX
 {
     WindowClass()
     {
-        std::memset(&this, 0, sizeof(wndclass));
-        cbSize = sizeof(wndclass);
+        std::memset(this, 0, sizeof(WindowClass));
+        cbSize = sizeof(WindowClass);
         style = CS_HREDRAW | CS_VREDRAW;
         lpfnWndProc = TestWndproc;
         hInstance = GetModuleHandle(0);
         lpszClassName = "TestWindow";
-        if (!RegisterClassEx(&wndclass)) {
+        if (!RegisterClassEx(this)) {
             std::cerr << "Error in Function = " << __FUNCTION__ << " at line = " << __LINE__ << ", with error code = " << GetLastError() << std::endl;
             throw std::runtime_error("Could not register window class");
         }
@@ -60,7 +65,7 @@ struct WindowClass : WNDCLASSEX
     {
         UnregisterClass(lpszClassName, hInstance);
     }
-}
+};
 
 static inline auto& GetWindowClass()
 {
@@ -78,9 +83,10 @@ Window::Window(const std::string& name, const uint32_t width, const uint32_t hei
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
         nullptr, nullptr, wndclass.hInstance, nullptr);
-    SetWindowLongPtr(hwnd, GWLP_USERDATA, this);
+    MSG msg{ 0 };
     while (!created && PeekMessage(&msg, hwnd, 0, 0, PM_REMOVE))
         DispatchMessage(&msg);
+    SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)this);
     nativeHandle = hwnd;
 }
 
@@ -89,10 +95,10 @@ Window::~Window()
     DestroyWindow(HWND(nativeHandle));
 }
 
-bool Window::PushEvents()
+void Window::PushEvents()
 {
     MSG msg{ 0 };
-    while (PeekMessage(&msg, hwnd, 0, 0, PM_REMOVE))
+    while (PeekMessage(&msg, HWND(nativeHandle), 0, 0, PM_REMOVE))
         DispatchMessage(&msg);
 }
 

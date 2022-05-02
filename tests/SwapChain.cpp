@@ -36,7 +36,7 @@ uint32_t height = 0;
 int SwapChain()
 {
     int ret = 0;
-    const auto window = Window("Test_SwapChain", 1280, 720);
+    auto window = Window("Test_SwapChain", 1280, 720);
     window.OnResize = [](const Window&, const uint32_t a_Width, const uint32_t a_Height){
         recreateSwapChain = true;
         width = a_Width;
@@ -47,7 +47,7 @@ int SwapChain()
     };
     //basic setup as usual
     const auto instance = CreateInstance("Test_SwapChain");
-    const auto surface = CreateSurface(instance, GetModuleHandle(0), window->nativeHandle);
+    const auto surface = CreateSurface(instance, GetModuleHandle(0), (void*)window.nativeHandle);
     const auto physicalDevice = Instance::EnumeratePhysicalDevices(instance).front();
     const auto device = CreateDevice(physicalDevice);
     const auto queueFamily = FindQueueFamily(physicalDevice, PhysicalDevice::QueueFlagsBits::Transfer);

@@ -86,7 +86,7 @@ void Impl::Present(const Queue::Handle& a_Queue, const uint32_t& a_ImageIndex)
 {
     assert(!retired);
     const auto physicalDevice = device.lock()->physicalDevice.lock();
-    const auto surfaceRect = info.surface->GetRect();
+    const auto surfaceRect = info.surface->GetExtent();
     physicalDevice->SetSurface(info.surface);
     a_Queue->PushCommand([this, imageIndex = a_ImageIndex, surfaceRect] {
         glBindFramebuffer(GL_READ_FRAMEBUFFER, frameBufferHandle);

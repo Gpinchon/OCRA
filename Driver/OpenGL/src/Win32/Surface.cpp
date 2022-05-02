@@ -22,12 +22,12 @@ Impl::Impl(const void* a_WND)
 {
 	Window::Win32::SetDefaultPixelFormat(nativeWindow);
 }
-uiRect2D Impl::GetRect()
+uiExtent2D Impl::GetExtent()
 {
-	uiRect2D rect2D;
+	uiExtent2D rect2D;
 	RECT windowRect;
     GetWindowRect(
-        HWND(info.surface->nativeWindow),
+        HWND(nativeWindow),
         &windowRect);
     rect2D.width = windowRect.right - windowRect.left;
     rect2D.height = windowRect.bottom - windowRect.top;
