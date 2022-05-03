@@ -9,8 +9,6 @@
 
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
 
-#include <semaphore>
-
 namespace OCRA::Memory
 {
 Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
