@@ -16,6 +16,7 @@
 #include <vector>
 
 OCRA_DECLARE_HANDLE(OCRA::RenderPass);
+OCRA_DECLARE_HANDLE(OCRA::Device);
 
 namespace OCRA::RenderPass
 {

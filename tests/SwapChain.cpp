@@ -101,7 +101,7 @@ int SwapChain()
     uint32_t frameIndex = 0;
     bool close = false;
 
-    window.OnResize = [&swapChain, &presentInfo](const Window&, const uint32_t a_Width, const uint32_t a_Height) {
+    window.OnResize = [&device, &surface, &swapChain, &presentInfo](const Window&, const uint32_t a_Width, const uint32_t a_Height) {
         swapChain = CreateSwapChain(device, surface, swapChain, a_Width, a_Height, SWAPCHAIN_IMAGE_NBR);
         presentInfo.swapChains = { swapChain };
     };

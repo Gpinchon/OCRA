@@ -218,7 +218,7 @@ struct QueueFamilyProperties {
     QueueFlags  queueFlags{ QueueFlagsBits::None };
     uint32_t    queueCount{ 0 };
     uint32_t    timestampValidBits{ 0 };
-    Extent3D    minImageTransferGranularity;
+    Extent3D    minImageTransferGranularity{};
 };
 const std::vector<QueueFamilyProperties> GetQueueFamilyProperties(const Handle& a_PhysicalDevice);
 

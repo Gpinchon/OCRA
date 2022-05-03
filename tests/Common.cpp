@@ -25,6 +25,7 @@ LRESULT CALLBACK TestWndproc(
     case WM_PAINT :
         if (window->OnPaint)
             window->OnPaint(*window);
+        return DefWindowProc(hwnd, uMsg, wParam, lParam);
         break;
     case WM_SIZE:
         if (window->OnResize)
