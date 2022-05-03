@@ -10,50 +10,6 @@
 
 namespace OCRA::SwapChain::Win32
 {
-struct PresentObject
-{
-    PresentObject(IDXGISwapChain* a_SwapChainD3D, ID3D10Device* a_DeviceD3D, const DXGI_FORMAT& a_Format, bool a_Synchronize)
-        : device(a_DeviceD3D)
-        , swapChain(a_SwapChainD3D)
-        , synchronize(a_Synchronize)
-    {
-        WIN32_CHECK_ERROR(S_OK == swapChain->GetBuffer(0, __uuidof(ID3D10Texture2D), (void**)&colorBuffer));
-        WIN32_CHECK_ERROR(colorBuffer != nullptr);
-        D3D10_RENDER_TARGET_VIEW_DESC rtvDescription{};
-        rtvDescription.Format = a_Format;
-        rtvDescription.ViewDimension = D3D10_RTV_DIMENSION_TEXTURE2D;
-        rtvDescription.Texture2D.MipSlice = 0;
-        device->CreateRenderTargetView(
-            colorBuffer,
-            &rtvDescription,
-            &colorBufferView
-        );
-        device->OMSetRenderTargets(1, &colorBufferView, nullptr);
-    }
-    ~PresentObject()
-    {
-        colorBuffer->Release();
-        colorBufferView->Release();
-        WIN32_CHECK_ERROR(S_OK == swapChain->Present(
-            synchronize ? 1 : 0,
-            0
-        ));
-    }
-    inline uiExtent2D GetExtent() const {
-        D3D10_TEXTURE2D_DESC desc{};
-        colorBuffer->GetDesc(&desc);
-        return { desc.Width, desc.Height };
-    }
-    inline auto GetColorBuffer() const {
-        return colorBuffer;
-    }
-    const bool              synchronize;
-    IDXGISwapChain* const   swapChain;
-    ID3D10Device* const     device;
-    ID3D10Texture2D*        colorBuffer{ nullptr };
-    ID3D10RenderTargetView* colorBufferView{ nullptr };
-};
-
 struct D3DContainer
 {
     D3DContainer(const Info& a_Info)
@@ -73,7 +29,7 @@ struct D3DContainer
 #else
         uint32_t flags = 0;
 #endif //DEBUG
-        D3D10CreateDeviceAndSwapChain(
+        WIN32_CHECK_ERROR(S_OK == D3D10CreateDeviceAndSwapChain(
             nullptr,                   //Adapter
             D3D10_DRIVER_TYPE_HARDWARE,//Driver Type
             nullptr,                   //Software
@@ -82,15 +38,11 @@ struct D3DContainer
             &swapChainDesc,            //SwapChain Description
             &swapChain,             //SwapChain PTR
             &device                 //Device PTR
-        );
+        ));
     }
     ~D3DContainer() {
         swapChain->Release();
         device->Release();
-    }
-    inline auto CreatePresentObject()
-    {
-        return PresentObject(swapChain, device, format, synchronize);
     }
     inline void ResizeBuffers(const Info& a_Info)
     {
@@ -106,5 +58,43 @@ struct D3DContainer
     const DXGI_FORMAT format;
     IDXGISwapChain*   swapChain{ nullptr };
     ID3D10Device*     device{ nullptr };
+};
+struct PresentObject
+{
+    PresentObject(D3DContainer* a_Container) : container(a_Container)
+    {
+        WIN32_CHECK_ERROR(S_OK == container->swapChain->GetBuffer(0, __uuidof(ID3D10Texture2D), (void**)&colorBuffer));
+        WIN32_CHECK_ERROR(colorBuffer != nullptr);
+        D3D10_RENDER_TARGET_VIEW_DESC rtvDescription{};
+        rtvDescription.Format = container->format;
+        rtvDescription.ViewDimension = D3D10_RTV_DIMENSION_TEXTURE2D;
+        rtvDescription.Texture2D.MipSlice = 0;
+        WIN32_CHECK_ERROR(S_OK == container->device->CreateRenderTargetView(
+            colorBuffer,
+            &rtvDescription,
+            &colorBufferView
+        ));
+        container->device->OMSetRenderTargets(1, &colorBufferView, nullptr);
+        WIN32_CHECK_ERROR(colorBufferView != nullptr);
+    }
+    ~PresentObject()
+    {
+        colorBuffer->Release();
+        colorBufferView->Release();
+        WIN32_CHECK_ERROR(S_OK == container->swapChain->Present(
+            container->synchronize ? 1 : 0, 0
+        ));
+    }
+    inline uiExtent2D GetExtent() const {
+        D3D10_TEXTURE2D_DESC desc{};
+        colorBuffer->GetDesc(&desc);
+        return { desc.Width, desc.Height };
+    }
+    inline auto GetColorBuffer() const {
+        return colorBuffer;
+    }
+    D3DContainer* const     container;
+    ID3D10Texture2D* colorBuffer{ nullptr };
+    ID3D10RenderTargetView* colorBufferView{ nullptr };
 };
 }

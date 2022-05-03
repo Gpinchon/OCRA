@@ -52,7 +52,7 @@ Impl::~Impl()
 void Impl::Present(const Queue::Handle& a_Queue, const uint32_t& a_ImageIndex)
 {
     assert(!retired);
-    const auto presentObject = d3dContainer->CreatePresentObject();
+    const auto presentObject = PresentObject(d3dContainer);
     a_Queue->PushCommand([this, imageIndex = a_ImageIndex, colorBuffer = presentObject.GetColorBuffer(), extent = presentObject.GetExtent()]{
         auto colorBufferHandle = wglDXRegisterObjectNV(glHandleD3D, colorBuffer, renderTextureHandle, GL_TEXTURE_2D, WGL_ACCESS_WRITE_DISCARD_NV);
         WIN32_CHECK_ERROR(colorBufferHandle != nullptr);

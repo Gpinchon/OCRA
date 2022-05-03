@@ -1,5 +1,7 @@
 #pragma once
 
+#include <SwapChain.hpp>
+
 #include <GL/Surface.hpp>
 #include <GL/Win32/DXGIFormat.hpp>
 #include <GL/Win32/Error.hpp>
@@ -8,52 +10,6 @@
 
 namespace OCRA::SwapChain::Win32
 {
-struct PresentObject
-{
-    PresentObject(IDXGISwapChain* a_SwapChain, ID3D11Device* a_Device, ID3D11DeviceContext* a_DeviceContext, const DXGI_FORMAT& a_Format, bool a_Synchronize)
-        : device(a_Device)
-        , deviceContext(a_DeviceContext)
-        , swapChain(a_SwapChain)
-        , synchronize(a_Synchronize)
-    {
-        WIN32_CHECK_ERROR(S_OK == swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&colorBuffer));
-        WIN32_CHECK_ERROR(colorBuffer != nullptr);
-        D3D11_RENDER_TARGET_VIEW_DESC rtvDescription{};
-        rtvDescription.Format = a_Format;
-        rtvDescription.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
-        rtvDescription.Texture2D.MipSlice = 0;
-        device->CreateRenderTargetView(
-            colorBuffer,
-            &rtvDescription,
-            &colorBufferView
-        );
-        deviceContext->OMSetRenderTargets(1, &colorBufferView, nullptr);
-    }
-    ~PresentObject()
-    {
-        colorBuffer->Release();
-        colorBufferView->Release();
-        WIN32_CHECK_ERROR(S_OK == swapChain->Present(
-            synchronize ? 1 : 0,
-            0
-        ));
-    }
-    inline uiExtent2D GetExtent() const {
-        D3D11_TEXTURE2D_DESC desc{};
-        colorBuffer->GetDesc(&desc);
-        return { desc.Width, desc.Height };
-    }
-    inline auto GetColorBuffer() const {
-        return colorBuffer;
-    }
-    const bool                  synchronize;
-    IDXGISwapChain* const       swapChain;
-    ID3D11Device* const         device;
-    ID3D11DeviceContext* const  deviceContext;
-    ID3D11Texture2D*            colorBuffer{ nullptr };
-    ID3D11RenderTargetView*     colorBufferView{ nullptr };
-};
-
 struct D3DContainer
 {
     D3DContainer(const Info& a_Info)
@@ -73,7 +29,7 @@ struct D3DContainer
 #else
         uint32_t flags = 0;
 #endif //DEBUG
-        D3D11CreateDeviceAndSwapChain(
+        WIN32_CHECK_ERROR(S_OK == D3D11CreateDeviceAndSwapChain(
             nullptr,                  //Adapter
             D3D_DRIVER_TYPE_HARDWARE, //Driver Type
             nullptr,                  //Software
@@ -86,15 +42,12 @@ struct D3DContainer
             &device,                  //Device PTR
             nullptr,                  //Feature Level
             &deviceContext            //Immediat Context
-        );
+        ));
     }
     ~D3DContainer() {
         swapChain->Release();
         device->Release();
-    }
-    inline auto CreatePresentObject()
-    {
-        return PresentObject(swapChain, device, deviceContext, format, synchronize);
+        deviceContext->Release();
     }
     inline void ResizeBuffers(const Info& a_Info)
     {
@@ -111,5 +64,43 @@ struct D3DContainer
     IDXGISwapChain*      swapChain{ nullptr };
     ID3D11Device*        device{ nullptr };
     ID3D11DeviceContext* deviceContext{ nullptr };
+};
+struct PresentObject
+{
+    PresentObject(D3DContainer* a_Container) : container(a_Container)
+    {
+        WIN32_CHECK_ERROR(S_OK == container->swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&colorBuffer));
+        WIN32_CHECK_ERROR(colorBuffer != nullptr);
+        D3D11_RENDER_TARGET_VIEW_DESC rtvDescription{};
+        rtvDescription.Format = container->format;
+        rtvDescription.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+        rtvDescription.Texture2D.MipSlice = 0;
+        WIN32_CHECK_ERROR(S_OK == container->device->CreateRenderTargetView(
+            colorBuffer,
+            &rtvDescription,
+            &colorBufferView
+        ));
+        container->deviceContext->OMSetRenderTargets(1, &colorBufferView, nullptr);
+        WIN32_CHECK_ERROR(colorBufferView != nullptr);
+    }
+    ~PresentObject()
+    {
+        colorBuffer->Release();
+        colorBufferView->Release();
+        WIN32_CHECK_ERROR(S_OK == container->swapChain->Present(
+            container->synchronize ? 1 : 0, 0
+        ));
+    }
+    inline uiExtent2D GetExtent() const {
+        D3D11_TEXTURE2D_DESC desc{};
+        colorBuffer->GetDesc(&desc);
+        return { desc.Width, desc.Height };
+    }
+    inline auto GetColorBuffer() const {
+        return colorBuffer;
+    }
+    D3DContainer* const     container;
+    ID3D11Texture2D*        colorBuffer{ nullptr };
+    ID3D11RenderTargetView* colorBufferView{ nullptr };
 };
 }
