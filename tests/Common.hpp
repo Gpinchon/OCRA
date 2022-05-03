@@ -49,7 +49,7 @@ struct Window
 	void Update();
 	std::function<void(const Window&, const uint32_t, const uint32_t)> OnResize;
 	std::function<void(const Window&)> OnClose;
-	std::function<void(const Window&)> OnCreate;
+	std::function<void(const Window&)> OnPaint;
 	const void* nativeHandle;
 	bool created{ false };
 };

@@ -46,7 +46,8 @@ void ExecuteCommandBuffer(
 void OCRA::Command::Buffer::Impl::Reset()
 {
     assert(
-        state == State::Recording ||
+        state == State::Initial    ||
+        state == State::Recording  ||
         state == State::Executable ||
         state == State::Invalid
     );
@@ -59,7 +60,7 @@ void OCRA::Command::Buffer::Impl::Reset()
 void OCRA::Command::Buffer::Impl::Invalidate()
 {
     assert(
-        state == State::Recording ||
+        state == State::Recording  ||
         state == State::Executable ||
         state == State::Pending
     );

@@ -22,20 +22,17 @@ LRESULT CALLBACK TestWndproc(
     if (window == nullptr) return DefWindowProc(hwnd, uMsg, wParam, lParam);
     switch (uMsg)
     {
-    case WM_SIZE: {
-        const auto width = LOWORD(lParam);
-        const auto height = HIWORD(lParam);
-        if (window->OnResize)
-            window->OnResize(*window, width, height);
+    case WM_PAINT :
+        if (window->OnPaint)
+            window->OnPaint(*window);
         break;
-    }
+    case WM_SIZE:
+        if (window->OnResize)
+            window->OnResize(*window, LOWORD(lParam), HIWORD(lParam));
+        break;
     case WM_CLOSE:
         if (window->OnClose)
             window->OnClose(*window);
-        break;
-    case WM_CREATE:
-        if (window->OnCreate)
-            window->OnCreate(*window);
         break;
     default:
         return DefWindowProc(hwnd, uMsg, wParam, lParam);
@@ -84,8 +81,10 @@ Window::Window(const std::string& name, const uint32_t width, const uint32_t hei
         CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
         nullptr, nullptr, wndclass.hInstance, nullptr);
     MSG msg{ 0 };
-    while (!created && PeekMessage(&msg, hwnd, 0, 0, PM_REMOVE))
+    while (PeekMessage(&msg, hwnd, 0, 0, PM_REMOVE)) {
         DispatchMessage(&msg);
+        if (msg.message == WM_CREATE) break;
+    }
     SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)this);
     nativeHandle = hwnd;
 }

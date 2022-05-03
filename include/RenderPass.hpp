@@ -7,7 +7,6 @@
 #pragma once
 
 #include <Common/Rect2D.hpp>
-#include <Framebuffer.hpp>
 #include <Handle.hpp>
 #include <Image/Format.hpp>
 #include <Image/Layout.hpp>

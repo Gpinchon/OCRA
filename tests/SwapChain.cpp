@@ -82,23 +82,10 @@ static inline auto RecordClearCommandBuffer(Command::Buffer::Handle a_CommandBuf
     Command::Buffer::End(a_CommandBuffer);
 }
 
-bool close = false;
-bool recreateSwapChain = true;
-uint32_t width = 0;
-uint32_t height = 0;
-
 int SwapChain()
 {
     int ret = 0;
     auto window = Window("Test_SwapChain", 1280, 720);
-    window.OnResize = [](const Window&, const uint32_t a_Width, const uint32_t a_Height){
-        recreateSwapChain = true;
-        width = a_Width;
-        height = a_Height;
-    };
-    window.OnClose = [](const Window&) {
-        close = true;
-    };
     //basic setup as usual
     const auto instance = CreateInstance("Test_SwapChain");
     const auto surface = CreateSurface(instance, GetModuleHandle(0), (void*)window.nativeHandle);
@@ -108,28 +95,29 @@ int SwapChain()
     const auto queue = Device::GetQueue(device, queueFamily, 0); //Get first available queue
     const auto commandPool = CreateCommandPool(device, queueFamily);
 
-    Command::Buffer::Handle commandBuffer;
+    Command::Buffer::Handle clearCommandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Primary);
     SwapChain::Handle       swapChain;
     SwapChain::PresentInfo  presentInfo;
     uint32_t frameIndex = 0;
-    
+    bool close = false;
+
+    window.OnResize = [&swapChain, &presentInfo](const Window&, const uint32_t a_Width, const uint32_t a_Height) {
+        swapChain = CreateSwapChain(device, surface, swapChain, a_Width, a_Height, SWAPCHAIN_IMAGE_NBR);
+        presentInfo.swapChains = { swapChain };
+    };
+    window.OnClose = [&close](const Window&) {
+        close = true;
+    };
     window.Show();
-    while (!close) {
+    while (true) {
         window.PushEvents();
+        if (close) break;
         const auto swapChainImageIndex = frameIndex++ % SWAPCHAIN_IMAGE_NBR;
         presentInfo.imageIndices = { swapChainImageIndex };
-        if (recreateSwapChain)
-        {
-            recreateSwapChain = false;
-            swapChain = CreateSwapChain(device, surface, swapChain, width, height, SWAPCHAIN_IMAGE_NBR);
-            presentInfo.swapChains = { swapChain };
-        }
         const auto swapChainImage = SwapChain::GetImages(device, swapChain).at(swapChainImageIndex);
-        if (commandBuffer == nullptr)
-            commandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Primary);
-        else Command::Buffer::Reset(commandBuffer);
-        RecordClearCommandBuffer(commandBuffer, swapChainImage);
-        SubmitCommandBuffer(queue, commandBuffer);
+        Command::Buffer::Reset(clearCommandBuffer);
+        RecordClearCommandBuffer(clearCommandBuffer, swapChainImage);
+        SubmitCommandBuffer(queue, clearCommandBuffer);
         SwapChain::Present(queue, presentInfo);
     }
 	return ret;

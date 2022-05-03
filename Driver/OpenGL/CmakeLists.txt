@@ -190,10 +190,10 @@ endif(WIN32)
 message(STATUS "DX SDK" $ENV{DXSDK_DIR})
 
 if (WIN32)
-find_library(D3D11_LIBRARY
-  NAMES d3d11.lib
+find_library(D3D10_LIBRARY
+  NAMES d3d10.lib
   PATHS "$ENV{DXSDK_DIR}/Lib/x64"
-  DOC   "Where the D3D11 library resides"
+  DOC   "Where the D3D10 library resides"
 )
 endif (WIN32)
 
@@ -204,7 +204,7 @@ target_include_directories(OCRAImpl PRIVATE
 )
 
 if (WIN32)
-target_link_libraries(OCRAImpl PUBLIC GLEW::GLEW ${D3D11_LIBRARY})
+target_link_libraries(OCRAImpl PUBLIC GLEW::GLEW ${D3D10_LIBRARY})
 endif (WIN32)
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
