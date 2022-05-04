@@ -47,7 +47,6 @@ struct AttachmentReference {
 };
 
 struct SubPassDescription {
-	constexpr static auto MaxAttachments = 32;
 	Pipeline::BindingPoint pipelineBindPoint{ Pipeline::BindingPoint::Unknown };
 	std::vector<AttachmentReference> inputAttachments;
 	std::vector<AttachmentReference> colorAttachments;

@@ -47,16 +47,12 @@ Handle Create(const Device::Handle& a_Device, const Info& a_Info);
 
 #include <Buffer.hpp>
 #include <Common/Offset3D.hpp>
+#include <Common/ColorValue.hpp>
 #include <Command/Buffer.hpp>
 #include <Image/Layout.hpp>
 
 namespace OCRA::Image
 {
-union ClearColor {
-    float       float32[4];
-    int32_t     int32[4];
-    uint32_t    uint32[4];
-};
 namespace Subresource
 {
 struct Layers {
@@ -79,7 +75,6 @@ struct Range {
 
 namespace OCRA::Command
 {
-
 struct BufferImageCopy {
     uint64_t bufferOffset{ 0 };
     uint32_t bufferRowLength{ 0 };
@@ -102,6 +97,6 @@ void ClearColorImage(
     const Command::Buffer::Handle&  a_CommandBuffer,
     const Image::Handle&            a_Image,
     const Image::Layout&            a_ImageLayout,
-    const Image::ClearColor&        a_Color,
+    const ColorValue&               a_Color,
     const std::vector<Image::Subresource::Range>& a_Ranges);
 }

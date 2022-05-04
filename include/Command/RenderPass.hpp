@@ -7,9 +7,9 @@
 #pragma once
 
 #include <Handle.hpp>
+#include <Common/ClearValue.hpp>
 #include <Common/Rect2D.hpp>
 #include <FrameBuffer.hpp>
-#include <ClearValue.hpp>
 #include <RenderPass.hpp>
 
 #include <vector>
@@ -20,14 +20,14 @@ namespace OCRA::Command
 {
 struct RenderPassBeginInfo
 {
-	RenderPass::Handle renderPass{ 0 };
-	FrameBuffer::Handle framebuffer{ 0 };
-	Rect2D renderArea;
-	std::vector<ClearValue> clearValues;
+    RenderPass::Handle  renderPass{ 0 };
+    FrameBuffer::Handle framebuffer{ 0 };
+    uiRect2D            renderArea;
+    std::vector<ClearValue> clearValues;
 };
 enum class SubPassContents
 {
-	Inline, SecondaryCommandBuffers
+    Inline, SecondaryCommandBuffers
 };
 //Begin Render Pass recording
 void BeginRenderPass(const Command::Buffer::Handle& a_CommandBuffer, const RenderPassBeginInfo& a_BeginInfo, const SubPassContents& a_SubPassContents);

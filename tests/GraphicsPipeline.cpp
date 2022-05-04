@@ -4,11 +4,14 @@
 #include <Device.hpp>
 #include <Surface.hpp>
 #include <SwapChain.hpp>
+#include <Image/Image.hpp>
+#include <Image/View.hpp>
+#include <RenderPass.hpp>
 #include <Command/Pool.hpp>
 #include <Command/Buffer.hpp>
+#include <Command/RenderPass.hpp>
 #include <Command/Scissor.hpp>
 #include <Command/ViewPort.hpp>
-#include <Image/Image.hpp>
 
 #include <Windows.h>
 
@@ -16,24 +19,9 @@ using namespace OCRA;
 
 #define SWAPCHAIN_IMAGE_NBR 2
 
-static inline auto RecordClearCommandBuffer(Command::Buffer::Handle a_CommandBuffer, const Image::Handle& a_Image)
-{
-    Command::Buffer::BeginInfo bufferBeginInfo;
-    bufferBeginInfo.flags = Command::Buffer::UsageFlagBits::None;
-    Command::Buffer::Reset(a_CommandBuffer);
-    Command::Buffer::Begin(a_CommandBuffer, bufferBeginInfo);
-    {
-        Image::ClearColor clearColor{ 0.35294117f, 0.36862745f, 0.41960784f, 1.f };
-        Image::Subresource::Range range{};
-        range.levelCount = 1;
-        Command::ClearColorImage(a_CommandBuffer, a_Image, Image::Layout::Unknown, clearColor, { range });
-    }
-    Command::Buffer::End(a_CommandBuffer);
-}
-
 #include <Pipeline/Graphics.hpp>
 
-static inline auto CreateGraphicsPipeline(const Device::Handle& a_Device, const uint32_t a_Width, const uint32_t a_Height)
+static inline auto CreateGraphicsPipeline(const Device::Handle& a_Device, const RenderPass::Handle& a_RenderPass, const uint32_t a_Width, const uint32_t a_Height)
 {
     Pipeline::Graphics::Info graphicsPipelineInfo;
     ViewPort viewport;
@@ -43,6 +31,7 @@ static inline auto CreateGraphicsPipeline(const Device::Handle& a_Device, const 
     iRect2D  scissor;
     scissor.offset = { 0, 0 };
     scissor.extent = { a_Width, a_Height };
+    graphicsPipelineInfo.renderPass = a_RenderPass;
     graphicsPipelineInfo.inputAssemblyState.primitiveRestartEnable = false;
     graphicsPipelineInfo.viewPortState.viewPorts = { viewport };
     graphicsPipelineInfo.viewPortState.scissors  = { scissor };
@@ -51,9 +40,34 @@ static inline auto CreateGraphicsPipeline(const Device::Handle& a_Device, const 
     return Pipeline::Graphics::Create(a_Device, graphicsPipelineInfo);
 }
 
-void RecordMainCommandBuffer(Command::Buffer::Handle& a_MainCommandBuffer, Command::Buffer::Handle& a_ClearCommandBuffer, const uint32_t a_Width, const uint32_t a_Height)
+static inline auto CreateRenderPass(const Device::Handle& a_Device)
 {
-    Command::Buffer::BeginInfo beginInfo;
+    RenderPass::Info renderPassInfo{};
+    //TODO fill this
+    RenderPass::Create(a_Device, renderPassInfo);
+}
+
+static inline auto CreateFrameBuffer(const Device::Handle& a_Device, const std::vector<Image::Handle> a_Attachments)
+{
+    FrameBuffer::Info frameBufferInfo{};
+    for (const auto& image : a_Attachments) {
+        Image::View::Info imageViewInfo;
+        imageViewInfo.image = image;
+        const auto imageView = Image::View::Create(a_Device, imageViewInfo);
+        frameBufferInfo.attachments.push_back(imageView);
+    }
+    frameBufferInfo.extent.depth = 1;
+    return FrameBuffer::Create(a_Device, frameBufferInfo);
+}
+
+static inline void RecordMainCommandBuffer(
+    Command::Buffer::Handle&    a_MainCommandBuffer,
+    FrameBuffer::Handle&        a_FrameBuffer,
+    Pipeline::Handle&           a_GraphicsPipeline,
+    RenderPass::Handle&         a_RenderPass,
+    const uint32_t a_Width, const uint32_t a_Height)
+{
+    Command::Buffer::BeginInfo commandBufferBeginInfo{};
     bufferBeginInfo.flags = Command::Buffer::UsageFlagBits::None;
     ViewPort viewport;
     viewport.rect.offset = { 0, 0 };
@@ -62,13 +76,25 @@ void RecordMainCommandBuffer(Command::Buffer::Handle& a_MainCommandBuffer, Comma
     iRect2D  scissor;
     scissor.offset = { 0, 0 };
     scissor.extent = { a_Width, a_Height };
+    Command::RenderPassBeginInfo renderPassBeginInfo{};
+    Command::SubPassContents     subPassContents{};
+    renderPassBeginInfo.renderPass = a_RenderPass;
+    renderPassBeginInfo.framebuffer = a_FrameBuffer;
+    renderPassBeginInfo.renderArea.offset = { 0, 0 };
+    renderPassBeginInfo.renderArea.extent = { a_Width, a_Height };
+    renderPassBeginInfo.clearValues = { {0, 0, 0, 0} };
+
     Command::Buffer::Reset(a_MainCommandBuffer);
-    Command::Buffer::Begin(a_MainCommandBuffer, beginInfo);
+    Command::Buffer::Begin(a_MainCommandBuffer, commandBufferBeginInfo);
     {
-        Command::ExecuteCommandBuffer(a_MainCommandBuffer, a_ClearCommandBuffer);
-        Command::SetScissor(a_MainCommandBuffer, 0, { scissor });
-        Command::SetViewPort(a_MainCommandBuffer, 0, { viewport });
-        //draw stuff here
+        Command::BeginRenderPass(a_MainCommandBuffer, renderPassBeginInfo, subPassContents);
+        {
+            Command::SetScissor(a_MainCommandBuffer, 0, { scissor });
+            Command::SetViewPort(a_MainCommandBuffer, 0, { viewport });
+            Command::BindPipeline(a_MainCommandBuffer, Pipeline::BindingPoint::Graphics, a_GraphicsPipeline);
+            //draw stuff here
+        }
+        Command::EndRenderPass(a_MainCommandBuffer);
     }
     Command::Buffer::End(a_MainCommandBuffer);
 }
@@ -85,19 +111,27 @@ int SwapChain()
     const auto queueFamily = FindQueueFamily(physicalDevice, PhysicalDevice::QueueFlagsBits::Transfer);
     const auto queue = Device::GetQueue(device, queueFamily, 0); //Get first available queue
     const auto commandPool = CreateCommandPool(device, queueFamily);
+    const auto renderPass = CreateRenderPass(device);
 
     Command::Buffer::Handle mainCommandBuffer  = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Primary);
-    Command::Buffer::Handle clearCommandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Secondary);
 
+    std::vector<FrameBuffer::Handle> frameBuffers;
+    Pipeline::Handle        graphicsPipeline;
     SwapChain::Handle       swapChain;
     SwapChain::PresentInfo  presentInfo;
     uint32_t frameIndex = 0;
+    uint32_t lastSwapChainImageIndex = 0;
+    bool first = true;
     bool close = false;
 
-    window.OnResize = [&swapChain, &presentInfo](const Window&, const uint32_t a_Width, const uint32_t a_Height) {
+    window.OnResize = [&device, &renderPass, &swapChain, &frameBuffers, &presentInfo](const Window&, const uint32_t a_Width, const uint32_t a_Height) {
+        frameBuffers.clear();
         swapChain = CreateSwapChain(device, surface, swapChain, a_Width, a_Height, SWAPCHAIN_IMAGE_NBR);
+        graphicsPipeline = CreateGraphicsPipeline(device, renderPass, a_Width, a_Height);
+        for (const auto& swapChainImage : SwapChain::GetImages(device, swapChain)) {
+            frameBuffers.push_back(CreateFrameBuffer(device, { swapChainImage }));
+        }
         presentInfo.swapChains = { swapChain };
-        RecordMainCommandBuffer(mainCommandBuffer, clearCommandBuffer, a_Width, a_Height);
     };
     window.OnClose = [&close](const Window&) {
         close = true;
@@ -109,7 +143,11 @@ int SwapChain()
         const auto swapChainImageIndex = frameIndex++ % SWAPCHAIN_IMAGE_NBR;
         presentInfo.imageIndices = { swapChainImageIndex };
         const auto swapChainImage = SwapChain::GetImages(device, swapChain).at(swapChainImageIndex);
-        RecordClearCommandBuffer(clearCommandBuffer, swapChainImage);
+        if (lastSwapChainImageIndex != swapChainImageIndex || first) {
+            first = false;
+            lastSwapChainImageIndex = swapChainImageIndex;
+            RecordMainCommandBuffer(mainCommandBuffer, frameBuffers.at(swapChainImageIndex), a_Width, a_Height);
+        }
         SubmitCommandBuffer(queue, mainCommandBuffer);
         SwapChain::Present(queue, presentInfo);
     }

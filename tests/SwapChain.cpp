@@ -74,7 +74,7 @@ static inline auto RecordClearCommandBuffer(Command::Buffer::Handle a_CommandBuf
     bufferBeginInfo.flags = Command::Buffer::UsageFlagBits::None;
     Command::Buffer::Begin(a_CommandBuffer, bufferBeginInfo);
     {
-        Image::ClearColor clearColor{ color.r, color.g, color.b, 1.f };
+        ColorValue clearColor{ color.r, color.g, color.b, 1.f };
         Image::Subresource::Range range{};
         range.levelCount = 1;
         Command::ClearColorImage(a_CommandBuffer, a_Image, Image::Layout::Unknown, clearColor, { range });

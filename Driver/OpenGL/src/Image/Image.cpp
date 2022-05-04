@@ -285,8 +285,8 @@ static inline void CheckValidCopy(const BufferImageCopy& a_Copy, const Image::Ha
 }
 void CopyBufferToImage(
     const Command::Buffer::Handle& a_CommandBuffer,
-    const OCRA::Buffer::Handle& a_SrcBuffer,
-    const Image::Handle& a_DstImage,
+    const OCRA::Buffer::Handle&    a_SrcBuffer,
+    const Image::Handle&           a_DstImage,
     const std::vector<BufferImageCopy>& a_Regions)
 {
     for (const auto& copy : a_Regions) CheckValidCopy(copy, a_DstImage);
@@ -303,8 +303,8 @@ void CopyBufferToImage(
 
 void CopyImageToBuffer(
     const Command::Buffer::Handle& a_CommandBuffer,
-    const OCRA::Buffer::Handle& a_DstBuffer,
-    const Image::Handle& a_SrcImage,
+    const OCRA::Buffer::Handle&    a_DstBuffer,
+    const Image::Handle&           a_SrcImage,
     const std::vector<BufferImageCopy>& a_Regions)
 {
     for (const auto& copy : a_Regions) CheckValidCopy(copy, a_SrcImage);
@@ -318,7 +318,12 @@ void CopyImageToBuffer(
         glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
     });
 }
-void ClearColorImage(const Command::Buffer::Handle& a_CommandBuffer, const Image::Handle& a_Image, const Image::Layout& a_ImageLayout, const Image::ClearColor& a_Color, const std::vector<Image::Subresource::Range>& a_Ranges)
+void ClearColorImage(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const Image::Handle&           a_Image,
+    const Image::Layout&           a_ImageLayout,
+    const ColorValue&              a_Color,
+    const std::vector<Image::Subresource::Range>& a_Ranges)
 {
     //for (const auto& range : a_Ranges) CheckValidCopy(copy, a_SrcImage);
     a_CommandBuffer->PushCommand([
@@ -326,7 +331,6 @@ void ClearColorImage(const Command::Buffer::Handle& a_CommandBuffer, const Image
     ](Command::Buffer::ExecutionState&) {
         for (const auto& range : ranges)
         {
-            Image::ClearColor color{ 0, 0, 0, 0 };
             for (uint32_t level = range.baseMipLevel; level < range.levelCount; ++level)
                 glClearTexImage(
                         image->handle,
