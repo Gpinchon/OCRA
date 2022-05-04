@@ -51,6 +51,8 @@ struct D3DContainer
     {
         if (colorBufferView != nullptr) colorBufferView->Release();
         if (colorBuffer != nullptr) colorBuffer->Release();
+        colorBufferView = nullptr;
+        colorBuffer = nullptr;
         swapChain->ResizeBuffers(
             a_Info.minImageCount,
             a_Info.imageExtent.width,

@@ -28,8 +28,10 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
         info.oldSwapchain->Retire();
         info.oldSwapchain.reset();
         d3dContainer->ResizeBuffers(info);
+        /*
         a_Device->PushCommand([this] {
             wglDXUnregisterObjectNV(glDeviceD3D, glColorBufferD3D);
+            d3dContainer->ResizeBuffers(info);
             glColorBufferD3D = wglDXRegisterObjectNV(
                 glDeviceD3D,
                 d3dContainer->colorBuffer,
@@ -37,8 +39,9 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
                 GL_TEXTURE_2D,
                 WGL_ACCESS_WRITE_DISCARD_NV
             );
-            WIN32_CHECK_ERROR(colorBufferHandle != nullptr);
+            WIN32_CHECK_ERROR(glColorBufferD3D != nullptr);
         }, true);
+        */
         return;
     }
     d3dContainer = new D3DContainer(info);
@@ -46,6 +49,7 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
     WIN32_CHECK_ERROR(glDeviceD3D != nullptr);
     a_Device->PushCommand([this] {
         glGenTextures(1, &renderTextureHandle);
+        /*
         glColorBufferD3D = wglDXRegisterObjectNV(
             glDeviceD3D,
             d3dContainer->colorBuffer,
@@ -53,17 +57,20 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
             GL_TEXTURE_2D,
             WGL_ACCESS_WRITE_DISCARD_NV
         );
-        WIN32_CHECK_ERROR(colorBufferHandle != nullptr);
+        WIN32_CHECK_ERROR(glColorBufferD3D != nullptr);
+        */
     }, true);
 }
 
 Impl::~Impl()
 {
+    /*
     if (glColorBufferD3D != nullptr) {
         device.lock()->PushCommand([this]() {
             wglDXUnregisterObjectNV(glDeviceD3D, glColorBufferD3D);
         }, true);
     }
+    */
     if (renderTextureHandle != 0) {
         device.lock()->PushCommand([texture = renderTextureHandle]() {
             if (texture != 0) glDeleteTextures(1, &texture);
@@ -77,12 +84,21 @@ void Impl::Present(const Queue::Handle& a_Queue, const uint32_t& a_ImageIndex)
 {
     assert(!retired);
     a_Queue->PushCommand([this, imageIndex = a_ImageIndex]{
-        wglDXLockObjectsNV(glDeviceD3D, 1, &colorBufferHandle);
+        glColorBufferD3D = wglDXRegisterObjectNV(
+            glDeviceD3D,
+            d3dContainer->colorBuffer,
+            renderTextureHandle,
+            GL_TEXTURE_2D,
+            WGL_ACCESS_WRITE_DISCARD_NV
+        );
+        WIN32_CHECK_ERROR(glColorBufferD3D != nullptr);
+        wglDXLockObjectsNV(glDeviceD3D, 1, &glColorBufferD3D);
         glCopyImageSubData(
             images.at(imageIndex)->handle, GL_TEXTURE_2D, 0, 0, 0, 0,
             renderTextureHandle,           GL_TEXTURE_2D, 0, 0, 0, 0,
             d3dContainer->extent.width, d3dContainer->extent.height, 1);
-        wglDXUnlockObjectsNV(glDeviceD3D, 1, &colorBufferHandle);
+        wglDXUnlockObjectsNV(glDeviceD3D, 1, &glColorBufferD3D);
+        wglDXUnregisterObjectNV(glDeviceD3D, glColorBufferD3D);
     }, true);
     d3dContainer->Present();
 }
