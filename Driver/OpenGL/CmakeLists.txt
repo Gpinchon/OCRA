@@ -169,9 +169,11 @@ set(OCRA_IMPL_SOURCE_FILES
 if (WIN32)
 set(OCRA_IMPL_HEADER_FILES ${OCRA_IMPL_HEADER_FILES}
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/Error.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/D3DContainerInterface.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/D3D10Container.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/D3D11Container.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/DXGIFormat.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/WGLDXMapping.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/Instance.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/OpenGL.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/PhysicalDevice.hpp
