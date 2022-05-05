@@ -2,61 +2,82 @@
 
 #include <GL/WeakHandle.hpp>
 #include <GL/Device.hpp>
-#include <GL/Win32/D3DContainerInterface.hpp>
+#include <GL/Win32/Error.hpp>
 
 #include <GL/glew.h>
 #include <GL/wglew.h>
 
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
 
-namespace OCRA::SwapChain::Win32
+namespace OCRA::WGLDX
 {
-struct WGLDXDeviceMapping
+struct LockObject
 {
-    WGLDXDeviceMapping(const Device::Handle& a_Device, D3DContainerInterface* const a_D3DContainer)
-        : device(a_Device)
-        , d3dContainer(a_D3DContainer)
+    LockObject(HANDLE a_WGLDXDevice, HANDLE a_WGLDXObject)
+        : wglDXDevice(a_WGLDXDevice)
+        , wglDXObject(a_WGLDXObject)
     {
-        a_Device->PushCommand([this] {
-            glDeviceD3D = wglDXOpenDeviceNV(d3dContainer->device);
-        }, true);
+        WIN32_CHECK_ERROR(wglDXLockObjectsNV(wglDXDevice, 1, &wglDXObject));
     }
-    ~WGLDXDeviceMapping()
+    ~LockObject()
     {
-        device.lock()->PushCommand([this] {
-            wglDXCloseDeviceNV(d3dContainer->device);
-        }, true);
+        WIN32_CHECK_ERROR(wglDXUnlockObjectsNV(wglDXDevice, 1, &wglDXObject));
     }
-    Device::WeakHandle device;
-    D3DContainerInterface* const d3dContainer;
-    HANDLE glDeviceD3D{ nullptr };
+    HANDLE wglDXDevice, wglDXObject;
 };
 
-struct D3DTextureMapping
+struct DeviceMapping
 {
-    D3DTextureMapping(WGLDXDeviceMapping* const a_WGLDXDeviceMapping, void* const D3DColorBuffer)
+    DeviceMapping(const Device::Handle& a_Device, void* const a_D3DDevice)
+        : device(a_Device)
+        , d3dDevice(a_D3DDevice)
+    {
+        a_Device->PushCommand([this] {
+            wglDXDevice = wglDXOpenDeviceNV(d3dDevice);
+        }, true);
+        WIN32_CHECK_ERROR(wglDXDevice != nullptr);
+    }
+    ~DeviceMapping()
+    {
+        device.lock()->PushCommand([this] {
+            WIN32_CHECK_ERROR(wglDXCloseDeviceNV(wglDXDevice));
+        }, true);
+    }
+    void* const         d3dDevice;
+    Device::WeakHandle  device;
+    HANDLE              wglDXDevice{ nullptr };
+};
+
+struct TextureMapping
+{
+    TextureMapping(DeviceMapping* const a_WGLDXDeviceMapping, void* const D3DColorBuffer)
         : wglDXDeviceMapping(a_WGLDXDeviceMapping)
     {
         wglDXDeviceMapping->device.lock()->PushCommand([this, D3DColorBuffer] {
             glGenTextures(1, &glTextureHandle);
-            glColorBufferD3D = wglDXRegisterObjectNV(
-                wglDXDeviceMapping->glDeviceD3D,
+            wglDXTextureHandle = wglDXRegisterObjectNV(
+                wglDXDeviceMapping->wglDXDevice,
                 D3DColorBuffer,
                 glTextureHandle,
                 GL_TEXTURE_2D,
                 WGL_ACCESS_WRITE_DISCARD_NV
             );
         }, true);
+        WIN32_CHECK_ERROR(wglDXTextureHandle != nullptr);
     }
-    ~D3DTextureMapping()
+    ~TextureMapping()
     {
         wglDXDeviceMapping->device.lock()->PushCommand([this] {
-            wglDXUnlockObjectsNV(wglDXDeviceMapping->glDeviceD3D, 1, (HANDLE*)glColorBufferD3D);
+            WIN32_CHECK_ERROR(wglDXUnregisterObjectNV(wglDXDeviceMapping->wglDXDevice, wglDXTextureHandle));
             glDeleteTextures(1, &glTextureHandle);
         }, true);
     }
-    WGLDXDeviceMapping* const wglDXDeviceMapping;
-    uint32_t glTextureHandle{ 0 };
-    void* glColorBufferD3D{ nullptr };
+    LockObject Lock()
+    {
+        return { wglDXDeviceMapping->wglDXDevice, wglDXTextureHandle };
+    }
+    DeviceMapping* const wglDXDeviceMapping;
+    uint32_t    glTextureHandle{ 0 };
+    HANDLE      wglDXTextureHandle{ nullptr };
 };
 }

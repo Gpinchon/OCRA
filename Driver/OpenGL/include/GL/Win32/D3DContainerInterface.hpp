@@ -17,23 +17,25 @@ struct D3DContainerInterface
         , format(GetDXFormat(a_Info.imageFormat, a_Info.imageColorSpace == Image::ColorSpace::sRGB))
     {}
     inline ~D3DContainerInterface() {
-        colorBuffer->Release();
+        if (colorBuffer != nullptr) colorBuffer->Release();
         device->Release();
         swapChain->Release();
     }
     inline void ResizeSwapChain(const Info& a_Info)
     {
         if (colorBuffer != nullptr) colorBuffer->Release();
-        colorBuffer = nullptr;
         swapChain->ResizeBuffers(
-            a_Info.minImageCount,
+            1,// a_Info.minImageCount,
             a_Info.imageExtent.width,
             a_Info.imageExtent.height,
             format,
             0
         );
-        DXGI_SWAP_CHAIN_DESC swapChainDesc;
-        swapChain->GetDesc(&swapChainDesc);
+    }
+    inline void GetColorBuffer(const IID& a_IID)
+    {
+        WIN32_CHECK_ERROR(S_OK == swapChain->GetBuffer(0, a_IID, (void**)&colorBuffer));
+        WIN32_CHECK_ERROR(colorBuffer != nullptr);
     }
     inline void Present()
     {
@@ -43,9 +45,8 @@ struct D3DContainerInterface
     }
     const bool          synchronize;
     const DXGI_FORMAT   format;
-    uiExtent2D          extent{ 0, 0 };
     IDXGISwapChain*     swapChain{ nullptr };
-    IUnknown* device{ nullptr };
-    IUnknown* colorBuffer{ nullptr };
+    IUnknown*           device{ nullptr };
+    IUnknown*           colorBuffer{ nullptr };
 };
 }

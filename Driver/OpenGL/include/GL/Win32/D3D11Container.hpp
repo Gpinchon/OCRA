@@ -17,11 +17,11 @@ struct D3DContainer : D3DContainerInterface
         DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
         swapChainDesc.BufferDesc.Format = format;
         swapChainDesc.SampleDesc.Count = 1;
-        swapChainDesc.BufferCount = a_Info.minImageCount;
-        swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT; //TODO give the real Image Usage
+        swapChainDesc.BufferCount = 1;
+        swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
         swapChainDesc.OutputWindow = HWND(a_Info.surface->nativeWindow);
         swapChainDesc.Windowed = true;
-        swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+        swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_SEQUENTIAL;
 #ifdef DEBUG
         uint32_t flags = D3D11_CREATE_DEVICE_DEBUG;
 #else
@@ -41,7 +41,7 @@ struct D3DContainer : D3DContainerInterface
             nullptr,                  //Feature Level
             &deviceContext            //Immediat Context
         ));
-        InitColorBuffer();
+        GetColorBuffer(__uuidof(ID3D11Texture2D));
     }
     inline ~D3DContainer() {
         deviceContext->Release();
@@ -49,21 +49,12 @@ struct D3DContainer : D3DContainerInterface
     inline void ResizeBuffers(const Info& a_Info)
     {
         ResizeSwapChain(a_Info);
-        InitColorBuffer();
+        GetColorBuffer(__uuidof(ID3D11Texture2D));
     }
-    inline void InitColorBuffer()
-    {
-        WIN32_CHECK_ERROR(S_OK == swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&colorBuffer));
-        WIN32_CHECK_ERROR(colorBuffer != nullptr);
+    inline uiExtent2D GetExtent() const {
         D3D11_TEXTURE2D_DESC desc{};
         ((ID3D11Texture2D*)colorBuffer)->GetDesc(&desc);
-        extent = { desc.Width, desc.Height };
-    }
-    inline void Present()
-    {
-        WIN32_CHECK_ERROR(S_OK == swapChain->Present(
-            synchronize ? 1 : 0, 0
-        ));
+        return { desc.Width, desc.Height };
     }
     ID3D11DeviceContext*    deviceContext{ nullptr };
 };

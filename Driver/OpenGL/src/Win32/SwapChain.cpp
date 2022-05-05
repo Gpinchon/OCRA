@@ -14,6 +14,8 @@
 #include <GL/Win32/D3D10Container.hpp>
 #endif //USE_D3D11
 
+#include <GL/Win32/WGLDXMapping.hpp>
+
 namespace OCRA::SwapChain::Win32
 {
 Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
@@ -21,84 +23,39 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
 {
     if (info.oldSwapchain != nullptr) {
         auto win32SwapChain = std::static_pointer_cast<SwapChain::Win32::Impl>(info.oldSwapchain);
-        d3dContainer = win32SwapChain->d3dContainer;
-        glDeviceD3D = win32SwapChain->glDeviceD3D;
-        glColorBufferD3D = win32SwapChain->glColorBufferD3D;
-        renderTextureHandle = win32SwapChain->renderTextureHandle;
+        d3dContainer.swap(win32SwapChain->d3dContainer);
+        wglDXDeviceMapping.swap(win32SwapChain->wglDXDeviceMapping);
         info.oldSwapchain->Retire();
         info.oldSwapchain.reset();
         d3dContainer->ResizeBuffers(info);
-        /*
-        a_Device->PushCommand([this] {
-            wglDXUnregisterObjectNV(glDeviceD3D, glColorBufferD3D);
-            d3dContainer->ResizeBuffers(info);
-            glColorBufferD3D = wglDXRegisterObjectNV(
-                glDeviceD3D,
-                d3dContainer->colorBuffer,
-                renderTextureHandle,
-                GL_TEXTURE_2D,
-                WGL_ACCESS_WRITE_DISCARD_NV
-            );
-            WIN32_CHECK_ERROR(glColorBufferD3D != nullptr);
-        }, true);
-        */
+        wglDXTextureMapping = std::make_unique<WGLDX::TextureMapping>(wglDXDeviceMapping.get(), d3dContainer->colorBuffer);
         return;
     }
-    d3dContainer = new D3DContainer(info);
-    glDeviceD3D = wglDXOpenDeviceNV(d3dContainer->device);
-    WIN32_CHECK_ERROR(glDeviceD3D != nullptr);
-    a_Device->PushCommand([this] {
-        glGenTextures(1, &renderTextureHandle);
-        /*
-        glColorBufferD3D = wglDXRegisterObjectNV(
-            glDeviceD3D,
-            d3dContainer->colorBuffer,
-            renderTextureHandle,
-            GL_TEXTURE_2D,
-            WGL_ACCESS_WRITE_DISCARD_NV
-        );
-        WIN32_CHECK_ERROR(glColorBufferD3D != nullptr);
-        */
-    }, true);
+    d3dContainer = std::make_unique<D3DContainer>(info);
+    wglDXDeviceMapping = std::make_unique<WGLDX::DeviceMapping>(a_Device, d3dContainer->device);
+    wglDXTextureMapping = std::make_unique<WGLDX::TextureMapping>(wglDXDeviceMapping.get(), d3dContainer->colorBuffer);
 }
 
 Impl::~Impl()
 {
-    /*
-    if (glColorBufferD3D != nullptr) {
-        device.lock()->PushCommand([this]() {
-            wglDXUnregisterObjectNV(glDeviceD3D, glColorBufferD3D);
-        }, true);
-    }
-    */
-    if (renderTextureHandle != 0) {
-        device.lock()->PushCommand([texture = renderTextureHandle]() {
-            if (texture != 0) glDeleteTextures(1, &texture);
-        }, false);
-    }
-    if (glDeviceD3D != nullptr) wglDXCloseDeviceNV(glDeviceD3D);
-    if (d3dContainer != nullptr) delete d3dContainer;
+}
+
+void Impl::Retire() {
+    d3dContainer = nullptr;
+    wglDXDeviceMapping = nullptr;
+    wglDXTextureMapping = nullptr;
 }
 
 void Impl::Present(const Queue::Handle& a_Queue, const uint32_t& a_ImageIndex)
 {
     assert(!retired);
     a_Queue->PushCommand([this, imageIndex = a_ImageIndex]{
-        glColorBufferD3D = wglDXRegisterObjectNV(
-            glDeviceD3D,
-            d3dContainer->colorBuffer,
-            renderTextureHandle,
-            GL_TEXTURE_2D,
-            WGL_ACCESS_WRITE_DISCARD_NV
-        );
-        WIN32_CHECK_ERROR(glColorBufferD3D != nullptr);
-        wglDXLockObjectsNV(glDeviceD3D, 1, &glColorBufferD3D);
+        const auto extent = d3dContainer->GetExtent();
+        const auto lock = wglDXTextureMapping->Lock();
         glCopyImageSubData(
-            images.at(imageIndex)->handle, GL_TEXTURE_2D, 0, 0, 0, 0,
-            renderTextureHandle,           GL_TEXTURE_2D, 0, 0, 0, 0,
-            d3dContainer->extent.width, d3dContainer->extent.height, 1);
-        wglDXUnlockObjectsNV(glDeviceD3D, 1, &glColorBufferD3D);
-        wglDXUnregisterObjectNV(glDeviceD3D, glColorBufferD3D);
+            images.at(imageIndex)->handle,        GL_TEXTURE_2D, 0, 0, 0, 0,
+            wglDXTextureMapping->glTextureHandle, GL_TEXTURE_2D, 0, 0, 0, 0,
+            extent.width, extent.height, 1);
     }, true);
     d3dContainer->Present();
 }
