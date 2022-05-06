@@ -28,12 +28,12 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
         info.oldSwapchain->Retire();
         info.oldSwapchain.reset();
         d3dContainer->ResizeBuffers(info);
-        wglDXTextureMapping = std::make_unique<WGLDX::TextureMapping>(wglDXDeviceMapping.get(), d3dContainer->colorBuffer);
+        wglDXTextureMapping = std::make_unique<WGLDX::TextureMapping>(wglDXDeviceMapping, d3dContainer->colorBuffer);
         return;
     }
     d3dContainer = std::make_unique<D3DContainer>(info);
-    wglDXDeviceMapping = std::make_unique<WGLDX::DeviceMapping>(a_Device, d3dContainer->device);
-    wglDXTextureMapping = std::make_unique<WGLDX::TextureMapping>(wglDXDeviceMapping.get(), d3dContainer->colorBuffer);
+    wglDXDeviceMapping = std::make_shared<WGLDX::DeviceMapping>(a_Device, d3dContainer->device);
+    wglDXTextureMapping = std::make_unique<WGLDX::TextureMapping>(wglDXDeviceMapping, d3dContainer->colorBuffer);
 }
 
 Impl::~Impl()
@@ -49,14 +49,15 @@ void Impl::Retire() {
 void Impl::Present(const Queue::Handle& a_Queue, const uint32_t& a_ImageIndex)
 {
     assert(!retired);
-    a_Queue->PushCommand([this, imageIndex = a_ImageIndex]{
-        const auto extent = d3dContainer->GetExtent();
+    const auto extent = d3dContainer->GetExtent();
+    a_Queue->PushCommand([this, extent, imageIndex = a_ImageIndex]{
         const auto lock = wglDXTextureMapping->Lock();
         glCopyImageSubData(
             images.at(imageIndex)->handle,        GL_TEXTURE_2D, 0, 0, 0, 0,
             wglDXTextureMapping->glTextureHandle, GL_TEXTURE_2D, 0, 0, 0, 0,
             extent.width, extent.height, 1);
-    }, true);
-    d3dContainer->Present();
+        d3dContainer->Present();
+    }, d3dContainer->synchronize);
+    
 }
 }

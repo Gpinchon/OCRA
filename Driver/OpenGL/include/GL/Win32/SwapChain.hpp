@@ -23,8 +23,7 @@ struct Impl : SwapChain::Impl
     virtual void Retire() override;
     virtual void Present(const Queue::Handle& a_Queue, const uint32_t& a_ImageIndex) override;
     std::unique_ptr<D3DContainer>          d3dContainer;
-    std::unique_ptr<WGLDX::DeviceMapping>  wglDXDeviceMapping;
+    std::shared_ptr<WGLDX::DeviceMapping>  wglDXDeviceMapping;
     std::unique_ptr<WGLDX::TextureMapping> wglDXTextureMapping;
-    //WGLDXTextureMapping* wglDXTextureMapping;
 };
 }

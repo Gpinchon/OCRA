@@ -33,4 +33,9 @@ Queue::Handle GetQueue(
     const Handle& a_Device,
     uint32_t a_FamilyIndex,
     uint32_t a_QueueIndex);
+/**
+* Wait for the device to finish commands execution
+* In OGL, this will push an empty synchronized command
+*/
+void WaitIdle(const Handle& a_Device);
 }

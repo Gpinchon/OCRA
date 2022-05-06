@@ -22,6 +22,9 @@ struct Impl
     inline void PushCommand(const Command& a_Command, const bool a_Synchronous) {
         device.lock()->PushCommand(familyIndex, queueIndex, a_Command, a_Synchronous);
     }
+    inline void WaitIdle() {
+        device.lock()->PushCommand(familyIndex, queueIndex, []{}, true);
+    }
     const Device::WeakHandle device;
     const uint32_t  familyIndex;
     const uint32_t  queueIndex;

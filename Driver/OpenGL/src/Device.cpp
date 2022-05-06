@@ -25,4 +25,12 @@ Handle Create(const PhysicalDevice::Handle& a_PhysicalDevice, const Info& a_Info
 Queue::Handle GetQueue(const Handle& a_Device, uint32_t a_FamilyIndex, uint32_t a_QueueIndex) {
 	return a_Device->queueFamilies.at(a_FamilyIndex).at(a_QueueIndex);
 }
+void WaitIdle(const Handle& a_Device)
+{
+	for (const auto& queueFamily : a_Device->queueFamilies) {
+		for (const auto& queue : queueFamily.second)
+			queue->WaitIdle();
+	}
+	
+}
 }

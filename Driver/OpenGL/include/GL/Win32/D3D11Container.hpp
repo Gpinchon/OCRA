@@ -39,12 +39,9 @@ struct D3DContainer : D3DContainerInterface
             &swapChain,               //SwapChain PTR
             (ID3D11Device**)&device,  //Device PTR
             nullptr,                  //Feature Level
-            &deviceContext            //Immediat Context
+            nullptr                   //Device Context
         ));
         GetColorBuffer(__uuidof(ID3D11Texture2D));
-    }
-    inline ~D3DContainer() {
-        deviceContext->Release();
     }
     inline void ResizeBuffers(const Info& a_Info)
     {
@@ -56,6 +53,5 @@ struct D3DContainer : D3DContainerInterface
         ((ID3D11Texture2D*)colorBuffer)->GetDesc(&desc);
         return { desc.Width, desc.Height };
     }
-    ID3D11DeviceContext*    deviceContext{ nullptr };
 };
 }

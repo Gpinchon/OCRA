@@ -41,4 +41,5 @@ void Submit(
 	const Handle& a_Queue,
 	const std::vector<SubmitInfo>& a_SubmitInfos,
 	const Fence::Handle& a_Fence = nullptr);
+void WaitIdle(const Handle& a_Queue);
 }

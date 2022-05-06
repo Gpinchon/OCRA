@@ -119,6 +119,7 @@ int SwapChain()
         RecordClearCommandBuffer(clearCommandBuffer, swapChainImage);
         SubmitCommandBuffer(queue, clearCommandBuffer);
         SwapChain::Present(queue, presentInfo);
+        Queue::WaitIdle(queue);
     }
 	return ret;
 }

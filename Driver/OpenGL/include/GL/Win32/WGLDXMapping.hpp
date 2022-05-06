@@ -50,7 +50,7 @@ struct DeviceMapping
 
 struct TextureMapping
 {
-    TextureMapping(DeviceMapping* const a_WGLDXDeviceMapping, void* const D3DColorBuffer)
+    TextureMapping(const std::shared_ptr<DeviceMapping> a_WGLDXDeviceMapping, void* const D3DColorBuffer)
         : wglDXDeviceMapping(a_WGLDXDeviceMapping)
     {
         wglDXDeviceMapping->device.lock()->PushCommand([this, D3DColorBuffer] {
@@ -76,7 +76,7 @@ struct TextureMapping
     {
         return { wglDXDeviceMapping->wglDXDevice, wglDXTextureHandle };
     }
-    DeviceMapping* const wglDXDeviceMapping;
+    std::shared_ptr<DeviceMapping> wglDXDeviceMapping;
     uint32_t    glTextureHandle{ 0 };
     HANDLE      wglDXTextureHandle{ nullptr };
 };

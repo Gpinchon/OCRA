@@ -54,4 +54,8 @@ void Submit(
 		Execute(queue, submitInfos, fence);
 	}, false);
 }
+void WaitIdle(const Handle& a_Queue)
+{
+	a_Queue->WaitIdle();
+}
 }
