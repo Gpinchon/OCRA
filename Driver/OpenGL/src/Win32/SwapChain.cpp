@@ -44,6 +44,7 @@ void Impl::Retire() {
     d3dContainer = nullptr;
     wglDXDeviceMapping = nullptr;
     wglDXTextureMapping = nullptr;
+    SwapChain::Impl::Retire();
 }
 
 void Impl::Present(const Queue::Handle& a_Queue, const uint32_t& a_ImageIndex)

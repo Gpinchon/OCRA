@@ -63,7 +63,7 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
     if (info.oldSwapchain != nullptr) {
         if (CanRecycleOldSwapChainImages(info.oldSwapchain->info, info.oldSwapchain->realExtent, info)) {
             realExtent = info.oldSwapchain->realExtent;
-            images = info.oldSwapchain->images;
+            images.swap(info.oldSwapchain->images);
         }
         else images = CreateImages(a_Device, a_Info);
         return;
