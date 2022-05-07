@@ -11,21 +11,6 @@ OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
 
 namespace OCRA::WGLDX
 {
-struct LockObject
-{
-    LockObject(HANDLE a_WGLDXDevice, HANDLE a_WGLDXObject)
-        : wglDXDevice(a_WGLDXDevice)
-        , wglDXObject(a_WGLDXObject)
-    {
-        WIN32_CHECK_ERROR(wglDXLockObjectsNV(wglDXDevice, 1, &wglDXObject));
-    }
-    ~LockObject()
-    {
-        WIN32_CHECK_ERROR(wglDXUnlockObjectsNV(wglDXDevice, 1, &wglDXObject));
-    }
-    HANDLE wglDXDevice, wglDXObject;
-};
-
 struct DeviceMapping
 {
     DeviceMapping(const Device::Handle& a_Device, void* const a_D3DDevice)
@@ -50,34 +35,35 @@ struct DeviceMapping
 
 struct TextureMapping
 {
-    TextureMapping(const std::shared_ptr<DeviceMapping> a_WGLDXDeviceMapping, void* const D3DColorBuffer)
+    inline TextureMapping(const std::shared_ptr<DeviceMapping> a_WGLDXDeviceMapping, void* const a_D3DColorBuffer, const uint32_t& a_glTextureHandle)
         : wglDXDeviceMapping(a_WGLDXDeviceMapping)
     {
-        wglDXDeviceMapping->device.lock()->PushCommand([this, D3DColorBuffer] {
-            glGenTextures(1, &glTextureHandle);
+        wglDXDeviceMapping->device.lock()->PushCommand([this, a_D3DColorBuffer, a_glTextureHandle] {
             wglDXTextureHandle = wglDXRegisterObjectNV(
                 wglDXDeviceMapping->wglDXDevice,
-                D3DColorBuffer,
-                glTextureHandle,
+                a_D3DColorBuffer,
+                a_glTextureHandle,
                 GL_TEXTURE_2D,
-                WGL_ACCESS_WRITE_DISCARD_NV
+                WGL_ACCESS_READ_WRITE_NV
             );
         }, true);
         WIN32_CHECK_ERROR(wglDXTextureHandle != nullptr);
     }
-    ~TextureMapping()
+    inline ~TextureMapping()
     {
         wglDXDeviceMapping->device.lock()->PushCommand([this] {
             WIN32_CHECK_ERROR(wglDXUnregisterObjectNV(wglDXDeviceMapping->wglDXDevice, wglDXTextureHandle));
-            glDeleteTextures(1, &glTextureHandle);
         }, true);
     }
-    LockObject Lock()
+    inline void Lock()
     {
-        return { wglDXDeviceMapping->wglDXDevice, wglDXTextureHandle };
+        WIN32_CHECK_ERROR(wglDXLockObjectsNV(wglDXDeviceMapping->wglDXDevice, 1, &wglDXTextureHandle));
+    }
+    inline void Unlock()
+    {
+        WIN32_CHECK_ERROR(wglDXUnlockObjectsNV(wglDXDeviceMapping->wglDXDevice, 1, &wglDXTextureHandle));
     }
     std::shared_ptr<DeviceMapping> wglDXDeviceMapping;
-    uint32_t    glTextureHandle{ 0 };
     HANDLE      wglDXTextureHandle{ nullptr };
 };
 }

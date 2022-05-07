@@ -19,10 +19,13 @@ struct Impl
         retired = true;
     }
     virtual void Present(const Queue::Handle& a_Queue, const uint32_t& a_ImageIndex) = 0;
+    virtual uint32_t AcquireBackBuffer(
+        const std::chrono::nanoseconds& a_TimeoutNS,
+        const Queue::Semaphore::Handle& a_Semaphore,
+        const Queue::Fence::Handle&     a_Fence) = 0;
     Info                        info;
     const Device::WeakHandle    device;
     bool                        retired{ false };
     std::vector<Image::Handle>  images;
-    Extent2D                    realExtent;
 };
 }

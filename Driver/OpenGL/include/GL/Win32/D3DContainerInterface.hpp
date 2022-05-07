@@ -8,45 +8,66 @@
 
 #include <dxgi1_3.h>
 
+#pragma comment(lib , "dxgi") 
+
 namespace OCRA::SwapChain::Win32
 {
+IDXGIFactory* GetDeviceFactory(IUnknown* device)
+{
+    IDXGIDevice* dxgiDevice = 0;
+    IDXGIAdapter* dxgiAdapter = 0;
+    IDXGIFactory* dxgiFactory = 0;
+
+    if (SUCCEEDED(device->QueryInterface(__uuidof(IDXGIDevice), (void**)&dxgiDevice)))
+    {
+        if (SUCCEEDED(dxgiDevice->GetParent(__uuidof(IDXGIAdapter), (void**)&dxgiAdapter)))
+        {
+            dxgiAdapter->GetParent(__uuidof(IDXGIFactory), (void**)&dxgiFactory);
+            dxgiAdapter->Release();
+        }
+        dxgiDevice->Release();
+    }
+    WIN32_CHECK_ERROR(dxgiDevice != nullptr);
+    return dxgiFactory;
+}
 struct D3DContainerInterface
 {
     inline D3DContainerInterface(const Info& a_Info)
         : synchronize(a_Info.presentMode != PresentMode::Immediate)
         , format(GetDXFormat(a_Info.imageFormat, a_Info.imageColorSpace == Image::ColorSpace::sRGB))
     {
-        WIN32_CHECK_ERROR(S_OK == CreateDXGIFactory2(0, __uuidof(IDXGIFactory2), &factory));
     }
     inline ~D3DContainerInterface() {
-        colorBuffer->Release();
+        for (auto& colorBuffer : colorBuffers) colorBuffer->Release();
         swapChain->Release();
         device->Release();
-        factory->Release();
     }
     inline void CreateSwapChain(const Info& a_Info)
     {
-        DXGI_SWAP_CHAIN_DESC1 swapChainDesc{};
-        std::memset(&swapChainDesc, sizeof(swapChainDesc), 0);
-        swapChainDesc.format = format;
-        swapChainDesc.SampleDesc.Count = 1;
-        swapChainDesc.SampleDesc.Quality = 0;
-        swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-        swapChainDesc.BufferCount = 1;
-        swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED; //TODO give the real alpha mode
-        swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_SEQUENTIAL;
-        factory->CreateSwapChainForHwnd(
-            device,                             //D3D Device
-            HWND(a_Info.surface->nativeWindow), //Window Handle
-            &swapChainDesc,                     //SwapChain Desc
-            nullptr,                            //SwapChain Fullscreen Desc
-            nullptr,                            //DXGI Output
-            &swapChain                          //DXGI SwapChain PTR
+        auto factory = GetDeviceFactory(device);
+        DXGI_SWAP_CHAIN_DESC desc{};
+        std::memset(&desc, sizeof(desc), 0);
+        desc.BufferDesc.Format = format;
+        desc.BufferDesc.Width = a_Info.imageExtent.width;
+        desc.BufferDesc.Height = a_Info.imageExtent.height;
+        desc.SampleDesc.Count = 1;
+        desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+        desc.BufferCount = a_Info.minImageCount;
+        desc.OutputWindow = HWND(a_Info.surface->nativeWindow);
+        desc.Windowed = true;
+        desc.SwapEffect = DXGI_SWAP_EFFECT_SEQUENTIAL;
+        factory->CreateSwapChain(
+            device,
+            &desc,
+            &swapChain
         );
+        WIN32_CHECK_ERROR(swapChain != nullptr);
+        factory->Release();
     }
     inline void ResizeSwapChain(const Info& a_Info)
     {
-        if (colorBuffer != nullptr) colorBuffer->Release();
+        for (auto& colorBuffer : colorBuffers) colorBuffer->Release();
+        colorBuffers.clear();
         swapChain->ResizeBuffers(
             1,
             a_Info.imageExtent.width,
@@ -54,24 +75,38 @@ struct D3DContainerInterface
             format,
             0
         );
+        currentBackBuffer = 0;
     }
     template<typename T>
-    inline void GetColorBuffer()
+    inline auto GetBuffers()
     {
-        WIN32_CHECK_ERROR(S_OK == swapChain->GetBuffer(0, __uuidof(T), (void**)&colorBuffer));
-        WIN32_CHECK_ERROR(colorBuffer != nullptr);
+        DXGI_SWAP_CHAIN_DESC desc{};
+        swapChain->GetDesc(&desc);
+        colorBuffers.resize(desc.BufferCount);
+        for (auto i = 0u; i < desc.BufferCount; ++i) {
+            T* buffer = nullptr;
+            WIN32_CHECK_ERROR(S_OK == swapChain->GetBuffer(i, __uuidof(T), (void**)&buffer));
+            WIN32_CHECK_ERROR(buffer != nullptr);
+            colorBuffers.at(i) = buffer;
+        }
     }
     inline void Present()
     {
-        WIN32_CHECK_ERROR(S_OK == swapChain->Present(
-            synchronize ? 1 : 0, 0
-        ));
+        const auto swapChainStatus = swapChain->Present(synchronize ? 1 : 0, 0);
+        WIN32_CHECK_ERROR(S_OK == swapChainStatus || DXGI_STATUS_OCCLUDED == swapChainStatus);
+        currentBackBuffer = (currentBackBuffer + 1) % colorBuffers.size();
     }
-    const bool          synchronize;
-    const DXGI_FORMAT   format;
-    IDXGIFactory2*      factory{ nullptr };
-    IDXGISwapChain1*    swapChain{ nullptr };
-    IUnknown*           device{ nullptr };
-    IUnknown*           colorBuffer{ nullptr };
+    inline uExtent2D GetExtent()
+    {
+        DXGI_SWAP_CHAIN_DESC desc{};
+        swapChain->GetDesc(&desc);
+        return { desc.BufferDesc.Width, desc.BufferDesc.Height };
+    }
+    const bool             synchronize;
+    const DXGI_FORMAT      format;
+    uint32_t               currentBackBuffer = 0;
+    IDXGISwapChain*        swapChain{ nullptr };
+    IUnknown*              device{ nullptr };
+    std::vector<IUnknown*> colorBuffers;
 };
 }

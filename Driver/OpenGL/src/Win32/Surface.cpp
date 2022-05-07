@@ -15,17 +15,6 @@ Impl::Impl(const Instance::Handle& a_Instance, const Info& a_Info)
 	, hdc(GetDC(HWND(nativeWindow)))
 {
 }
-uiExtent2D Impl::GetExtent()
-{
-	uiExtent2D rect2D;
-	RECT windowRect;
-    GetWindowRect(
-        HWND(nativeWindow),
-        &windowRect);
-    rect2D.width = windowRect.right - windowRect.left;
-    rect2D.height = windowRect.bottom - windowRect.top;
-    return rect2D;
-}
 Impl::~Impl()
 {
 	ReleaseDC(HWND(nativeWindow), HDC(hdc));

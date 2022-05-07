@@ -22,8 +22,6 @@ struct Impl
         , instance(a_Instance)
         , nativeWindow(a_NativeWindow)
     {}
-    //returns the nativeWindow drawing rect
-    virtual uiExtent2D GetExtent() = 0;
     const std::string type;
     const Instance::WeakHandle instance;
     const void* nativeWindow;

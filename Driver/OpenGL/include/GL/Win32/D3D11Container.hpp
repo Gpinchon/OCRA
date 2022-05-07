@@ -8,6 +8,8 @@
 
 #include <d3d11.h>
 
+#include <cassert>
+
 namespace OCRA::SwapChain::Win32
 {
 struct D3DContainer : D3DContainerInterface
@@ -32,17 +34,12 @@ struct D3DContainer : D3DContainerInterface
             nullptr                   //Device Context PTR
         ));
         CreateSwapChain(a_Info);
-        GetColorBuffer<ID3D11Texture2D>();
+        GetBuffers<ID3D11Texture2D>();
     }
     inline void ResizeBuffers(const Info& a_Info)
     {
         ResizeSwapChain(a_Info);
-        GetColorBuffer<ID3D11Texture2D>();
-    }
-    inline uiExtent2D GetExtent() const {
-        D3D11_TEXTURE2D_DESC desc{};
-        ((ID3D11Texture2D*)colorBuffer)->GetDesc(&desc);
-        return { desc.Width, desc.Height };
+        GetBuffers<ID3D11Texture2D>();
     }
 };
 }

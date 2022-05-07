@@ -12,5 +12,5 @@ struct Extent<2, T> {
 };
 typedef Extent<2, float>    Extent2D;
 typedef Extent<2, int>		iExtent2D;
-typedef Extent<2, unsigned> uiExtent2D;
+typedef Extent<2, unsigned> uExtent2D;
 }

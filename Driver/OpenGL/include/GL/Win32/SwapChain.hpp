@@ -22,8 +22,12 @@ struct Impl : SwapChain::Impl
     //when retiring the SwapChain becomes "empty"
     virtual void Retire() override;
     virtual void Present(const Queue::Handle& a_Queue, const uint32_t& a_ImageIndex) override;
-    std::unique_ptr<D3DContainer>          d3dContainer;
-    std::shared_ptr<WGLDX::DeviceMapping>  wglDXDeviceMapping;
-    std::unique_ptr<WGLDX::TextureMapping> wglDXTextureMapping;
+    virtual uint32_t AcquireBackBuffer(
+        const std::chrono::nanoseconds& a_Timeout,
+        const Queue::Semaphore::Handle& a_Semaphore,
+        const Queue::Fence::Handle&     a_Fence) override;
+    std::unique_ptr<D3DContainer>                       d3dContainer;
+    std::shared_ptr<WGLDX::DeviceMapping>               wglDXDeviceMapping;
+    std::vector<std::unique_ptr<WGLDX::TextureMapping>> wglDXTextureMappings;
 };
 }

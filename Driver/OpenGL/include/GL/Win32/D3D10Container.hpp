@@ -28,17 +28,12 @@ struct D3DContainer : D3DContainerInterface
             (ID3D10Device**)&device    //Device PTR
         ));
         CreateSwapChain(a_Info);
-        GetColorBuffer<ID3D10Texture2D>();
+        GetBuffers<ID3D10Texture2D>();
     }
     inline void ResizeBuffers(const Info& a_Info)
     {
         ResizeSwapChain(a_Info);
-        GetColorBuffer<ID3D10Texture2D>();
-    }
-    inline uiExtent2D GetExtent() const {
-        D3D10_TEXTURE2D_DESC desc{};
-        ((ID3D10Texture2D*)colorBuffer)->GetDesc(&desc);
-        return { desc.Width, desc.Height };
+        GetBuffers<ID3D10Texture2D>();
     }
 };
 }

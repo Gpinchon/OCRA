@@ -7,6 +7,7 @@
 #include <Command/Pool.hpp>
 #include <Command/Buffer.hpp>
 #include <Image/Image.hpp>
+#include <Queue/Fence.hpp>
 #include <Common/Vec3.hpp>
 
 #include <Windows.h>
@@ -96,9 +97,8 @@ int SwapChain()
     const auto commandPool = CreateCommandPool(device, queueFamily);
 
     Command::Buffer::Handle clearCommandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Primary);
-    SwapChain::Handle       swapChain;
+    SwapChain::Handle       swapChain = CreateSwapChain(device, surface, nullptr, 1280, 720, SWAPCHAIN_IMAGE_NBR);;
     SwapChain::PresentInfo  presentInfo;
-    uint32_t frameIndex = 0;
     bool close = false;
 
     window.OnResize = [&device, &surface, &swapChain, &presentInfo](const Window&, const uint32_t a_Width, const uint32_t a_Height) {
@@ -109,12 +109,14 @@ int SwapChain()
         close = true;
     };
     window.Show();
+    const auto imageAcquisitionFence = Queue::Fence::Create(device);
     while (true) {
         window.PushEvents();
         if (close) break;
-        const auto swapChainImageIndex = frameIndex++ % SWAPCHAIN_IMAGE_NBR;
-        presentInfo.imageIndices = { swapChainImageIndex };
-        const auto swapChainImage = SwapChain::GetImages(device, swapChain).at(swapChainImageIndex);
+        const auto nextImage = SwapChain::AcquireNextImage(device, swapChain, std::chrono::nanoseconds(15000000), nullptr, imageAcquisitionFence);
+        Queue::Fence::WaitFor(device, imageAcquisitionFence, std::chrono::nanoseconds(15000000));
+        presentInfo.imageIndices = { nextImage };
+        const auto swapChainImage = SwapChain::GetImages(device, swapChain).at(nextImage);
         Command::Buffer::Reset(clearCommandBuffer);
         RecordClearCommandBuffer(clearCommandBuffer, swapChainImage);
         SubmitCommandBuffer(queue, clearCommandBuffer);

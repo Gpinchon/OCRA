@@ -28,4 +28,8 @@ struct Impl
     const uint32_t dataFormat;
     const uint32_t handle;
 };
+/**
+* @brief creates an empty image with no storage
+*/
+Handle CreateEmpty(const Device::Handle& a_Device, const Info& a_Info);
 }

@@ -71,7 +71,7 @@ static inline auto& GetWindowClass()
     return wndclass;
 }
 
-Window::Window(const std::string& name, const uint32_t width, const uint32_t height)
+Window::Window(const std::string& name, const uint32_t a_Width, const uint32_t a_Height)
 {
     const auto& wndclass = GetWindowClass();
     const auto hwnd = CreateWindowEx(
@@ -79,7 +79,7 @@ Window::Window(const std::string& name, const uint32_t width, const uint32_t hei
         wndclass.lpszClassName,
         "Test Window",
         WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+        CW_USEDEFAULT, CW_USEDEFAULT, a_Width, a_Height,
         nullptr, nullptr, wndclass.hInstance, nullptr);
     MSG msg{ 0 };
     while (PeekMessage(&msg, hwnd, 0, 0, PM_REMOVE)) {
