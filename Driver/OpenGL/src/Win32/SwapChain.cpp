@@ -112,8 +112,9 @@ uint32_t Impl::AcquireBackBuffer(
     const Queue::Semaphore::Handle& a_Semaphore,
     const Queue::Fence::Handle& a_Fence)
 {
-    device.lock()->PushCommand([this, semaphore = a_Semaphore, fence = a_Fence] {
-        wglDXTextureMappings.at(d3dContainer->GetCurrentBackBufferIndex())->Lock();
+    const auto currentBackBufferIndex = d3dContainer->GetCurrentBackBufferIndex();
+    device.lock()->PushCommand([this, currentBackBufferIndex, semaphore = a_Semaphore, fence = a_Fence] {
+        wglDXTextureMappings.at(currentBackBufferIndex)->Lock();
         if (semaphore != nullptr) {
             if (semaphore->type == Queue::Semaphore::Type::Binary)
                 std::static_pointer_cast<Queue::Semaphore::Binary>(semaphore)->Signal();
@@ -121,6 +122,6 @@ uint32_t Impl::AcquireBackBuffer(
         }
         if (fence != nullptr) fence->Signal();
     }, false);
-    return d3dContainer->GetCurrentBackBufferIndex();
+    return currentBackBufferIndex;
 }
 }
