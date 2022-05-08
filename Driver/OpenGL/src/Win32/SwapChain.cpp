@@ -96,8 +96,7 @@ void Impl::Present(const Queue::Handle& a_Queue, const uint32_t& a_ImageIndex)
     assert(!retired);
     const auto extent = d3dContainer->GetExtent();
     a_Queue->PushCommand([this, extent, imageIndex = a_ImageIndex]{
-        const auto& currentBackBuffer = wglDXTextureMappings.at(d3dContainer->currentBackBuffer);
-        currentBackBuffer->Unlock();
+        wglDXTextureMappings.at(d3dContainer->GetCurrentBackBufferIndex())->Unlock();
     }, true);
     d3dContainer->Present();
 }
@@ -109,8 +108,7 @@ uint32_t Impl::AcquireBackBuffer(
     const Queue::Fence::Handle& a_Fence)
 {
     device.lock()->PushCommand([this, semaphore = a_Semaphore, fence = a_Fence] {
-        const auto& currentBackBuffer = wglDXTextureMappings.at(d3dContainer->currentBackBuffer);
-        currentBackBuffer->Lock();
+        wglDXTextureMappings.at(d3dContainer->GetCurrentBackBufferIndex())->Lock();
         if (semaphore != nullptr) {
             if (semaphore->type == Queue::Semaphore::Type::Binary)
                 std::static_pointer_cast<Queue::Semaphore::Binary>(semaphore)->Signal();
@@ -118,6 +116,6 @@ uint32_t Impl::AcquireBackBuffer(
         }
         if (fence != nullptr) fence->Signal();
     }, false);
-    return d3dContainer->currentBackBuffer;
+    return d3dContainer->GetCurrentBackBufferIndex();
 }
 }
