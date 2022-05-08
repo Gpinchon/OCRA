@@ -99,6 +99,11 @@ void Impl::Present(const Queue::Handle& a_Queue, const uint32_t& a_ImageIndex)
         wglDXTextureMappings.at(d3dContainer->GetCurrentBackBufferIndex())->Unlock();
     }, true);
     d3dContainer->Present();
+#ifdef USE_D3D11 //Add glFinish frame delimiter for NSight
+    a_Queue->PushCommand([] {
+        glFinish();
+    }, false);
+#endif //USE_D3D11
 }
 
 //TODO: implement a timeout
