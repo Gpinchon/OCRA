@@ -14,7 +14,7 @@
 
 #include <vector>
 
-HANDLE(OCRA::Command::Buffer);
+OCRA_DECLARE_HANDLE(OCRA::Command::Buffer);
 
 namespace OCRA::Command
 {
@@ -22,7 +22,7 @@ struct RenderPassBeginInfo
 {
     RenderPass::Handle  renderPass{ 0 };
     FrameBuffer::Handle framebuffer{ 0 };
-    uiRect2D            renderArea;
+    Rect2D              renderArea;
     std::vector<ClearValue> clearValues;
 };
 enum class SubPassContents

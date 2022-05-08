@@ -42,7 +42,6 @@ set(OCRA_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/IndexType.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Logic.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Offset3D.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Rect.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Rect2D.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Rect3D.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/ScissorTest.hpp
@@ -106,6 +105,7 @@ endif (RenderingAPI STREQUAL "OpenGL")
 set(OCRA_TEST_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/main.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/Common.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/GraphicsPipeline.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/PhysicalDevice.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/SwapChain.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/Queue.cpp

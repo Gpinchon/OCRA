@@ -38,6 +38,14 @@ Impl::~Impl() {
         glDeleteFramebuffers(1, &handle);
     }, false);
 }
+void Impl::Bind()
+{
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, handle);
+}
+void Impl::Unbind()
+{
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+}
 Handle Create(
     const Device::Handle&       a_Device,
     const Info&                 a_Info,

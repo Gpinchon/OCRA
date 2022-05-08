@@ -22,7 +22,7 @@ struct AllocationCallback;
 
 namespace OCRA::FrameBuffer {
 struct Info {
-    RenderPass::Handle                  renderpass;
+    RenderPass::Handle                  renderPass;
     std::vector<Image::View::Handle>    attachments; //Image View handles
     Extent<3, uint16_t>                 extent; //extents, rarelly used except for layers
 };

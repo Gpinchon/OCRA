@@ -12,5 +12,5 @@ namespace OCRA::Command
 void SetScissor(
     const Command::Buffer::Handle&  a_CommandBuffer,
     const uint32_t&                 a_FirstScissor,
-    const std::vector<iRect2D>&     a_Scissors);
+    const std::vector<Rect2D>&      a_Scissors);
 }

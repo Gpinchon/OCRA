@@ -25,7 +25,7 @@ namespace OCRA::Command::Buffer
 {
 struct DynamicStates {
 	std::vector<ViewPort>		viewPorts;
-	std::vector<iRect2D>		scissors;
+	std::vector<Rect2D> 		scissors;
 	Vec<4, GLfloat> blendConstants{ 0, 0, 0, 0 };
 	GLfloat lineWidth{ 0.f };
 	GLfloat depthBiasConstantFactor{ 0.f };

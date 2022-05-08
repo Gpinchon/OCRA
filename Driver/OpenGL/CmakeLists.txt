@@ -80,6 +80,7 @@ set(OCRA_IMPL_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/MemoryBarrier.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Pool.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Query.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/RenderPass.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Scissor.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/ViewPort.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Image/Image.cpp

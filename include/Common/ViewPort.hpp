@@ -11,7 +11,7 @@
 
 namespace OCRA {
 struct ViewPort {
-    Rect2D              rect;
-    DepthRange<double>  depthRange;
+    Rect2D              rect{};
+    DepthRange<double>  depthRange{ 0, 1 };
 };
 }

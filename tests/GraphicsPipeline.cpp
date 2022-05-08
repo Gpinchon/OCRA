@@ -12,12 +12,11 @@
 #include <Command/RenderPass.hpp>
 #include <Command/Scissor.hpp>
 #include <Command/ViewPort.hpp>
+#include <Queue/Fence.hpp>
 
 #include <Windows.h>
 
 using namespace OCRA;
-
-#define SWAPCHAIN_IMAGE_NBR 2
 
 #include <Pipeline/Graphics.hpp>
 
@@ -28,7 +27,7 @@ static inline auto CreateGraphicsPipeline(const Device::Handle& a_Device, const 
     viewport.rect.offset = { 0, 0 };
     viewport.rect.extent = { a_Width, a_Height };
     viewport.depthRange  = { 0, 1 };
-    iRect2D  scissor;
+    Rect2D  scissor{};
     scissor.offset = { 0, 0 };
     scissor.extent = { a_Width, a_Height };
     graphicsPipelineInfo.renderPass = a_RenderPass;
@@ -44,7 +43,7 @@ static inline auto CreateRenderPass(const Device::Handle& a_Device)
 {
     RenderPass::Info renderPassInfo{};
     //TODO fill this
-    RenderPass::Create(a_Device, renderPassInfo);
+    return RenderPass::Create(a_Device, renderPassInfo);
 }
 
 static inline auto CreateFrameBuffer(const Device::Handle& a_Device, const std::vector<Image::Handle> a_Attachments)
@@ -53,6 +52,8 @@ static inline auto CreateFrameBuffer(const Device::Handle& a_Device, const std::
     for (const auto& image : a_Attachments) {
         Image::View::Info imageViewInfo;
         imageViewInfo.image = image;
+        imageViewInfo.format = Image::Format::Uint8_Normalized_RGBA;
+        imageViewInfo.type = Image::View::Type::View2D;
         const auto imageView = Image::View::Create(a_Device, imageViewInfo);
         frameBufferInfo.attachments.push_back(imageView);
     }
@@ -61,19 +62,19 @@ static inline auto CreateFrameBuffer(const Device::Handle& a_Device, const std::
 }
 
 static inline void RecordMainCommandBuffer(
-    Command::Buffer::Handle&    a_MainCommandBuffer,
-    FrameBuffer::Handle&        a_FrameBuffer,
-    Pipeline::Handle&           a_GraphicsPipeline,
-    RenderPass::Handle&         a_RenderPass,
+    const Command::Buffer::Handle& a_MainCommandBuffer,
+    const FrameBuffer::Handle&     a_FrameBuffer,
+    const Pipeline::Handle&        a_GraphicsPipeline,
+    const RenderPass::Handle&      a_RenderPass,
     const uint32_t a_Width, const uint32_t a_Height)
 {
-    Command::Buffer::BeginInfo commandBufferBeginInfo{};
+    Command::Buffer::BeginInfo bufferBeginInfo{};
     bufferBeginInfo.flags = Command::Buffer::UsageFlagBits::None;
     ViewPort viewport;
     viewport.rect.offset = { 0, 0 };
     viewport.rect.extent = { a_Width, a_Height };
     viewport.depthRange  = { 0, 1 };
-    iRect2D  scissor;
+    Rect2D  scissor{};
     scissor.offset = { 0, 0 };
     scissor.extent = { a_Width, a_Height };
     Command::RenderPassBeginInfo renderPassBeginInfo{};
@@ -85,7 +86,7 @@ static inline void RecordMainCommandBuffer(
     renderPassBeginInfo.clearValues = { {0, 0, 0, 0} };
 
     Command::Buffer::Reset(a_MainCommandBuffer);
-    Command::Buffer::Begin(a_MainCommandBuffer, commandBufferBeginInfo);
+    Command::Buffer::Begin(a_MainCommandBuffer, bufferBeginInfo);
     {
         Command::BeginRenderPass(a_MainCommandBuffer, renderPassBeginInfo, subPassContents);
         {
@@ -99,7 +100,7 @@ static inline void RecordMainCommandBuffer(
     Command::Buffer::End(a_MainCommandBuffer);
 }
 
-int SwapChain()
+int GraphicsPipeline()
 {
     int ret = 0;
     auto window = Window("Test_SwapChain", 1280, 720);
@@ -112,26 +113,23 @@ int SwapChain()
     const auto queue = Device::GetQueue(device, queueFamily, 0); //Get first available queue
     const auto commandPool = CreateCommandPool(device, queueFamily);
     const auto renderPass = CreateRenderPass(device);
+    const auto imageAcquisitionFence = Queue::Fence::Create(device);
 
     Command::Buffer::Handle mainCommandBuffer  = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Primary);
 
-    std::vector<FrameBuffer::Handle> frameBuffers;
+    FrameBuffer::Handle     frameBuffer;
     Pipeline::Handle        graphicsPipeline;
     SwapChain::Handle       swapChain;
     SwapChain::PresentInfo  presentInfo;
-    uint32_t frameIndex = 0;
-    uint32_t lastSwapChainImageIndex = 0;
-    bool first = true;
+    uint32_t width = 0, height = 0;
     bool close = false;
 
-    window.OnResize = [&device, &renderPass, &swapChain, &frameBuffers, &presentInfo](const Window&, const uint32_t a_Width, const uint32_t a_Height) {
-        frameBuffers.clear();
-        swapChain = CreateSwapChain(device, surface, swapChain, a_Width, a_Height, SWAPCHAIN_IMAGE_NBR);
+    window.OnResize = [&](const Window&, const uint32_t a_Width, const uint32_t a_Height) {
+        swapChain = CreateSwapChain(device, surface, swapChain, a_Width, a_Height, 2);
         graphicsPipeline = CreateGraphicsPipeline(device, renderPass, a_Width, a_Height);
-        for (const auto& swapChainImage : SwapChain::GetImages(device, swapChain)) {
-            frameBuffers.push_back(CreateFrameBuffer(device, { swapChainImage }));
-        }
         presentInfo.swapChains = { swapChain };
+        width = a_Width;
+        height = a_Height;
     };
     window.OnClose = [&close](const Window&) {
         close = true;
@@ -140,16 +138,16 @@ int SwapChain()
     while (true) {
         window.PushEvents();
         if (close) break;
-        const auto swapChainImageIndex = frameIndex++ % SWAPCHAIN_IMAGE_NBR;
-        presentInfo.imageIndices = { swapChainImageIndex };
-        const auto swapChainImage = SwapChain::GetImages(device, swapChain).at(swapChainImageIndex);
-        if (lastSwapChainImageIndex != swapChainImageIndex || first) {
-            first = false;
-            lastSwapChainImageIndex = swapChainImageIndex;
-            RecordMainCommandBuffer(mainCommandBuffer, frameBuffers.at(swapChainImageIndex), a_Width, a_Height);
-        }
+        const auto nextImage = SwapChain::AcquireNextImage(device, swapChain, std::chrono::nanoseconds(15000000), nullptr, imageAcquisitionFence);
+        Queue::Fence::WaitFor(device, imageAcquisitionFence, std::chrono::nanoseconds(15000000));
+        Queue::Fence::Reset(device, { imageAcquisitionFence });
+        presentInfo.imageIndices = { nextImage };
+        const auto swapChainImage = SwapChain::GetImages(device, swapChain).at(nextImage);
+        const auto frameBuffer = CreateFrameBuffer(device, { swapChainImage });
+        RecordMainCommandBuffer(mainCommandBuffer, frameBuffer, graphicsPipeline, renderPass, width, height);
         SubmitCommandBuffer(queue, mainCommandBuffer);
         SwapChain::Present(queue, presentInfo);
+        Queue::WaitIdle(queue);
     }
     return ret;
 }

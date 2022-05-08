@@ -14,5 +14,9 @@ struct Vec<2, T> {
 		struct { T u, v; };
 	};
 };
-typedef Vec<2, float> Vec2;
+typedef Vec<2, float>	 Vec2;
+typedef Vec<2, double>	 dVec2;
+typedef Vec<2, int>		 iVec2;
+typedef Vec<2, unsigned> uVec2;
+typedef Vec<2, bool>     bVec2;
 }
