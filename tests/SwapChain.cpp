@@ -73,6 +73,7 @@ static inline auto RecordClearCommandBuffer(Command::Buffer::Handle a_CommandBuf
     const auto color = HSVtoRGB(hue, 0.5f, 1.f);
     Command::Buffer::BeginInfo bufferBeginInfo;
     bufferBeginInfo.flags = Command::Buffer::UsageFlagBits::None;
+    Command::Buffer::Reset(a_CommandBuffer);
     Command::Buffer::Begin(a_CommandBuffer, bufferBeginInfo);
     {
         ColorValue clearColor{ color.r, color.g, color.b, 1.f };
@@ -95,6 +96,7 @@ int SwapChain()
     const auto queueFamily = FindQueueFamily(physicalDevice, PhysicalDevice::QueueFlagsBits::Transfer);
     const auto queue = Device::GetQueue(device, queueFamily, 0); //Get first available queue
     const auto commandPool = CreateCommandPool(device, queueFamily);
+    const auto imageAcquisitionFence = Queue::Fence::Create(device);
 
     Command::Buffer::Handle clearCommandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Primary);
     SwapChain::Handle       swapChain = CreateSwapChain(device, surface, nullptr, 1280, 720, SWAPCHAIN_IMAGE_NBR);;
@@ -109,15 +111,14 @@ int SwapChain()
         close = true;
     };
     window.Show();
-    const auto imageAcquisitionFence = Queue::Fence::Create(device);
     while (true) {
         window.PushEvents();
         if (close) break;
         const auto nextImage = SwapChain::AcquireNextImage(device, swapChain, std::chrono::nanoseconds(15000000), nullptr, imageAcquisitionFence);
         Queue::Fence::WaitFor(device, imageAcquisitionFence, std::chrono::nanoseconds(15000000));
+        Queue::Fence::Reset(device, { imageAcquisitionFence });
         presentInfo.imageIndices = { nextImage };
         const auto swapChainImage = SwapChain::GetImages(device, swapChain).at(nextImage);
-        Command::Buffer::Reset(clearCommandBuffer);
         RecordClearCommandBuffer(clearCommandBuffer, swapChainImage);
         SubmitCommandBuffer(queue, clearCommandBuffer);
         SwapChain::Present(queue, presentInfo);
