@@ -35,16 +35,17 @@ struct DeviceMapping
 
 struct TextureMapping
 {
-    inline TextureMapping(const std::shared_ptr<DeviceMapping> a_WGLDXDeviceMapping, void* const a_D3DColorBuffer, const uint32_t& a_glTextureHandle)
+    inline TextureMapping(const std::shared_ptr<DeviceMapping> a_WGLDXDeviceMapping, void* const a_D3DColorBuffer)
         : wglDXDeviceMapping(a_WGLDXDeviceMapping)
     {
-        wglDXDeviceMapping->device.lock()->PushCommand([this, a_D3DColorBuffer, a_glTextureHandle] {
+        wglDXDeviceMapping->device.lock()->PushCommand([this, a_D3DColorBuffer] {
+            glGenTextures(1, &glTextureHandle);
             wglDXTextureHandle = wglDXRegisterObjectNV(
                 wglDXDeviceMapping->wglDXDevice,
                 a_D3DColorBuffer,
-                a_glTextureHandle,
+                glTextureHandle,
                 GL_TEXTURE_2D,
-                WGL_ACCESS_READ_WRITE_NV
+                WGL_ACCESS_WRITE_DISCARD_NV
             );
         }, true);
         WIN32_CHECK_ERROR(wglDXTextureHandle != nullptr);
@@ -53,6 +54,7 @@ struct TextureMapping
     {
         wglDXDeviceMapping->device.lock()->PushCommand([this] {
             WIN32_CHECK_ERROR(wglDXUnregisterObjectNV(wglDXDeviceMapping->wglDXDevice, wglDXTextureHandle));
+            glDeleteTextures(1, &glTextureHandle);
         }, true);
     }
     inline void Lock()
@@ -64,6 +66,7 @@ struct TextureMapping
         WIN32_CHECK_ERROR(wglDXUnlockObjectsNV(wglDXDeviceMapping->wglDXDevice, 1, &wglDXTextureHandle));
     }
     std::shared_ptr<DeviceMapping> wglDXDeviceMapping;
-    HANDLE      wglDXTextureHandle{ nullptr };
+    HANDLE                         wglDXTextureHandle{ nullptr };
+    uint32_t                       glTextureHandle{ 0 };
 };
 }

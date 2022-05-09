@@ -19,6 +19,7 @@ struct Impl : SwapChain::Impl
 {
     Impl(const Device::Handle& a_Device, const Info& a_Info);
     ~Impl();
+    void CreateTextureMappings();
     //when retiring the SwapChain becomes "empty"
     virtual void Retire() override;
     virtual void Present(const Queue::Handle& a_Queue, const uint32_t& a_ImageIndex) override;

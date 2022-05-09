@@ -16,6 +16,7 @@ struct Impl
     Impl(const Device::Handle& a_Device, const Info& a_Info);
     //retired SwapChains loose ownership of their FB and get unusable
     virtual void Retire() {
+        images.clear();
         retired = true;
     }
     virtual void Present(const Queue::Handle& a_Queue, const uint32_t& a_ImageIndex) = 0;
