@@ -69,7 +69,7 @@ struct D3DContainerInterface
         for (auto& colorBuffer : colorBuffers) colorBuffer->Release();
         colorBuffers.clear();
         swapChain->ResizeBuffers(
-            1,
+            a_Info.minImageCount,
             a_Info.imageExtent.width,
             a_Info.imageExtent.height,
             format,

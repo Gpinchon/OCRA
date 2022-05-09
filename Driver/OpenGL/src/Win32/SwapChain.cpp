@@ -63,8 +63,7 @@ Impl::~Impl()
 void Impl::CreateTextureMappings()
 {
     for (const auto& colorBuffer : d3dContainer->colorBuffers) {
-        auto imageMapping = std::make_unique<WGLDX::TextureMapping>(wglDXDeviceMapping, colorBuffer);
-        wglDXTextureMappings.push_back(imageMapping);
+        wglDXTextureMappings.push_back(std::make_unique<WGLDX::TextureMapping>(wglDXDeviceMapping, colorBuffer));
     }
 }
 
@@ -80,8 +79,8 @@ void Impl::Present(const Queue::Handle& a_Queue, const uint32_t& a_ImageIndex)
     assert(!retired);
     const auto extent = d3dContainer->GetExtent();
     const auto currentBackBufferIndex = d3dContainer->GetCurrentBackBufferIndex();
-    const auto& wglDXTextureMapping = wglDXTextureMappings.at(currentBackBufferIndex);
-    a_Queue->PushCommand([this, extent, imageIndex = a_ImageIndex, wglDXTextureMapping]{
+    a_Queue->PushCommand([this, extent, currentBackBufferIndex, imageIndex = a_ImageIndex]{
+        const auto& wglDXTextureMapping = wglDXTextureMappings.at(currentBackBufferIndex);
         glCopyImageSubData(
             images.at(imageIndex)->handle,        GL_TEXTURE_2D, 0, 0, 0, 0,
             wglDXTextureMapping->glTextureHandle, GL_TEXTURE_2D, 0, 0, 0, 0,
