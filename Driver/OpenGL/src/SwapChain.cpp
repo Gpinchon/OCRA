@@ -35,11 +35,6 @@ Handle Create(const Device::Handle& a_Device, const Info& a_Info)
 #endif //_WIN32
 }
 
-const std::vector<Image::Handle>& GetImages(const Device::Handle& a_Device, const Handle& a_SwapChain)
-{
-    return a_SwapChain->images;
-}
-
 void Present(const Queue::Handle& a_Queue, const PresentInfo& a_PresentInfo)
 {
     for (const auto& semaphore : a_PresentInfo.waitSemaphores)
@@ -50,12 +45,11 @@ void Present(const Queue::Handle& a_Queue, const PresentInfo& a_PresentInfo)
     }
     for (auto index = 0u; index < a_PresentInfo.swapChains.size(); ++index) {
         const auto& swapChain = a_PresentInfo.swapChains.at(index);
-        const auto& swapChainImage = a_PresentInfo.imageIndices.at(index);
-        swapChain->Present(a_Queue, swapChainImage);
+        swapChain->Present(a_Queue);
     }
 }
 
-uint32_t AcquireNextImage(
+Image::Handle AcquireNextImage(
     const Device::Handle&           a_Device,
     const Handle&                   a_SwapChain,
     const std::chrono::nanoseconds& a_Timeout,

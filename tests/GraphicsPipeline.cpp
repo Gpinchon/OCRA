@@ -47,11 +47,9 @@ struct GraphicsPipelineTestApp
         while (true) {
             window.PushEvents();
             if (close) break;
-            const auto nextImage = SwapChain::AcquireNextImage(device, swapChain, std::chrono::nanoseconds(15000000), nullptr, imageAcquisitionFence);
+            const auto swapChainImage = SwapChain::AcquireNextImage(device, swapChain, std::chrono::nanoseconds(15000000), nullptr, imageAcquisitionFence);
             Queue::Fence::WaitFor(device, imageAcquisitionFence, std::chrono::nanoseconds(15000000));
             Queue::Fence::Reset(device, { imageAcquisitionFence });
-            presentInfo.imageIndices = { nextImage };
-            const auto swapChainImage = SwapChain::GetImages(device, swapChain).at(nextImage);
             frameBuffer = CreateFrameBuffer({ swapChainImage });
             RecordMainCommandBuffer();
             SubmitCommandBuffer(queue, mainCommandBuffer);

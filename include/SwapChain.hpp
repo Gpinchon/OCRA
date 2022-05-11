@@ -27,7 +27,7 @@ enum class PresentMode {
 };
 struct Info {
     Surface::Handle         surface{ nullptr };
-    uint32_t                minImageCount{ 0 };
+    uint32_t                imageCount{ 0 }; //You might get less depending on the implementation
     Image::Format           imageFormat{ Image::Format::Unknown };
     Image::ColorSpace       imageColorSpace{ Image::ColorSpace::Unknown };
     Extent2D                imageExtent{ 0, 0 };
@@ -44,17 +44,19 @@ struct Info {
 * /!\ When using OGL on Win32, you HAVE to recreate a SwapChain on resize /!\
 */
 Handle Create(const Device::Handle& a_Device, const Info& a_Info);
-const std::vector<Image::Handle>& GetImages(const Device::Handle& a_Device, const Handle& a_SwapChain);
-struct PresentInfo {
+struct PresentInfo
+{
     std::vector<Queue::Semaphore::Handle>   waitSemaphores;
     std::vector<SwapChain::Handle>          swapChains;
-    std::vector<uint32_t>                   imageIndices;
 };
+/**
+* Presents the current Back Buffer to the Surface
+*/
 void Present(const Queue::Handle& a_Queue, const PresentInfo& a_PresentInfo);
 /**
-* @return : the index to the next image of the swapchain
+* @return : a handle to the current Back Buffer
 */
-uint32_t AcquireNextImage(
+Image::Handle AcquireNextImage(
     const Device::Handle& a_Device,
     const Handle& a_SwapChain,
     const std::chrono::nanoseconds& a_Timeout,

@@ -67,6 +67,6 @@ struct TextureMapping
     }
     std::shared_ptr<DeviceMapping> wglDXDeviceMapping;
     HANDLE                         wglDXTextureHandle{ nullptr };
-    uint32_t                       glTextureHandle{ 0 };
+    uint32_t                       glTextureHandle;
 };
 }
