@@ -1,9 +1,9 @@
 #include <RenderPass.hpp>
-#include <Command/RenderPass.hpp>
 
-#include <GL/Command/ExecutionState.hpp>
-#include <GL/Command/Buffer.hpp>
 #include <GL/FrameBuffer.hpp>
+#include <GL/RenderPass.hpp>
+#include <GL/Command/Buffer.hpp>
+#include <GL/Command/ExecutionState.hpp>
 
 #include <GL/glew.h>
 
@@ -18,8 +18,9 @@ static inline auto GetClearOps(const Info& a_Info)
 {
     std::vector<ClearBufferOp> clearOps;
     for (uint32_t i = 0; i < a_Info.colorAttachments.size(); ++i) {
+        const auto& colorAttachment = a_Info.colorAttachments.at(i);
         if (colorAttachment.loadOp == LoadOperation::Clear) {
-            ClearBufferOp op;
+            ClearBufferOp op{};
             op.buffer = GL_COLOR;
             op.drawBuffer = i;
             clearOps.push_back(op);
@@ -31,6 +32,7 @@ static inline auto GetDrawBuffers(const Info& a_Info)
 {
     std::vector<GLenum> drawBuffers;
     for (uint32_t i = 0; i < a_Info.colorAttachments.size(); ++i) {
+        const auto& colorAttachment = a_Info.colorAttachments.at(i);
         if (colorAttachment.storeOp == StoreOperation::Store) {
             if (colorAttachment.location == -1) drawBuffers.push_back(GL_NONE);
             else drawBuffers.push_back(GL_COLOR_ATTACHMENT0 + colorAttachment.location);
@@ -46,15 +48,15 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
     , drawBuffers(GetDrawBuffers(a_Info))
 {}
 
-void Impl::BeginRenderPass(Buffer::ExecutionState& a_ExecutionState)
+void Impl::BeginRenderPass(Command::Buffer::ExecutionState& a_ExecutionState)
 {
     const auto& renderPass = a_ExecutionState.renderPass;
-    a_ExecutionState.framebuffer->Bind();
+    renderPass.framebuffer->Bind();
     glViewport(renderPass.renderArea.offset.x,     renderPass.renderArea.offset.y,
                renderPass.renderArea.extent.width, renderPass.renderArea.extent.height);
-    if (info.depthAttachment.loadOP == LoadOperation::Clear)
+    if (info.depthAttachment.loadOp == LoadOperation::Clear)
         glClearBufferfv(GL_DEPTH, 0, &renderPass.depthClearValue);
-    if (info.stencilAttachment.loadOP == LoadOperation::Clear)
+    if (info.stencilAttachment.loadOp == LoadOperation::Clear)
         glClearBufferiv(GL_STENCIL, 0, &renderPass.stencilClearValue);
     for (uint32_t i = 0; i < clearOps.size(); ++i)
     {
@@ -67,9 +69,9 @@ void Impl::BeginRenderPass(Buffer::ExecutionState& a_ExecutionState)
             clearValue.float32);
     }
     glDrawBuffers(drawBuffers.size(), drawBuffers.data());
-    if (info.depthAttachment.storeOp == StoreOp::DontCare)
+    if (info.depthAttachment.storeOp == StoreOperation::DontCare)
         glDepthMask(false);
-    if (info.stencilAttachment.storeOp == StoreOp::DontCare)
+    if (info.stencilAttachment.storeOp == StoreOperation::DontCare)
         glStencilMask(0);
 }
 

@@ -1,8 +1,11 @@
 #pragma once
 
 #include <RenderPass.hpp>
+#include <GL/WeakHandle.hpp>
 
 #include <vector>
+
+OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
 
 namespace OCRA::Command::Buffer
 {

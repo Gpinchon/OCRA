@@ -38,7 +38,7 @@ inline const std::function<void(Command::Buffer::ExecutionState&)> CompileStenci
     if (a_DynamicState.Contains(DynamicState::State::StencilOP)) {
         return [face(a_Face)](Command::Buffer::ExecutionState& a_ExecutionState) {
             const auto& renderPass = a_ExecutionState.renderPass.renderPass;
-            const auto ignoreStencilMask = renderPass != nullptr && renderPass->info.depthAttachment.storeOp == RenderPass::StoreOp::DontCare;
+            const auto ignoreStencilMask = renderPass != nullptr && renderPass->info.depthAttachment.storeOp == RenderPass::StoreOperation::DontCare;
             ApplyStencilOP(
                 face,
                 face == GL_BACK ? a_ExecutionState.dynamicStates.backStencilOP : a_ExecutionState.dynamicStates.frontStencilOP,
@@ -51,7 +51,7 @@ inline const std::function<void(Command::Buffer::ExecutionState&)> CompileStenci
         stencilOp(Stencil::GLOpState(a_OpState))
     ](Command::Buffer::ExecutionState& a_ExecutionState) {
         const auto& renderPass = a_ExecutionState.renderPass.renderPass;
-        const auto ignoreStencilMask = renderPass != nullptr && renderPass->info.depthAttachment.storeOp == RenderPass::StoreOp::DontCare;
+        const auto ignoreStencilMask = renderPass != nullptr && renderPass->info.depthAttachment.storeOp == RenderPass::StoreOperation::DontCare;
         ApplyStencilOP(face, stencilOp, ignoreStencilMask);
     };
 }
@@ -82,7 +82,7 @@ inline const auto Compile(const Device::Handle& a_Device, const DepthStencilStat
         bDepthTestEnable ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
         bDepthBoundsTestEnable ? glEnable(GL_DEPTH_BOUNDS_TEST_EXT) : glDisable(GL_DEPTH_BOUNDS_TEST_EXT);
         const auto& renderPass = a_ExecutionState.renderPass.renderPass;
-        const auto ignoreDepthMask = renderPass != nullptr && renderPass->info.depthAttachment.storeOp == RenderPass::StoreOp::DontCare;
+        const auto ignoreDepthMask = renderPass != nullptr && renderPass->info.depthAttachment.storeOp == RenderPass::StoreOperation::DontCare;
         if (!ignoreDepthMask) glDepthMask(bDepthWriteEnable);
         glDepthFunc(eDepthCompareOp);
         bStencilTestEnable  ? glEnable(GL_STENCIL_TEST) : glDisable(GL_STENCIL_TEST);

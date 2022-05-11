@@ -33,6 +33,7 @@ set(OCRA_IMPL_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Instance.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/ObjectPool.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/PhysicalDevice.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/RenderPass.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Surface.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/SwapChain.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/WeakHandle.hpp
@@ -69,6 +70,7 @@ set(OCRA_IMPL_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/FrameBuffer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Instance.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Memory.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/RenderPass.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/PhysicalDevice.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/QueryPool.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/SwapChain.cpp
@@ -80,7 +82,6 @@ set(OCRA_IMPL_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/MemoryBarrier.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Pool.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Query.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/RenderPass.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Scissor.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/ViewPort.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Image/Image.cpp

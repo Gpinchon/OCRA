@@ -1,5 +1,6 @@
 #pragma once
 
+#include <FrameBuffer.hpp>
 #include <Handle.hpp>
 
 #include <GL/WeakHandle.hpp>

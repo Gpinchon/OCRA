@@ -68,7 +68,7 @@ struct RenderPassBeginInfo
     RenderPass::Handle      renderPass{ 0 };
     FrameBuffer::Handle     framebuffer{ 0 };
     Rect2D                  renderArea{ 0, 0, 0, 0 };
-    std::vector<ClearValue> colorClearValues{ 0, 0, 0, 0 };
+    std::vector<ColorValue> colorClearValues;
     float                   depthClearValue{ 0 };
     int32_t                 stencilClearValue{ 0 };
 };

@@ -2,14 +2,14 @@
 
 #include <Instance.hpp>
 #include <Device.hpp>
+#include <FrameBuffer.hpp>
+#include <RenderPass.hpp>
 #include <Surface.hpp>
 #include <SwapChain.hpp>
 #include <Image/Image.hpp>
 #include <Image/View.hpp>
-#include <RenderPass.hpp>
 #include <Command/Pool.hpp>
 #include <Command/Buffer.hpp>
-#include <Command/RenderPass.hpp>
 #include <Command/Scissor.hpp>
 #include <Command/ViewPort.hpp>
 #include <Queue/Fence.hpp>
@@ -116,7 +116,7 @@ struct GraphicsPipelineTestApp
         renderPassBeginInfo.framebuffer = frameBuffer;
         renderPassBeginInfo.renderArea.offset = { 0, 0 };
         renderPassBeginInfo.renderArea.extent = extent;
-        renderPassBeginInfo.clearValues = { {0, 0, 0, 0} };
+        renderPassBeginInfo.colorClearValues = { {1, 0, 0, 0} };
 
         Command::Buffer::Reset(mainCommandBuffer);
         Command::Buffer::Begin(mainCommandBuffer, bufferBeginInfo);
