@@ -227,7 +227,7 @@ SwapChain::Handle CreateSwapChain(const Device::Handle& a_Device, const Surface:
     info.presentMode = SwapChain::PresentMode::Immediate;
     info.imageColorSpace = Image::ColorSpace::sRGB;
     info.imageFormat = Image::Format::Uint8_Normalized_RGBA;
-    info.minImageCount = a_ImageNbr;
+    info.imageCount = a_ImageNbr;
     info.surface = a_Surface;
     info.imageExtent.width  = a_Width;
     info.imageExtent.height = a_Height;

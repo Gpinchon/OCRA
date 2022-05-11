@@ -16,17 +16,15 @@ struct Impl
     Impl(const Device::Handle& a_Device, const Info& a_Info);
     //retired SwapChains loose ownership of their FB and get unusable
     virtual void Retire() {
-        images.clear();
         retired = true;
     }
-    virtual void Present(const Queue::Handle& a_Queue, const uint32_t& a_ImageIndex) = 0;
-    virtual uint32_t AcquireBackBuffer(
+    virtual void Present(const Queue::Handle& a_Queue) = 0;
+    virtual Image::Handle AcquireBackBuffer(
         const std::chrono::nanoseconds& a_TimeoutNS,
         const Queue::Semaphore::Handle& a_Semaphore,
         const Queue::Fence::Handle&     a_Fence) = 0;
     Info                        info;
     const Device::WeakHandle    device;
     bool                        retired{ false };
-    std::vector<Image::Handle>  images;
 };
 }

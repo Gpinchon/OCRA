@@ -38,7 +38,7 @@ struct D3DContainerInterface
     {
     }
     inline ~D3DContainerInterface() {
-        for (auto& colorBuffer : colorBuffers) colorBuffer->Release();
+        colorBuffer->Release();
         swapChain->Release();
         device->Release();
     }
@@ -52,7 +52,7 @@ struct D3DContainerInterface
         desc.BufferDesc.Height = a_Info.imageExtent.height;
         desc.SampleDesc.Count = 1;
         desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-        desc.BufferCount = a_Info.minImageCount;
+        desc.BufferCount = 1;
         desc.OutputWindow = HWND(a_Info.surface->nativeWindow);
         desc.Windowed = true;
         desc.SwapEffect = DXGI_SWAP_EFFECT_SEQUENTIAL;
@@ -66,10 +66,9 @@ struct D3DContainerInterface
     }
     inline void ResizeSwapChain(const Info& a_Info)
     {
-        for (auto& colorBuffer : colorBuffers) colorBuffer->Release();
-        colorBuffers.clear();
+        colorBuffer->Release();
         swapChain->ResizeBuffers(
-            a_Info.minImageCount,
+            1,
             a_Info.imageExtent.width,
             a_Info.imageExtent.height,
             format,
@@ -77,28 +76,20 @@ struct D3DContainerInterface
         );
     }
     template<typename T>
-    inline auto GetBuffers()
+    inline auto GetBuffer()
     {
         DXGI_SWAP_CHAIN_DESC desc{};
         swapChain->GetDesc(&desc);
-        colorBuffers.resize(desc.BufferCount);
-        for (auto i = 0u; i < desc.BufferCount; ++i) {
-            T* buffer = nullptr;
-            WIN32_CHECK_ERROR(S_OK == swapChain->GetBuffer(i, __uuidof(T), (void**)&buffer));
-            WIN32_CHECK_ERROR(buffer != nullptr);
-            colorBuffers.at(i) = buffer;
-        }
+        assert(desc.BufferCount == 1);
+        T* buffer = nullptr;
+        WIN32_CHECK_ERROR(S_OK == swapChain->GetBuffer(0, IID_PPV_ARGS(&buffer)));
+        WIN32_CHECK_ERROR(buffer != nullptr);
+        colorBuffer = buffer;
     }
     inline void Present()
     {
         const auto swapChainStatus = swapChain->Present(synchronize ? 1 : 0, 0);
         WIN32_CHECK_ERROR(S_OK == swapChainStatus || DXGI_STATUS_OCCLUDED == swapChainStatus);
-    }
-    inline uint32_t GetCurrentBackBufferIndex() const
-    {
-        uint32_t presentCount = 0;
-        swapChain->GetLastPresentCount(&presentCount);
-        return presentCount % colorBuffers.size();
     }
     inline uExtent2D GetExtent() const
     {
@@ -110,6 +101,6 @@ struct D3DContainerInterface
     const DXGI_FORMAT      format;
     IDXGISwapChain*        swapChain{ nullptr };
     IUnknown*              device{ nullptr };
-    std::vector<IUnknown*> colorBuffers;
+    IUnknown*              colorBuffer;
 };
 }

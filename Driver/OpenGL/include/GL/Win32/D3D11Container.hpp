@@ -34,12 +34,12 @@ struct D3DContainer : D3DContainerInterface
             nullptr                   //Device Context PTR
         ));
         CreateSwapChain(a_Info);
-        GetBuffers<ID3D11Texture2D>();
+        GetBuffer<ID3D11Texture2D>();
     }
     inline void ResizeBuffers(const Info& a_Info)
     {
         ResizeSwapChain(a_Info);
-        GetBuffers<ID3D11Texture2D>();
+        GetBuffer<ID3D11Texture2D>();
     }
 };
 }
