@@ -8,10 +8,7 @@
 
 #include <Common/Rect2D.hpp>
 #include <Handle.hpp>
-#include <Image/Format.hpp>
-#include <Image/Layout.hpp>
 #include <Pipeline/Pipeline.hpp>
-#include <Common/SampleCount.hpp>
 
 #include <vector>
 
@@ -20,58 +17,67 @@ OCRA_DECLARE_HANDLE(OCRA::Device);
 
 namespace OCRA::RenderPass
 {
+enum class LoadOperation {
+    DontCare, //Nothing is done
+    Load,     //Values are kept
+    Clear,    //Values are cleared
+    MaxValue
+};
+enum class StoreOperation {
+    DontCare, //Nothing is stored
+    Store,    //Values from the Fragment Shader are written
+    MaxValue
+};
+
 struct AttachmentDescription {
-	enum class LoadOperation {
-		DontCare, Load, Clear,
-		MaxValue
-	};
-	enum class StoreOperation {
-		DontCare, Store,
-		MaxValue
-	};
-	Image::Format format{ Image::Format::Unknown };
-	SampleCount samples{ SampleCount::Count1 };
-	//load/store for color/depth buffer
-	LoadOperation loadOp{ LoadOperation::DontCare }; //determines what to do with the buffer before rendering
-	StoreOperation storeOp{ StoreOperation::DontCare }; //determines what to do with the buffer after rendering
-	//load/store for stencil buffer
-	LoadOperation stencilLoadOp{ LoadOperation::DontCare };
-	StoreOperation stencilStoreOp{ StoreOperation::DontCare };
-	Image::Layout initialLayout{ Image::Layout::Unknown };
-	Image::Layout finalLayout{ Image::Layout::Unknown };
+    LoadOperation  loadOp{ LoadOperation::DontCare };   //determines what to do with the buffer before rendering
+    StoreOperation storeOp{ StoreOperation::DontCare }; //determines what to do with the buffer after rendering
 };
 
-struct AttachmentReference {
-	int8_t attachment{ -1 }; //-1 means no attachment
-	Image::Layout layout{ Image::Layout::Unknown };
+struct ColorAttachmentDescription : AttachmentDescription {
+    int8_t  location{ -1 }; //location of the output, -1 means none
 };
 
-struct SubPassDescription {
-	Pipeline::BindingPoint pipelineBindPoint{ Pipeline::BindingPoint::Unknown };
-	std::vector<AttachmentReference> inputAttachments;
-	std::vector<AttachmentReference> colorAttachments;
-	AttachmentReference resolveAttachment;
-	AttachmentReference depthStencilAttachment;
-	//describes attachments not used by this subpass but whose content must pe preserved
-	std::vector<AttachmentReference> preserveAttachments;
-};
-
-struct SubPassDependency {
-	int8_t srcSubPass{ -1 };
-	int8_t dstSubPass{ -1 };
-};
-
+/**
+ * Specifies the outputs of the RenderPass and clear operations
+ */
 struct Info {
-	std::vector<AttachmentDescription> attachments;
-	std::vector<SubPassDescription> subPasses;
-	std::vector<SubPassDependency> dependencies;
+    Pipeline::BindingPoint                  pipelineBindingPoint{ Pipeline::BindingPoint::Unknown };
+    std::vector<ColorAttachmentDescription> colorAttachments;
+    AttachmentDescription                   depthAttachment;
+    AttachmentDescription                   stencilAttachment;
 };
+
 Handle Create(const Device::Handle& a_Device, const Info& a_Info);
-const Info& GetInfo(const Device::Handle& a_Device, const Handle& a_Handle);
-uint8_t GetAttachmentCount(const Handle& a_RenderPass);
-const AttachmentDescription& GetAttachment(const Handle& a_RenderPass, uint8_t a_AttachmentIndex);
-uint8_t GetSubpassCount(const Handle& a_RenderPass);
-const SubPassDescription& GetSubpass(const Handle& a_RenderPass, uint8_t a_SubPassIndex);
-uint8_t GetDependencyCount(const Handle& a_RenderPass);
-const SubPassDependency& GetDependency(const Handle& a_RenderPass, uint8_t a_DependencyIndex);
+}
+
+#include <Common/ClearValue.hpp>
+
+OCRA_DECLARE_HANDLE(OCRA::FrameBuffer);
+
+namespace OCRA::Command
+{
+/**
+ * renderArea        : defines the area that this RenderPass is gonna render to
+ * colorClearValues  : defines the values to be used to clear color buffers, must be the same size as colorAttachments member of RenderPass
+ * depthClearValue   : defines the values to be used to clear the depth buffer
+ * stencilClearValue : defines the values to be used to clear the stencil buffer
+ */
+struct RenderPassBeginInfo
+{
+    RenderPass::Handle      renderPass{ 0 };
+    FrameBuffer::Handle     framebuffer{ 0 };
+    Rect2D                  renderArea{ 0, 0, 0, 0 };
+    std::vector<ClearValue> colorClearValues{ 0, 0, 0, 0 };
+    float                   depthClearValue{ 0 };
+    int32_t                 stencilClearValue{ 0 };
+};
+enum class SubPassContents
+{
+    Inline, SecondaryCommandBuffers
+};
+//Begin Render Pass recording
+void BeginRenderPass(const Command::Buffer::Handle& a_CommandBuffer, const RenderPassBeginInfo& a_BeginInfo, const SubPassContents& a_SubPassContents);
+//End Render Pass recording
+void EndRenderPass(const Command::Buffer::Handle& a_CommandBuffer);
 }

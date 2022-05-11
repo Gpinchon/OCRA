@@ -58,7 +58,9 @@ struct RenderPass
 	OCRA::RenderPass::Handle	renderPass;
 	FrameBuffer::Handle			framebuffer;
 	Rect2D						renderArea;
-	std::vector<ClearValue>			clearValues;
+	std::vector<ClearValue> 	colorClearValues;
+    float                   	depthClearValue;
+    uint32_t                	stencilClearValue;
 	std::vector<VertexInputBinding>	vertexInputBindings;
 	IndexBufferBinding				indexBufferBinding;
 	GLenum							primitiveTopology{ GL_NONE };

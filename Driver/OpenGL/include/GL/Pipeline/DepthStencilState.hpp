@@ -12,12 +12,14 @@
 #include <GL/Command/ExecutionState.hpp>
 #include <GL/Common/Compare.hpp>
 #include <GL/Common/Stencil.hpp>
+#include <GL/RenderPass.hpp>
 #include <GL/glew.h>
 
 namespace OCRA::Pipeline::DepthStencilState {
 inline void ApplyStencilOP(
     const GLenum& a_Face,
-    const Stencil::GLOpState& a_GLOpState
+    const Stencil::GLOpState& a_GLOpState,
+    const bool a_IgnoreMask
 ) {
     glStencilOpSeparate(
         a_Face,
@@ -29,29 +31,33 @@ inline void ApplyStencilOP(
         a_GLOpState.compareOp,
         a_GLOpState.reference,
         a_GLOpState.compareMask);
-    glStencilMaskSeparate(
-        a_Face,
-        a_GLOpState.writeMask);
+    if (!a_IgnoreMask) glStencilMaskSeparate(a_Face, a_GLOpState.writeMask);
 };
 inline const std::function<void(Command::Buffer::ExecutionState&)> CompileStencilOp(const GLenum& a_Face, const Stencil::OpState& a_OpState, const DynamicState::Info& a_DynamicState)
 {
     if (a_DynamicState.Contains(DynamicState::State::StencilOP)) {
         return [face(a_Face)](Command::Buffer::ExecutionState& a_ExecutionState) {
+            const auto& renderPass = a_ExecutionState.renderPass.renderPass;
+            const auto ignoreStencilMask = renderPass != nullptr && renderPass->info.depthAttachment.storeOp == RenderPass::StoreOp::DontCare;
             ApplyStencilOP(
                 face,
-                face == GL_BACK ? a_ExecutionState.dynamicStates.backStencilOP : a_ExecutionState.dynamicStates.frontStencilOP
+                face == GL_BACK ? a_ExecutionState.dynamicStates.backStencilOP : a_ExecutionState.dynamicStates.frontStencilOP,
+                ignoreStencilMask
             );
         };
     }
     else return [
         face(a_Face),
         stencilOp(Stencil::GLOpState(a_OpState))
-    ](Command::Buffer::ExecutionState&) {
-        ApplyStencilOP(face, stencilOp);
+    ](Command::Buffer::ExecutionState& a_ExecutionState) {
+        const auto& renderPass = a_ExecutionState.renderPass.renderPass;
+        const auto ignoreStencilMask = renderPass != nullptr && renderPass->info.depthAttachment.storeOp == RenderPass::StoreOp::DontCare;
+        ApplyStencilOP(face, stencilOp, ignoreStencilMask);
     };
 }
 inline const auto Compile(const Device::Handle& a_Device, const DepthStencilState::Info& a_Info, const DynamicState::Info& a_DynamicState)
 {
+    if (!GLEW_EXT_depth_bounds_test) throw std::runtime_error("Depth bounds test extension required !");
     const auto depthTestEnable(a_Info.depthTestEnable);
     const auto depthWriteEnable(a_Info.depthWriteEnable);
     const auto depthCompareOp(GetGLOperation(a_Info.depthCompareOp));
@@ -75,12 +81,13 @@ inline const auto Compile(const Device::Handle& a_Device, const DepthStencilStat
         const auto bStencilTestEnable = dynamicStencilTestEnable ? a_ExecutionState.dynamicStates.stencilTestEnable : stencilTestEnable;
         bDepthTestEnable ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
         bDepthBoundsTestEnable ? glEnable(GL_DEPTH_BOUNDS_TEST_EXT) : glDisable(GL_DEPTH_BOUNDS_TEST_EXT);
-        glDepthMask(bDepthWriteEnable);
+        const auto& renderPass = a_ExecutionState.renderPass.renderPass;
+        const auto ignoreDepthMask = renderPass != nullptr && renderPass->info.depthAttachment.storeOp == RenderPass::StoreOp::DontCare;
+        if (!ignoreDepthMask) glDepthMask(bDepthWriteEnable);
         glDepthFunc(eDepthCompareOp);
         bStencilTestEnable  ? glEnable(GL_STENCIL_TEST) : glDisable(GL_STENCIL_TEST);
         front(a_ExecutionState);
         back(a_ExecutionState);
-        //extension : GL_EXT_depth_bounds_test
         glDepthBoundsEXT(
             sDepthBounds.min,
             sDepthBounds.max);
