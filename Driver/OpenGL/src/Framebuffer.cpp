@@ -19,11 +19,29 @@ static inline auto CreateFrameBuffer(const Device::Handle& a_Device, const Info&
         glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_HEIGHT, a_Info.extent.height);
         glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_LAYERS, a_Info.extent.depth);
         for (uint32_t index = 0; index < a_Info.attachments.size(); ++index) {
-            glFramebufferTextureEXT(
-                GL_FRAMEBUFFER,
-                GL_COLOR_ATTACHMENT0 + index,
-                a_Info.attachments.at(index)->handle,
-                0);
+            const auto& imageView = a_Info.attachments.at(index);
+            if (imageView->info.type == Image::View::Type::View1D)
+                glFramebufferTexture1D(
+                    GL_FRAMEBUFFER,
+                    GL_COLOR_ATTACHMENT0 + index,
+                    GL_TEXTURE_1D,
+                    imageView->handle,
+                    attachment.level);
+            else if (imageView->info.type == Image::View::Type::View2D)
+                glFramebufferTexture2D(
+                    GL_FRAMEBUFFER,
+                    GL_COLOR_ATTACHMENT0 + index,
+                    GL_TEXTURE_2D,
+                    imageView->handle,
+                    attachment.level);
+            else if (imageView->info.type == Image::View::Type::View3D)
+                glFramebufferTexture3D(
+                    GL_FRAMEBUFFER,
+                    GL_COLOR_ATTACHMENT0 + index
+                    GL_TEXTURE_3D,
+                    imageView->handle,
+                    attachment.level,
+                    attachment.layer);
         }
         assert(glCheckNamedFramebufferStatusEXT(handle, GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);

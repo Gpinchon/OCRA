@@ -10,6 +10,7 @@
 OCRA_DECLARE_HANDLE(OCRA::Device);
 OCRA_DECLARE_HANDLE(OCRA::Descriptor::Set);
 OCRA_DECLARE_HANDLE(OCRA::Buffer::View);
+OCRA_DECLARE_HANDLE(OCRA::Image::View);
 
 namespace OCRA::Descriptor::Set
 {

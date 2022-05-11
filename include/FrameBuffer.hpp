@@ -22,10 +22,14 @@ struct AllocationCallback;
 
 namespace OCRA::FrameBuffer {
 struct Info {
-    RenderPass::Handle                  renderPass;
-    std::vector<Image::View::Handle>    attachments; //Image View handles
-    Extent<3, uint16_t>                 extent; //extents, rarelly used except for layers
+    RenderPass::Handle               renderPass;
+    std::vector<Image::View::Handle> attachments; //Image View handles
+    Extent<3, uint16_t>              extent; //default FB extent
 };
+/**
+ * Creates a framebuffer with the specified attachments.
+ * In case of no attachments, an empty FB with size Info::extent will be created.
+ */
 Handle Create(
     const Device::Handle&       a_Device,
     const Info&                 a_Info,
