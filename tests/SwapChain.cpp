@@ -68,7 +68,11 @@ Vec3 HSVtoRGB(float fH, float fS, float fV) {
 static inline auto RecordClearCommandBuffer(Command::Buffer::Handle a_CommandBuffer, const Image::Handle& a_Image)
 {
     static float hue = 0;
-    hue += 0.5;
+    static auto lastTime = std::chrono::high_resolution_clock::now();
+    const auto now = std::chrono::high_resolution_clock::now();
+    const auto delta = std::chrono::duration<double, std::milli>(now - lastTime).count();
+    lastTime = now;
+    hue += 0.05 * delta;
     hue = hue > 360 ? 0 : hue;
     const auto color = HSVtoRGB(hue, 0.5f, 1.f);
     Command::Buffer::BeginInfo bufferBeginInfo;
