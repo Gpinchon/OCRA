@@ -83,4 +83,12 @@ void SubmitCommandBuffer(const Queue::Handle& a_Queue, const Command::Buffer::Ha
 uint32_t FindProperMemoryType(const PhysicalDevice::Handle& a_PhysicalDevice, const PhysicalDevice::MemoryPropertyFlags& a_MemoryProperties);
 //allocate GPU memory with the specified properties
 Memory::Handle AllocateMemory(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const uint64_t& a_Size, const PhysicalDevice::MemoryPropertyFlags& a_MemoryProperties);
+
+struct TestApp
+{
+	TestApp(const std::string& a_Name)
+		: instance(CreateInstance(a_Name))
+	{}
+	Instance::Handle instance;
+}
 }
