@@ -77,7 +77,7 @@ Window::Window(const std::string& name, const uint32_t a_Width, const uint32_t a
     const auto hwnd = CreateWindowEx(
         0,
         wndclass.lpszClassName,
-        "Test Window",
+        name.c_str(),
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT, a_Width, a_Height,
         nullptr, nullptr, wndclass.hInstance, nullptr);
