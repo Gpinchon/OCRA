@@ -31,8 +31,7 @@ static inline auto GetClearOps(const Info& a_Info)
 static inline auto GetDrawBuffers(const Info& a_Info)
 {
     std::vector<GLenum> drawBuffers;
-    for (uint32_t i = 0; i < a_Info.colorAttachments.size(); ++i) {
-        const auto& colorAttachment = a_Info.colorAttachments.at(i);
+    for (const auto& colorAttachment : a_Info.colorAttachments) {
         if (colorAttachment.storeOp == StoreOperation::Store) {
             if (colorAttachment.location == -1) drawBuffers.push_back(GL_NONE);
             else drawBuffers.push_back(GL_COLOR_ATTACHMENT0 + colorAttachment.location);
