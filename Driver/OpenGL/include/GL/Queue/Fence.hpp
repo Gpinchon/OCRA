@@ -16,20 +16,28 @@ namespace OCRA::Queue::Fence {
 struct Impl {
 	Impl(const Device::Handle& a_Device) : device(a_Device) {}
 	inline auto GetStatus() {
-		std::unique_lock<std::mutex>(mutex);
+		std::unique_lock<std::mutex> lock(mutex);
 		return status;
 	}
 	inline bool WaitFor(const std::chrono::nanoseconds& a_TimeoutNS) {
 		return cv.wait_for(std::unique_lock<std::mutex>(mutex), a_TimeoutNS, [this] { return status == Status::Signaled; });
 	}
 	inline void Signal() {
-		std::unique_lock<std::mutex> lock(mutex);
+		mutex.lock();
 		if (status == Status::Signaled) return;
 		const auto sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
 		glClientWaitSync(sync, 0, GL_TIMEOUT_IGNORED);
 		glDeleteSync(sync);
 		status = Status::Signaled;
-		lock.unlock();
+		mutex.unlock();
+		cv.notify_all();
+	}
+	//Signals the Fence without actually syncing with the GPU
+	inline void SignalNoSync() {
+		mutex.lock();
+		if (status == Status::Signaled) return;
+		status = Status::Signaled;
+		mutex.unlock();
 		cv.notify_all();
 	}
 	inline void Reset() {

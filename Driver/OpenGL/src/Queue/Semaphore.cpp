@@ -67,6 +67,6 @@ uint64_t GetCounterValue(
     const Handle& a_Semaphore)
 {
     assert(a_Semaphore->type == Type::Timeline);
-    return std::static_pointer_cast<Timeline>(a_Semaphore)->Value();
+    return std::static_pointer_cast<Timeline>(a_Semaphore)->Count();
 }
 }
