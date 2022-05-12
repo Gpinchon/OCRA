@@ -20,10 +20,14 @@ using namespace OCRA;
 
 #include <Pipeline/Graphics.hpp>
 
-struct GraphicsPipelineTestApp
+struct GraphicsPipelineTestApp : TestApp
 {
     GraphicsPipelineTestApp()
-        : window(Window("Test_SwapChain", 1280, 720))
+        : TestApp("Test_GraphicsPipeline")
+        , window(Window("Test_GraphicsPipeline", 1280, 720))
+        , surface(CreateSurface(instance, GetModuleHandle(0), (void*)window.nativeHandle))
+        , physicalDevice(Instance::EnumeratePhysicalDevices(instance).front())
+        , device(CreateDevice(physicalDevice))
     {
         window.OnResize = [this](const Window&, const uint32_t a_Width, const uint32_t a_Height) {
             OnResize(a_Width, a_Height);
@@ -31,11 +35,7 @@ struct GraphicsPipelineTestApp
         window.OnClose = [this](const Window&) {
             OnClose();
         };
-        instance = CreateInstance("Test_SwapChain");
-        surface = CreateSurface(instance, GetModuleHandle(0), (void*)window.nativeHandle);
-        physicalDevice = Instance::EnumeratePhysicalDevices(instance).front();
-        device = CreateDevice(physicalDevice);
-        const auto queueFamily = FindQueueFamily(physicalDevice, PhysicalDevice::QueueFlagsBits::Transfer);
+        const auto queueFamily = FindQueueFamily(physicalDevice, PhysicalDevice::QueueFlagsBits::Graphics);
         queue = Device::GetQueue(device, queueFamily, 0); //Get first available queue
         commandPool = CreateCommandPool(device, queueFamily);
         renderPass = CreateRenderPass();
@@ -60,7 +60,9 @@ struct GraphicsPipelineTestApp
     RenderPass::Handle CreateRenderPass()
     {
         RenderPass::Info renderPassInfo{};
-        //TODO fill this
+        RenderPass::ColorAttachmentDescription colorAttachment;
+        colorAttachment.loadOp = RenderPass::LoadOperation::Clear; //clear the attachment 0 on begin
+        renderPassInfo.colorAttachments = { colorAttachment };
         return RenderPass::Create(device, renderPassInfo);
     }
     Pipeline::Handle CreateGraphicsPipeline()
@@ -77,7 +79,6 @@ struct GraphicsPipelineTestApp
         graphicsPipelineInfo.inputAssemblyState.primitiveRestartEnable = false;
         graphicsPipelineInfo.viewPortState.viewPorts = { viewport };
         graphicsPipelineInfo.viewPortState.scissors = { scissor };
-        graphicsPipelineInfo.dynamicState.dynamicStates = { Pipeline::DynamicState::State::Viewport, Pipeline::DynamicState::State::Scissor };
         //Everything else is left by default for now
         return Pipeline::Graphics::Create(device, graphicsPipelineInfo);
     }
@@ -103,28 +104,17 @@ struct GraphicsPipelineTestApp
     {
         Command::Buffer::BeginInfo bufferBeginInfo{};
         bufferBeginInfo.flags = Command::Buffer::UsageFlagBits::None;
-        ViewPort viewport;
-        viewport.rect.offset = { 0, 0 };
-        viewport.rect.extent = extent;
-        viewport.depthRange = { 0, 1 };
-        Rect2D  scissor{};
-        scissor.offset = { 0, 0 };
-        scissor.extent = extent;
-        Command::RenderPassBeginInfo renderPassBeginInfo{};
-        Command::SubPassContents     subPassContents{};
-        renderPassBeginInfo.renderPass = renderPass;
-        renderPassBeginInfo.framebuffer = frameBuffer;
-        renderPassBeginInfo.renderArea.offset = { 0, 0 };
-        renderPassBeginInfo.renderArea.extent = extent;
-        renderPassBeginInfo.colorClearValues = { {1, 0, 0, 0} };
-
         Command::Buffer::Reset(mainCommandBuffer);
         Command::Buffer::Begin(mainCommandBuffer, bufferBeginInfo);
         {
-            Command::BeginRenderPass(mainCommandBuffer, renderPassBeginInfo, subPassContents);
+            Command::RenderPassBeginInfo renderPassBeginInfo{};
+            renderPassBeginInfo.renderPass = renderPass;
+            renderPassBeginInfo.framebuffer = frameBuffer;
+            renderPassBeginInfo.renderArea.offset = { 0, 0 };
+            renderPassBeginInfo.renderArea.extent = extent;
+            renderPassBeginInfo.colorClearValues = { {1, 0, 0, 0} };
+            Command::BeginRenderPass(mainCommandBuffer, renderPassBeginInfo, Command::SubPassContents::Inline);
             {
-                Command::SetScissor(mainCommandBuffer, 0, { scissor });
-                Command::SetViewPort(mainCommandBuffer, 0, { viewport });
                 Command::BindPipeline(mainCommandBuffer, Pipeline::BindingPoint::Graphics, graphicsPipeline);
                 //draw stuff here
             }
@@ -146,7 +136,6 @@ struct GraphicsPipelineTestApp
     bool                    close{ false };
     Window                  window;
     uExtent2D               extent;
-    Instance::Handle        instance;
     Surface::Handle         surface;
     PhysicalDevice::Handle  physicalDevice;
     Device::Handle          device;
