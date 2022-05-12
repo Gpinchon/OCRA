@@ -43,10 +43,8 @@ void Present(const Queue::Handle& a_Queue, const PresentInfo& a_PresentInfo)
             std::static_pointer_cast<Queue::Semaphore::Binary>(semaphore)->Wait();
         else throw std::runtime_error("Cannot wait on Timeline Semaphores when presenting");
     }
-    for (auto index = 0u; index < a_PresentInfo.swapChains.size(); ++index) {
-        const auto& swapChain = a_PresentInfo.swapChains.at(index);
+    for (const auto& swapChain : a_PresentInfo.swapChains)
         swapChain->Present(a_Queue);
-    }
 }
 
 Image::Handle AcquireNextImage(
@@ -56,6 +54,6 @@ Image::Handle AcquireNextImage(
     const Queue::Semaphore::Handle& a_Semaphore,
     const Queue::Fence::Handle&     a_Fence)
 {
-    return a_SwapChain->AcquireBackBuffer(a_Timeout, a_Semaphore, a_Fence);
+    return a_SwapChain->AcquireNextImage(a_Timeout, a_Semaphore, a_Fence);
 }
 }

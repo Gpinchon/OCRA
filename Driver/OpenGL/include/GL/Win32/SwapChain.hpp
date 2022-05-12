@@ -22,7 +22,7 @@ struct Impl : SwapChain::Impl
     //when retiring the SwapChain becomes "empty"
     virtual void Retire() override;
     virtual void Present(const Queue::Handle& a_Queue) override;
-    virtual Image::Handle AcquireBackBuffer(
+    virtual Image::Handle AcquireNextImage(
         const std::chrono::nanoseconds& a_Timeout,
         const Queue::Semaphore::Handle& a_Semaphore,
         const Queue::Fence::Handle&     a_Fence) override;
