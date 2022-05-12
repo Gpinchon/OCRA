@@ -67,7 +67,7 @@ Vec3 HSVtoRGB(float fH, float fS, float fV) {
 
 struct SwapChainTestApp : TestApp
 {
-    SwapChainTestApp
+    SwapChainTestApp()
         : TestApp("Test_SwapChain")
         , window(Window("Test_SwapChain", 1280, 720))
         , surface(CreateSurface(instance, GetModuleHandle(0), (void*)window.nativeHandle))
@@ -138,12 +138,13 @@ struct SwapChainTestApp : TestApp
     Surface::Handle         surface;
     PhysicalDevice::Handle  physicalDevice;
     Device::Handle          device;
+    SwapChain::PresentInfo  presentInfo;
     SwapChain::Handle       swapChain;
     Queue::Handle           queue;
     Queue::Fence::Handle    imageAcquisitionFence;
     Command::Pool::Handle   commandPool;
     Command::Buffer::Handle commandBuffer;
-}
+};
 
 int SwapChain()
 {

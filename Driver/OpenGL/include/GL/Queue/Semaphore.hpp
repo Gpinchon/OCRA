@@ -49,8 +49,9 @@ struct Binary : Impl {
 struct Timeline : Impl {
     Timeline(const uint64_t& a_InitialValue)
         : Impl(Type::Timeline)
-        , count(a_InitialValue)
-    {}
+    {
+        count = a_InitialValue;
+    }
     void SignalDevice(const uint64_t& a_Value) {
         mutex.lock();
         assert(a_Value > count);

@@ -90,5 +90,5 @@ struct TestApp
 		: instance(CreateInstance(a_Name))
 	{}
 	Instance::Handle instance;
-}
+};
 }
