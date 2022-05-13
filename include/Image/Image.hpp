@@ -56,6 +56,13 @@ struct BufferImageCopy {
     Offset3D imageOffset;
     Extent3D imageExtent;
 };
+struct ImageCopy {
+    Image::Subresource::Layers srcSubresource;
+    Offset3D                   srcOffset;
+    Image::Subresource::Layers dstSubresource;
+    Offset3D                   dstOffset;
+    Extent3D                   extent;
+};
 void CopyBufferToImage(
     const Command::Buffer::Handle&  a_CommandBuffer,
     const OCRA::Buffer::Handle&     a_SrcBuffer,
@@ -66,6 +73,11 @@ void CopyImageToBuffer(
     const OCRA::Buffer::Handle&     a_DstBuffer,
     const Image::Handle&            a_SrcImage,
     const std::vector<BufferImageCopy>& a_Regions);
+void CopyImage(
+    const Command::Buffer::Handle&  a_CommandBuffer,
+    const Image::Handle&            a_SrcImage,
+    const Image::Handle&            a_DstImage,
+    const std::vector<ImageCopy>    a_Regions);
 void ClearColorImage(
     const Command::Buffer::Handle&  a_CommandBuffer,
     const Image::Handle&            a_Image,

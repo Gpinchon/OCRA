@@ -31,13 +31,14 @@ static inline auto CreateTexture(const Device::Handle& a_Device)
     }, true);
     return handle;
 }
-Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
+Impl::Impl(const Device::Handle& a_Device, const Info& a_Info, const uint32_t a_Target)
     : device(a_Device)
     , info(a_Info)
     , internalFormat(GetGLSizedFormat(a_Info.format))
     , dataFormat(GetGLDataFormat(a_Info.format))
     , dataType(GetGLDataType(a_Info.format))
     , handle(CreateTexture(a_Device))
+    , target(a_Target)
 {}
 Impl::~Impl() {
     device.lock()->PushCommand([handle = handle] {
@@ -48,8 +49,7 @@ Impl::~Impl() {
 template<bool Compressed>
 struct Texture : Impl {
     Texture(const Device::Handle& a_Device, const Info& a_Info, const GLenum& a_Target)
-        : Impl(a_Device, a_Info)
-        , target(a_Target)
+        : Impl(a_Device, a_Info, a_Target)
     {
     }
     virtual void Download(const Command::BufferImageCopy& a_Copy, const size_t& a_MemoryOffset) override {
@@ -84,7 +84,6 @@ struct Texture : Impl {
     inline void Unbind() const {
         glBindTexture(target, 0); //initialize texture object
     }
-    const GLenum target;
 };
 
 template <bool Compressed>
@@ -342,6 +341,26 @@ void CopyImageToBuffer(
         glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
     });
 }
+
+void CopyImage(
+    const Command::Buffer::Handle&  a_CommandBuffer,
+    const Image::Handle&            a_SrcImage,
+    const Image::Handle&            a_DstImage,
+    const std::vector<ImageCopy>    a_Regions)
+{
+    a_CommandBuffer->PushCommand([
+        srcImage = a_SrcImage, dstImage = a_DstImage, regions = a_Regions
+    ](Command::Buffer::ExecutionState&) {
+        for (const auto& copy : regions) {
+            glCopyImageSubData(
+                srcImage->handle, srcImage->target, copy.srcSubresource.level, copy.srcOffset.x, copy.srcOffset.y, copy.srcOffset.z,
+                dstImage->handle, dstImage->target, copy.dstSubresource.level, copy.dstOffset.x, copy.dstOffset.y, copy.dstOffset.z,
+                copy.extent.width, copy.extent.height, copy.extent.depth);
+        }
+    });
+    
+}
+
 void ClearColorImage(
     const Command::Buffer::Handle& a_CommandBuffer,
     const Image::Handle&           a_Image,

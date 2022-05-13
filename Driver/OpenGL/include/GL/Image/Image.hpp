@@ -17,7 +17,7 @@ OCRA_DECLARE_WEAK_HANDLE(OCRA::Device)
 namespace OCRA::Image {
 struct Impl
 {
-    Impl(const Device::Handle& a_Device, const Info& a_Info);
+    Impl(const Device::Handle& a_Device, const Info& a_Info, const uint32_t a_Target);
     ~Impl();
     virtual void Download(const Command::BufferImageCopy& a_Copy, const size_t& a_MemoryOffset) = 0;
     virtual void Upload(const Command::BufferImageCopy& a_Copy, const size_t& a_MemoryOffset) = 0;
@@ -27,6 +27,7 @@ struct Impl
     const uint32_t dataType;
     const uint32_t dataFormat;
     const uint32_t handle;
+    const uint32_t target;
 };
 /**
 * @brief creates an empty image with no storage
