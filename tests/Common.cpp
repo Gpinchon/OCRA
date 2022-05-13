@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <vector>
+#include <stdexcept>
 #include <windows.h>
 
 LRESULT CALLBACK TestWndproc(
@@ -240,7 +241,13 @@ uint32_t FindProperMemoryType(const PhysicalDevice::Handle& a_PhysicalDevice, co
         if (memoryProperties.memoryTypes.at(memoryTypeIndex).propertyFlags == a_MemoryProperties)
             return memoryTypeIndex;
     }
-    return std::numeric_limits<uint32_t>::infinity();
+    //Couldn't find optimal memory type, take any fitting type
+    for (auto memoryTypeIndex = 0u; memoryTypeIndex < memoryProperties.memoryTypes.size(); ++memoryTypeIndex) {
+        if ((memoryProperties.memoryTypes.at(memoryTypeIndex).propertyFlags & a_MemoryProperties) != 0)
+            return memoryTypeIndex;
+    }
+    throw std::runtime_error("Could not find matching memory type");
+    return (std::numeric_limits<uint32_t>::max)();
 }
 Memory::Handle AllocateMemory(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const uint64_t& a_Size, const PhysicalDevice::MemoryPropertyFlags& a_MemoryProperties)
 {
