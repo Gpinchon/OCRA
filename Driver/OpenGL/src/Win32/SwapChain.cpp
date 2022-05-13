@@ -74,7 +74,7 @@ void Impl::Present(const Queue::Handle& a_Queue)
     a_Queue->PushCommand([this, extent]{
         wglDXTextureMapping->Lock();
         glCopyImageSubData(
-            images.at(backBufferIndex)->handle, GL_TEXTURE_2D, 0, 0, 0, 0,
+            images.at(backBufferIndex)->handle,   GL_TEXTURE_2D, 0, 0, 0, 0,
             wglDXTextureMapping->glTextureHandle, GL_TEXTURE_2D, 0, 0, 0, 0,
             extent.width, extent.height, 1);
         wglDXTextureMapping->Unlock();
