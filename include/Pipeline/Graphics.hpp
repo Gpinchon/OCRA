@@ -26,17 +26,17 @@ OCRA_DECLARE_HANDLE(OCRA::Device);
 namespace OCRA::Pipeline::Graphics {
 struct Info { //describes a graphics pipeline with each stage
 	RenderPass::Handle          renderPass{ 0 }; //a handle to a previously created render pass
-    ShaderPipelineState::Info   shaderPipelineStates;
-    ColorBlendState::Info       colorBlendState;
-    DepthStencilState::Info     depthStencilState;
-    InputAssemblyState::Info    inputAssemblyState;
-    MultisampleState::Info      multisampleState;
-    RasterizationState::Info    rasterizationState;
-    ShaderPipelineState::Info   shaderPipelineState;
-    TessellationState::Info     tessellationState;
-    VertexInputState::Info      vertexInputState;
-    ViewPortState::Info         viewPortState;
-    DynamicState::Info          dynamicState;
+    ShaderPipelineState::Info   shaderPipelineStates{};
+    ColorBlendState::Info       colorBlendState{};
+    DepthStencilState::Info     depthStencilState{};
+    InputAssemblyState::Info    inputAssemblyState{};
+    MultisampleState::Info      multisampleState{};
+    RasterizationState::Info    rasterizationState{};
+    ShaderPipelineState::Info   shaderPipelineState{};
+    TessellationState::Info     tessellationState{};
+    VertexInputState::Info      vertexInputState{};
+    ViewPortState::Info         viewPortState{};
+    DynamicState::Info          dynamicState{};
 };
 Handle Create(const Device::Handle& a_Device, const Info& a_Info);
 const Info& GetInfo(const Device::Handle& a_Device, const Handle& a_Handle);

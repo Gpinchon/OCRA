@@ -63,13 +63,19 @@ struct RenderPass
     int32_t                	    stencilClearValue;
 	std::vector<VertexInputBinding>	vertexInputBindings;
 	IndexBufferBinding				indexBufferBinding;
-	GLenum							primitiveTopology{ GL_NONE };
+	
 };
 struct ExecutionState {
+	ExecutionState() {
+		pipelineState.fill(nullptr);
+		lastPipelineState.fill(nullptr);
+	}
 	bool				once{ false };
 	RenderPass			renderPass{};
 	uint32_t			subpassIndex{ 0 };
 	std::array<OCRA::Pipeline::Handle, size_t(OCRA::Pipeline::BindingPoint::MaxValue)> pipelineState{};
+	std::array<OCRA::Pipeline::Handle, size_t(OCRA::Pipeline::BindingPoint::MaxValue)> lastPipelineState{};
 	DynamicStates		dynamicStates;
+	GLenum				primitiveTopology{ GL_NONE };
 };
 }

@@ -14,10 +14,11 @@ struct Info;
 
 
 namespace OCRA::Pipeline::TessellationState {
-inline auto Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info&)
+inline std::function<void(Command::Buffer::ExecutionState&)> Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info&)
 {
-	return [patchControlPoints = a_Info.patchControlPoints](Command::Buffer::ExecutionState&) {
+	if (a_Info.patchControlPoints > 0) return[patchControlPoints = a_Info.patchControlPoints](Command::Buffer::ExecutionState&) {
 		glPatchParameteri(GL_PATCH_VERTICES, patchControlPoints);
 	};
+	else return [](Command::Buffer::ExecutionState&) {};
 }
 }

@@ -46,28 +46,28 @@ inline std::function<void(Command::Buffer::ExecutionState&)> Compile(const Devic
 	if (dynamicPrimitiveRestartEnable && dynamicPrimitiveTopology)
 		return [](Command::Buffer::ExecutionState& a_ExecutionState){
 			a_ExecutionState.dynamicStates.primitiveRestartEnable ? glEnable(GL_PRIMITIVE_RESTART) : glDisable(GL_PRIMITIVE_RESTART);
-			a_ExecutionState.renderPass.primitiveTopology = a_ExecutionState.dynamicStates.primitiveTopology;
+			a_ExecutionState.primitiveTopology = a_ExecutionState.dynamicStates.primitiveTopology;
 		};
 	else if (dynamicPrimitiveRestartEnable)
 		return [
 			primitivetopology(GetGLTopology(a_Info.topology))
 		](Command::Buffer::ExecutionState& a_ExecutionState){
 			a_ExecutionState.dynamicStates.primitiveRestartEnable ? glEnable(GL_PRIMITIVE_RESTART) : glDisable(GL_PRIMITIVE_RESTART);
-			a_ExecutionState.renderPass.primitiveTopology = primitivetopology;
+			a_ExecutionState.primitiveTopology = primitivetopology;
 		};
 	else if (dynamicPrimitiveTopology)
 		return [
 			primitiveRestartEnable(a_Info.primitiveRestartEnable)
 		](Command::Buffer::ExecutionState& a_ExecutionState){
 			primitiveRestartEnable ? glEnable(GL_PRIMITIVE_RESTART) : glDisable(GL_PRIMITIVE_RESTART);
-			a_ExecutionState.renderPass.primitiveTopology = a_ExecutionState.dynamicStates.primitiveTopology;
+			a_ExecutionState.primitiveTopology = a_ExecutionState.dynamicStates.primitiveTopology;
 		};
 	else return [
 			primitivetopology(GetGLTopology(a_Info.topology)),
 			primitiveRestartEnable(a_Info.primitiveRestartEnable)
 		](Command::Buffer::ExecutionState& a_ExecutionState){
 			primitiveRestartEnable ? glEnable(GL_PRIMITIVE_RESTART) : glDisable(GL_PRIMITIVE_RESTART);
-			a_ExecutionState.renderPass.primitiveTopology = primitivetopology;
+			a_ExecutionState.primitiveTopology = primitivetopology;
 		};
 }
 }

@@ -8,10 +8,10 @@
 
 #include <Pipeline/ShaderPipelineState.hpp>
 
-#include <GL/Shader/Stage.hpp>
-#include <GL/glew.h>
+#include <GL/WeakHandle.hpp>
 
 OCRA_DECLARE_HANDLE(OCRA::Device);
+OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
 
 namespace OCRA::Pipeline::DynamicState {
 struct Info;
@@ -23,17 +23,13 @@ struct ExecutionState;
 
 namespace OCRA::Pipeline::ShaderPipelineState {
 //compiles the specified stages into a program pipeline
-inline auto Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info&)
-{
-	GLuint handle;
-	glGenProgramPipelines(1, &handle);
-	for (const auto& stage : a_Info.stages) {
-		const auto& stageInfo{ Shader::Stage::GetInfo(stage) };
-		const auto& stageGLHandle{ Shader::Stage::GetGLHandle(stage) };
-		glUseProgramStages(handle, Shader::Stage::GetGLStage(stageInfo.stage), stageGLHandle);
-	}
-	return [handle](Command::Buffer::ExecutionState&){
-		glBindProgramPipeline(handle);
-	};
-}
+struct Compile {
+	Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info&);
+	Compile(const Compile& a_Other);
+	~Compile();
+	void operator()(Command::Buffer::ExecutionState&) const;
+	const Device::WeakHandle device;
+	const Info& info;
+	mutable uint32_t handle{ 0 };
+};
 }

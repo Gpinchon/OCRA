@@ -13,7 +13,7 @@
 
 namespace OCRA::Pipeline::ViewPortState {
 struct Info {
-    std::vector<ViewPort> viewPorts;
-    std::vector<Rect2D>   scissors;
+    std::vector<ViewPort> viewPorts{};
+    std::vector<Rect2D>   scissors{};
 };
 }

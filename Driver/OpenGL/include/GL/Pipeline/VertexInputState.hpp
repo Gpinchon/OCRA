@@ -9,45 +9,31 @@
 #include <Handle.hpp>
 #include <Pipeline/VertexInputState.hpp>
 
-#include <GL/Command/ExecutionState.hpp>
 #include <GL/Common/VertexType.hpp>
-#include <GL/Buffer.hpp>
-#include <GL/Memory.hpp>
-#include <GL/glew.h>
+#include <GL/WeakHandle.hpp>
+
+OCRA_DECLARE_HANDLE(OCRA::Device);
+OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
+
+namespace OCRA::Pipeline::DynamicState {
+struct Info;
+}
+
+namespace OCRA::Command::Buffer {
+struct ExecutionState;
+}
 
 namespace OCRA::Pipeline::VertexInputState {
 //compiles the specified Vertex Input State into a callback
-//only the Vertex Attributes are compiled here, Vertex Bindings are compiled by Command::RenderPass::CompileGraphicStates
-inline auto Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info& a_DynamicState)
+//only the Vertex Attributes are compiled here, Vertex Bindings are compiled by on execution
+struct Compile
 {
-    return [info = a_Info](Command::Buffer::ExecutionState& a_ExecutionState){
-        glPrimitiveRestartIndex(info.primitiveRestartIndex);
-        for (const auto& bindingDescription : info.bindingDescriptions) {
-            const auto& vertexInput = a_ExecutionState.renderPass.vertexInputBindings.at(bindingDescription.binding);
-            const auto& vertexMemory = vertexInput.buffer->memoryBinding;
-            //Is this binding divided by instance or by vertex ?
-            const auto divideByInstance = bindingDescription.inputRate == BindingDescription::InputRate::Instance;
-            glBindVertexBuffer(
-                bindingDescription.binding,
-                vertexMemory.memory->handle,
-                vertexMemory.offset + vertexInput.offset,
-                bindingDescription.stride);
-            glVertexBindingDivisor(
-                bindingDescription.binding,
-                divideByInstance ? 1 : 0);
-        }
-        for (const auto& attribute : info.attributeDescriptions) {
-            glEnableVertexAttribArray(attribute.location);
-            glVertexAttribFormat(
-                attribute.location,
-                attribute.format.size,
-                GetGLVertexType(attribute.format.type),
-                attribute.format.normalized,
-                attribute.offset);
-            glVertexAttribBinding(
-                attribute.location,
-                attribute.binding);
-        }
-    };
-}
+    Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info& a_DynamicState);
+    Compile(const Compile& a_Other);
+    ~Compile();
+    void operator()(Command::Buffer::ExecutionState&) const;
+    const Info info;
+    const Device::WeakHandle device;
+    mutable uint32_t handle{ 0 };
+};
 }

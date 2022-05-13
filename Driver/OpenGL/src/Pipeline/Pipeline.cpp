@@ -1,5 +1,6 @@
 #include <Command/Buffer.hpp>
 #include <Pipeline/Pipeline.hpp>
+#include <GL/Pipeline/Pipeline.hpp>
 
 #include <GL/Command/ExecutionState.hpp>
 #include <GL/Command/Buffer.hpp>

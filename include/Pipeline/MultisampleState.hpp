@@ -8,14 +8,14 @@
 
 #include <Common/SampleCount.hpp>
 
-#include <array>
+#include <vector>
 
 namespace OCRA::Pipeline::MultisampleState {
 struct Info {
     SampleCount rasterizationSamples { SampleCount::Count1 };
     bool sampleShadingEnable { false };
     float minSampleShading { 1 };
-    std::array<uint32_t, 32> sampleMasks; //sampleMask size == rasterizationSamples / 32
+    std::vector<uint32_t> sampleMasks;
     bool alphaToCoverageEnable { false };
     bool alphaToOneEnable { false };
 };

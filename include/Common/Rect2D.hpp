@@ -6,7 +6,7 @@
 namespace OCRA {
 struct Rect2D
 {
-    iVec2     offset;
-    uExtent2D extent;
+    iVec2     offset{ 0, 0 };
+    uExtent2D extent{ 0, 0 };
 };
 }
