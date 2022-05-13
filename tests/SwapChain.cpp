@@ -97,7 +97,6 @@ struct SwapChainTestApp : TestApp
             RecordClearCommandBuffer(swapChainImage);
             SubmitCommandBuffer(queue, commandBuffer);
             SwapChain::Present(queue, presentInfo);
-            Queue::WaitIdle(queue);
         }
     }
     void RecordClearCommandBuffer(const Image::Handle& a_Image)
