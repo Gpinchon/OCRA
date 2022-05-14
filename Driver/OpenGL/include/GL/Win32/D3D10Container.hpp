@@ -14,11 +14,11 @@ struct D3DContainer : D3DContainerInterface
 {
     inline D3DContainer(const Info& a_Info) : D3DContainerInterface(a_Info)
     {
-#ifdef DEBUG
+#ifdef _DEBUG
         uint32_t flags = D3D10_CREATE_DEVICE_DEBUG;
 #else
         uint32_t flags = 0;
-#endif //DEBUG
+#endif _DEBUG
         WIN32_CHECK_ERROR(S_OK == D3D10CreateDevice(
             nullptr,                   //Adapter
             D3D10_DRIVER_TYPE_HARDWARE,//Driver Type

@@ -55,7 +55,7 @@ struct D3DContainerInterface
         desc.BufferCount = 1;
         desc.OutputWindow = HWND(a_Info.surface->nativeWindow);
         desc.Windowed = true;
-        desc.SwapEffect = DXGI_SWAP_EFFECT_SEQUENTIAL;
+        desc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
         factory->CreateSwapChain(
             device,
             &desc,

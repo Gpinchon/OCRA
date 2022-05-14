@@ -45,8 +45,7 @@ struct TextureMapping
                 a_D3DColorBuffer,
                 glTextureHandle,
                 GL_TEXTURE_2D,
-                WGL_ACCESS_WRITE_DISCARD_NV
-            );
+                WGL_ACCESS_WRITE_DISCARD_NV);
         }, true);
         WIN32_CHECK_ERROR(wglDXTextureHandle != nullptr);
     }
@@ -67,6 +66,6 @@ struct TextureMapping
     }
     std::shared_ptr<DeviceMapping> wglDXDeviceMapping;
     HANDLE                         wglDXTextureHandle{ nullptr };
-    uint32_t                       glTextureHandle;
+    uint32_t                       glTextureHandle{ 0 };
 };
 }

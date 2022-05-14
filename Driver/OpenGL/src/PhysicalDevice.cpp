@@ -320,10 +320,10 @@ Impl::Impl(const Instance::Handle& a_Instance)
 void Impl::GetProperties()
 {
     PushCommand([this] {
-#ifdef DEBUG
+#ifdef _DEBUG
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
         glDebugMessageCallback(MessageCallback, 0);
-#endif DEBUG
+#endif _DEBUG
         properties = GetPhysicalDevicePropertiesGL();
         features = GetPhysicalDeviceFeaturesGL(properties);
         memoryProperties = GetMemoryPropertiesGL();
