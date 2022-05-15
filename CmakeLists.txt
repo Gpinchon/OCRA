@@ -102,27 +102,7 @@ add_subdirectory(Driver/OpenGL)
 endif (RenderingAPI STREQUAL "OpenGL")
 
 add_subdirectory(ShaderCompiler)
-add_subdirectory(Tests)
-
-#[[
-set(OCRA_TEST_SOURCE_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/main.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/Common.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/GraphicsPipeline.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/PhysicalDevice.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/SwapChain.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/Queue.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/CommandBuffer.cpp)
-set(OCRA_TEST_HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/Common.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestList.hpp)
-add_executable(OCRA-UnitTests
-  ${OCRA_TEST_SOURCE_FILES}
-  ${OCRA_TEST_HEADER_FILES})
-target_include_directories(OCRA-UnitTests PRIVATE
-  "${CMAKE_CURRENT_SOURCE_DIR}/tests")
-target_link_libraries(OCRA-UnitTests OCRA::Interface OCRA::Implementation)
-]]
+add_subdirectory(UnitTests)
 
 if(MSVC_IDE)
   set(CMAKE_DEBUG_POSTFIX "d")
