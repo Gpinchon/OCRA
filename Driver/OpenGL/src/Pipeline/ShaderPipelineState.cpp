@@ -12,9 +12,7 @@ Compile::Compile(const Device::Handle& a_Device, const Info& a_Info, const Dynam
 	a_Device->PushCommand([this, info = a_Info] {
 		glGenProgramPipelines(1, &handle);
 		for (const auto& stage : info.stages) {
-			const auto& stageInfo{ Shader::Stage::GetInfo(stage) };
-			const auto& stageGLHandle{ Shader::Stage::GetGLHandle(stage) };
-			glUseProgramStages(handle, Shader::Stage::GetGLStage(stageInfo.stage), stageGLHandle);
+			glUseProgramStages(handle, stage->stage, stage->handle);
 		}
 	}, true);
 }

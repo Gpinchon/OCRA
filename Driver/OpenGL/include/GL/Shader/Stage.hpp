@@ -9,26 +9,18 @@
 #include <Handle.hpp>
 #include <Shader/Stage.hpp>
 
-#include <GL/glew.h>
+#include <GL/WeakHandle.hpp>
 
-#include <stdexcept>
+OCRA_DECLARE_HANDLE(OCRA::Device);
+OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
 
 namespace OCRA::Shader::Stage {
-static inline auto GetGLStage(const StageFlags& a_Stage)
-{
-	if (a_Stage == StageFlagBits::Vertex)
-		return GL_VERTEX_SHADER;
-	if (a_Stage == StageFlagBits::Geometry)
-		return GL_GEOMETRY_SHADER;
-	if (a_Stage == StageFlagBits::Fragment)
-		return GL_FRAGMENT_SHADER;
-	if (a_Stage == StageFlagBits::Compute)
-		return GL_COMPUTE_SHADER;
-	if (a_Stage == StageFlagBits::TessControl)
-		return GL_TESS_CONTROL_SHADER;
-	if (a_Stage == StageFlagBits::TessEval)
-		return GL_TESS_EVALUATION_SHADER;
-	throw std::runtime_error("Unknown Shader Stage");
-}
-unsigned GetGLHandle(const Handle& a_Handle);
+struct Impl {
+	Impl(const Device::Handle& a_Device, const Info& a_Info);
+	~Impl();
+    const Device::WeakHandle device;
+    const Info info;
+    const uint32_t handle;
+	const uint32_t stage;
+};
 }
