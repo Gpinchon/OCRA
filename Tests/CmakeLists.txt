@@ -1,0 +1,29 @@
+cmake_minimum_required(VERSION 3.19)
+cmake_policy(SET CMP0074 NEW)
+
+include(../cmake-tools/GroupSources.cmake)
+
+set(OCRA_TEST_SOURCE_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Common.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/GraphicsPipeline.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/PhysicalDevice.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/SwapChain.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Queue.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/CommandBuffer.cpp)
+set(OCRA_TEST_HEADER_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Common.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/TestList.hpp)
+add_executable(OCRA-UnitTests
+  ${OCRA_TEST_SOURCE_FILES}
+  ${OCRA_TEST_HEADER_FILES})
+target_include_directories(OCRA-UnitTests PRIVATE
+  "${CMAKE_CURRENT_SOURCE_DIR}/include")
+
+target_link_libraries(OCRA-UnitTests OCRA::Interface OCRA::Implementation)
+
+if(MSVC_IDE)
+  # Run macro
+  GroupSources(src)
+  GroupSources(include)
+endif()

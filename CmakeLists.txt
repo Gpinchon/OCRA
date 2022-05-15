@@ -5,6 +5,9 @@ project(OCRA LANGUAGES CXX)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(CMAKE_CXX_STANDARD 17)
+set (CMAKE_CXX_FLAGS_RELEASE "-Ox")
+
+include(cmake-tools/GroupSources.cmake)
 
 #[[Rendering API]]
 set(RenderingAPI "OpenGL" CACHE STRING
@@ -13,8 +16,6 @@ set(RenderingAPIValues
   "OpenGL;Vulkan;DirectX")
 set_property(CACHE RenderingAPI PROPERTY STRINGS ${RenderingAPIValues})
 add_compile_definitions(RENDERINGAPI=${RenderingAPI})
-
-set (CMAKE_CXX_FLAGS_RELEASE "-Ox")
 
 set(OCRA_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Allocator.hpp
@@ -89,17 +90,21 @@ set(OCRA_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/State/Draw.hpp
 )
 
-add_library(OCRA INTERFACE ${OCRA_HEADER_FILES})
-set_target_properties(OCRA PROPERTIES LINKER_LANGUAGE CXX)
-target_include_directories(OCRA INTERFACE
+add_library(OCRA-Interface INTERFACE ${OCRA_HEADER_FILES})
+set_target_properties(OCRA-Interface PROPERTIES LINKER_LANGUAGE CXX)
+target_include_directories(OCRA-Interface INTERFACE
   "${CMAKE_CURRENT_SOURCE_DIR}/include"
 )
+add_library(OCRA::Interface ALIAS OCRA-Interface)
 
 if (RenderingAPI STREQUAL "OpenGL")
 add_subdirectory(Driver/OpenGL)
-add_library(OCRA::Impl ALIAS OCRAImpl)
 endif (RenderingAPI STREQUAL "OpenGL")
 
+add_subdirectory(ShaderCompiler)
+add_subdirectory(Tests)
+
+#[[
 set(OCRA_TEST_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/main.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/Common.cpp
@@ -111,34 +116,16 @@ set(OCRA_TEST_SOURCE_FILES
 set(OCRA_TEST_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/Common.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestList.hpp)
-add_executable(UnitTests
+add_executable(OCRA-UnitTests
   ${OCRA_TEST_SOURCE_FILES}
   ${OCRA_TEST_HEADER_FILES})
-target_include_directories(UnitTests PRIVATE
-  "${CMAKE_CURRENT_SOURCE_DIR}/tests"
-)
-target_link_libraries(UnitTests OCRA)
-target_link_libraries(UnitTests OCRA::Impl)
+target_include_directories(OCRA-UnitTests PRIVATE
+  "${CMAKE_CURRENT_SOURCE_DIR}/tests")
+target_link_libraries(OCRA-UnitTests OCRA::Interface OCRA::Implementation)
+]]
 
 if(MSVC_IDE)
   set(CMAKE_DEBUG_POSTFIX "d")
-  # Macro to preserve source files hierarchy in the IDE
-  macro(GroupSources curdir)
-    file(GLOB children RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/${curdir} ${CMAKE_CURRENT_SOURCE_DIR}/${curdir}/*)
-  
-    foreach(child ${children})
-      if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${curdir}/${child})
-        GroupSources(${curdir}/${child})
-      else()
-        string(REPLACE "/" "\\" groupname ${curdir})
-        string(REPLACE "src" "Sources" groupname ${groupname})
-        string(REPLACE "include" "Includes" groupname ${groupname})
-        #string(REPLACE "shaders" "Shaders" groupname ${groupname})
-        source_group(${groupname} FILES ${CMAKE_CURRENT_SOURCE_DIR}/${curdir}/${child})
-      endif()
-    endforeach()
-  endmacro()
-  
   # Run macro
   GroupSources(src)
   GroupSources(include)

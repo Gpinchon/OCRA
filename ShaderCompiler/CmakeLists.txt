@@ -1,0 +1,84 @@
+cmake_minimum_required(VERSION 3.19)
+cmake_policy(SET CMP0074 NEW)
+
+project(OCRACompiler LANGUAGES CXX)
+
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_FLAGS_RELEASE "-Ox")
+
+include(FetchContent)
+include(../cmake-tools/add_subdirectory_with_folder.cmake)
+include(../cmake-tools/GroupSources.cmake)
+
+# Fetch SPIRV_CROSS
+FetchContent_Declare(
+  SPIRV_CROSS
+  GIT_REPOSITORY  https://github.com/KhronosGroup/SPIRV-Cross.git
+)
+FetchContent_GetProperties(SPIRV_CROSS)
+if (NOT SPIRV_CROSS_POPULATED)
+  FetchContent_Populate(SPIRV_CROSS)
+  message(STATUS "Fetched SPIRV_CROSS to ${spirv_cross_SOURCE_DIR}")
+  
+  option(SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS "Instead of throwing exceptions assert" OFF)
+  option(SPIRV_CROSS_SHARED "Build the C API as a single shared library." OFF)
+  option(SPIRV_CROSS_STATIC "Build the C and C++ API as static libraries." ON)
+  option(SPIRV_CROSS_CLI "Build the CLI binary. Requires SPIRV_CROSS_STATIC." OFF)
+  option(SPIRV_CROSS_ENABLE_TESTS "Enable SPIRV-Cross tests." OFF)
+  option(SPIRV_CROSS_ENABLE_GLSL "Enable GLSL support." ON)
+  option(SPIRV_CROSS_ENABLE_HLSL "Enable HLSL target support." ON)
+  option(SPIRV_CROSS_ENABLE_MSL "Enable MSL target support." ON)
+  option(SPIRV_CROSS_ENABLE_CPP "Enable C++ target support." ON)
+  option(SPIRV_CROSS_ENABLE_REFLECT "Enable JSON reflection target support." ON)
+  option(SPIRV_CROSS_ENABLE_C_API "Enable C API wrapper support in static library." OFF)
+  option(SPIRV_CROSS_ENABLE_UTIL "Enable util module support." OFF)
+
+  add_subdirectory_with_folder("3rdparty/SPIRV-Cross" ${spirv_cross_SOURCE_DIR} ${spirv_cross_BINARY_DIR})
+endif (NOT SPIRV_CROSS_POPULATED)
+# Fetch SPIRV_CROSS
+
+# Fetch GLSLANG
+FetchContent_Declare(
+  GLSLANG
+  GIT_REPOSITORY  https://github.com/KhronosGroup/glslang.git
+)
+FetchContent_GetProperties(GLSLANG)
+if (NOT GLSLANG_POPULATED)
+  FetchContent_Populate(GLSLANG)
+  message(STATUS "Fetched GLSLang to ${glslang_SOURCE_DIR}")
+  add_subdirectory_with_folder("3rdparty/GLSLang" ${glslang_SOURCE_DIR} ${glslang_BINARY_DIR})
+endif (NOT GLSLANG_POPULATED)
+# Fetch GLSLANG
+
+
+set(OCRA_SHADER_COMPILER_API_HEADER_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Shader.hpp
+)
+
+set(OCRA_SHADER_COMPILER_API_SOURCE_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Shader.cpp
+)
+
+add_library(OCRA-ShaderCompiler-API STATIC ${OCRA_SHADER_COMPILER_API_HEADER_FILES} ${OCRA_SHADER_COMPILER_API_SOURCE_FILES})
+set_target_properties(OCRA-ShaderCompiler-API PROPERTIES LINKER_LANGUAGE CXX)
+target_include_directories(OCRA-ShaderCompiler-API PUBLIC
+  "${CMAKE_CURRENT_SOURCE_DIR}/include"
+)
+target_link_libraries(OCRA-ShaderCompiler-API PUBLIC spirv-cross-cpp glslang)
+add_library(OCRA::ShaderCompiler::API ALIAS OCRA-ShaderCompiler-API)
+
+set(OCRA_SHADER_COMPILER_SOURCE_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
+set(OCRA_SHADER_COMPILER_HEADER_FILES
+  )
+add_executable(OCRA-ShaderCompiler
+  ${OCRA_SHADER_COMPILER_SOURCE_FILES}
+  ${OCRA_SHADER_COMPILER_HEADER_FILES})
+target_link_libraries(OCRA-ShaderCompiler OCRA::ShaderCompiler::API)
+
+if(MSVC_IDE)
+  # Run macro
+  GroupSources(src)
+  GroupSources(include)
+endif()
