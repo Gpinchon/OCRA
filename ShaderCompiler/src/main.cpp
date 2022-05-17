@@ -1,5 +1,5 @@
 int main(int argc, char const *argv[])
 {
-	/* code */
+	/* add offline compiler code here */
 	return 0;
 }

@@ -11,6 +11,38 @@ include(FetchContent)
 include(../cmake-tools/add_subdirectory_with_folder.cmake)
 include(../cmake-tools/GroupSources.cmake)
 
+# Fetch GLSLANG
+FetchContent_Declare(
+  GLSLANG
+  GIT_REPOSITORY  https://github.com/KhronosGroup/glslang.git
+)
+FetchContent_GetProperties(GLSLANG)
+if (NOT GLSLANG_POPULATED)
+  FetchContent_Populate(GLSLANG)
+  message(STATUS "Fetched GLSLang to ${glslang_SOURCE_DIR}")
+  add_subdirectory_with_folder("3rdparty/GLSLang" ${glslang_SOURCE_DIR} ${glslang_BINARY_DIR})
+endif (NOT GLSLANG_POPULATED)
+# Fetch GLSLANG
+
+# Fetch shaderc
+FetchContent_Declare(
+  SHADERC
+  GIT_REPOSITORY  https://github.com/google/shaderc.git
+  GIT_TAG         v2022.1
+)
+FetchContent_GetProperties(SHADERC)
+if (NOT SHADERC_POPULATED)
+  FetchContent_Populate(SHADERC)
+  message(STATUS "Fetched SHADERC to ${shaderc_SOURCE_DIR}")
+  
+  option(SHADERC_SKIP_INSTALL  "Skip installation"      ON)
+  option(SHADERC_SKIP_TESTS    "Skip building tests"    ON)
+  option(SHADERC_SKIP_EXAMPLES "Skip building examples" ON)
+
+  add_subdirectory_with_folder("3rdparty/ShaderC" ${shaderc_SOURCE_DIR} ${shaderc_BINARY_DIR})
+endif (NOT SPIRV_CROSS_POPULATED)
+# Fetch shaderc
+
 # Fetch SPIRV_CROSS
 FetchContent_Declare(
   SPIRV_CROSS
@@ -38,19 +70,6 @@ if (NOT SPIRV_CROSS_POPULATED)
 endif (NOT SPIRV_CROSS_POPULATED)
 # Fetch SPIRV_CROSS
 
-# Fetch GLSLANG
-FetchContent_Declare(
-  GLSLANG
-  GIT_REPOSITORY  https://github.com/KhronosGroup/glslang.git
-)
-FetchContent_GetProperties(GLSLANG)
-if (NOT GLSLANG_POPULATED)
-  FetchContent_Populate(GLSLANG)
-  message(STATUS "Fetched GLSLang to ${glslang_SOURCE_DIR}")
-  add_subdirectory_with_folder("3rdparty/GLSLang" ${glslang_SOURCE_DIR} ${glslang_BINARY_DIR})
-endif (NOT GLSLANG_POPULATED)
-# Fetch GLSLANG
-
 
 set(OCRA_SHADER_COMPILER_API_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Shader.hpp
@@ -65,7 +84,7 @@ set_target_properties(OCRA-ShaderCompiler-API PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories(OCRA-ShaderCompiler-API PUBLIC
   "${CMAKE_CURRENT_SOURCE_DIR}/include"
 )
-target_link_libraries(OCRA-ShaderCompiler-API PUBLIC spirv-cross-cpp glslang)
+target_link_libraries(OCRA-ShaderCompiler-API PUBLIC spirv-cross-cpp shaderc)
 add_library(OCRA::ShaderCompiler::API ALIAS OCRA-ShaderCompiler-API)
 
 set(OCRA_SHADER_COMPILER_SOURCE_FILES
