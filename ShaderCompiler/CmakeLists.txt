@@ -11,6 +11,39 @@ include(FetchContent)
 include(../cmake-tools/add_subdirectory_with_folder.cmake)
 include(../cmake-tools/GroupSources.cmake)
 
+# Fetch SPIRV_TOOLS
+FetchContent_Declare(
+  SPIRV_TOOLS
+  GIT_REPOSITORY  https://github.com/KhronosGroup/SPIRV-Tools.git
+  GIT_TAG         v2022.2
+)
+
+FetchContent_GetProperties(SPIRV_TOOLS)
+if (NOT SPIRV_TOOLS_POPULATED)
+  FetchContent_Populate(SPIRV_TOOLS)
+  message(STATUS "Fetched SPIRV-Tools to ${spirv_tools_SOURCE_DIR}")
+  FetchContent_Declare(
+    SPIRV_HEADERS
+    GIT_REPOSITORY  https://github.com/KhronosGroup/SPIRV-Headers.git
+    GIT_TAG         4995a2f2723c401eb0ea3e10c81298906bf1422b
+    SOURCE_DIR      ${spirv_tools_SOURCE_DIR}/external/spirv-headers
+  )
+  FetchContent_Declare(
+    GOOGLE_TEST
+    GIT_REPOSITORY  https://github.com/google/googletest.git
+    GIT_TAG         25dcdc7e8bfac8967f20fb2c0a628f5cf442188d
+    SOURCE_DIR      ${spirv_tools_SOURCE_DIR}/external/googletest
+  )
+  option(SPIRV_HEADERS_SKIP_EXAMPLES "Skip building examples" ON)
+  option(SPIRV_HEADERS_SKIP_INSTALL "Skip install" ON)
+  FetchContent_Populate(SPIRV_HEADERS)
+  message(STATUS "Fetched SPIRV-Headers to ${spirv_headers_SOURCE_DIR}")
+  FetchContent_Populate(GOOGLE_TEST)
+  message(STATUS "Fetched googletest to ${google_test_SOURCE_DIR}")
+  add_subdirectory_with_folder("3rdparty/SPIRV-Tools" ${spirv_tools_SOURCE_DIR} ${spirv_tools_BINARY_DIR})
+endif (NOT SPIRV_TOOLS_POPULATED)
+# Fetch SPIRV_TOOLS
+
 # Fetch GLSLANG
 FetchContent_Declare(
   GLSLANG
@@ -23,25 +56,6 @@ if (NOT GLSLANG_POPULATED)
   add_subdirectory_with_folder("3rdparty/GLSLang" ${glslang_SOURCE_DIR} ${glslang_BINARY_DIR})
 endif (NOT GLSLANG_POPULATED)
 # Fetch GLSLANG
-
-# Fetch shaderc
-FetchContent_Declare(
-  SHADERC
-  GIT_REPOSITORY  https://github.com/google/shaderc.git
-  GIT_TAG         v2022.1
-)
-FetchContent_GetProperties(SHADERC)
-if (NOT SHADERC_POPULATED)
-  FetchContent_Populate(SHADERC)
-  message(STATUS "Fetched SHADERC to ${shaderc_SOURCE_DIR}")
-  
-  option(SHADERC_SKIP_INSTALL  "Skip installation"      ON)
-  option(SHADERC_SKIP_TESTS    "Skip building tests"    ON)
-  option(SHADERC_SKIP_EXAMPLES "Skip building examples" ON)
-
-  add_subdirectory_with_folder("3rdparty/ShaderC" ${shaderc_SOURCE_DIR} ${shaderc_BINARY_DIR})
-endif (NOT SPIRV_CROSS_POPULATED)
-# Fetch shaderc
 
 # Fetch SPIRV_CROSS
 FetchContent_Declare(
@@ -70,6 +84,24 @@ if (NOT SPIRV_CROSS_POPULATED)
 endif (NOT SPIRV_CROSS_POPULATED)
 # Fetch SPIRV_CROSS
 
+# Fetch shaderc
+FetchContent_Declare(
+  SHADERC
+  GIT_REPOSITORY  https://github.com/google/shaderc.git
+  GIT_TAG         v2022.1
+)
+FetchContent_GetProperties(SHADERC)
+if (NOT SHADERC_POPULATED)
+  FetchContent_Populate(SHADERC)
+  message(STATUS "Fetched SHADERC to ${shaderc_SOURCE_DIR}")
+  
+  option(SHADERC_SKIP_INSTALL  "Skip installation"      ON)
+  option(SHADERC_SKIP_TESTS    "Skip building tests"    ON)
+  option(SHADERC_SKIP_EXAMPLES "Skip building examples" ON)
+
+  add_subdirectory_with_folder("3rdparty/ShaderC" ${shaderc_SOURCE_DIR} ${shaderc_BINARY_DIR})
+endif (NOT SHADERC_POPULATED)
+# Fetch shaderc
 
 set(OCRA_SHADER_COMPILER_API_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Shader.hpp
@@ -95,6 +127,8 @@ add_executable(OCRA-ShaderCompiler
   ${OCRA_SHADER_COMPILER_SOURCE_FILES}
   ${OCRA_SHADER_COMPILER_HEADER_FILES})
 target_link_libraries(OCRA-ShaderCompiler OCRA::ShaderCompiler::API)
+
+add_subdirectory(UnitTests)
 
 if(MSVC_IDE)
   # Run macro
