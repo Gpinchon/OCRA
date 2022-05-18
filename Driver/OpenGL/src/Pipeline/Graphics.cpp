@@ -38,14 +38,14 @@ struct Impl : Pipeline::Impl {
 			viewportState = ViewPortState::Compile(a_Device, info.viewPortState, info.dynamicState),
 			vertexInputState = VertexInputState::Compile(a_Device, info.vertexInputState, info.dynamicState)
 		](Command::Buffer::ExecutionState& a_ExecutionState) {
-			colorBlendState(a_ExecutionState);
-			depthStencilState(a_ExecutionState);
+			//colorBlendState(a_ExecutionState);
+			//depthStencilState(a_ExecutionState);
 			inputAssemblyState(a_ExecutionState);
-			multisampleState(a_ExecutionState);
-			rasterizationState(a_ExecutionState);
+			//multisampleState(a_ExecutionState);
+			//rasterizationState(a_ExecutionState);
 			shaderPipelineState(a_ExecutionState);
-			tessellationState(a_ExecutionState);
-			viewportState(a_ExecutionState);
+			//tessellationState(a_ExecutionState);
+			//viewportState(a_ExecutionState);
 			vertexInputState(a_ExecutionState);
 		};
 	}

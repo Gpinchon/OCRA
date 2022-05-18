@@ -20,7 +20,7 @@ add_executable(OCRA-UnitTests
 target_include_directories(OCRA-UnitTests PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-target_link_libraries(OCRA-UnitTests OCRA::Interface OCRA::Implementation)
+target_link_libraries(OCRA-UnitTests OCRA::Interface OCRA::Implementation OCRA::ShaderCompiler::API)
 
 if(MSVC_IDE)
   # Run macro

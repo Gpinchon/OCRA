@@ -22,5 +22,6 @@ struct Impl {
     const Info info;
     const uint32_t handle;
 	const uint32_t stage;
+	const uint32_t stageBits;
 };
 }

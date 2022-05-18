@@ -13,6 +13,11 @@ struct Shader
         TessControl, TessEval,
         MaxValue
     };
+    /**
+    * @arg a_Name : the shader's entry point
+    * @arg a_Source : the shader's human readable source code
+    * @arg a_Type : the shader's type (Vertex, Geometry, Fragment...)
+    */
     Shader(const std::string& a_Name, const std::string& a_Source, const Type& a_Type)
         : name(a_Name), source(a_Source), type(a_Type)
     {}

@@ -1,8 +1,9 @@
-#include <Shader.hpp>
+#include <ShaderCompiler/Shader.hpp>
 
 #include <shaderc/shaderc.hpp>
 
 #include <stdexcept>
+#include <iostream>
 
 namespace OCRA::ShaderCompiler
 {
@@ -28,10 +29,17 @@ std::vector<uint32_t> Shader::Compile(bool a_Optimize)
 {
     shaderc::Compiler        compiler;
     shaderc::CompileOptions  compilerOptions;
+    compilerOptions.SetTargetEnvironment(shaderc_target_env_opengl, 450);
     if (a_Optimize) compilerOptions.SetOptimizationLevel(shaderc_optimization_level_size);
-    const auto module = compiler.CompileGlslToSpv(source, GetShaderCType(type), name.c_str(), compilerOptions);
+    const auto module = compiler.CompileGlslToSpv(
+        source, GetShaderCType(type),
+        name.c_str(), name.c_str(), compilerOptions);
     if (module.GetCompilationStatus() != shaderc_compilation_status_success)
-        throw std::runtime_error(module.GetErrorMessage());
+    {
+        const auto error = module.GetErrorMessage();
+        std::cerr << error << std::endl;
+        throw std::runtime_error(error);
+    }
     return { module.cbegin(), module.cend() };
 }
 }

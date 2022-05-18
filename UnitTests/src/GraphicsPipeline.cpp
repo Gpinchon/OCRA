@@ -16,6 +16,7 @@
 #include <Command/ViewPort.hpp>
 #include <Queue/Fence.hpp>
 #include <Common/Vec3.hpp>
+#include <ShaderCompiler/Shader.hpp>
 
 #include <Windows.h>
 
@@ -66,6 +67,7 @@ struct GraphicsPipelineTestApp : TestApp
         window.OnClose = [this](const Window&) {
             OnClose();
         };
+        CreateShaderStages();
         const auto queueFamily = FindQueueFamily(physicalDevice, PhysicalDevice::QueueFlagsBits::Graphics);
         queue = Device::GetQueue(device, queueFamily, 0); //Get first available queue
         commandPool = CreateCommandPool(device, queueFamily);
@@ -115,9 +117,53 @@ struct GraphicsPipelineTestApp : TestApp
     {
         RenderPass::Info renderPassInfo{};
         RenderPass::ColorAttachmentDescription colorAttachment;
+        colorAttachment.location = 0;
         colorAttachment.loadOp = RenderPass::LoadOperation::Clear; //clear the attachment 0 on begin
+        colorAttachment.storeOp = RenderPass::StoreOperation::Store;
         renderPassInfo.colorAttachments = { colorAttachment };
         return RenderPass::Create(device, renderPassInfo);
+    }
+    void CreateShaderStages()
+    {
+        {
+            ShaderCompiler::VertexShader vertexShader("main",
+                "#version 450                                 \n"
+                "layout(location = 0) in vec2 inPosition;     \n"
+                "layout(location = 1) in vec3 inColor;        \n"
+                "layout(location = 0) out vec3 fragColor;     \n"
+                "void main() {                                \n"
+                "   gl_Position = vec4(inPosition, 0.0, 1.0); \n"
+                "   fragColor = inColor;                      \n"
+                "}                                            \n"
+            );
+            Shader::Module::Info shaderModuleInfo;
+            shaderModuleInfo.code = vertexShader.Compile(true);
+            const auto shaderModule = Shader::Module::Create(device, shaderModuleInfo);
+            Shader::Stage::Info shaderStageInfo;
+            shaderStageInfo.name = "main";
+            shaderStageInfo.stage = Shader::Stage::StageFlagBits::Vertex;
+            shaderStageInfo.module = shaderModule;
+            shaderStages.push_back(Shader::Stage::Create(device, shaderStageInfo));
+        }
+        {
+            ShaderCompiler::FragmentShader fragmentShader("main",
+                "#version 450                            \n"
+                "layout(location = 0) out vec4 outColor; \n"
+                "layout(location = 0) in vec3 fragColor; \n"
+                "void main() {                           \n"
+                "    outColor = vec4(fragColor, 1.0);    \n"
+                "}                                       \n"
+            );
+            Shader::Module::Info shaderModuleInfo;
+            shaderModuleInfo.code = fragmentShader.Compile(true);
+            const auto shaderModule = Shader::Module::Create(device, shaderModuleInfo);
+            Shader::Stage::Info shaderStageInfo;
+            shaderStageInfo.name = "main";
+            shaderStageInfo.stage = Shader::Stage::StageFlagBits::Fragment;
+            shaderStageInfo.module = shaderModule;
+            shaderStages.push_back(Shader::Stage::Create(device, shaderStageInfo));
+        }
+        
     }
     Pipeline::Handle CreateGraphicsPipeline()
     {
@@ -136,6 +182,7 @@ struct GraphicsPipelineTestApp : TestApp
         graphicsPipelineInfo.viewPortState.scissors = { scissor };
         graphicsPipelineInfo.vertexInputState.attributeDescriptions = Vertex::GetAttributeDescription();
         graphicsPipelineInfo.vertexInputState.bindingDescriptions   = Vertex::GetBindingDescriptions();
+        graphicsPipelineInfo.shaderPipelineState.stages = shaderStages;
         //Everything else is left by default for now
         //Pipeline::Graphics::Create(device, graphicsPipelineInfo);
         return Pipeline::Graphics::Create(device, graphicsPipelineInfo);
@@ -242,6 +289,7 @@ struct GraphicsPipelineTestApp : TestApp
     };
     Buffer::Handle          vertexBuffer;
     Memory::Handle          vertexBufferMemory;
+    std::vector<Shader::Stage::Handle>   shaderStages;
 };
 
 int GraphicsPipeline()
