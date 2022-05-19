@@ -13,38 +13,36 @@ include(../cmake-tools/GroupSources.cmake)
 
 # Fetch SPIRV_TOOLS
 FetchContent_Declare(
+    SPIRV_HEADERS
+    GIT_REPOSITORY  https://github.com/KhronosGroup/SPIRV-Headers.git
+    GIT_TAG         4995a2f2723c401eb0ea3e10c81298906bf1422b
+)
+option(SPIRV_HEADERS_SKIP_EXAMPLES "Skip building examples" ON)
+option(SPIRV_HEADERS_SKIP_INSTALL "Skip install" ON)
+FetchContent_MakeAvailable(SPIRV_HEADERS)
+set_subdirectory_folder("3rdparty/SPIRV-Headers" ${spirv_headers_SOURCE_DIR})
+
+# Fetch GOOGLE_TEST
+FetchContent_Declare(
+    GOOGLE_TEST
+    GIT_REPOSITORY  https://github.com/google/googletest.git
+    GIT_TAG         25dcdc7e8bfac8967f20fb2c0a628f5cf442188d
+    #SOURCE_DIR      ${spirv_tools_SOURCE_DIR}/external/googletest
+)
+FetchContent_MakeAvailable(GOOGLE_TEST)
+set_subdirectory_folder("3rdparty/GoogleTest" ${google_test_SOURCE_DIR})
+# Fetch GOOGLE_TEST
+
+FetchContent_Declare(
   SPIRV_TOOLS
   GIT_REPOSITORY  https://github.com/KhronosGroup/SPIRV-Tools.git
   GIT_TAG         v2022.2
 )
-
-FetchContent_GetProperties(SPIRV_TOOLS)
-if (NOT SPIRV_TOOLS_POPULATED)
-  FetchContent_Populate(SPIRV_TOOLS)
-  message(STATUS "Fetched SPIRV-Tools to ${spirv_tools_SOURCE_DIR}")
-  FetchContent_Declare(
-    SPIRV_HEADERS
-    GIT_REPOSITORY  https://github.com/KhronosGroup/SPIRV-Headers.git
-    GIT_TAG         4995a2f2723c401eb0ea3e10c81298906bf1422b
-    SOURCE_DIR      ${spirv_tools_SOURCE_DIR}/external/spirv-headers
-  )
-  FetchContent_Declare(
-    GOOGLE_TEST
-    GIT_REPOSITORY  https://github.com/google/googletest.git
-    GIT_TAG         25dcdc7e8bfac8967f20fb2c0a628f5cf442188d
-    SOURCE_DIR      ${spirv_tools_SOURCE_DIR}/external/googletest
-  )
-  option(SPIRV_SKIP_TESTS "Skip tests" ON)
-  option(SPIRV_SKIP_EXECUTABLES "Skip executables" ON)
-  option(SPIRV_HEADERS_SKIP_EXAMPLES "Skip building examples" ON)
-  option(SPIRV_HEADERS_SKIP_INSTALL "Skip install" ON)
-  option(SKIP_SPIRV_TOOLS_INSTALL "Skip SPIRV-Tools Installation" ON)
-  FetchContent_Populate(SPIRV_HEADERS)
-  message(STATUS "Fetched SPIRV-Headers to ${spirv_headers_SOURCE_DIR}")
-  FetchContent_Populate(GOOGLE_TEST)
-  message(STATUS "Fetched googletest to ${google_test_SOURCE_DIR}")
-  add_subdirectory_with_folder("3rdparty/SPIRV-Tools" ${spirv_tools_SOURCE_DIR} ${spirv_tools_BINARY_DIR})
-endif (NOT SPIRV_TOOLS_POPULATED)
+option(SPIRV_SKIP_TESTS "Skip tests" ON)
+option(SPIRV_SKIP_EXECUTABLES "Skip executables" ON)
+option(SKIP_SPIRV_TOOLS_INSTALL "Skip SPIRV-Tools Installation" ON)
+FetchContent_MakeAvailable(SPIRV_TOOLS)
+set_subdirectory_folder("3rdparty/SPIRV-Tools" ${spirv_tools_SOURCE_DIR})
 # Fetch SPIRV_TOOLS
 
 # Fetch GLSLANG
@@ -52,13 +50,9 @@ FetchContent_Declare(
   GLSLANG
   GIT_REPOSITORY  https://github.com/KhronosGroup/glslang.git
 )
-FetchContent_GetProperties(GLSLANG)
-if (NOT GLSLANG_POPULATED)
-  FetchContent_Populate(GLSLANG)
-  message(STATUS "Fetched GLSLang to ${glslang_SOURCE_DIR}")
-  option(SKIP_GLSLANG_INSTALL "Skip Installation" ON)
-  add_subdirectory_with_folder("3rdparty/GLSLang" ${glslang_SOURCE_DIR} ${glslang_BINARY_DIR})
-endif (NOT GLSLANG_POPULATED)
+option(SKIP_GLSLANG_INSTALL "Skip Installation" ON)
+FetchContent_MakeAvailable(GLSLANG)
+set_subdirectory_folder("3rdparty/GLSLang" ${glslang_SOURCE_DIR})
 # Fetch GLSLANG
 
 # Fetch SPIRV_CROSS
@@ -66,27 +60,21 @@ FetchContent_Declare(
   SPIRV_CROSS
   GIT_REPOSITORY  https://github.com/KhronosGroup/SPIRV-Cross.git
 )
-FetchContent_GetProperties(SPIRV_CROSS)
-if (NOT SPIRV_CROSS_POPULATED)
-  FetchContent_Populate(SPIRV_CROSS)
-  message(STATUS "Fetched SPIRV_CROSS to ${spirv_cross_SOURCE_DIR}")
-  
-  option(SPIRV_CROSS_SKIP_INSTALL "Skip SPIRV-Cross Installation" ON)
-  option(SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS "Instead of throwing exceptions assert" OFF)
-  option(SPIRV_CROSS_SHARED "Build the C API as a single shared library." OFF)
-  option(SPIRV_CROSS_STATIC "Build the C and C++ API as static libraries." ON)
-  option(SPIRV_CROSS_CLI "Build the CLI binary. Requires SPIRV_CROSS_STATIC." OFF)
-  option(SPIRV_CROSS_ENABLE_TESTS "Enable SPIRV-Cross tests." OFF)
-  option(SPIRV_CROSS_ENABLE_GLSL "Enable GLSL support." ON)
-  option(SPIRV_CROSS_ENABLE_HLSL "Enable HLSL target support." ON)
-  option(SPIRV_CROSS_ENABLE_MSL "Enable MSL target support." ON)
-  option(SPIRV_CROSS_ENABLE_CPP "Enable C++ target support." ON)
-  option(SPIRV_CROSS_ENABLE_REFLECT "Enable JSON reflection target support." ON)
-  option(SPIRV_CROSS_ENABLE_C_API "Enable C API wrapper support in static library." OFF)
-  option(SPIRV_CROSS_ENABLE_UTIL "Enable util module support." OFF)
-
-  add_subdirectory_with_folder("3rdparty/SPIRV-Cross" ${spirv_cross_SOURCE_DIR} ${spirv_cross_BINARY_DIR})
-endif (NOT SPIRV_CROSS_POPULATED)
+option(SPIRV_CROSS_SKIP_INSTALL "Skip SPIRV-Cross Installation" ON)
+option(SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS "Instead of throwing exceptions assert" OFF)
+option(SPIRV_CROSS_SHARED "Build the C API as a single shared library." OFF)
+option(SPIRV_CROSS_STATIC "Build the C and C++ API as static libraries." ON)
+option(SPIRV_CROSS_CLI "Build the CLI binary. Requires SPIRV_CROSS_STATIC." OFF)
+option(SPIRV_CROSS_ENABLE_TESTS "Enable SPIRV-Cross tests." OFF)
+option(SPIRV_CROSS_ENABLE_GLSL "Enable GLSL support." ON)
+option(SPIRV_CROSS_ENABLE_HLSL "Enable HLSL target support." ON)
+option(SPIRV_CROSS_ENABLE_MSL "Enable MSL target support." ON)
+option(SPIRV_CROSS_ENABLE_CPP "Enable C++ target support." ON)
+option(SPIRV_CROSS_ENABLE_REFLECT "Enable JSON reflection target support." ON)
+option(SPIRV_CROSS_ENABLE_C_API "Enable C API wrapper support in static library." OFF)
+option(SPIRV_CROSS_ENABLE_UTIL "Enable util module support." OFF)
+FetchContent_MakeAvailable(SPIRV_CROSS)
+set_subdirectory_folder("3rdparty/SPIRV-Cross" ${spirv_cross_SOURCE_DIR})
 # Fetch SPIRV_CROSS
 
 # Fetch shaderc
@@ -95,18 +83,12 @@ FetchContent_Declare(
   GIT_REPOSITORY  https://github.com/google/shaderc.git
   GIT_TAG         v2022.1
 )
-FetchContent_GetProperties(SHADERC)
-if (NOT SHADERC_POPULATED)
-  FetchContent_Populate(SHADERC)
-  message(STATUS "Fetched SHADERC to ${shaderc_SOURCE_DIR}")
-  
-  option(SHADERC_SKIP_INSTALL         "Skip installation"      ON)
-  option(SHADERC_SKIP_TESTS           "Skip building tests"    ON)
-  option(SHADERC_SKIP_EXAMPLES        "Skip building examples" ON)
-  option(SHADERC_SKIP_COPYRIGHT_CHECK "Skip copyright check"   ON)
-
-  add_subdirectory_with_folder("3rdparty/ShaderC" ${shaderc_SOURCE_DIR} ${shaderc_BINARY_DIR})
-endif (NOT SHADERC_POPULATED)
+option(SHADERC_SKIP_INSTALL         "Skip installation"      ON)
+option(SHADERC_SKIP_TESTS           "Skip building tests"    ON)
+option(SHADERC_SKIP_EXAMPLES        "Skip building examples" ON)
+option(SHADERC_SKIP_COPYRIGHT_CHECK "Skip copyright check"   ON)
+FetchContent_MakeAvailable(SHADERC)
+set_subdirectory_folder("3rdparty/ShaderC" ${shaderc_SOURCE_DIR})
 # Fetch shaderc
 
 set(OCRA_SHADER_COMPILER_API_HEADER_FILES

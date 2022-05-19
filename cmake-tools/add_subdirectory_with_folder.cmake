@@ -7,6 +7,16 @@ function(get_all_targets _result _dir)
     set(${_result} ${${_result}} ${_sub_targets} PARENT_SCOPE)
 endfunction()
 
+function(set_subdirectory_folder _folder_name _folder)
+    get_all_targets(_targets "${_folder}")
+    foreach(_target IN LISTS _targets)
+        set_target_properties(
+            ${_target}
+            PROPERTIES FOLDER "${_folder_name}"
+        )
+    endforeach()
+endfunction()
+
 function(add_subdirectory_with_folder _folder_name _folder)
     add_subdirectory(${_folder} ${ARGN})
     get_all_targets(_targets "${_folder}")

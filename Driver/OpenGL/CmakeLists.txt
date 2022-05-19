@@ -12,20 +12,16 @@ FetchContent_Declare(
   GIT_REPOSITORY  https://github.com/Perlmint/glew-cmake.git
   GIT_TAG         glew-cmake-2.2.0
 )
-FetchContent_GetProperties(GLEW)
-if (NOT GLEW_POPULATED)
-  FetchContent_Populate(GLEW)
-  message(STATUS "Fetched GLEW to ${glew_SOURCE_DIR}")
-  option(ONLY_LIBS "Do not build executables" ON)
-  option(glew-cmake_BUILD_STATIC "Build the static glew library" ON)
-  option(glew-cmake_BUILD_SHARED "Build the shared glew library" OFF)
-  add_subdirectory_with_folder("3rdparty/GLEW" ${glew_SOURCE_DIR} ${glew_BINARY_DIR})
-  add_library(GLEW::glew_s ALIAS libglew_static)
-  add_library(GLEW::GLEW ALIAS libglew_static)
-  set(GLEW_FOUND 1)
-  set(GLEW_INCLUDE_DIR ${glew_SOURCE_DIR}/include)
-  set(GLEW_LIBRARIES GLEW::glew GLEW::glew_s)
-endif (NOT GLEW_POPULATED)
+option(ONLY_LIBS "Do not build executables" ON)
+option(glew-cmake_BUILD_STATIC "Build the static glew library" ON)
+option(glew-cmake_BUILD_SHARED "Build the shared glew library" OFF)
+FetchContent_MakeAvailable(GLEW)
+add_library(GLEW::glew_s ALIAS libglew_static)
+add_library(GLEW::GLEW ALIAS libglew_static)
+set(GLEW_FOUND 1)
+set(GLEW_INCLUDE_DIR ${glew_SOURCE_DIR}/include)
+set(GLEW_LIBRARIES GLEW::glew GLEW::glew_s)
+set_subdirectory_folder("3rdparty/GLEW" ${glew_SOURCE_DIR})
 # Fetch GLEW
 
 set(OCRA_IMPL_HEADER_FILES
