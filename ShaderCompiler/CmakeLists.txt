@@ -5,7 +5,6 @@ project(OCRACompiler LANGUAGES CXX)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS "-std:c++latest")
 set(CMAKE_CXX_FLAGS_RELEASE "-Ox")
 
 include(FetchContent)
@@ -33,18 +32,6 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(GOOGLE_TEST)
 set_subdirectory_folder("3rdparty/GoogleTest" ${google_test_SOURCE_DIR})
 # Fetch GOOGLE_TEST
-
-FetchContent_Declare(
-  SPIRV_TOOLS
-  GIT_REPOSITORY  https://github.com/KhronosGroup/SPIRV-Tools.git
-  GIT_TAG         v2022.2
-)
-option(SPIRV_SKIP_TESTS "Skip tests" ON)
-option(SPIRV_SKIP_EXECUTABLES "Skip executables" ON)
-option(SKIP_SPIRV_TOOLS_INSTALL "Skip SPIRV-Tools Installation" ON)
-FetchContent_MakeAvailable(SPIRV_TOOLS)
-set_subdirectory_folder("3rdparty/SPIRV-Tools" ${spirv_tools_SOURCE_DIR})
-# Fetch SPIRV_TOOLS
 
 # Fetch GLSLANG
 FetchContent_Declare(
@@ -78,26 +65,15 @@ FetchContent_MakeAvailable(SPIRV_CROSS)
 set_subdirectory_folder("3rdparty/SPIRV-Cross" ${spirv_cross_SOURCE_DIR})
 # Fetch SPIRV_CROSS
 
-# Fetch shaderc
-FetchContent_Declare(
-  SHADERC
-  GIT_REPOSITORY  https://github.com/google/shaderc.git
-  GIT_TAG         v2022.1
-)
-option(SHADERC_SKIP_INSTALL         "Skip installation"      ON)
-option(SHADERC_SKIP_TESTS           "Skip building tests"    ON)
-option(SHADERC_SKIP_EXAMPLES        "Skip building examples" ON)
-option(SHADERC_SKIP_COPYRIGHT_CHECK "Skip copyright check"   ON)
-FetchContent_MakeAvailable(SHADERC)
-set_subdirectory_folder("3rdparty/ShaderC" ${shaderc_SOURCE_DIR})
-# Fetch shaderc
-
 set(OCRA_SHADER_COMPILER_API_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/ShaderCompiler/Shader.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/ShaderCompiler/Compiler.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/ShaderCompiler/Handle.hpp
 )
 
 set(OCRA_SHADER_COMPILER_API_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/ShaderCompiler/Shader.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/ShaderCompiler/Compiler.cpp
 )
 
 add_library(OCRA-ShaderCompiler-API STATIC ${OCRA_SHADER_COMPILER_API_HEADER_FILES} ${OCRA_SHADER_COMPILER_API_SOURCE_FILES})
@@ -106,19 +82,20 @@ target_include_directories(OCRA-ShaderCompiler-API PUBLIC
   "${CMAKE_CURRENT_SOURCE_DIR}/include"
 )
 target_link_libraries(OCRA-ShaderCompiler-API PUBLIC
-	glslang
-	SPIRV
+  glslang
+  SPIRV
   glslang-default-resource-limits
-	spirv-cross-core
+  spirv-cross-core
   spirv-cross-glsl
-	spirv-cross-reflect
+  spirv-cross-reflect
 )
 add_library(OCRA::ShaderCompiler::API ALIAS OCRA-ShaderCompiler-API)
 
 set(OCRA_SHADER_COMPILER_SOURCE_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+)
 set(OCRA_SHADER_COMPILER_HEADER_FILES
-  )
+)
 add_executable(OCRA-ShaderCompiler
   ${OCRA_SHADER_COMPILER_SOURCE_FILES}
   ${OCRA_SHADER_COMPILER_HEADER_FILES})

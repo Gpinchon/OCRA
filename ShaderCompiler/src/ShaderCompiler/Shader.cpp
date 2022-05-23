@@ -10,7 +10,7 @@
 #include <iostream>
 #include <sstream>
 
-namespace OCRA::ShaderCompiler
+namespace OCRA::ShaderCompiler::Shader
 {
 const auto inline GetExecutionModel(const Shader::Type& a_Type)
 {
@@ -50,26 +50,36 @@ const auto inline GetEshLang(const Shader::Type& a_Type)
 	throw std::runtime_error("Unknown shader type !");
 }
 
-std::vector<uint32_t> Shader::Compile(bool a_Optimize)
+struct Impl
 {
-	const auto eshLang = GetEshLang(type);
-	glslang::InitializeProcess();
+	Impl(const ShaderCompiler::Handle& a_Compiler, const Info& a_Info)
+		: info(a_Info)
+	{}
+	//compile to SPIRV binary words
+	std::vector<uint32_t> Compile();
+	const Info info;
+};
+
+std::vector<uint32_t> Impl::Compile()
+{
+	const auto eshLang = GetEshLang(info.type);
 	//Do some reflection
 	std::string glslCode;
 	{
-		
 		glslang::TShader shader(eshLang);
-		const auto code = source.data();
+		const auto code = info.source.data();
 		shader.setStrings(&code, 1);
 		shader.setEnvInput(glslang::EShSourceGlsl, eshLang, glslang::EShClientVulkan, 100);
 		shader.setEnvClient(glslang::EShClientVulkan, glslang::EShTargetVulkan_1_0);
 		shader.setEnvTarget(glslang::EshTargetSpv, glslang::EShTargetSpv_1_0);
-		shader.setEntryPoint(name.c_str());
-		shader.setSourceEntryPoint(name.c_str());
-		shader.parse(&glslang::DefaultTBuiltInResource, 100, false, EShMsgDefault);
+		//shader.setEntryPoint(name.c_str());
+		//shader.setSourceEntryPoint(name.c_str());
+		if (!shader.parse(&glslang::DefaultTBuiltInResource, 100, false, EShMsgDefault))
+			std::cerr << shader.getInfoLog() << std::endl;
 		glslang::TProgram program;
 		program.addShader(&shader);
-		program.link(EShMsgDefault);
+		if (!program.link(EShMsgDefault))
+			std::cerr << program.getInfoLog() << std::endl;
 		spv::SpvBuildLogger logger;
 		glslang::SpvOptions spvOptions;
 		spvOptions.validate = true;
@@ -77,7 +87,7 @@ std::vector<uint32_t> Shader::Compile(bool a_Optimize)
 		glslang::GlslangToSpv(*program.getIntermediate(eshLang), spvBinary, &logger, &spvOptions);
 		//SPIRV-Cross
 		spirv_cross::CompilerGLSL glsl(spvBinary);
-		glsl.set_entry_point(name, GetExecutionModel(type));
+		//glsl.set_entry_point(name, GetExecutionModel(type));
 		//TODO : do some reflection here
 		glslCode = glsl.compile();
 	}
@@ -85,24 +95,30 @@ std::vector<uint32_t> Shader::Compile(bool a_Optimize)
 	std::vector<uint32_t> spvBinary;
 	{
 		glslang::TShader shader(eshLang);
-		char* code = new char[source.size()];
-		std::memcpy(code, source.data(), source.size());
+		auto code = glslCode.data();
 		shader.setStrings(&code, 1);
 		shader.setEnvInput(glslang::EShSourceGlsl, eshLang, glslang::EShClientOpenGL, 100);
 		shader.setEnvClient(glslang::EShClientOpenGL, glslang::EShTargetOpenGL_450);
 		shader.setEnvTarget(glslang::EshTargetSpv, glslang::EShTargetSpv_1_0);
-		shader.setEntryPoint(name.c_str());
-		shader.setSourceEntryPoint(name.c_str());
-		shader.parse(&glslang::DefaultTBuiltInResource, 100, false, EShMsgDefault);
+		shader.setEntryPoint(info.entryPoint.c_str());
+		shader.setSourceEntryPoint(info.entryPoint.c_str());
+		if (!shader.parse(&glslang::DefaultTBuiltInResource, 100, false, EShMsgDefault))
+			std::cerr << shader.getInfoLog() << std::endl;
 		glslang::TProgram program;
 		program.addShader(&shader);
-		program.link(EShMsgDefault);
+		if (!program.link(EShMsgDefault))
+			std::cerr << program.getInfoLog() << std::endl;
 		spv::SpvBuildLogger logger;
 		glslang::SpvOptions spvOptions;
 		spvOptions.validate = true;
 		glslang::GlslangToSpv(*program.getIntermediate(eshLang), spvBinary, &logger, &spvOptions);
 	}
-	glslang::FinalizeProcess();
 	return spvBinary;
+}
+Handle Create(const ShaderCompiler::Handle& a_Compiler, const Info& a_Info) {
+	return Handle(new Impl(a_Compiler, a_Info));
+}
+std::vector<uint32_t> Compile(const Handle& a_Shader) {
+	return a_Shader->Compile();
 }
 }
