@@ -8,7 +8,6 @@
 
 #include <stdexcept>
 #include <iostream>
-#include <sstream>
 
 namespace OCRA::ShaderCompiler::Shader
 {
@@ -102,12 +101,18 @@ std::vector<uint32_t> Impl::Compile()
 		shader.setEnvTarget(glslang::EshTargetSpv, glslang::EShTargetSpv_1_0);
 		shader.setEntryPoint(info.entryPoint.c_str());
 		shader.setSourceEntryPoint(info.entryPoint.c_str());
-		if (!shader.parse(&glslang::DefaultTBuiltInResource, 100, false, EShMsgDefault))
-			std::cerr << shader.getInfoLog() << std::endl;
+		if (!shader.parse(&glslang::DefaultTBuiltInResource, 100, false, EShMsgDefault)) {
+			const auto error = shader.getInfoLog();
+			std::cerr << error << std::endl;
+			throw std::runtime_error(error);
+		}
 		glslang::TProgram program;
 		program.addShader(&shader);
-		if (!program.link(EShMsgDefault))
-			std::cerr << program.getInfoLog() << std::endl;
+		if (!program.link(EShMsgDefault)) {
+			const auto error = program.getInfoLog();
+			std::cerr << error << std::endl;
+			throw std::runtime_error(error);
+		}
 		spv::SpvBuildLogger logger;
 		glslang::SpvOptions spvOptions;
 		spvOptions.validate = true;
