@@ -5,6 +5,7 @@ project(OCRACompiler LANGUAGES CXX)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_FLAGS "-std:c++latest")
 set(CMAKE_CXX_FLAGS_RELEASE "-Ox")
 
 include(FetchContent)
@@ -50,7 +51,7 @@ FetchContent_Declare(
   GLSLANG
   GIT_REPOSITORY  https://github.com/KhronosGroup/glslang.git
 )
-option(SKIP_GLSLANG_INSTALL "Skip Installation" ON)
+#option(SKIP_GLSLANG_INSTALL "Skip Installation" ON)
 FetchContent_MakeAvailable(GLSLANG)
 set_subdirectory_folder("3rdparty/GLSLang" ${glslang_SOURCE_DIR})
 # Fetch GLSLANG
@@ -104,7 +105,14 @@ set_target_properties(OCRA-ShaderCompiler-API PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories(OCRA-ShaderCompiler-API PUBLIC
   "${CMAKE_CURRENT_SOURCE_DIR}/include"
 )
-target_link_libraries(OCRA-ShaderCompiler-API PUBLIC spirv-cross-cpp shaderc shaderc_util)
+target_link_libraries(OCRA-ShaderCompiler-API PUBLIC
+	glslang
+	SPIRV
+  glslang-default-resource-limits
+	spirv-cross-core
+  spirv-cross-glsl
+	spirv-cross-reflect
+)
 add_library(OCRA::ShaderCompiler::API ALIAS OCRA-ShaderCompiler-API)
 
 set(OCRA_SHADER_COMPILER_SOURCE_FILES

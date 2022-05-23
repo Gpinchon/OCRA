@@ -184,7 +184,6 @@ struct GraphicsPipelineTestApp : TestApp
         graphicsPipelineInfo.vertexInputState.bindingDescriptions   = Vertex::GetBindingDescriptions();
         graphicsPipelineInfo.shaderPipelineState.stages = shaderStages;
         //Everything else is left by default for now
-        //Pipeline::Graphics::Create(device, graphicsPipelineInfo);
         return Pipeline::Graphics::Create(device, graphicsPipelineInfo);
     }
     void CreateFrameBuffer()
