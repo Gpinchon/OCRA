@@ -135,7 +135,7 @@ struct GraphicsPipelineTestApp : TestApp
             ShaderCompiler::Shader::Info shaderInfo;
             shaderInfo.type = ShaderCompiler::Shader::Type::Vertex;
             shaderInfo.entryPoint = "main";
-            shaderInfo.source =
+            shaderInfo.source = {
                 "#version 450                                 \n"
                 "layout(location = 0) in vec2 inPosition;     \n"
                 "layout(location = 1) in vec3 inColor;        \n"
@@ -143,7 +143,8 @@ struct GraphicsPipelineTestApp : TestApp
                 "void main() {                                \n"
                 "   gl_Position = vec4(inPosition, 0.0, 1.0); \n"
                 "   fragColor = inColor;                      \n"
-                "}                                            \n";
+                "}                                            \n"
+            };
             const auto vertexShader = ShaderCompiler::Shader::Create(compiler, shaderInfo);
             Shader::Module::Info shaderModuleInfo;
             shaderModuleInfo.code = ShaderCompiler::Shader::Compile(vertexShader);
@@ -158,13 +159,14 @@ struct GraphicsPipelineTestApp : TestApp
             ShaderCompiler::Shader::Info shaderInfo;
             shaderInfo.type = ShaderCompiler::Shader::Type::Fragment;
             shaderInfo.entryPoint = "main";
-            shaderInfo.source =
+            shaderInfo.source = {
                 "#version 450                            \n"
                 "layout(location = 0) out vec4 outColor; \n"
                 "layout(location = 0) in vec3 fragColor; \n"
                 "void main() {                           \n"
                 "    outColor = vec4(fragColor, 1.0);    \n"
-                "}                                       \n";
+                "}                                       \n"
+            };
             const auto fragmentShader = ShaderCompiler::Shader::Create(compiler, shaderInfo);
             Shader::Module::Info shaderModuleInfo;
             shaderModuleInfo.code = ShaderCompiler::Shader::Compile(fragmentShader);
