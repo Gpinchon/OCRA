@@ -51,7 +51,7 @@ struct Impl : Pipeline::Impl {
 			viewportState(a_ExecutionState);
 			vertexInputState(a_ExecutionState);
 			a_ExecutionState.subpassIndex = info.subPass;
-			a_ExecutionState.renderPass.renderPass->BeginSubPass(info.subPass);
+			a_ExecutionState.renderPass.renderPass->BeginSubPass(a_ExecutionState);
 		};
 	}
     const Info info;

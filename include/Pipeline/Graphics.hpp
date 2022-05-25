@@ -26,7 +26,6 @@ OCRA_DECLARE_HANDLE(OCRA::RenderPass);
 
 namespace OCRA::Pipeline::Graphics {
 struct Info { //describes a graphics pipeline with each stage
-	RenderPass::Handle          renderPass{ 0 }; //a handle to a previously created render pass
     ShaderPipelineState::Info   shaderPipelineStates{};
     ColorBlendState::Info       colorBlendState{};
     DepthStencilState::Info     depthStencilState{};
@@ -38,8 +37,8 @@ struct Info { //describes a graphics pipeline with each stage
     VertexInputState::Info      vertexInputState{};
     ViewPortState::Info         viewPortState{};
     DynamicState::Info          dynamicState{};
-	RenderPass::Handle			renderPass{};
-	uint8_t						subPass{ 0 };
+	RenderPass::Handle			renderPass{}; //the RenderPass this Graphics Pipeline will be used with
+	uint8_t						subPass{ 0 }; //the subPass to "start" with inside the RenderPass
 };
 Handle Create(const Device::Handle& a_Device, const Info& a_Info);
 const Info& GetInfo(const Device::Handle& a_Device, const Handle& a_Handle);
