@@ -34,18 +34,25 @@ struct AttachmentDescription {
     StoreOperation storeOp{ StoreOperation::DontCare }; //determines what to do with the buffer after rendering
 };
 
-struct ColorAttachmentDescription : AttachmentDescription {
-    int8_t  location{ -1 }; //location of the output, -1 means none
+struct AttachmentReference {
+	int8_t  location{ -1 }; //location of the output, -1 means none
+};
+
+struct SubPassDescription {
+	Pipeline::BindingPoint           pipelineBindingPoint{ Pipeline::BindingPoint::Unknown };
+	std::vector<AttachmentReference> colorAttachments;
+	AttachmentReference              depthAttachment;
+	AttachmentReference              stencilAttachment;
 };
 
 /**
  * Specifies the outputs of the RenderPass and clear operations
  */
 struct Info {
-    Pipeline::BindingPoint                  pipelineBindingPoint{ Pipeline::BindingPoint::Unknown };
-    std::vector<ColorAttachmentDescription> colorAttachments;
-    AttachmentDescription                   depthAttachment;
-    AttachmentDescription                   stencilAttachment;
+	std::vector<SubPassDescription>	   subPasses;
+	std::vector<AttachmentDescription> colorAttachments;
+	AttachmentDescription              depthAttachment;
+	AttachmentDescription              stencilAttachment;
 };
 
 Handle Create(const Device::Handle& a_Device, const Info& a_Info);
@@ -78,6 +85,7 @@ enum class SubPassContents
 };
 //Begin Render Pass recording
 void BeginRenderPass(const Command::Buffer::Handle& a_CommandBuffer, const RenderPassBeginInfo& a_BeginInfo, const SubPassContents& a_SubPassContents);
+void NextSubPass(const Command::Buffer::Handle& a_CommandBuffer, const SubPassContents& a_SubPassContents);
 //End Render Pass recording
 void EndRenderPass(const Command::Buffer::Handle& a_CommandBuffer);
 }

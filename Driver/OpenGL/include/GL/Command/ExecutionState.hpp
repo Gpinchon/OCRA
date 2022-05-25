@@ -72,7 +72,7 @@ struct ExecutionState {
 	}
 	bool				once{ false };
 	RenderPass			renderPass{};
-	uint32_t			subpassIndex{ 0 };
+	uint32_t			subpassIndex{ uint32_t(-1) };
 	std::array<OCRA::Pipeline::Handle, size_t(OCRA::Pipeline::BindingPoint::MaxValue)> pipelineState{};
 	std::array<OCRA::Pipeline::Handle, size_t(OCRA::Pipeline::BindingPoint::MaxValue)> lastPipelineState{};
 	DynamicStates		dynamicStates;

@@ -22,6 +22,7 @@
 #include <vector>
 
 OCRA_DECLARE_HANDLE(OCRA::Device);
+OCRA_DECLARE_HANDLE(OCRA::RenderPass);
 
 namespace OCRA::Pipeline::Graphics {
 struct Info { //describes a graphics pipeline with each stage
@@ -37,6 +38,8 @@ struct Info { //describes a graphics pipeline with each stage
     VertexInputState::Info      vertexInputState{};
     ViewPortState::Info         viewPortState{};
     DynamicState::Info          dynamicState{};
+	RenderPass::Handle			renderPass{};
+	uint8_t						subPass{ 0 };
 };
 Handle Create(const Device::Handle& a_Device, const Info& a_Info);
 const Info& GetInfo(const Device::Handle& a_Device, const Handle& a_Handle);

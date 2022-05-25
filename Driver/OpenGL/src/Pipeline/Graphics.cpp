@@ -17,6 +17,7 @@
 #include <GL/Pipeline/TessellationState.hpp>
 #include <GL/Pipeline/ViewPortState.hpp>
 #include <GL/Pipeline/VertexInputState.hpp>
+#include <GL/RenderPass.hpp>
 
 #include <functional>
 #include <cassert>
@@ -28,6 +29,7 @@ struct Impl : Pipeline::Impl {
 	, info(a_Info)
 	{
 		Apply = [
+			this,
 			colorBlendState = ColorBlendState::Compile(a_Device, info.colorBlendState, info.dynamicState),
 			depthStencilState = DepthStencilState::Compile(a_Device, info.depthStencilState, info.dynamicState),
 			inputAssemblyState = InputAssemblyState::Compile(a_Device, info.inputAssemblyState, info.dynamicState),
@@ -38,6 +40,7 @@ struct Impl : Pipeline::Impl {
 			viewportState = ViewPortState::Compile(a_Device, info.viewPortState, info.dynamicState),
 			vertexInputState = VertexInputState::Compile(a_Device, info.vertexInputState, info.dynamicState)
 		](Command::Buffer::ExecutionState& a_ExecutionState) {
+			assert(info.renderPass == a_ExecutionState.renderPass.renderPass);
 			colorBlendState(a_ExecutionState);
 			depthStencilState(a_ExecutionState);
 			inputAssemblyState(a_ExecutionState);
@@ -47,6 +50,8 @@ struct Impl : Pipeline::Impl {
 			tessellationState(a_ExecutionState);
 			viewportState(a_ExecutionState);
 			vertexInputState(a_ExecutionState);
+			a_ExecutionState.subpassIndex = info.subPass;
+			a_ExecutionState.renderPass.renderPass->BeginSubPass(info.subPass);
 		};
 	}
     const Info info;

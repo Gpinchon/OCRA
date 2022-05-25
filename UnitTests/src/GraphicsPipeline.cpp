@@ -117,12 +117,15 @@ struct GraphicsPipelineTestApp : TestApp
     }
     RenderPass::Handle CreateRenderPass()
     {
+		RenderPass::SubPassDescription subPassDescription{};
+		RenderPass::AttachmentReference attachmentRef{ 0 };
+		subPassDescription.colorAttachments = { attachmentRef };
         RenderPass::Info renderPassInfo{};
-        RenderPass::ColorAttachmentDescription colorAttachment;
-        colorAttachment.location = 0;
+        RenderPass::AttachmentDescription colorAttachment;
         colorAttachment.loadOp = RenderPass::LoadOperation::Clear; //clear the attachment 0 on begin
-        colorAttachment.storeOp = RenderPass::StoreOperation::Store;
+        colorAttachment.storeOp = RenderPass::StoreOperation::Store; //write the result to attachment 0
         renderPassInfo.colorAttachments = { colorAttachment };
+		renderPassInfo.subPasses = { subPassDescription };
         return RenderPass::Create(device, renderPassInfo);
     }
     void CreateShaderStages()
@@ -146,7 +149,7 @@ struct GraphicsPipelineTestApp : TestApp
             shaderModuleInfo.code = ShaderCompiler::Shader::Compile(vertexShader);
             const auto shaderModule = Shader::Module::Create(device, shaderModuleInfo);
             Shader::Stage::Info shaderStageInfo;
-            shaderStageInfo.name = "main";
+            shaderStageInfo.entryPoint = "main";
             shaderStageInfo.stage = Shader::Stage::StageFlagBits::Vertex;
             shaderStageInfo.module = shaderModule;
             shaderStages.push_back(Shader::Stage::Create(device, shaderStageInfo));
@@ -167,7 +170,7 @@ struct GraphicsPipelineTestApp : TestApp
             shaderModuleInfo.code = ShaderCompiler::Shader::Compile(fragmentShader);
             const auto shaderModule = Shader::Module::Create(device, shaderModuleInfo);
             Shader::Stage::Info shaderStageInfo;
-            shaderStageInfo.name = "main";
+            shaderStageInfo.entryPoint = "main";
             shaderStageInfo.stage = Shader::Stage::StageFlagBits::Fragment;
             shaderStageInfo.module = shaderModule;
             shaderStages.push_back(Shader::Stage::Create(device, shaderStageInfo));
@@ -192,6 +195,8 @@ struct GraphicsPipelineTestApp : TestApp
         graphicsPipelineInfo.vertexInputState.attributeDescriptions = Vertex::GetAttributeDescription();
         graphicsPipelineInfo.vertexInputState.bindingDescriptions   = Vertex::GetBindingDescriptions();
         graphicsPipelineInfo.shaderPipelineState.stages = shaderStages;
+		graphicsPipelineInfo.renderPass = renderPass;
+		graphicsPipelineInfo.subPass = 0;
         //Everything else is left by default for now
         return Pipeline::Graphics::Create(device, graphicsPipelineInfo);
     }
