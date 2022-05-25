@@ -40,7 +40,7 @@ struct SpecializationInfo {
 struct Info {
     StageFlags stage { StageFlagBits::None }; //must be a single stage
     Module::Handle module; //the spir-v module
-    std::string name { "" }; //entry point name
+    std::string entryPoint { "" }; //entry point name
     SpecializationInfo specializationInfo;
 };
 Handle Create(const Device::Handle& a_Device, const Info& a_Info);

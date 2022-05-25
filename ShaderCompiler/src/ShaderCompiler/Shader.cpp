@@ -86,6 +86,14 @@ std::vector<uint32_t> Impl::Compile()
 		glslang::GlslangToSpv(*program.getIntermediate(eshLang), spvBinary, &logger, &spvOptions);
 		//SPIRV-Cross
 		spirv_cross::CompilerGLSL glsl(spvBinary);
+		const auto resources = glsl.get_shader_resources();
+		for (const auto& spi : resources.subpass_inputs) {
+			auto set = glsl.get_decoration(spi.id, spv::DecorationDescriptorSet);
+			auto binding = glsl.get_decoration(spi.id, spv::DecorationBinding);
+			auto inputIndex = glsl.get_decoration(spi.id, spv::DecorationInputAttachmentIndex);
+			glsl.set_subpass_input_remapped_components(spi.id, 0);
+			std::cout << "Found Subpass Input " << spi.name << " set = " << set << " binding = " << binding << " input_attachment_index " << inputIndex << std::endl;
+		}
 		//glsl.set_entry_point(name, GetExecutionModel(type));
 		//TODO : do some reflection here
 		glslCode = glsl.compile();

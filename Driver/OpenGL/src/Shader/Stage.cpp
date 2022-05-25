@@ -103,7 +103,7 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
         glProgramParameteri(handle, GL_PROGRAM_SEPARABLE, GL_TRUE);
         assert(GLEW_ARB_gl_spirv);
         glShaderBinary(1, &shader, GL_SHADER_BINARY_FORMAT_SPIR_V, moduleInfo.code.data(), sizeof(moduleInfo.code.front()) * moduleInfo.code.size());
-        glSpecializeShader(shader, info.name.c_str(), constantIndex.size(), constantIndex.data(), constantValue.data());
+        glSpecializeShader(shader, info.entryPoint.c_str(), constantIndex.size(), constantIndex.data(), constantValue.data());
         if (CheckShaderCompilation(shader)) //compilation is successful
         {
             glAttachShader(handle, shader);
