@@ -23,6 +23,7 @@
 
 OCRA_DECLARE_HANDLE(OCRA::Device);
 OCRA_DECLARE_HANDLE(OCRA::RenderPass);
+OCRA_DECLARE_HANDLE(OCRA::Pipeline::Layout);
 
 namespace OCRA::Pipeline::Graphics {
 struct Info { //describes a graphics pipeline with each stage
@@ -37,6 +38,7 @@ struct Info { //describes a graphics pipeline with each stage
     VertexInputState::Info      vertexInputState{};
     ViewPortState::Info         viewPortState{};
     DynamicState::Info          dynamicState{};
+	Layout::Handle				layout{};
 	RenderPass::Handle			renderPass{}; //the RenderPass this Graphics Pipeline will be used with
 	uint8_t						subPass{ 0 }; //the subPass to "start" with inside the RenderPass
 };

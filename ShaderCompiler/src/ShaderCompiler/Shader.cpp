@@ -59,6 +59,10 @@ struct Impl
 	const Info info;
 };
 
+constexpr auto SubPassInputOffset = 16;
+constexpr auto SetSize = 16;
+constexpr auto PushConstantBinding = 256;
+
 std::vector<uint32_t> Impl::Compile()
 {
 	const auto eshLang = GetEshLang(info.type);
@@ -86,16 +90,31 @@ std::vector<uint32_t> Impl::Compile()
 		glslang::GlslangToSpv(*program.getIntermediate(eshLang), spvBinary, &logger, &spvOptions);
 		//SPIRV-Cross
 		spirv_cross::CompilerGLSL glsl(spvBinary);
+		spirv_cross::CompilerGLSL::Options options;
+		options.emit_push_constant_as_uniform_buffer = true;
+		glsl.set_common_options(options);
 		const auto resources = glsl.get_shader_resources();
 		for (const auto& spi : resources.subpass_inputs) {
 			auto set = glsl.get_decoration(spi.id, spv::DecorationDescriptorSet);
 			auto binding = glsl.get_decoration(spi.id, spv::DecorationBinding);
 			auto inputIndex = glsl.get_decoration(spi.id, spv::DecorationInputAttachmentIndex);
-			glsl.set_subpass_input_remapped_components(spi.id, 0);
 			std::cout << "Found Subpass Input " << spi.name << " set = " << set << " binding = " << binding << " input_attachment_index " << inputIndex << std::endl;
+			assert(binding < SetSize);
+			glsl.set_decoration(spi.id, spv::DecorationBinding, SubPassInputOffset + binding + SetSize * set);
+			glsl.set_decoration(spi.id, spv::DecorationLocation, SubPassInputOffset + binding + SetSize * set);
+		}
+		for (const auto& pc : resources.push_constant_buffers) {
+			glsl.set_decoration(pc.id, spv::DecorationBinding, PushConstantBinding);
+		}
+		for (const auto& ss : resources.separate_samplers) {
+			if (!glsl.has_decoration(ss.id, spv::DecorationLocation))
+				glsl.set_decoration(ss.id, spv::DecorationBinding, glsl.get_decoration(ss.id, spv::DecorationLocation));
+		}
+		for (const auto& si : resources.sampled_images) {
+			if (!glsl.has_decoration(si.id, spv::DecorationLocation))
+				glsl.set_decoration(si.id, spv::DecorationLocation, glsl.get_decoration(si.id, spv::DecorationBinding));
 		}
 		//glsl.set_entry_point(name, GetExecutionModel(type));
-		//TODO : do some reflection here
 		glslCode = glsl.compile();
 	}
 	//Generate final SPIRV blob

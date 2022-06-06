@@ -5,15 +5,21 @@
 
 #include <GL/WeakHandle.hpp>
 
+#include <algorithm>
+
 OCRA_DECLARE_HANDLE(OCRA::Device);
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
 
-static inline auto CreateDirectIndexedLayout(const std::vector<LayoutBinding>& a_Bindings)
+
+
+namespace OCRA::Descriptor::SetLayout
 {
-	std::vector<LayoutBinding> bindings;
+static inline auto CreateDirectIndexedLayout(const std::vector<Binding>& a_Bindings)
+{
+	std::vector<Binding> bindings;
 	size_t size = 0;
 	for (const auto& binding : a_Bindings) {
-		size = max(size, binding.binding);
+		size = std::max(size, binding.binding);
 	}
 	bindings.resize(size);
 	for (const auto& binding : a_Bindings) {
@@ -21,16 +27,13 @@ static inline auto CreateDirectIndexedLayout(const std::vector<LayoutBinding>& a
 	}
 	return bindings;
 }
-
-namespace OCRA::Descriptor::SetLayout
-{
 struct Impl
 {
-	Impl(const Device::Handle& a_Device, const std::vector<LayoutBinding>& a_Bindings)
+	Impl(const Device::Handle& a_Device, const Info& a_Info)
 		: device(a_Device)
-		, bindings(CreateDirectIndexedLayout(a_Bindings))
+		, bindings(CreateDirectIndexedLayout(a_Info.bindings))
 	{}
 	const Device::WeakHandle device;
-	const std::vector<LayoutBinding> bindings;
+	const std::vector<Binding> bindings;
 };
 }

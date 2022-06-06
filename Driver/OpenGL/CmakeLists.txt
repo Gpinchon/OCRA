@@ -50,6 +50,7 @@ set(OCRA_IMPL_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Queue/Fence.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Queue/Queue.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Queue/Semaphore.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/Layout.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/ColorBlendState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/DepthStencilState.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Pipeline/MultisampleState.hpp
@@ -82,9 +83,12 @@ set(OCRA_IMPL_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Query.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Scissor.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/ViewPort.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Descriptor/Pool.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Descriptor/SetLayout.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Image/Image.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Image/View.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/Graphics.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/Layout.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/ShaderPipelineState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/VertexInputState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/Pipeline.cpp

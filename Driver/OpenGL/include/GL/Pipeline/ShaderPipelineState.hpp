@@ -31,5 +31,6 @@ struct Compile {
 	const Device::WeakHandle device;
 	const Info& info;
 	mutable uint32_t handle{ 0 };
+	mutable uint32_t pushConstantHandle{ 0 };
 };
 }
