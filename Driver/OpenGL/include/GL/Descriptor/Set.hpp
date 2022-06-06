@@ -6,6 +6,7 @@
 #include <GL/Descriptor/SetData.hpp>
 
 #include <vector>
+#include <cassert>
 
 OCRA_DECLARE_HANDLE(OCRA::Device);
 OCRA_DECLARE_HANDLE(OCRA::Descriptor::SetLayout);
@@ -16,13 +17,13 @@ struct Impl
 {
 	Impl(const SetLayout::Handle& a_Layout)
 		: layout(a_Layout)
-		, data(AllocateSetData(a_Layout))
+		, data(AllocateData(a_Layout))
 	{};
-	void Write(const Write& a_Write) {
+	void Write(const WriteOperation& a_Write) {
 		data.at(a_Write.dstBinding)->Write(a_Write);
 	}
-	void Copy(const Copy& a_Copy) {
-		assert(a_Copy.type == layout.bindings.at(a_Write.dstBinding).type);
+	void Copy(const CopyOperation& a_Copy) {
+		//assert(a_Copy.type == layout.bindings.at(a_Copy.dstBinding).type);
 		data.at(a_Copy.dstBinding)->Copy(a_Copy);
 	}
 	const SetLayout::Handle layout;

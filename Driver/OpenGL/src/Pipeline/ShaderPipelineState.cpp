@@ -16,8 +16,23 @@ Compile::Compile(const Device::Handle& a_Device, const Info& a_Info, const Dynam
 		for (const auto& stage : info.stages) {
 			glUseProgramStages(handle, stage->stageBits, stage->handle);
 		}
-		glGenBuffers(1, &pushConstantHandle);
+		{
+			GLenum props[] = { GL_BUFFER_BINDING };
+			GLint   values[1024];
+			GLsizei length = 0;
+			glGetProgramResourceiv(
+				handle,
+				GL_SHADER_STORAGE_BLOCK,
+				0,
+				1,
+				props,
+				1024,
+				&length,
+				values);
+
+		}
 		glBindProgramPipeline(handle);
+		glGenBuffers(1, &pushConstantHandle);
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, pushConstantHandle);
 		glBufferStorage(GL_SHADER_STORAGE_BUFFER, 128, nullptr, GL_DYNAMIC_STORAGE_BIT);
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, PushConstantBinding, pushConstantHandle);

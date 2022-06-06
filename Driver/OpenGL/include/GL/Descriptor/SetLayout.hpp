@@ -19,7 +19,7 @@ static inline auto CreateDirectIndexedLayout(const std::vector<Binding>& a_Bindi
 	std::vector<Binding> bindings;
 	size_t size = 0;
 	for (const auto& binding : a_Bindings) {
-		size = std::max(size, binding.binding);
+		size = std::max(size, size_t(binding.binding));
 	}
 	bindings.resize(size);
 	for (const auto& binding : a_Bindings) {

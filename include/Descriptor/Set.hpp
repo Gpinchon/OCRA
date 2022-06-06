@@ -9,7 +9,9 @@
 
 OCRA_DECLARE_HANDLE(OCRA::Device);
 OCRA_DECLARE_HANDLE(OCRA::Descriptor::Set);
+OCRA_DECLARE_HANDLE(OCRA::Buffer);
 OCRA_DECLARE_HANDLE(OCRA::Buffer::View);
+OCRA_DECLARE_HANDLE(OCRA::Image::Sampler);
 OCRA_DECLARE_HANDLE(OCRA::Image::View);
 
 namespace OCRA::Descriptor::Set
@@ -22,11 +24,11 @@ struct BufferInfo
 };
 struct ImageInfo
 {
-    Sampler::Handle     sampler;
-    Image::View::Handle imageView;
-    Image::Layout       imageLayout{ Image::Layout::Unknown };
+    Image::Sampler::Handle sampler;
+    Image::View::Handle    imageView;
+    Image::Layout          imageLayout{ Image::Layout::Unknown };
 };
-struct Write
+struct WriteOperation
 {
     Set::Handle dstSet;
     uint32_t    dstBinding{ 0 };
@@ -38,7 +40,7 @@ struct Write
     std::optional<ImageInfo>                imageInfo;
     std::optional<Buffer::View::Handle>     texelBufferView;
 };
-struct Copy
+struct CopyOperation
 {
     Set::Handle dstSet;
     uint32_t    dstBinding{ 0 };
@@ -50,8 +52,8 @@ struct Copy
 };
 void Update(
     const Device::Handle&       a_Device,
-    const std::vector<Write>    a_Writes,
-    const std::vector<Copy>     a_Copies);
+    const std::vector<WriteOperation>    a_Writes,
+    const std::vector<CopyOperation>     a_Copies);
 }
 
 #include <Pipeline/Pipeline.hpp>

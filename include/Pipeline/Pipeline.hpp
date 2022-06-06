@@ -3,6 +3,7 @@
 #include <Handle.hpp>
 
 #include <bitset>
+#include <vector>
 
 OCRA_DECLARE_HANDLE(OCRA::Pipeline);
 OCRA_DECLARE_HANDLE(OCRA::Command::Buffer);

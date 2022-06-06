@@ -107,12 +107,11 @@ std::vector<uint32_t> Impl::Compile()
 			glsl.set_decoration(pc.id, spv::DecorationBinding, PushConstantBinding);
 		}
 		for (const auto& ss : resources.separate_samplers) {
-			if (!glsl.has_decoration(ss.id, spv::DecorationLocation))
+			if (!glsl.has_decoration(ss.id, spv::DecorationBinding))
 				glsl.set_decoration(ss.id, spv::DecorationBinding, glsl.get_decoration(ss.id, spv::DecorationLocation));
 		}
 		for (const auto& si : resources.sampled_images) {
-			if (!glsl.has_decoration(si.id, spv::DecorationLocation))
-				glsl.set_decoration(si.id, spv::DecorationLocation, glsl.get_decoration(si.id, spv::DecorationBinding));
+			glsl.set_decoration(si.id, spv::DecorationLocation, glsl.get_decoration(si.id, spv::DecorationBinding));
 		}
 		//glsl.set_entry_point(name, GetExecutionModel(type));
 		glslCode = glsl.compile();

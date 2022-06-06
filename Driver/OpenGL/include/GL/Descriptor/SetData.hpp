@@ -11,69 +11,69 @@ namespace OCRA::Descriptor::Set
 struct Data
 {
 	Data(const Type& a_Type) : type(a_Type) {}
-	virtual Write(const Write& a_Write) = 0;
-	virtual Copy(const Copy& a_Copy) = 0;
+	virtual void Write(const WriteOperation& a_Write) = 0;
+	virtual void Copy(const CopyOperation& a_Copy) = 0;
 	const Type type;
 };
 struct SampledImage : Data {
 	SampledImage(const uint32_t& a_Count) : Data(Type::SampledImage) {}
-	virtual Write(const Write& a_Write) override {}
-	virtual Copy(const Copy& a_Copy) override {}
+	virtual void Write(const WriteOperation& a_Write) override {}
+	virtual void Copy(const CopyOperation& a_Copy) override {}
 };
 struct StorageImage : Data {
 	StorageImage(const uint32_t& a_Count) : Data(Type::StorageImage) {}
-	virtual Write(const Write& a_Write) override {}
-	virtual Copy(const Copy& a_Copy) override {}
+	virtual void Write(const WriteOperation& a_Write) override {}
+	virtual void Copy(const CopyOperation& a_Copy) override {}
 };
 struct UniformTexelBuffer : Data {
 	UniformTexelBuffer(const uint32_t& a_Count) : Data(Type::UniformTexelBuffer) {}
-	virtual Write(const Write& a_Write) override {}
-	virtual Copy(const Copy& a_Copy) override {}
+	virtual void Write(const WriteOperation& a_Write) override {}
+	virtual void Copy(const CopyOperation& a_Copy) override {}
 };
 struct StorageTexelBuffer : Data {
 	StorageTexelBuffer(const uint32_t& a_Count) : Data(Type::StorageTexelBuffer) {}
-	virtual Write(const Write& a_Write) override {}
-	virtual Copy(const Copy& a_Copy) override {}
+	virtual void Write(const WriteOperation& a_Write) override {}
+	virtual void Copy(const CopyOperation& a_Copy) override {}
 };
 struct UniformBuffer : Data {
 	UniformBuffer(const uint32_t& a_Count) : Data(Type::UniformBuffer) {}
-	virtual Write(const Write& a_Write) override {}
-	virtual Copy(const Copy& a_Copy) override {}
+	virtual void Write(const WriteOperation& a_Write) override {}
+	virtual void Copy(const CopyOperation& a_Copy) override {}
 };
 struct StorageBuffer : Data {
 	StorageBuffer(const uint32_t& a_Count) : Data(Type::StorageBuffer) {}
-	virtual Write(const Write& a_Write) override {}
-	virtual Copy(const Copy& a_Copy) override {}
+	virtual void Write(const WriteOperation& a_Write) override {}
+	virtual void Copy(const CopyOperation& a_Copy) override {}
 };
 struct UniformBufferDynamic : Data {
 	UniformBufferDynamic(const uint32_t& a_Count) : Data(Type::UniformBufferDynamic) {}
-	virtual Write(const Write& a_Write) override {}
-	virtual Copy(const Copy& a_Copy) override {}
+	virtual void Write(const WriteOperation& a_Write) override {}
+	virtual void Copy(const CopyOperation& a_Copy) override {}
 };
 struct StorageBufferDynamic : Data {
 	StorageBufferDynamic(const uint32_t& a_Count) : Data(Type::StorageBufferDynamic) {}
-	virtual Write(const Write& a_Write) override {}
-	virtual Copy(const Copy& a_Copy) override {}
+	virtual void Write(const WriteOperation& a_Write) override {}
+	virtual void Copy(const CopyOperation& a_Copy) override {}
 };
 struct InputAttachment : Data {
 	InputAttachment(const uint32_t& a_Count) : Data(Type::InputAttachment) {}
-	virtual Write(const Write& a_Write) override {}
-	virtual Copy(const Copy& a_Copy) override {}
+	virtual void Write(const WriteOperation& a_Write) override {}
+	virtual void Copy(const CopyOperation& a_Copy) override {}
 };
 struct InlineUniformBlock : Data {
 	InlineUniformBlock(const uint32_t& a_Count) : Data(Type::InlineUniformBlock) {}
-	virtual Write(const Write& a_Write) override {}
-	virtual Copy(const Copy& a_Copy) override {}
+	virtual void Write(const WriteOperation& a_Write) override {}
+	virtual void Copy(const CopyOperation& a_Copy) override {}
 };
 struct AccelerationStructure : Data {
 	AccelerationStructure(const uint32_t& a_Count) : Data(Type::AccelerationStructure) {}
-	virtual Write(const Write& a_Write) override {}
-	virtual Copy(const Copy& a_Copy) override {}
+	virtual void Write(const WriteOperation& a_Write) override {}
+	virtual void Copy(const CopyOperation& a_Copy) override {}
 };
 struct MutableValve : Data {
 	MutableValve(const uint32_t& a_Count) : Data(Type::MutableValve) {}
-	virtual Write(const Write& a_Write) override {}
-	virtual Copy(const Copy& a_Copy) override {}
+	virtual void Write(const WriteOperation& a_Write) override {}
+	virtual void Copy(const CopyOperation& a_Copy) override {}
 };
 static inline auto AllocateData(const SetLayout::Handle& a_Layout)
 {
