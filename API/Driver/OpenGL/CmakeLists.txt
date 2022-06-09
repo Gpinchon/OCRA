@@ -1,0 +1,136 @@
+cmake_minimum_required(VERSION 3.19)
+cmake_policy(SET CMP0074 NEW)
+project(OCRA-API-Implementation LANGUAGES CXX)
+
+include(FetchContent)
+
+# Fetch GLEW
+FetchContent_Declare(
+  GLEW
+  GIT_REPOSITORY  https://github.com/Perlmint/glew-cmake.git
+  GIT_TAG         glew-cmake-2.2.0
+)
+option(ONLY_LIBS "Do not build executables" ON)
+option(glew-cmake_BUILD_STATIC "Build the static glew library" ON)
+option(glew-cmake_BUILD_SHARED "Build the shared glew library" OFF)
+FetchContent_MakeAvailable(GLEW)
+add_library(GLEW::glew_s ALIAS libglew_static)
+add_library(GLEW::GLEW ALIAS libglew_static)
+set(GLEW_FOUND 1)
+set(GLEW_INCLUDE_DIR ${glew_SOURCE_DIR}/include)
+set(GLEW_LIBRARIES GLEW::glew GLEW::glew_s)
+set_subdirectory_folder("3rdparty/GLEW" ${glew_SOURCE_DIR})
+# Fetch GLEW
+
+set(OCRA_IMPL_INCLUDE_DIR
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  CACHE INTERNAL ""
+)
+
+set(OCRA_IMPL_HEADER_FILES
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Buffer.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Device.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Memory.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Instance.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/ObjectPool.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/PhysicalDevice.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/RenderPass.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/WeakHandle.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Command/Buffer.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Command/ExecutionState.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Command/Pool.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/Blend.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/Compare.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/IndexType.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/Logic.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/Stencil.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/VertexType.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Descriptor/Set.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Descriptor/SetData.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Descriptor/SetLayout.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Image/Format.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Image/Image.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Image/View.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Queue/Fence.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Queue/Queue.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Queue/Semaphore.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Pipeline/Layout.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Pipeline/ColorBlendState.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Pipeline/DepthStencilState.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Pipeline/MultisampleState.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Pipeline/Pipeline.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Pipeline/RasterizationState.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Pipeline/ShaderPipelineState.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Pipeline/TessellationState.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Pipeline/VertexInputState.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Pipeline/ViewPortState.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Shader/Stage.hpp
+)
+
+set(OCRA_IMPL_SOURCE_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Buffer.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Device.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/FrameBuffer.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Instance.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Memory.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/RenderPass.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/PhysicalDevice.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/QueryPool.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Queue/Fence.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Queue/Queue.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Queue/Semaphore.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Buffer.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Draw.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/MemoryBarrier.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Pool.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Query.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Scissor.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/ViewPort.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Descriptor/Pool.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Descriptor/SetLayout.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Image/Image.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Image/View.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/Graphics.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/Layout.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/ShaderPipelineState.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/VertexInputState.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/Pipeline.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Shader/Stage.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Shader/Module.cpp
+)
+
+if (WIN32)
+  set(OCRA_IMPL_HEADER_FILES ${OCRA_IMPL_HEADER_FILES}
+    ${OCRA_IMPL_INCLUDE_DIR}/GL/Win32/Error.hpp
+    ${OCRA_IMPL_INCLUDE_DIR}/GL/Win32/Instance.hpp
+    ${OCRA_IMPL_INCLUDE_DIR}/GL/Win32/OpenGL.hpp
+    ${OCRA_IMPL_INCLUDE_DIR}/GL/Win32/PhysicalDevice.hpp
+    ${OCRA_IMPL_INCLUDE_DIR}/GL/Win32/Window.hpp
+  )
+  set(OCRA_IMPL_SOURCE_FILES ${OCRA_IMPL_SOURCE_FILES}
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Win32/Error.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Win32/Instance.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Win32/OpenGL.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Win32/PhysicalDevice.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Win32/Window.cpp
+  )
+endif(WIN32)
+
+add_library(OCRA-API-Implementation ${OCRA_IMPL_SOURCE_FILES} ${OCRA_IMPL_HEADER_FILES})
+add_library(OCRA::API::Implementation ALIAS OCRA-API-Implementation)
+target_include_directories(OCRA-API-Implementation PRIVATE
+  ${OCRA_IMPL_INCLUDE_DIR}
+)
+set_target_properties(
+  OCRA-API-Implementation
+  PROPERTIES FOLDER "API"
+)
+
+target_link_libraries(OCRA-API-Implementation PUBLIC OCRA::API::Interface GLEW::GLEW)
+
+if (MSVC_IDE)
+  set(CMAKE_DEBUG_POSTFIX "d")
+  # Run macro
+  GroupSources(src)
+  GroupSources(include)
+endif ()

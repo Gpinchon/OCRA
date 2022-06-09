@@ -1,0 +1,34 @@
+cmake_minimum_required(VERSION 3.19)
+cmake_policy(SET CMP0074 NEW)
+
+project(OCRA LANGUAGES CXX)
+
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_FLAGS_RELEASE "-Ox")
+
+set(OCRA_SWAPCHAIN_HEADER_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/SwapChain.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Surface.hpp
+)
+
+add_library(OCRA-SwapChain-Interface INTERFACE ${OCRA_SWAPCHAIN_HEADER_FILES})
+add_library(OCRA::SwapChain::Interface ALIAS OCRA-SwapChain-Interface)
+set_target_properties(OCRA-SwapChain-Interface PROPERTIES LINKER_LANGUAGE CXX)
+target_include_directories(OCRA-SwapChain-Interface INTERFACE
+  "${CMAKE_CURRENT_SOURCE_DIR}/include")
+set_target_properties(
+  OCRA-SwapChain-Interface
+  PROPERTIES FOLDER "SwapChain"
+)
+
+if (RenderingAPI STREQUAL "OpenGL")
+add_subdirectory(Driver/OpenGL)
+endif (RenderingAPI STREQUAL "OpenGL")
+
+if(MSVC_IDE)
+  set(CMAKE_DEBUG_POSTFIX "d")
+  # Run macro
+  GroupSources(src)
+  GroupSources(include)
+endif()

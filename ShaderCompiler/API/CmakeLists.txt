@@ -1,0 +1,100 @@
+cmake_minimum_required(VERSION 3.19)
+cmake_policy(SET CMP0074 NEW)
+
+project(OCRACompiler LANGUAGES CXX)
+
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_FLAGS_RELEASE "-Ox")
+
+include(FetchContent)
+
+# Fetch SPIRV_TOOLS
+FetchContent_Declare(
+    SPIRV_HEADERS
+    GIT_REPOSITORY  https://github.com/KhronosGroup/SPIRV-Headers.git
+    GIT_TAG         4995a2f2723c401eb0ea3e10c81298906bf1422b
+)
+option(SPIRV_HEADERS_SKIP_EXAMPLES "Skip building examples" ON)
+option(SPIRV_HEADERS_SKIP_INSTALL "Skip install" ON)
+FetchContent_MakeAvailable(SPIRV_HEADERS)
+set_subdirectory_folder("3rdparty/SPIRV-Headers" ${spirv_headers_SOURCE_DIR})
+
+# Fetch GOOGLE_TEST
+FetchContent_Declare(
+    GOOGLE_TEST
+    GIT_REPOSITORY  https://github.com/google/googletest.git
+    GIT_TAG         25dcdc7e8bfac8967f20fb2c0a628f5cf442188d
+    #SOURCE_DIR      ${spirv_tools_SOURCE_DIR}/external/googletest
+)
+FetchContent_MakeAvailable(GOOGLE_TEST)
+set_subdirectory_folder("3rdparty/GoogleTest" ${google_test_SOURCE_DIR})
+# Fetch GOOGLE_TEST
+
+# Fetch GLSLANG
+FetchContent_Declare(
+  GLSLANG
+  GIT_REPOSITORY  https://github.com/KhronosGroup/glslang.git
+)
+#option(SKIP_GLSLANG_INSTALL "Skip Installation" ON)
+FetchContent_MakeAvailable(GLSLANG)
+set_subdirectory_folder("3rdparty/GLSLang" ${glslang_SOURCE_DIR})
+# Fetch GLSLANG
+
+# Fetch SPIRV_CROSS
+FetchContent_Declare(
+  SPIRV_CROSS
+  GIT_REPOSITORY  https://github.com/KhronosGroup/SPIRV-Cross.git
+)
+option(SPIRV_CROSS_SKIP_INSTALL "Skip SPIRV-Cross Installation" ON)
+option(SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS "Instead of throwing exceptions assert" OFF)
+option(SPIRV_CROSS_SHARED "Build the C API as a single shared library." OFF)
+option(SPIRV_CROSS_STATIC "Build the C and C++ API as static libraries." ON)
+option(SPIRV_CROSS_CLI "Build the CLI binary. Requires SPIRV_CROSS_STATIC." OFF)
+option(SPIRV_CROSS_ENABLE_TESTS "Enable SPIRV-Cross tests." OFF)
+option(SPIRV_CROSS_ENABLE_GLSL "Enable GLSL support." ON)
+option(SPIRV_CROSS_ENABLE_HLSL "Enable HLSL target support." ON)
+option(SPIRV_CROSS_ENABLE_MSL "Enable MSL target support." ON)
+option(SPIRV_CROSS_ENABLE_CPP "Enable C++ target support." ON)
+option(SPIRV_CROSS_ENABLE_REFLECT "Enable JSON reflection target support." ON)
+option(SPIRV_CROSS_ENABLE_C_API "Enable C API wrapper support in static library." OFF)
+option(SPIRV_CROSS_ENABLE_UTIL "Enable util module support." OFF)
+FetchContent_MakeAvailable(SPIRV_CROSS)
+set_subdirectory_folder("3rdparty/SPIRV-Cross" ${spirv_cross_SOURCE_DIR})
+# Fetch SPIRV_CROSS
+
+set(OCRA_SHADER_COMPILER_API_HEADER_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/ShaderCompiler/Shader.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/ShaderCompiler/Compiler.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/ShaderCompiler/Handle.hpp
+)
+
+set(OCRA_SHADER_COMPILER_API_SOURCE_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/ShaderCompiler/Shader.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/ShaderCompiler/Compiler.cpp
+)
+
+add_library(OCRA-ShaderCompiler-API STATIC ${OCRA_SHADER_COMPILER_API_HEADER_FILES} ${OCRA_SHADER_COMPILER_API_SOURCE_FILES})
+add_library(OCRA::ShaderCompiler::API ALIAS OCRA-ShaderCompiler-API)
+set_target_properties(OCRA-ShaderCompiler-API PROPERTIES LINKER_LANGUAGE CXX)
+target_include_directories(OCRA-ShaderCompiler-API PUBLIC
+  "${CMAKE_CURRENT_SOURCE_DIR}/include"
+)
+target_link_libraries(OCRA-ShaderCompiler-API PUBLIC
+  glslang
+  SPIRV
+  glslang-default-resource-limits
+  spirv-cross-core
+  spirv-cross-glsl
+  spirv-cross-reflect
+)
+set_target_properties(
+  OCRA-ShaderCompiler-API
+  PROPERTIES FOLDER "ShaderCompiler"
+)
+
+if(MSVC_IDE)
+  # Run macro
+  GroupSources(src)
+  GroupSources(include)
+endif()

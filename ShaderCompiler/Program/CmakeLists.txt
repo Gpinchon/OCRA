@@ -1,0 +1,24 @@
+cmake_minimum_required(VERSION 3.19)
+cmake_policy(SET CMP0074 NEW)
+
+project(OCRACompiler LANGUAGES CXX)
+
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_FLAGS_RELEASE "-Ox")
+set(OCRA_SHADER_COMPILER_SOURCE_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+)
+add_executable(OCRA-ShaderCompiler
+  ${OCRA_SHADER_COMPILER_SOURCE_FILES})
+target_link_libraries(OCRA-ShaderCompiler OCRA::ShaderCompiler::API)
+set_target_properties(
+  OCRA-ShaderCompiler
+  PROPERTIES FOLDER "ShaderCompiler"
+)
+
+if(MSVC_IDE)
+  # Run macro
+  GroupSources(src)
+  GroupSources(include)
+endif()

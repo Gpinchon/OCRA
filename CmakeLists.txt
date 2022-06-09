@@ -5,108 +5,13 @@ project(OCRA LANGUAGES CXX)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(CMAKE_CXX_STANDARD 17)
-set (CMAKE_CXX_FLAGS_RELEASE "-Ox")
+set(CMAKE_CXX_FLAGS_RELEASE "-Ox")
+set(CMAKE_CXX_FLAGS "-std:c++latest")
 
 include(cmake-tools/GroupSources.cmake)
+include(cmake-tools/add_subdirectory_with_folder.cmake)
 
-#[[Rendering API]]
-set(RenderingAPI "OpenGL" CACHE STRING
-  "Rendering API used at compile-time")
-set(RenderingAPIValues
-  "OpenGL;Vulkan;DirectX")
-set_property(CACHE RenderingAPI PROPERTY STRINGS ${RenderingAPIValues})
-add_compile_definitions(RENDERINGAPI=${RenderingAPI})
-
-set(OCRA_HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Allocator.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Buffer.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Device.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/FrameBuffer.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Handle.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Instance.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Memory.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/PhysicalDevice.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/QueryPool.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/RenderPass.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/SwapChain.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Surface.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Queue/Queue.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Queue/Fence.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Queue/Semaphore.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Blend.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Compare.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Extent.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Extent2D.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Extent3D.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/IndexType.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Logic.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Offset3D.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Rect2D.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Rect3D.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/ScissorTest.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/SharingMode.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Stencil.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Timer.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Vec.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Vec2.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Vec3.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Vec4.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/VertexType.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/BufferBinding.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/Buffer.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/Draw.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/MemoryBarrier.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/Pool.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/Query.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/Scissor.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/ViewPort.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Descriptor/Descriptor.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Descriptor/Pool.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Descriptor/Set.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Descriptor/SetLayout.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Descriptor/Type.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Image/Descriptor.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Image/Filter.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Image/Format.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Image/Image.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Image/Sampler.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Image/Usage.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Image/View.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/ColorBlendState.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/DepthStencilState.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/Graphics.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/InputAssemblyState.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/MultisampleState.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/Pipeline.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/RasterizationState.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/ShaderPipelineState.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/TessellationState.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/VertexInputState.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Pipeline/ViewPortState.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Primitive/Topology.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Shader/Module.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Shader/Stage.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/State/Clear.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/State/Draw.hpp
-)
-
-add_library(OCRA-Interface INTERFACE ${OCRA_HEADER_FILES})
-set_target_properties(OCRA-Interface PROPERTIES LINKER_LANGUAGE CXX)
-target_include_directories(OCRA-Interface INTERFACE
-  "${CMAKE_CURRENT_SOURCE_DIR}/include"
-)
-add_library(OCRA::Interface ALIAS OCRA-Interface)
-
-if (RenderingAPI STREQUAL "OpenGL")
-add_subdirectory(Driver/OpenGL)
-endif (RenderingAPI STREQUAL "OpenGL")
-
+add_subdirectory(API)
+add_subdirectory(SwapChain)
 add_subdirectory(ShaderCompiler)
 add_subdirectory(UnitTests)
-
-if(MSVC_IDE)
-  set(CMAKE_DEBUG_POSTFIX "d")
-  # Run macro
-  GroupSources(src)
-  GroupSources(include)
-endif()

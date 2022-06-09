@@ -1,0 +1,19 @@
+cmake_minimum_required(VERSION 3.19)
+cmake_policy(SET CMP0074 NEW)
+
+include(../../cmake-tools/GroupSources.cmake)
+
+set(OCRA_TEST_GRAPHICS_PIPELINE_SOURCE_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/GraphicsPipeline.cpp)
+add_executable(OCRA-UnitTests-GraphicsPipeline
+  ${OCRA_TEST_GRAPHICS_PIPELINE_SOURCE_FILES})
+target_include_directories(OCRA-UnitTests-GraphicsPipeline PRIVATE
+  "${CMAKE_CURRENT_SOURCE_DIR}/include")
+
+target_link_libraries(OCRA-UnitTests-GraphicsPipeline OCRA-UnitTests-Common OCRA::API::Interface OCRA::API::Implementation OCRA::SwapChain::Implementation OCRA::ShaderCompiler::API)
+
+if(MSVC_IDE)
+  # Run macro
+  GroupSources(src)
+  GroupSources(include)
+endif()
