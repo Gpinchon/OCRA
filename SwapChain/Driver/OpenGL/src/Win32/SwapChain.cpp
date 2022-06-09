@@ -41,7 +41,7 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
     : SwapChain::Impl(a_Device, a_Info)
     , images(CreateImages(a_Device, a_Info))
 {
-    if (info.oldSwapchain != nullptr) {
+    if (info.oldSwapchain != nullptr && !info.oldSwapchain->retired) {
         auto win32SwapChain = std::static_pointer_cast<SwapChain::Win32::Impl>(info.oldSwapchain);
         d3dContainer.swap(win32SwapChain->d3dContainer);
         wglDXDeviceMapping.swap(win32SwapChain->wglDXDeviceMapping);
@@ -58,13 +58,14 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
 
 Impl::~Impl()
 {
+    Retire();
 }
 
 void Impl::Retire() {
+    SwapChain::Impl::Retire();
     wglDXTextureMapping = nullptr;
     wglDXDeviceMapping = nullptr;
     d3dContainer = nullptr;
-    SwapChain::Impl::Retire();
 }
 
 void Impl::Present(const Queue::Handle& a_Queue)

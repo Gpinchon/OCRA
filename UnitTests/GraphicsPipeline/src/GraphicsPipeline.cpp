@@ -86,7 +86,7 @@ struct GraphicsPipelineTestApp : TestApp
         , device(CreateDevice(physicalDevice))
     {
         window.OnResize = [this](const Window&, const uint32_t a_Width, const uint32_t a_Height) {
-            OnResize(a_Width, a_Height);
+            if (!close) OnResize(a_Width, a_Height);
         };
         window.OnClose = [this](const Window&) {
             OnClose();

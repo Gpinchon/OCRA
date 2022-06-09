@@ -97,7 +97,9 @@ struct SwapChainTestApp : TestApp
         , device(CreateDevice(physicalDevice))
     {
         window.OnResize = [this](const Window&, const uint32_t a_Width, const uint32_t a_Height) {
-            OnResize(a_Width, a_Height);
+            //IMPORTANT, when destroyed, swapchain switches to windowed mode
+            //If a resize is triggered by this switch it will result in a crash !
+            if (!close) OnResize(a_Width, a_Height);
         };
         window.OnClose = [this](const Window&) {
             OnClose();

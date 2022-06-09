@@ -38,6 +38,7 @@ struct D3DContainerInterface
     {
     }
     inline ~D3DContainerInterface() {
+        swapChain->SetFullscreenState(false, nullptr);
         colorBuffer->Release();
         swapChain->Release();
         device->Release();
