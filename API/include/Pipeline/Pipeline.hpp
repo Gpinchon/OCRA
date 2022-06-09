@@ -6,6 +6,7 @@
 #include <vector>
 
 OCRA_DECLARE_HANDLE(OCRA::Pipeline);
+OCRA_DECLARE_HANDLE(OCRA::Pipeline::Layout);
 OCRA_DECLARE_HANDLE(OCRA::Command::Buffer);
 
 namespace OCRA::Pipeline
@@ -29,7 +30,7 @@ void BindPipeline(
 	const Pipeline::Handle& a_Pipeline);
 void PushConstants(
 	const Command::Buffer::Handle& a_CommandBuffer,
+	const Pipeline::Layout::Handle& a_PipelineLayout,
 	const uint8_t a_Offset,
-	const std::vector<char> a_Data
-);
+	const std::vector<char> a_Data);
 }

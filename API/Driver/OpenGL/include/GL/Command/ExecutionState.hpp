@@ -20,6 +20,7 @@
 
 OCRA_DECLARE_HANDLE(OCRA::Pipeline);
 OCRA_DECLARE_HANDLE(OCRA::Buffer);
+OCRA_DECLARE_HANDLE(OCRA::Descriptor::Set);
 
 namespace OCRA::Command::Buffer
 {
@@ -69,14 +70,21 @@ struct PushConstants
 	uint8_t				offset{ 0 };
 	std::vector<GLbyte>	data{};
 };
+struct DescriptorSets {
+	Pipeline::Layout::Handle pipelineLayout;
+	std::vector<Descriptor::Set::Handle> descriptorSets;
+	std::vector<uint32_t> dynamicOffset;
+};
 struct ExecutionState {
 	ExecutionState() {
+		descriptorSets.fill({});
 		pipelineState.fill(nullptr);
 		lastPipelineState.fill(nullptr);
 	}
 	bool				once{ false };
 	RenderPass			renderPass{};
 	uint32_t			subpassIndex{ uint32_t(-1) };
+	std::array<DescriptorSets, size_t(OCRA::Pipeline::BindingPoint::MaxValue)> descriptorSets{};
 	std::array<OCRA::Pipeline::Handle, size_t(OCRA::Pipeline::BindingPoint::MaxValue)> pipelineState{};
 	std::array<OCRA::Pipeline::Handle, size_t(OCRA::Pipeline::BindingPoint::MaxValue)> lastPipelineState{};
 	DynamicStates		dynamicStates{};

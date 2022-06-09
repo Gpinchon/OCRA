@@ -87,6 +87,7 @@ set(OCRA_IMPL_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Scissor.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/ViewPort.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Descriptor/Pool.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Descriptor/Set.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Descriptor/SetLayout.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Image/Image.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Image/View.cpp

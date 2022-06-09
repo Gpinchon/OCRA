@@ -1,0 +1,46 @@
+#include <Descriptor/Set.hpp>
+
+#include <GL/Descriptor/Set.hpp>
+#include <GL/Command/Buffer.hpp>
+#include <GL/Command/ExecutionState.hpp>
+#include <GL/Pipeline/Layout.hpp>
+
+#include <GL/glew.h>
+
+namespace OCRA::Descriptor::Set {
+void Update(const Device::Handle& a_Device, const std::vector<WriteOperation> a_Writes, const std::vector<CopyOperation> a_Copies)
+{
+    for (const auto& writeOperation : a_Writes) {
+        writeOperation.dstSet->Write(writeOperation);
+    }
+    for (const auto& copyOperation : a_Copies) {
+        copyOperation.dstSet->Copy(copyOperation);
+    }
+}
+}
+constexpr auto PushConstantBinding = 256;
+namespace OCRA::Command
+{
+void BindDescriptorSets(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const Pipeline::BindingPoint& a_BindingPoint,
+    const Pipeline::Layout::Handle& a_PipelineLayout,
+    const uint32_t& a_firstSet,
+    const std::vector<Descriptor::Set::Handle>  a_DescriptorSets,
+    const std::vector<uint32_t>                 a_DynamicOffsets)
+{
+    Command::Buffer::DescriptorSets descriptorSets;
+    descriptorSets.pipelineLayout = a_PipelineLayout;
+    descriptorSets.descriptorSets = { a_DescriptorSets.begin() + a_firstSet, a_DescriptorSets.end() };
+    descriptorSets.dynamicOffset = a_DynamicOffsets;
+    a_CommandBuffer->PushCommand([bindingPoint = size_t(a_BindingPoint), descriptorSets](Buffer::ExecutionState& a_ExecutionState) {
+        a_ExecutionState.descriptorSets.at(bindingPoint) = descriptorSets;
+        for (auto& set : descriptorSets.descriptorSets) {
+            set->Apply();
+        }
+        if (descriptorSets.pipelineLayout->pushConstantSize > 0)
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, PushConstantBinding, descriptorSets.pipelineLayout->pushConstantHandle);
+    });
+}
+}
+

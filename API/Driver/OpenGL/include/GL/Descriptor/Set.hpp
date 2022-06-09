@@ -20,7 +20,7 @@ struct Impl
 	{
 		data.reserve(a_Layout->bindings.size());
 		for (const auto& binding : a_Layout->bindings) {
-			data.push_back(Data(binding.type));
+			data.push_back(Data(binding.type, binding.binding));
 		}
 	};
 	void Write(const WriteOperation& a_Write) {
@@ -31,6 +31,10 @@ struct Impl
 		auto& dstData = data.at(a_Copy.dstBinding);
 		const auto& srcData = a_Copy.srcSet->data.at(a_Copy.dstBinding);
 		dstData = srcData;
+	}
+	void Apply() {
+		for (auto& setData : data)
+			setData.Apply();
 	}
 	const SetLayout::Handle layout;
 	std::vector<Data> data;

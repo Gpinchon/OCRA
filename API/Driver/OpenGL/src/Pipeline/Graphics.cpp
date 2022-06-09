@@ -28,7 +28,7 @@ struct Impl : Pipeline::Impl {
 	: Pipeline::Impl(a_Device, BindingPoint::Graphics)
 	, info(a_Info)
 	{
-		/*Apply = [
+		Apply = [
 			this,
 			colorBlendState = ColorBlendState::Compile(a_Device, info.colorBlendState, info.dynamicState),
 			depthStencilState = DepthStencilState::Compile(a_Device, info.depthStencilState, info.dynamicState),
@@ -52,7 +52,7 @@ struct Impl : Pipeline::Impl {
 			vertexInputState(a_ExecutionState);
 			a_ExecutionState.subpassIndex = info.subPass;
 			a_ExecutionState.renderPass.renderPass->BeginSubPass(a_ExecutionState);
-		};*/
+		};
 	}
     const Info info;
 };

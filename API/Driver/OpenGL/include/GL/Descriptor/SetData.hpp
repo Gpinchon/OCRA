@@ -12,6 +12,7 @@ namespace OCRA::Descriptor::Set
 struct Storage {
     virtual void operator=(const Storage& a_Other) = 0;
     virtual void operator=(const WriteOperation& a_Write) = 0;
+    virtual void Apply(uint32_t bindingIndex) = 0;
 };
 struct ImageStorage : Storage {
 	virtual void operator=(const Storage& a_Other) override {
@@ -21,6 +22,9 @@ struct ImageStorage : Storage {
 		imageView = std::get<ImageInfo>(a_Write.data).imageView;
 		imageSampler = std::get<ImageInfo>(a_Write.data).sampler;
 	}
+    virtual void Apply(uint32_t bindingIndex) override {
+
+    }
 	OCRA::Image::View::Handle     imageView{ nullptr };
 	OCRA::Image::Sampler::Handle  imageSampler{ nullptr };
 };
@@ -36,6 +40,7 @@ struct BufferStorage : Storage {
 		offset = std::get<BufferInfo>(a_Write.data).offset;
 		range = std::get<BufferInfo>(a_Write.data).range;
 	}
+    virtual void Apply(uint32_t bindingIndex) override {}
 	OCRA::Buffer::Handle buffer;
 	size_t				 offset{ 0 };
 	size_t				 range{ 0 };
@@ -53,41 +58,48 @@ struct UniformBufferDynamic : Storage {
         *this = static_cast<const UniformBufferDynamic&>(a_Other);
     }
     virtual void operator=(const WriteOperation& a_Write) override {}
+    virtual void Apply(uint32_t bindingIndex) override {}
 };
 struct StorageBufferDynamic : Storage {
     virtual void operator=(const Storage& a_Other) override {
         *this = static_cast<const StorageBufferDynamic&>(a_Other);
     }
     virtual void operator=(const WriteOperation& a_Write) override {}
+    virtual void Apply(uint32_t bindingIndex) override {}
 };
 struct InputAttachment : Storage {
     virtual void operator=(const Storage& a_Other) override {
         *this = static_cast<const InputAttachment&>(a_Other);
     }
     virtual void operator=(const WriteOperation& a_Write) override {}
+    virtual void Apply(uint32_t bindingIndex) override {}
 };
 struct InlineUniformBlock : Storage {
     virtual void operator=(const Storage& a_Other) override {
         *this = static_cast<const InlineUniformBlock&>(a_Other);
     }
     virtual void operator=(const WriteOperation& a_Write) override {}
+    virtual void Apply(uint32_t bindingIndex) override {}
 };
 struct AccelerationStructure : Storage {
     virtual void operator=(const Storage& a_Other) override {
         *this = static_cast<const AccelerationStructure&>(a_Other);
     }
     virtual void operator=(const WriteOperation& a_Write) override {}
+    virtual void Apply(uint32_t bindingIndex) override {}
 };
 struct MutableValve : Storage {
     virtual void operator=(const Storage& a_Other) override {
         *this = static_cast<const MutableValve&>(a_Other);
     }
     virtual void operator=(const WriteOperation& a_Write) override {}
+    virtual void Apply(uint32_t bindingIndex) override {}
 };
 struct Data
 {
-    Data(const Type& a_Type)
+    Data(const Type& a_Type, uint32_t a_BindingIndex)
         : type(a_Type)
+        , bindingIndex(a_BindingIndex)
     {
         switch (type)
         {
@@ -132,15 +144,19 @@ struct Data
 	~Data() {
 		delete storage;
 	}
-	Data& operator=(const Data& a_Other) {
+	void operator=(const Data& a_Other) {
 		assert(a_Other.type == type);
 		*storage = *a_Other.storage;
 	}
-	Data& operator=(const WriteOperation& a_Write) {
+    void operator=(const WriteOperation& a_Write) {
 		assert(a_Write.type == type);
 		*storage = a_Write;
 	}
+    void Apply() {
+        storage->Apply(bindingIndex);
+    }
     const Type type;
-    Storage* storage;
+    const uint32_t bindingIndex;
+    Storage* storage{ nullptr };
 };
 }
