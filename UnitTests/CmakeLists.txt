@@ -1,21 +1,13 @@
 cmake_minimum_required(VERSION 3.19)
 cmake_policy(SET CMP0074 NEW)
 
-add_subdirectory(Common)
-add_subdirectory(CommandBuffer)
-add_subdirectory(GraphicsPipeline)
-add_subdirectory(PhysicalDevice)
-add_subdirectory(Queue)
-add_subdirectory(ShaderCompiler)
-add_subdirectory(SwapChain)
-
-set_subdirectory_folder("UnitTests" Common)
-set_subdirectory_folder("UnitTests" CommandBuffer)
-set_subdirectory_folder("UnitTests" GraphicsPipeline)
-set_subdirectory_folder("UnitTests" PhysicalDevice)
-set_subdirectory_folder("UnitTests" Queue)
-set_subdirectory_folder("UnitTests" ShaderCompiler)
-set_subdirectory_folder("UnitTests" SwapChain)
+add_subdirectory_with_folder("UnitTests" Common)
+add_subdirectory_with_folder("UnitTests" CommandBuffer)
+add_subdirectory_with_folder("UnitTests" GraphicsPipeline)
+add_subdirectory_with_folder("UnitTests" PhysicalDevice)
+add_subdirectory_with_folder("UnitTests" Queue)
+add_subdirectory_with_folder("UnitTests" ShaderCompiler)
+add_subdirectory_with_folder("UnitTests" SwapChain)
 
 
 if(MSVC_IDE)

@@ -6,7 +6,6 @@ project(OCRA LANGUAGES CXX)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS_RELEASE "-Ox")
-set(CMAKE_CXX_FLAGS "-std:c++latest")
 
 include(cmake-tools/GroupSources.cmake)
 include(cmake-tools/add_subdirectory_with_folder.cmake)

@@ -3,11 +3,6 @@ cmake_policy(SET CMP0074 NEW)
 
 project(OCRA LANGUAGES CXX)
 
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS_RELEASE "-Ox")
-set(CMAKE_CXX_FLAGS "-std:c++latest")
-
 #[[Rendering API]]
 set(RenderingAPI "OpenGL" CACHE STRING
   "Rendering API used at compile-time")
