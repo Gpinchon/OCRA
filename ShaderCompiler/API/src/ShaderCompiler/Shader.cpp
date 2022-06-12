@@ -61,7 +61,7 @@ struct Impl
 
 constexpr auto SubPassInputOffset = 16;
 constexpr auto SetSize = 16;
-constexpr auto PushConstantBinding = 256;
+constexpr auto PushConstantBinding = 64;
 
 std::vector<uint32_t> Impl::Compile()
 {

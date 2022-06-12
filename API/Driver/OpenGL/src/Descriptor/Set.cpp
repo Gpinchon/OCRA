@@ -3,6 +3,7 @@
 #include <GL/Descriptor/Set.hpp>
 #include <GL/Command/Buffer.hpp>
 #include <GL/Command/ExecutionState.hpp>
+#include <GL/Pipeline/Pipeline.hpp>
 #include <GL/Pipeline/Layout.hpp>
 
 #include <GL/glew.h>
@@ -18,7 +19,7 @@ void Update(const Device::Handle& a_Device, const std::vector<WriteOperation> a_
     }
 }
 }
-constexpr auto PushConstantBinding = 256;
+
 namespace OCRA::Command
 {
 void BindDescriptorSets(
@@ -34,12 +35,13 @@ void BindDescriptorSets(
     descriptorSets.descriptorSets = { a_DescriptorSets.begin() + a_firstSet, a_DescriptorSets.end() };
     descriptorSets.dynamicOffset = a_DynamicOffsets;
     a_CommandBuffer->PushCommand([bindingPoint = size_t(a_BindingPoint), descriptorSets](Buffer::ExecutionState& a_ExecutionState) {
+        assert(descriptorSets.pipelineLayout == a_ExecutionState.pipelineState.at(bindingPoint)->layout);
         a_ExecutionState.descriptorSets.at(bindingPoint) = descriptorSets;
         for (auto& set : descriptorSets.descriptorSets) {
             set->Apply();
         }
-        if (descriptorSets.pipelineLayout->pushConstantSize > 0)
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, PushConstantBinding, descriptorSets.pipelineLayout->pushConstantHandle);
+        //TODO : use descriptorSets.pipelineLayout->info.pushConstants
+        a_ExecutionState.pushConstants.Bind();
     });
 }
 }

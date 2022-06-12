@@ -42,4 +42,9 @@ namespace OCRA::Command
 void ExecuteCommandBuffer(
 	const Buffer::Handle& a_CommandBuffer,
 	const Buffer::Handle& a_SecondaryCommandBuffer);
+void PushConstants(
+	const Command::Buffer::Handle& a_CommandBuffer,
+	const Pipeline::Layout::Handle& a_PipelineLayout,
+	const uint8_t a_Offset,
+	const std::vector<char>& a_Data);
 }

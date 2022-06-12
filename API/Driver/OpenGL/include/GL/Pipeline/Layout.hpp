@@ -11,11 +11,8 @@ namespace OCRA::Pipeline::Layout
 struct Impl
 {
     Impl(const Device::Handle& a_Device, const Info& a_Info);
-    ~Impl();
-    void Apply();
+    bool IsCompatibleWith(const Handle& a_Layout);
     const Device::WeakHandle device;
     const Info    info;
-    const uint8_t pushConstantSize;
-    const uint32_t pushConstantHandle;
 };
 }

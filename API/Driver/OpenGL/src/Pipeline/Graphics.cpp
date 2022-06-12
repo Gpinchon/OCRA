@@ -25,7 +25,7 @@
 namespace OCRA::Pipeline::Graphics {
 struct Impl : Pipeline::Impl {
 	Impl(const Device::Handle& a_Device, const Info& a_Info)
-	: Pipeline::Impl(a_Device, BindingPoint::Graphics)
+	: Pipeline::Impl(BindingPoint::Graphics, a_Info.layout)
 	, info(a_Info)
 	{
 		Apply = [

@@ -28,9 +28,4 @@ void BindPipeline(
 	const Command::Buffer::Handle& a_CommandBuffer,
 	const Pipeline::BindingPoint& a_BindingPoint,
 	const Pipeline::Handle& a_Pipeline);
-void PushConstants(
-	const Command::Buffer::Handle& a_CommandBuffer,
-	const Pipeline::Layout::Handle& a_PipelineLayout,
-	const uint8_t a_Offset,
-	const std::vector<char> a_Data);
 }

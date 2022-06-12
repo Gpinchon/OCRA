@@ -41,7 +41,7 @@ std::vector<Buffer::Handle> AllocateBuffer(const Device::Handle& a_Device, const
     std::vector<Buffer::Handle> commandBuffers;
     commandBuffers.reserve(a_Info.count);
     for (auto i = 0u; i < a_Info.count; ++i) {
-        auto buffer = std::allocate_shared<Buffer::Impl>(a_Info.pool->bufferAllocator, Buffer::Level(a_Info.level));
+        auto buffer = std::allocate_shared<Buffer::Impl>(a_Info.pool->bufferAllocator, a_Device, Buffer::Level(a_Info.level));
         commandBuffers.push_back(buffer);
     }
     return commandBuffers;

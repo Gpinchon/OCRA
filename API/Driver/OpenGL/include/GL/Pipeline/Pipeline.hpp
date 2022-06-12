@@ -2,23 +2,19 @@
 
 #include <Pipeline/Pipeline.hpp>
 
-#include <GL/WeakHandle.hpp>
-
 #include <functional>
-
-OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
 
 namespace OCRA::Command::Buffer {
 struct ExecutionState;
 }
 namespace OCRA::Pipeline {
 struct Impl {
-	Impl(const Device::Handle& a_Device, const BindingPoint& a_BindingPoint)
-		: device(a_Device)
+	Impl(const BindingPoint& a_BindingPoint, const Layout::Handle& a_Layout)
+		: layout(a_Layout)
 		, bindingPoint(a_BindingPoint)
 	{};
 	std::function<void(Command::Buffer::ExecutionState&)> Apply;
-	const Device::WeakHandle device;
+	const Layout::Handle     layout;
 	const BindingPoint		 bindingPoint;
 };
 }

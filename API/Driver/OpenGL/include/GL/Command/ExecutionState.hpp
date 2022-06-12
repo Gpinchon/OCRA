@@ -13,6 +13,7 @@
 #include <RenderPass.hpp>
 
 #include <GL/Common/Stencil.hpp>
+#include <GL/PushConstants.hpp>
 #include <GL/glew.h>
 
 #include <vector>
@@ -65,18 +66,18 @@ struct RenderPass
 	std::vector<VertexInputBinding>	vertexInputBindings;
 	IndexBufferBinding				indexBufferBinding;
 };
-struct PushConstants
-{
-	uint8_t				offset{ 0 };
-	std::vector<GLbyte>	data{};
-};
 struct DescriptorSets {
 	Pipeline::Layout::Handle pipelineLayout;
 	std::vector<Descriptor::Set::Handle> descriptorSets;
 	std::vector<uint32_t> dynamicOffset;
 };
 struct ExecutionState {
-	ExecutionState() {
+	ExecutionState(const Device::Handle& a_Device)
+		: pushConstants(a_Device)
+	{
+		Reset();
+	}
+	void Reset() {
 		descriptorSets.fill({});
 		pipelineState.fill(nullptr);
 		lastPipelineState.fill(nullptr);
@@ -88,7 +89,7 @@ struct ExecutionState {
 	std::array<OCRA::Pipeline::Handle, size_t(OCRA::Pipeline::BindingPoint::MaxValue)> pipelineState{};
 	std::array<OCRA::Pipeline::Handle, size_t(OCRA::Pipeline::BindingPoint::MaxValue)> lastPipelineState{};
 	DynamicStates		dynamicStates{};
+	OCRA::PushConstants	pushConstants;
 	GLenum				primitiveTopology{ GL_NONE };
-	PushConstants		pushConstants{};
 };
 }
