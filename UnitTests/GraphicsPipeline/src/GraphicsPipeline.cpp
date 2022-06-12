@@ -14,6 +14,8 @@
 #include <Command/Draw.hpp>
 #include <Command/Scissor.hpp>
 #include <Command/ViewPort.hpp>
+#include <Pipeline/Layout.hpp>
+#include <Descriptor/Set.hpp>
 #include <Queue/Fence.hpp>
 #include <Common/Vec3.hpp>
 
@@ -25,6 +27,60 @@
 using namespace OCRA;
 
 #include <Pipeline/Graphics.hpp>
+
+Vec3 HSVtoRGB(float fH, float fS, float fV) {
+    float fC = fV * fS; // Chroma
+    float fHPrime = fmod(fH / 60.0, 6);
+    float fX = fC * (1 - fabs(fmod(fHPrime, 2) - 1));
+    float fM = fV - fC;
+    float fR, fG, fB;
+
+    if (0 <= fHPrime && fHPrime < 1) {
+        fR = fC;
+        fG = fX;
+        fB = 0;
+    }
+    else if (1 <= fHPrime && fHPrime < 2) {
+        fR = fX;
+        fG = fC;
+        fB = 0;
+    }
+    else if (2 <= fHPrime && fHPrime < 3) {
+        fR = 0;
+        fG = fC;
+        fB = fX;
+    }
+    else if (3 <= fHPrime && fHPrime < 4) {
+        fR = 0;
+        fG = fX;
+        fB = fC;
+    }
+    else if (4 <= fHPrime && fHPrime < 5) {
+        fR = fX;
+        fG = 0;
+        fB = fC;
+    }
+    else if (5 <= fHPrime && fHPrime < 6) {
+        fR = fC;
+        fG = 0;
+        fB = fX;
+    }
+    else {
+        fR = 0;
+        fG = 0;
+        fB = 0;
+    }
+
+    fR += fM;
+    fG += fM;
+    fB += fM;
+    return { fR, fG, fB };
+}
+
+struct PushConstants {
+    Vec3 color;
+    int  padding;
+};
 
 struct Vertex {
     Vec2 pos;
@@ -97,7 +153,11 @@ struct GraphicsPipelineTestApp : TestApp
         commandPool = CreateCommandPool(device, queueFamily);
         renderPass = CreateRenderPass();
         imageAcquisitionFence = Queue::Fence::Create(device);
+        CreateFrameBuffer();
+        CreateGraphicsPipeline();
         mainCommandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Primary);
+        drawCommandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Secondary);
+        RecordDrawCommandBuffer();
         vertexBuffer = CreateVertexBuffer();
         vertexBufferMemory = AllocateVertexBuffer();
         Buffer::BindMemory(device, vertexBuffer, vertexBufferMemory, 0);
@@ -162,10 +222,14 @@ struct GraphicsPipelineTestApp : TestApp
                 "#version 450                                 \n"
                 "layout(location = 0) in vec2 inPosition;     \n"
                 "layout(location = 1) in vec3 inColor;        \n"
+                "layout(push_constant) uniform PushConstants {\n"
+                "   vec3 color;                               \n"
+                "   int  padding;                             \n"
+                "} constants;                                 \n"
                 "layout(location = 0) out vec3 fragColor;     \n"
                 "void main() {                                \n"
                 "   gl_Position = vec4(inPosition, 0.0, 1.0); \n"
-                "   fragColor = inColor;                      \n"
+                "   fragColor = constants.color;              \n"
                 "}                                            \n"
             };
             const auto vertexShader = ShaderCompiler::Shader::Create(compiler, shaderInfo);
@@ -202,9 +266,8 @@ struct GraphicsPipelineTestApp : TestApp
         }
         
     }
-    Pipeline::Handle CreateGraphicsPipeline()
+    void CreateGraphicsPipeline()
     {
-        Pipeline::Graphics::Info graphicsPipelineInfo{};
         ViewPort viewport;
         viewport.rect.offset = { 0, 0 };
         viewport.rect.extent = extent;
@@ -212,6 +275,16 @@ struct GraphicsPipelineTestApp : TestApp
         Rect2D  scissor{};
         scissor.offset = { 0, 0 };
         scissor.extent = extent;
+        Pipeline::Layout::Handle layout;
+        {
+            Pipeline::Layout::Info layoutInfo;
+            Pipeline::Layout::PushConstantRange pushConstantRange;
+            pushConstantRange.size = sizeof(PushConstants);
+            pushConstantRange.stage = Shader::Stage::StageFlagBits::Vertex;
+            layoutInfo.pushConstants.push_back(pushConstantRange);
+            layout = Pipeline::Layout::Create(device, layoutInfo);
+        }
+        graphicsPipelineInfo.layout = layout;
         graphicsPipelineInfo.renderPass = renderPass;
         graphicsPipelineInfo.inputAssemblyState.topology = Primitive::Topology::TriangleList;
         graphicsPipelineInfo.inputAssemblyState.primitiveRestartEnable = false;
@@ -223,7 +296,7 @@ struct GraphicsPipelineTestApp : TestApp
 		graphicsPipelineInfo.renderPass = renderPass;
 		graphicsPipelineInfo.subPass = 0;
         //Everything else is left by default for now
-        return Pipeline::Graphics::Create(device, graphicsPipelineInfo);
+        graphicsPipeline = Pipeline::Graphics::Create(device, graphicsPipelineInfo);
     }
     void CreateFrameBuffer()
     {
@@ -255,6 +328,43 @@ struct GraphicsPipelineTestApp : TestApp
             frameBuffer = FrameBuffer::Create(device, frameBufferInfo);
         }
     }
+    void RecordDrawCommandBuffer()
+    {
+        Command::Buffer::BeginInfo bufferBeginInfo{};
+        bufferBeginInfo.flags = Command::Buffer::UsageFlagBits::None;
+        Command::Buffer::Reset(drawCommandBuffer);
+        Command::RenderPassBeginInfo renderPassBeginInfo{};
+        renderPassBeginInfo.renderPass = renderPass;
+        renderPassBeginInfo.framebuffer = frameBuffer;
+        renderPassBeginInfo.renderArea.offset = { 0, 0 };
+        renderPassBeginInfo.renderArea.extent = extent;
+        renderPassBeginInfo.colorClearValues.push_back(ColorValue(0.8118f, 0.7294f, 0.5137f, 1.f));
+        Command::Buffer::Begin(drawCommandBuffer, bufferBeginInfo);
+        Command::BeginRenderPass(drawCommandBuffer, renderPassBeginInfo, Command::SubPassContents::Inline);
+        {
+            Command::BindPipeline(drawCommandBuffer, Pipeline::BindingPoint::Graphics, graphicsPipeline);
+            Command::BindDescriptorSets(drawCommandBuffer, Pipeline::BindingPoint::Graphics, graphicsPipelineInfo.layout, 0, {}, {});
+            Command::BindVertexBuffers(drawCommandBuffer, 0, { vertexBuffer }, { 0 });
+            Command::Draw(drawCommandBuffer, vertices.size(), 1, 0, 0);
+        }
+        Command::EndRenderPass(drawCommandBuffer);
+        Command::Buffer::End(drawCommandBuffer);
+    }
+    void UpdatePushConstants()
+    {
+        static float hue = 0;
+        static auto lastTime = std::chrono::high_resolution_clock::now();
+        const auto now = std::chrono::high_resolution_clock::now();
+        const auto delta = std::chrono::duration<double, std::milli>(now - lastTime).count();
+        lastTime = now;
+        hue += 0.05 * delta;
+        hue = hue > 360 ? 0 : hue;
+        PushConstants pushConstants;
+        pushConstants.color = HSVtoRGB(hue, 0.5f, 1.f);
+        std::vector<char> data(sizeof(pushConstants));
+        std::memcpy(data.data(), &pushConstants, sizeof(pushConstants));
+        Command::PushConstants(mainCommandBuffer, graphicsPipelineInfo.layout, 0, data);
+    }
     void RecordMainCommandBuffer()
     {
         Command::Buffer::BeginInfo bufferBeginInfo{};
@@ -262,20 +372,8 @@ struct GraphicsPipelineTestApp : TestApp
         Command::Buffer::Reset(mainCommandBuffer);
         Command::Buffer::Begin(mainCommandBuffer, bufferBeginInfo);
         {
-            Command::RenderPassBeginInfo renderPassBeginInfo{};
-            renderPassBeginInfo.renderPass = renderPass;
-            renderPassBeginInfo.framebuffer = frameBuffer;
-            renderPassBeginInfo.renderArea.offset = { 0, 0 };
-            renderPassBeginInfo.renderArea.extent = extent;
-            renderPassBeginInfo.colorClearValues.push_back(ColorValue(0.8118f, 0.7294f, 0.5137f, 1.f));
-            Command::BeginRenderPass(mainCommandBuffer, renderPassBeginInfo, Command::SubPassContents::Inline);
-            {
-                Command::BindPipeline(mainCommandBuffer, Pipeline::BindingPoint::Graphics, graphicsPipeline);
-                Command::BindVertexBuffers(mainCommandBuffer, 0, { vertexBuffer }, { 0 });
-                Command::Draw(mainCommandBuffer, vertices.size(), 1, 0, 0);
-                //draw stuff here
-            }
-            Command::EndRenderPass(mainCommandBuffer);
+            UpdatePushConstants();
+            Command::ExecuteCommandBuffer(mainCommandBuffer, drawCommandBuffer);
             {
                 Command::ImageCopy imageCopy;
                 imageCopy.extent.width  = extent.width;
@@ -295,31 +393,34 @@ struct GraphicsPipelineTestApp : TestApp
     {
         extent = { a_Width, a_Height };
         swapChain = CreateSwapChain(device, surface, swapChain, a_Width, a_Height, 2);
-        graphicsPipeline = CreateGraphicsPipeline();
         presentInfo.swapChains = { swapChain };
         CreateFrameBuffer();
+        CreateGraphicsPipeline();
+        RecordDrawCommandBuffer();
     }
     void OnClose()
     {
         close = true;
     }
-    bool                    close{ false };
-    Window                  window;
-    uExtent2D               extent{ 0, 0 };
-    Surface::Handle         surface;
-    PhysicalDevice::Handle  physicalDevice;
-    Device::Handle          device;
-    RenderPass::Handle      renderPass;
-    FrameBuffer::Handle     frameBuffer;
-    Image::Handle           frameBufferImage;
-    Pipeline::Handle        graphicsPipeline;
-    SwapChain::Handle       swapChain;
-    Image::Handle           swapChainImage;
-    SwapChain::PresentInfo  presentInfo;
-    Command::Pool::Handle   commandPool;
-    Command::Buffer::Handle mainCommandBuffer;
-    Queue::Handle           queue;
-    Queue::Fence::Handle    imageAcquisitionFence;
+    bool                     close{ false };
+    Window                   window;
+    uExtent2D                extent{ 1280, 720 };
+    Surface::Handle          surface;
+    PhysicalDevice::Handle   physicalDevice;
+    Device::Handle           device;
+    RenderPass::Handle       renderPass;
+    FrameBuffer::Handle      frameBuffer;
+    Image::Handle            frameBufferImage;
+    Pipeline::Graphics::Info graphicsPipelineInfo;
+    Pipeline::Handle         graphicsPipeline;
+    SwapChain::Handle        swapChain;
+    Image::Handle            swapChainImage;
+    SwapChain::PresentInfo   presentInfo;
+    Command::Pool::Handle    commandPool;
+    Command::Buffer::Handle  mainCommandBuffer;
+    Command::Buffer::Handle  drawCommandBuffer;
+    Queue::Handle            queue;
+    Queue::Fence::Handle     imageAcquisitionFence;
     const std::vector<Vertex> vertices = {
         {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
         {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
