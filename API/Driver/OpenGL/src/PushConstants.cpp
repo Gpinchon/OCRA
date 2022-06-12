@@ -42,7 +42,8 @@ static inline auto CreatePushConstantBuffer(const Device::Handle& a_Device, cons
 }
 
 PushConstants::PushConstants(const Device::Handle& a_Device)
-	: size(256)
+	: device(a_Device)
+	, size(256)
 	, offsetAlignment(PushConstantOffsetAlignment(a_Device))
 	, bufferHandle(CreatePushConstantBuffer(a_Device, size))
 {}

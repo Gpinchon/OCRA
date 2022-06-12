@@ -13,6 +13,7 @@
 
 OCRA_DECLARE_HANDLE(OCRA::Command::Buffer);
 OCRA_DECLARE_HANDLE(OCRA::Device);
+OCRA_DECLARE_HANDLE(OCRA::Pipeline::Layout);
 
 namespace OCRA::Command::Buffer
 {

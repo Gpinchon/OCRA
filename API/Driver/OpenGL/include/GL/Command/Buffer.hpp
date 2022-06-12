@@ -4,6 +4,7 @@
 #include <Command/Buffer.hpp>
 
 #include <GL/Command/ExecutionState.hpp>
+#include <GL/PushConstants.hpp>
 
 #include <functional>
 #include <vector>
@@ -24,11 +25,11 @@ struct Impl
 {
 	Impl(const Device::Handle& a_Device)
 		: level(Level::Unknown)
-		, executionState(a_Device)
+		, pushConstants(a_Device)
 	{}
 	Impl(const Device::Handle& a_Device, const Level a_Level)
 		: level(a_Level)
-		, executionState(a_Device)
+		, pushConstants(a_Device)
 	{}
 	~Impl() { Invalidate(); }
 	void Reset();
@@ -49,7 +50,8 @@ struct Impl
 	std::vector<Command> commands;
 	std::vector<Handle> secondaryBuffers;
 	Buffer::BeginInfo beginInfo;
-	ExecutionState executionState;
+	ExecutionState executionState{};
+	OCRA::PushConstants pushConstants;
 };
 static inline void Execute(const std::vector<Handle>& a_CommandBuffers) {
 	for (const auto& commandBuffer : a_CommandBuffers) {

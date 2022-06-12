@@ -34,14 +34,17 @@ void BindDescriptorSets(
     descriptorSets.pipelineLayout = a_PipelineLayout;
     descriptorSets.descriptorSets = { a_DescriptorSets.begin() + a_firstSet, a_DescriptorSets.end() };
     descriptorSets.dynamicOffset = a_DynamicOffsets;
-    a_CommandBuffer->PushCommand([bindingPoint = size_t(a_BindingPoint), descriptorSets](Buffer::ExecutionState& a_ExecutionState) {
+    a_CommandBuffer->PushCommand([
+        &pushConstants = a_CommandBuffer->pushConstants,
+        bindingPoint = size_t(a_BindingPoint),
+        descriptorSets](Buffer::ExecutionState& a_ExecutionState) {
         assert(descriptorSets.pipelineLayout == a_ExecutionState.pipelineState.at(bindingPoint)->layout);
         a_ExecutionState.descriptorSets.at(bindingPoint) = descriptorSets;
         for (auto& set : descriptorSets.descriptorSets) {
             set->Apply();
         }
         //TODO : use descriptorSets.pipelineLayout->info.pushConstants
-        a_ExecutionState.pushConstants.Bind();
+        pushConstants.Bind();
     });
 }
 }

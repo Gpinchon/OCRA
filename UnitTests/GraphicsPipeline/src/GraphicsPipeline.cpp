@@ -153,11 +153,8 @@ struct GraphicsPipelineTestApp : TestApp
         commandPool = CreateCommandPool(device, queueFamily);
         renderPass = CreateRenderPass();
         imageAcquisitionFence = Queue::Fence::Create(device);
-        CreateFrameBuffer();
-        CreateGraphicsPipeline();
         mainCommandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Primary);
         drawCommandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Secondary);
-        RecordDrawCommandBuffer();
         vertexBuffer = CreateVertexBuffer();
         vertexBufferMemory = AllocateVertexBuffer();
         Buffer::BindMemory(device, vertexBuffer, vertexBufferMemory, 0);
@@ -340,6 +337,7 @@ struct GraphicsPipelineTestApp : TestApp
         renderPassBeginInfo.renderArea.extent = extent;
         renderPassBeginInfo.colorClearValues.push_back(ColorValue(0.8118f, 0.7294f, 0.5137f, 1.f));
         Command::Buffer::Begin(drawCommandBuffer, bufferBeginInfo);
+        UpdatePushConstants();
         Command::BeginRenderPass(drawCommandBuffer, renderPassBeginInfo, Command::SubPassContents::Inline);
         {
             Command::BindPipeline(drawCommandBuffer, Pipeline::BindingPoint::Graphics, graphicsPipeline);
@@ -363,7 +361,7 @@ struct GraphicsPipelineTestApp : TestApp
         pushConstants.color = HSVtoRGB(hue, 0.5f, 1.f);
         std::vector<char> data(sizeof(pushConstants));
         std::memcpy(data.data(), &pushConstants, sizeof(pushConstants));
-        Command::PushConstants(mainCommandBuffer, graphicsPipelineInfo.layout, 0, data);
+        Command::PushConstants(drawCommandBuffer, graphicsPipelineInfo.layout, 0, data);
     }
     void RecordMainCommandBuffer()
     {
@@ -372,7 +370,7 @@ struct GraphicsPipelineTestApp : TestApp
         Command::Buffer::Reset(mainCommandBuffer);
         Command::Buffer::Begin(mainCommandBuffer, bufferBeginInfo);
         {
-            UpdatePushConstants();
+            RecordDrawCommandBuffer();
             Command::ExecuteCommandBuffer(mainCommandBuffer, drawCommandBuffer);
             {
                 Command::ImageCopy imageCopy;
