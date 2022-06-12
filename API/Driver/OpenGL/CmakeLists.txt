@@ -34,6 +34,7 @@ set(OCRA_IMPL_HEADER_FILES
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Instance.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/ObjectPool.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/PhysicalDevice.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/PushConstants.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/RenderPass.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/WeakHandle.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Command/Buffer.hpp
@@ -73,6 +74,7 @@ set(OCRA_IMPL_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/FrameBuffer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Instance.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Memory.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/PushConstants.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/RenderPass.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/PhysicalDevice.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/QueryPool.cpp
