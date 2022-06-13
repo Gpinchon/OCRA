@@ -4,9 +4,9 @@
 
 #ifdef _DEBUG
 //Similar to assert except it attempts to GetLastError to find more intel
-#define WIN32_CHECK_ERROR(condition) if (!(condition)) { OCRA::Win32::CheckError(__FILE__, __LINE__, #condition); };
+#define WIN32_CHECK_ERROR(condition) { if (!(condition)) { OCRA::Win32::CheckError(__FILE__, __LINE__, #condition); }; }
 #else
-#define WIN32_CHECK_ERROR(condition) if (!(condition)) {};
+#define WIN32_CHECK_ERROR(condition) { if (!(condition)) {}; }
 #endif _DEBUG
 
 namespace OCRA::Win32

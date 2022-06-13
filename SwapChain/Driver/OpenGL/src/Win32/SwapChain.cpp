@@ -4,6 +4,7 @@
 #include <GL/Win32/Error.hpp>
 #include <GL/Win32/OpenGL.hpp>
 #include <GL/Device.hpp>
+#include <GL/Image/Format.hpp>
 #include <GL/Image/Image.hpp>
 #include <GL/Queue/Queue.hpp>
 #include <GL/Queue/Semaphore.hpp>
@@ -101,16 +102,18 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
         WIN32_CHECK_ERROR(SetPixelFormat(HDC(hdc), pixelFormat, nullptr));
         hglrc = OpenGL::Win32::CreateContext(hdc);
     }
-    
+    const auto pixelSize = GetPixelSize(info.imageFormat);
+    pixelData.resize(info.imageExtent.width * info.imageExtent.height * pixelSize, 0);
     textureInternalFormat = images.front()->internalFormat;
     textureDataFormat = images.front()->dataFormat;
     textureDataType = images.front()->dataType;
     textureTarget = images.front()->target;
     workerThread.PushCommand([this] {
-        wglMakeCurrent(HDC(hdc), HGLRC(hglrc));
-        if (info.presentMode == PresentMode::Immediate)
-            wglSwapIntervalEXT(0);
-        else wglSwapIntervalEXT(1);
+        WIN32_CHECK_ERROR(wglMakeCurrent(HDC(hdc), HGLRC(hglrc)));
+        if (info.presentMode == PresentMode::Immediate) {
+            WIN32_CHECK_ERROR(wglSwapIntervalEXT(0));
+        }
+        else WIN32_CHECK_ERROR(wglSwapIntervalEXT(1));
         if (frameBufferHandle == 0)
             glCreateFramebuffers(1, &frameBufferHandle);
         if (textureHandle == 0) {
@@ -167,9 +170,6 @@ void Impl::Present(const Queue::Handle& a_Queue)
     assert(!retired);
     const auto& image = images.at(backBufferIndex);
     const auto extent = image->info.extent;
-    const auto pixelSize = sizeof(char) * 4;
-    pixelData.resize(extent.width * extent.height * pixelSize, 0);
-    
     workerThread.PushCommand([this, queue = a_Queue, extent] {
         queue->PushCommand([this] {
             const auto& image = images.at(backBufferIndex);
