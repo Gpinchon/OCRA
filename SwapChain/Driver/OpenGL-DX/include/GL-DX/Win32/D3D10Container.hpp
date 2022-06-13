@@ -2,9 +2,9 @@
 
 #include <SwapChain.hpp>
 
-#include <GL/Surface.hpp>
-#include <GL/Win32/Error.hpp>
-#include <GL/Win32/D3DContainerInterface.hpp>
+#include <GL-DX/Surface.hpp>
+#include <GL-DX/Win32/Error.hpp>
+#include <GL-DX/Win32/D3DContainerInterface.hpp>
 
 #include <d3d10.h>
 

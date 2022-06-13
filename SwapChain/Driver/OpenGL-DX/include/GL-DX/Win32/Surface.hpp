@@ -1,6 +1,6 @@
 #pragma once
 
-#include <GL/Surface.hpp>
+#include <GL-DX/Surface.hpp>
 
 namespace OCRA::Surface::Win32
 {

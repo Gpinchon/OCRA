@@ -4,12 +4,12 @@ cmake_policy(SET CMP0074 NEW)
 project(OCRA LANGUAGES CXX)
 
 #[[Rendering API]]
-set(RenderingAPI "OpenGL" CACHE STRING
-  "Rendering API used at compile-time")
-set(RenderingAPIValues
+set(OCRA_API_IMPL "OpenGL" CACHE STRING
+  "API Impl used at compile-time")
+set(OCRA_API_IMPL_VALUES
   "OpenGL;Vulkan;DirectX")
-set_property(CACHE RenderingAPI PROPERTY STRINGS ${RenderingAPIValues})
-add_compile_definitions(RENDERINGAPI=${RenderingAPI})
+set_property(CACHE OCRA_API_IMPL PROPERTY STRINGS ${OCRA_API_IMPL_VALUES})
+add_compile_definitions(OCRA_API_IMPL=${OCRA_API_IMPL})
 
 set(OCRA_API_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Allocator.hpp
@@ -92,9 +92,9 @@ set_target_properties(
   PROPERTIES FOLDER "API"
 )
 
-if (RenderingAPI STREQUAL "OpenGL")
+if (OCRA_API_IMPL STREQUAL "OpenGL")
 add_subdirectory(Driver/OpenGL)
-endif (RenderingAPI STREQUAL "OpenGL")
+endif (OCRA_API_IMPL STREQUAL "OpenGL")
 
 if(MSVC_IDE)
   set(CMAKE_DEBUG_POSTFIX "d")

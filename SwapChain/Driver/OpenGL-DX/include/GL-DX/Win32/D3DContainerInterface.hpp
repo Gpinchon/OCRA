@@ -2,8 +2,9 @@
 
 #include <SwapChain.hpp>
 
+#include <GL-DX/Win32/DXGIFormat.hpp>
+
 #include <Common/Extent2D.hpp>
-#include <GL/Win32/DXGIFormat.hpp>
 #include <GL/Win32/Error.hpp>
 
 #include <dxgi1_3.h>

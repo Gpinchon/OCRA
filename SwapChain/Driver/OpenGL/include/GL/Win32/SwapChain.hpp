@@ -2,16 +2,9 @@
 
 #include <GL/SwapChain.hpp>
 
+#include <GL/Common/WorkerThread.hpp>
+
 #include <memory>
-
-namespace OCRA::WGLDX {
-struct DeviceMapping;
-struct TextureMapping;
-}
-
-namespace OCRA::SwapChain::Win32 {
-struct D3DContainer;
-}
 
 namespace OCRA::SwapChain::Win32
 {
@@ -26,11 +19,17 @@ struct Impl : SwapChain::Impl
         const std::chrono::nanoseconds& a_Timeout,
         const Queue::Semaphore::Handle& a_Semaphore,
         const Queue::Fence::Handle&     a_Fence) override;
-    
-    std::unique_ptr<D3DContainer>                       d3dContainer;
-    std::shared_ptr<WGLDX::DeviceMapping>               wglDXDeviceMapping;
-    std::unique_ptr<WGLDX::TextureMapping>              wglDXTextureMapping;
-    std::vector<Image::Handle>                          images;
-    uint32_t                                            backBufferIndex{ 0 };
+    WorkerThread               workerThread;
+    void*                      hglrc{ nullptr };
+    void*                      hdc{ nullptr };
+    std::vector<unsigned char> pixelData;
+    uint32_t                   textureHandle{ 0 };
+    uint32_t                   textureInternalFormat{ 0 };
+    uint32_t                   textureDataFormat{ 0 };
+    uint32_t                   textureDataType{ 0 };
+    uint32_t                   textureTarget{ 0 };
+    uint32_t                   frameBufferHandle{ 0 };
+    std::vector<Image::Handle> images;
+    uint32_t                   backBufferIndex{ 0 };
 };
 }

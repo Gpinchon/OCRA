@@ -1,11 +1,9 @@
 #include <SwapChain.hpp>
 #include <Image/Image.hpp>
 
-#ifdef _WIN32
-#include <GL/Win32/SwapChain.hpp>
-#endif
-#include <GL/SwapChain.hpp>
-#include <GL/Surface.hpp>
+#include <GL-DX/Win32/SwapChain.hpp>
+#include <GL-DX/SwapChain.hpp>
+#include <GL-DX/Surface.hpp>
 
 #include <GL/Queue/Fence.hpp>
 #include <GL/Queue/Semaphore.hpp>
@@ -22,7 +20,6 @@
 
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
 
-//TODO : use WGL_NV_DX_interop & WGL_NV_DX_interop2
 namespace OCRA::SwapChain
 {
 Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)

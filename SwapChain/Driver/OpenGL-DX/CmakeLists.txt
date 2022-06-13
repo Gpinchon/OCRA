@@ -1,0 +1,68 @@
+cmake_minimum_required(VERSION 3.19)
+cmake_policy(SET CMP0074 NEW)
+project(OCRA-API-Implementation LANGUAGES CXX)
+
+include(FetchContent)
+
+set(OCRA_IMPL_SWAPCHAIN_HEADER_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL-DX/Surface.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/GL-DX/SwapChain.hpp
+)
+
+set(OCRA_IMPL_SWAPCHAIN_SOURCE_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/SwapChain.cpp
+)
+
+if (WIN32)
+  set(OCRA_IMPL_SWAPCHAIN_HEADER_FILES ${OCRA_IMPL_SWAPCHAIN_HEADER_FILES}
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/GL-DX/Win32/D3DContainerInterface.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/GL-DX/Win32/D3D10Container.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/GL-DX/Win32/D3D11Container.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/GL-DX/Win32/DXGIFormat.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/GL-DX/Win32/WGLDXMapping.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/GL-DX/Win32/Surface.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/GL-DX/Win32/SwapChain.hpp
+  )
+  set(OCRA_IMPL_SWAPCHAIN_SOURCE_FILES ${OCRA_IMPL_SWAPCHAIN_SOURCE_FILES}
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Win32/Surface.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Win32/SwapChain.cpp
+  )
+endif(WIN32)
+
+add_library(OCRA-SwapChain-Implementation ${OCRA_IMPL_SWAPCHAIN_SOURCE_FILES} ${OCRA_IMPL_SWAPCHAIN_HEADER_FILES})
+add_library(OCRA::SwapChain::Implementation ALIAS OCRA-SwapChain-Implementation)
+target_include_directories(OCRA-SwapChain-Implementation PRIVATE
+  "${CMAKE_CURRENT_SOURCE_DIR}/include"
+  ${OCRA_IMPL_INCLUDE_DIR}
+)
+set_target_properties(
+  OCRA-SwapChain-Implementation
+  PROPERTIES FOLDER "SwapChain"
+)
+
+if (WIN32)
+  option(OCRA_SWAPCHAIN_USE_D3D11 "Use D3D11 for the SwapChain emulation" ON)
+  if (OCRA_SWAPCHAIN_USE_D3D11)
+    find_library(OCRA_SWAPCHAIN_D3D_LIB
+      NAMES d3d11.lib
+      PATHS "$ENV{DXSDK_DIR}/Lib/x64"
+      DOC   "Where the D3D11 library resides"
+    )
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DOCRA_SWAPCHAIN_USE_D3D11")
+  else (OCRA_SWAPCHAIN_USE_D3D11)
+    find_library(OCRA_SWAPCHAIN_D3D_LIB
+        NAMES d3d10.lib
+        PATHS "$ENV{DXSDK_DIR}/Lib/x64"
+        DOC   "Where the D3D10 library resides"
+    )
+  endif(OCRA_SWAPCHAIN_USE_D3D11)
+endif (WIN32)
+
+target_link_libraries(OCRA-SwapChain-Implementation PUBLIC OCRA-API-Implementation OCRA-SwapChain-Interface GLEW::GLEW ${OCRA_SWAPCHAIN_D3D_LIB})
+
+if (MSVC_IDE)
+  set(CMAKE_DEBUG_POSTFIX "d")
+  # Run macro
+  GroupSources(src)
+  GroupSources(include)
+endif ()
