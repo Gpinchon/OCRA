@@ -13,6 +13,7 @@
 #include <GL/wglew.h>
 
 #include <iostream>
+#include <sstream>
 
 namespace OCRA::SwapChain::Win32
 {
@@ -27,7 +28,7 @@ void GLAPIENTRY MessageCallback(
 {
     if (type == GL_DEBUG_TYPE_ERROR)
     {
-        std::stringstream ss;
+        std::stringstream ss{};
         ss << "GL CALLBACK : **GL ERROR * *\n" <<
             " type     = " << type << "\n" <<
             " severity = " << severity << "\n" <<
@@ -107,6 +108,9 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
     textureTarget = images.front()->target;
     workerThread.PushCommand([this] {
         wglMakeCurrent(HDC(hdc), HGLRC(hglrc));
+        if (info.presentMode == PresentMode::Immediate)
+            wglSwapIntervalEXT(0);
+        else wglSwapIntervalEXT(1);
         if (frameBufferHandle == 0)
             glCreateFramebuffers(1, &frameBufferHandle);
         if (textureHandle == 0) {
@@ -165,18 +169,19 @@ void Impl::Present(const Queue::Handle& a_Queue)
     const auto extent = image->info.extent;
     const auto pixelSize = sizeof(char) * 4;
     pixelData.resize(extent.width * extent.height * pixelSize, 0);
-    a_Queue->PushCommand([this, extent]{
-        const auto &image = images.at(backBufferIndex);
-        glBindTexture(image->target, image->handle);
-        glGetTexImage(
-            image->target,
-            0,
-            image->dataFormat,
-            image->dataType,
-            pixelData.data());
-        glBindTexture(image->target, 0);
-    }, true);
-    workerThread.PushCommand([this, extent] {
+    
+    workerThread.PushCommand([this, queue = a_Queue, extent] {
+        queue->PushCommand([this] {
+            const auto& image = images.at(backBufferIndex);
+            glBindTexture(image->target, image->handle);
+            glGetTexImage(
+                image->target,
+                0,
+                image->dataFormat,
+                image->dataType,
+                pixelData.data());
+            glBindTexture(image->target, 0);
+        }, true);
         glBindTexture(textureTarget, textureHandle);
         glTexSubImage2D(
             textureTarget, 0,
@@ -188,7 +193,7 @@ void Impl::Present(const Queue::Handle& a_Queue)
             0, 0, extent.width, extent.height,
             GL_COLOR_BUFFER_BIT, GL_NEAREST);
         WIN32_CHECK_ERROR(SwapBuffers(HDC(hdc)));
-    }, true);
+    }, info.presentMode != PresentMode::Immediate);
     backBufferIndex = (backBufferIndex + 1) % info.imageCount;
 }
 
@@ -198,6 +203,7 @@ Image::Handle Impl::AcquireNextImage(
     const Queue::Semaphore::Handle& a_Semaphore,
     const Queue::Fence::Handle& a_Fence)
 {
+    workerThread.Wait();
     //We do not need to synchronize with the GPU for real here
     if (a_Semaphore != nullptr) {
         if (a_Semaphore->type == Queue::Semaphore::Type::Binary)
