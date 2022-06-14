@@ -73,13 +73,15 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
     , images(CreateImages(a_Device, a_Info))
 {
     const auto pixelSize = GetPixelSize(info.imageFormat);
-    pixelData.resize(info.imageExtent.width * info.imageExtent.height * pixelSize / 8, 0);
+    const auto transferBufferSize = info.imageExtent.width * info.imageExtent.height * pixelSize / 8;
     if (info.oldSwapchain != nullptr && !info.oldSwapchain->retired) {
         auto win32SwapChain = std::static_pointer_cast<SwapChain::Win32::Impl>(info.oldSwapchain);
         win32SwapChain->workerThread.Wait();
         hdc = win32SwapChain->hdc;
         hglrc = win32SwapChain->hglrc;
         presentShader.swap(win32SwapChain->presentShader);
+        if (transferBufferSize <= win32SwapChain->transferBuffer->size)
+            transferBuffer.swap(win32SwapChain->transferBuffer);
         info.oldSwapchain->Retire();
         info.oldSwapchain.reset();
     }
@@ -104,7 +106,7 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
         WIN32_CHECK_ERROR(SetPixelFormat(HDC(hdc), pixelFormat, nullptr));
         hglrc = OpenGL::Win32::CreateContext(hdc);
     }
-    workerThread.PushCommand([this] {
+    workerThread.PushCommand([this, transferBufferSize] {
         WIN32_CHECK_ERROR(wglMakeCurrent(HDC(hdc), HGLRC(hglrc)));
         if (info.presentMode == PresentMode::Immediate) {
             WIN32_CHECK_ERROR(wglSwapIntervalEXT(0));
@@ -114,6 +116,8 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
         glDebugMessageCallback(MessageCallback, 0);
 #endif _DEBUG
+        if (transferBuffer == nullptr)
+            transferBuffer.reset(new TransferBuffer(transferBufferSize));
         if (presentTexture == nullptr)
             presentTexture.reset(new PresentTexture(images.front()));
         if (presentShader == nullptr)
@@ -127,6 +131,7 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
         glActiveTexture(GL_TEXTURE0);
         presentTexture->Bind();
         glBindSampler(0, presentTexture->samplerHandle);
+        transferBuffer->Bind();
     }, false);
 }
 
@@ -150,6 +155,7 @@ Impl::~Impl()
 void Impl::Retire() {
     SwapChain::Impl::Retire();
     workerThread.PushCommand([this] {
+        transferBuffer.reset();
         presentShader.reset();
         presentTexture.reset();
         presentGeometry.reset();
@@ -166,7 +172,7 @@ void Impl::Present(const Queue::Handle& a_Queue)
     const auto& image = images.at(backBufferIndex);
     const auto extent = image->info.extent;
     workerThread.PushCommand([this, queue = a_Queue, extent] {
-        queue->PushCommand([this] {
+        queue->PushCommand([this, bufferPtr = transferBuffer->Map()]{
             const auto& image = images.at(backBufferIndex);
             glBindTexture(image->target, image->handle);
             glGetTexImage(
@@ -174,10 +180,11 @@ void Impl::Present(const Queue::Handle& a_Queue)
                 0,
                 image->dataFormat,
                 image->dataType,
-                pixelData.data());
+                bufferPtr);
             glBindTexture(image->target, 0);
         }, true);
-        presentTexture->UploadData(pixelData);
+        transferBuffer->Unmap();
+        presentTexture->UploadData();
         presentGeometry->Draw();
         WIN32_CHECK_ERROR(SwapBuffers(HDC(hdc)));
     }, info.presentMode != PresentMode::Immediate);
@@ -200,6 +207,42 @@ Image::Handle Impl::AcquireNextImage(
     if (a_Fence != nullptr) a_Fence->SignalNoSync();
     return images.at(backBufferIndex);
 }
+
+TransferBuffer::TransferBuffer(const size_t& a_Size)
+    : size(a_Size)
+{
+    glGenBuffers(1, &handle);
+    Bind();
+    glBufferStorage(GL_PIXEL_UNPACK_BUFFER, size * 3, nullptr, GL_MAP_WRITE_BIT);
+    Unbind();
+}
+
+void TransferBuffer::Bind() const
+{
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, handle);
+}
+
+void TransferBuffer::Unbind() const
+{
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+}
+
+TransferBuffer::~TransferBuffer()
+{
+    glDeleteBuffers(1, &handle);
+}
+
+void* TransferBuffer::Map()
+{
+    offset = (offset + 1) % 3;
+    return glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, offset * size, size, GL_MAP_WRITE_BIT);
+}
+
+void TransferBuffer::Unmap()
+{
+    glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+}
+
 static inline auto CheckShaderCompilation(GLuint a_Shader)
 {
     GLint result;
@@ -300,12 +343,12 @@ void PresentTexture::Unbind() const
 {
     glBindTexture(target, 0);
 }
-void PresentTexture::UploadData(const std::vector<unsigned char>& a_Data) const
+void PresentTexture::UploadData() const
 {
     glTexSubImage2D(
         target, 0,
         0, 0, extent.width, extent.height,
-        dataFormat, dataType, a_Data.data());
+        dataFormat, dataType, 0);
 }
 PresentGeometry::PresentGeometry()
 {

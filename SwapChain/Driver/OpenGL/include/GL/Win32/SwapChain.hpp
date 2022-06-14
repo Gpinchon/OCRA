@@ -8,12 +8,21 @@
 #include <GL/Common/WorkerThread.hpp>
 
 #include <memory>
-#include <vector>
-#include <array>
 
 OCRA_DECLARE_HANDLE(OCRA::Image);
 
 namespace OCRA::SwapChain::Win32 {
+struct TransferBuffer {
+    TransferBuffer(const size_t& a_Size);
+    ~TransferBuffer();
+    void* Map();
+    void  Unmap();
+    void  Bind() const;
+    void  Unbind() const;
+    uint32_t     handle{ 0 };
+    uint32_t     offset{ 0 };
+    const size_t size{ 0 };
+};
 struct PresentShader {
     PresentShader();
     ~PresentShader();
@@ -26,7 +35,7 @@ struct PresentTexture {
     ~PresentTexture();
     void Bind() const;
     void Unbind() const;
-    void UploadData(const std::vector<unsigned char>& a_Data) const;
+    void UploadData() const;
     uint32_t handle{ 0 };
     uint32_t samplerHandle{ 0 };
     const uint32_t target{ 0 };
@@ -62,7 +71,7 @@ struct Impl : SwapChain::Impl
     WorkerThread                     workerThread;
     void*                            hglrc{ nullptr };
     void*                            hdc{ nullptr };
-    std::vector<unsigned char>       pixelData;
+    std::unique_ptr<TransferBuffer>  transferBuffer;
     std::unique_ptr<PresentShader>   presentShader;
     std::unique_ptr<PresentTexture>  presentTexture;
     std::unique_ptr<PresentGeometry> presentGeometry;
