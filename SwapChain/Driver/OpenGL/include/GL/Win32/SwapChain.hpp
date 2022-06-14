@@ -2,9 +2,49 @@
 
 #include <GL/SwapChain.hpp>
 
+#include <Common/Extent3D.hpp>
+#include <Common/Vec2.hpp>
+
 #include <GL/Common/WorkerThread.hpp>
 
 #include <memory>
+#include <vector>
+#include <array>
+
+OCRA_DECLARE_HANDLE(OCRA::Image);
+
+namespace OCRA::SwapChain::Win32 {
+struct PresentShader {
+    PresentShader();
+    ~PresentShader();
+    void Bind() const;
+    void Unbind() const;
+    uint32_t handle{ 0 };
+};
+struct PresentTexture {
+    PresentTexture(const Image::Handle& a_FromImage);
+    ~PresentTexture();
+    void Bind() const;
+    void Unbind() const;
+    void UploadData(const std::vector<unsigned char>& a_Data) const;
+    uint32_t handle{ 0 };
+    uint32_t samplerHandle{ 0 };
+    const uint32_t target{ 0 };
+    const uint32_t dataType{ 0 };
+    const uint32_t dataFormat{ 0 };
+    const uint32_t internalFormat{ 0 };
+    const Extent3D extent{ 0, 0, 0 };
+};
+struct PresentGeometry {
+    PresentGeometry();
+    ~PresentGeometry();
+    void Bind() const;
+    void Unbind() const;
+    void Draw() const;
+    uint32_t VBOhandle;
+    uint32_t VAOhandle;
+};
+}
 
 namespace OCRA::SwapChain::Win32
 {
@@ -19,17 +59,14 @@ struct Impl : SwapChain::Impl
         const std::chrono::nanoseconds& a_Timeout,
         const Queue::Semaphore::Handle& a_Semaphore,
         const Queue::Fence::Handle&     a_Fence) override;
-    WorkerThread               workerThread;
-    void*                      hglrc{ nullptr };
-    void*                      hdc{ nullptr };
-    std::vector<unsigned char> pixelData;
-    uint32_t                   textureHandle{ 0 };
-    uint32_t                   textureInternalFormat{ 0 };
-    uint32_t                   textureDataFormat{ 0 };
-    uint32_t                   textureDataType{ 0 };
-    uint32_t                   textureTarget{ 0 };
-    uint32_t                   frameBufferHandle{ 0 };
-    std::vector<Image::Handle> images;
-    uint32_t                   backBufferIndex{ 0 };
+    WorkerThread                     workerThread;
+    void*                            hglrc{ nullptr };
+    void*                            hdc{ nullptr };
+    std::vector<unsigned char>       pixelData;
+    std::unique_ptr<PresentShader>   presentShader;
+    std::unique_ptr<PresentTexture>  presentTexture;
+    std::unique_ptr<PresentGeometry> presentGeometry;
+    std::vector<Image::Handle>       images;
+    uint32_t                         backBufferIndex{ 0 };
 };
 }

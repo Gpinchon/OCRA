@@ -72,12 +72,14 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
     : SwapChain::Impl(a_Device, a_Info)
     , images(CreateImages(a_Device, a_Info))
 {
+    const auto pixelSize = GetPixelSize(info.imageFormat);
+    pixelData.resize(info.imageExtent.width * info.imageExtent.height * pixelSize / 8, 0);
     if (info.oldSwapchain != nullptr && !info.oldSwapchain->retired) {
         auto win32SwapChain = std::static_pointer_cast<SwapChain::Win32::Impl>(info.oldSwapchain);
         win32SwapChain->workerThread.Wait();
         hdc = win32SwapChain->hdc;
         hglrc = win32SwapChain->hglrc;
-        frameBufferHandle = win32SwapChain->frameBufferHandle;
+        presentShader.swap(win32SwapChain->presentShader);
         info.oldSwapchain->Retire();
         info.oldSwapchain.reset();
     }
@@ -91,7 +93,7 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
             WGL_ACCELERATION_ARB,   WGL_FULL_ACCELERATION_ARB,
             WGL_COLORSPACE_EXT,     WGL_COLORSPACE_SRGB_EXT,
             WGL_PIXEL_TYPE_ARB,     WGL_TYPE_RGBA_ARB,
-            WGL_COLOR_BITS_ARB,     32,
+            WGL_COLOR_BITS_ARB,     pixelSize,
             0
         };
         int32_t  pixelFormat = 0;
@@ -102,33 +104,29 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
         WIN32_CHECK_ERROR(SetPixelFormat(HDC(hdc), pixelFormat, nullptr));
         hglrc = OpenGL::Win32::CreateContext(hdc);
     }
-    const auto pixelSize = GetPixelSize(info.imageFormat);
-    pixelData.resize(info.imageExtent.width * info.imageExtent.height * pixelSize, 0);
-    textureInternalFormat = images.front()->internalFormat;
-    textureDataFormat = images.front()->dataFormat;
-    textureDataType = images.front()->dataType;
-    textureTarget = images.front()->target;
     workerThread.PushCommand([this] {
         WIN32_CHECK_ERROR(wglMakeCurrent(HDC(hdc), HGLRC(hglrc)));
         if (info.presentMode == PresentMode::Immediate) {
             WIN32_CHECK_ERROR(wglSwapIntervalEXT(0));
         }
         else WIN32_CHECK_ERROR(wglSwapIntervalEXT(1));
-        if (frameBufferHandle == 0)
-            glCreateFramebuffers(1, &frameBufferHandle);
-        if (textureHandle == 0) {
-            glGenTextures(1, &textureHandle);
-            glBindTexture(textureTarget, textureHandle);
-            glTexStorage2D(textureTarget, 1, textureInternalFormat, info.imageExtent.width, info.imageExtent.height);
-            glBindTexture(textureTarget, 0);
-        }
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, frameBufferHandle);
-        glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureTarget, textureHandle, 0);
 #ifdef _DEBUG
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
         glDebugMessageCallback(MessageCallback, 0);
 #endif _DEBUG
+        if (presentTexture == nullptr)
+            presentTexture.reset(new PresentTexture(images.front()));
+        if (presentShader == nullptr)
+            presentShader.reset(new PresentShader);
+        if (presentGeometry == nullptr)
+            presentGeometry.reset(new PresentGeometry);
+        glViewport(0, 0, presentTexture->extent.width, presentTexture->extent.height);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+        presentGeometry->Bind();
+        presentShader->Bind();
+        glActiveTexture(GL_TEXTURE0);
+        presentTexture->Bind();
+        glBindSampler(0, presentTexture->samplerHandle);
     }, false);
 }
 
@@ -136,10 +134,9 @@ Impl::~Impl()
 {
     retired = true;
     workerThread.PushCommand([this] {
-        if (textureHandle != 0)
-            glDeleteTextures(1, &textureHandle);
-        if (frameBufferHandle != 0)
-            glDeleteFramebuffers(1, &frameBufferHandle);
+        presentTexture.reset();
+        presentShader.reset();
+        presentGeometry.reset();
         wglMakeCurrent(nullptr, nullptr);
     }, true);
     if (hdc != nullptr)
@@ -148,21 +145,19 @@ Impl::~Impl()
         wglDeleteContext(HGLRC(hglrc));
     hdc = nullptr;
     hglrc = nullptr;
-    textureHandle = 0;
-    frameBufferHandle = 0;
-    
 }
 
 void Impl::Retire() {
     SwapChain::Impl::Retire();
     workerThread.PushCommand([this] {
+        presentShader.reset();
+        presentTexture.reset();
+        presentGeometry.reset();
         wglMakeCurrent(nullptr, nullptr);
     }, true);
     images.clear();
     hdc = nullptr;
     hglrc = nullptr;
-    textureHandle = 0;
-    frameBufferHandle = 0;
 }
 
 void Impl::Present(const Queue::Handle& a_Queue)
@@ -182,16 +177,8 @@ void Impl::Present(const Queue::Handle& a_Queue)
                 pixelData.data());
             glBindTexture(image->target, 0);
         }, true);
-        glBindTexture(textureTarget, textureHandle);
-        glTexSubImage2D(
-            textureTarget, 0,
-            0, 0, extent.width, extent.height,
-            textureDataFormat, textureDataType, pixelData.data());
-        glBindTexture(textureTarget, 0);
-        glBlitFramebuffer(
-            0, 0, extent.width, extent.height,
-            0, 0, extent.width, extent.height,
-            GL_COLOR_BUFFER_BIT, GL_NEAREST);
+        presentTexture->UploadData(pixelData);
+        presentGeometry->Draw();
         WIN32_CHECK_ERROR(SwapBuffers(HDC(hdc)));
     }, info.presentMode != PresentMode::Immediate);
     backBufferIndex = (backBufferIndex + 1) % info.imageCount;
@@ -212,5 +199,143 @@ Image::Handle Impl::AcquireNextImage(
     }
     if (a_Fence != nullptr) a_Fence->SignalNoSync();
     return images.at(backBufferIndex);
+}
+static inline auto CheckShaderCompilation(GLuint a_Shader)
+{
+    GLint result;
+    glGetShaderiv(a_Shader, GL_COMPILE_STATUS, &result);
+    if (result != GL_TRUE) {
+        GLsizei length{ 0 };
+        glGetShaderiv(a_Shader, GL_INFO_LOG_LENGTH, &length);
+        if (length > 1) {
+            std::vector<char> infoLog(length, 0);
+            glGetShaderInfoLog(a_Shader, length, nullptr, infoLog.data());
+            std::string logString(infoLog.begin(), infoLog.end());
+            throw std::runtime_error(logString);
+        }
+        else throw std::runtime_error("Unknown Error");
+        return false;
+    }
+    return true;
+}
+PresentShader::PresentShader()
+{
+    const auto vertCode =
+        "#version 430                                       \n"
+        "out vec2 UV;                                       \n"
+        "void main() {                                      \n"
+        "   float x = -1.0 + float((gl_VertexID & 1) << 2); \n"
+        "   float y = -1.0 + float((gl_VertexID & 2) << 1); \n"
+        "   UV.x = (x + 1.0) * 0.5;                         \n"
+        "   UV.y = 1 - (y + 1.0) * 0.5;                     \n"
+        "   gl_Position = vec4(x, y, 0, 1);                 \n"
+        "}                                                  \n"
+    ;
+    const int vertLen = strlen(vertCode);
+    const auto vertHandle = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertHandle, 1, &vertCode, &vertLen);
+    glCompileShader(vertHandle);
+    CheckShaderCompilation(vertHandle);
+    
+    const auto fragCode =
+        "#version 430                                       \n"
+        "layout(location = 0) out vec4 out_Color;           \n"
+        "layout(binding = 0) uniform sampler2D in_Color;    \n"
+        "in vec2 UV;                                        \n"
+        "void main() {                                      \n"
+        "   out_Color = texture(in_Color, UV);              \n"
+        "}                                                  \n"
+    ;
+    const int fragLen = strlen(fragCode);
+    const auto fragHandle = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragHandle, 1, &fragCode, &fragLen);
+    glCompileShader(fragHandle);
+    CheckShaderCompilation(fragHandle);
+
+    handle = glCreateProgram();
+    glAttachShader(handle, vertHandle);
+    glAttachShader(handle, fragHandle);
+    glLinkProgram(handle);
+    glDetachShader(handle, vertHandle);
+    glDetachShader(handle, fragHandle);
+    glDeleteShader(vertHandle);
+    glDeleteShader(fragHandle);
+}
+PresentShader::~PresentShader()
+{
+    glDeleteProgram(handle);
+}
+void PresentShader::Bind() const
+{
+    glUseProgram(handle);
+}
+void PresentShader::Unbind() const
+{
+    glUseProgram(0);
+}
+PresentTexture::PresentTexture(const Image::Handle& a_FromImage)
+    : target(a_FromImage->target)
+    , dataType(a_FromImage->dataType)
+    , dataFormat(a_FromImage->dataFormat)
+    , internalFormat(a_FromImage->internalFormat)
+    , extent(a_FromImage->info.extent)
+{
+    glGenSamplers(1, &samplerHandle);
+    glGenTextures(1, &handle);
+    glBindTexture(target, handle);
+    glTexStorage2D(target, 1, internalFormat, extent.width, extent.height);
+    glBindTexture(target, 0);
+}
+PresentTexture::~PresentTexture()
+{
+    glDeleteSamplers(1, &samplerHandle);
+    glDeleteTextures(1, &handle);
+}
+void PresentTexture::Bind() const
+{
+    glBindTexture(target, handle);
+}
+
+void PresentTexture::Unbind() const
+{
+    glBindTexture(target, 0);
+}
+void PresentTexture::UploadData(const std::vector<unsigned char>& a_Data) const
+{
+    glTexSubImage2D(
+        target, 0,
+        0, 0, extent.width, extent.height,
+        dataFormat, dataType, a_Data.data());
+}
+PresentGeometry::PresentGeometry()
+{
+    glGenBuffers(1, &VBOhandle);
+    glBindBuffer(GL_ARRAY_BUFFER, VBOhandle);
+    glBufferStorage(GL_ARRAY_BUFFER, 3, nullptr, 0);
+    glGenVertexArrays(1, &VAOhandle);
+    glBindVertexArray(VAOhandle);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_BYTE, false, 1, 0);
+
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+PresentGeometry::~PresentGeometry()
+{
+    glDeleteBuffers(1, &VBOhandle);
+    glDeleteVertexArrays(1, &VAOhandle);
+}
+void PresentGeometry::Bind() const
+{
+    glBindVertexArray(VAOhandle);
+}
+void PresentGeometry::Unbind() const
+{
+    glBindVertexArray(0);
+}
+void PresentGeometry::Draw() const
+{
+    glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 }
