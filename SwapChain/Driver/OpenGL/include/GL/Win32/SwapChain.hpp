@@ -12,36 +12,9 @@
 OCRA_DECLARE_HANDLE(OCRA::Image);
 
 namespace OCRA::SwapChain::Win32 {
-struct PresentShader {
-    PresentShader();
-    ~PresentShader();
-    void Bind() const;
-    void Unbind() const;
-    uint32_t handle{ 0 };
-};
-struct PresentTexture {
-    PresentTexture(const Image::Handle& a_FromImage);
-    ~PresentTexture();
-    void Bind() const;
-    void Unbind() const;
-    void UploadData() const;
-    uint32_t handle{ 0 };
-    uint32_t samplerHandle{ 0 };
-    const uint32_t target{ 0 };
-    const uint32_t dataType{ 0 };
-    const uint32_t dataFormat{ 0 };
-    const uint32_t internalFormat{ 0 };
-    const Extent3D extent{ 0, 0, 0 };
-};
-struct PresentGeometry {
-    PresentGeometry();
-    ~PresentGeometry();
-    void Bind() const;
-    void Unbind() const;
-    void Draw() const;
-    uint32_t VBOhandle;
-    uint32_t VAOhandle;
-};
+struct PresentShader;
+struct PresentTexture;
+struct PresentGeometry;
 }
 
 namespace OCRA::SwapChain::Win32
@@ -53,6 +26,8 @@ struct Impl : SwapChain::Impl
     //when retiring the SwapChain becomes "empty"
     virtual void Retire() override;
     virtual void Present(const Queue::Handle& a_Queue) override;
+    void PresentNV(const Queue::Handle& a_Queue);
+    void PresentGL(const Queue::Handle& a_Queue);
     virtual Image::Handle AcquireNextImage(
         const std::chrono::nanoseconds& a_Timeout,
         const Queue::Semaphore::Handle& a_Semaphore,
@@ -65,5 +40,6 @@ struct Impl : SwapChain::Impl
     std::unique_ptr<PresentGeometry> presentGeometry;
     std::vector<Image::Handle>       images;
     uint32_t                         backBufferIndex{ 0 };
+    std::vector<unsigned char>       pixelBuffer;
 };
 }

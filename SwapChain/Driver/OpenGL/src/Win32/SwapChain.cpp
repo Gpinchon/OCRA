@@ -1,9 +1,11 @@
 #include <GL/Win32/SwapChain.hpp>
+#include <GL/Win32/PresentGeometry.hpp>
+#include <GL/Win32/PresentShader.hpp>
+#include <GL/Win32/PresentTexture.hpp>
 #include <GL/Surface.hpp>
 
 #include <GL/Win32/Error.hpp>
 #include <GL/Win32/OpenGL.hpp>
-
 #include <GL/Device.hpp>
 #include <GL/Image/Format.hpp>
 #include <GL/Image/Image.hpp>
@@ -74,6 +76,11 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
     , images(CreateImages(a_Device, a_Info))
 {
     const auto pixelSize = GetPixelSize(info.imageFormat);
+    if (!WGL_NV_copy_image) {
+        std::cerr << "WGL_NV_copy_image unavailable : using slower path\n";
+        const auto transferBufferSize = info.imageExtent.width * info.imageExtent.height * pixelSize / 8;
+        pixelBuffer.resize(transferBufferSize, 0);
+    }
     if (info.oldSwapchain != nullptr && !info.oldSwapchain->retired) {
         auto win32SwapChain = std::static_pointer_cast<SwapChain::Win32::Impl>(info.oldSwapchain);
         win32SwapChain->workerThread.Wait();
@@ -161,10 +168,20 @@ void Impl::Retire() {
 void Impl::Present(const Queue::Handle& a_Queue)
 {
     assert(!retired);
+    if (WGL_NV_copy_image) {
+        PresentNV(a_Queue);
+    }
+    else {
+        PresentGL(a_Queue);
+    }
+}
+
+void Impl::PresentNV(const Queue::Handle& a_Queue)
+{
     const auto& image = images.at(backBufferIndex);
     const auto extent = image->info.extent;
     workerThread.PushCommand([this, queue = a_Queue, extent] {
-        queue->PushCommand([this, extent]{
+        queue->PushCommand([this, extent] {
             auto sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
             glClientWaitSync(sync, 0, 1000);
             glDeleteSync(sync);
@@ -175,10 +192,36 @@ void Impl::Present(const Queue::Handle& a_Queue)
                 HGLRC(hglrc), presentTexture->handle, presentTexture->target,
                 0, 0, 0, 0,
                 extent.width, extent.height, 1));
-        }, true);
+            }, true);
         presentGeometry->Draw();
         WIN32_CHECK_ERROR(SwapBuffers(HDC(hdc)));
-    }, info.presentMode != PresentMode::Immediate);
+        }, info.presentMode != PresentMode::Immediate);
+    backBufferIndex = (backBufferIndex + 1) % info.imageCount;
+}
+
+void Impl::PresentGL(const Queue::Handle& a_Queue)
+{
+    const auto& image = images.at(backBufferIndex);
+    const auto extent = image->info.extent;
+    workerThread.PushCommand([this, queue = a_Queue, extent] {
+        queue->PushCommand([this, extent] {
+            const auto& image = images.at(backBufferIndex);
+            glBindTexture(image->target, image->handle);
+            glGetTexImage(
+                image->target,
+                0,
+                image->dataFormat,
+                image->dataType,
+                pixelBuffer.data());
+            glBindTexture(image->target, 0);
+            }, true);
+        glTexSubImage2D(
+            presentTexture->target, 0,
+            0, 0, extent.width, extent.height,
+            presentTexture->dataFormat, presentTexture->dataType, pixelBuffer.data());
+        presentGeometry->Draw();
+        WIN32_CHECK_ERROR(SwapBuffers(HDC(hdc)));
+        }, info.presentMode != PresentMode::Immediate);
     backBufferIndex = (backBufferIndex + 1) % info.imageCount;
 }
 
@@ -197,144 +240,5 @@ Image::Handle Impl::AcquireNextImage(
     }
     if (a_Fence != nullptr) a_Fence->SignalNoSync();
     return images.at(backBufferIndex);
-}
-
-static inline auto CheckShaderCompilation(GLuint a_Shader)
-{
-    GLint result;
-    glGetShaderiv(a_Shader, GL_COMPILE_STATUS, &result);
-    if (result != GL_TRUE) {
-        GLsizei length{ 0 };
-        glGetShaderiv(a_Shader, GL_INFO_LOG_LENGTH, &length);
-        if (length > 1) {
-            std::vector<char> infoLog(length, 0);
-            glGetShaderInfoLog(a_Shader, length, nullptr, infoLog.data());
-            std::string logString(infoLog.begin(), infoLog.end());
-            throw std::runtime_error(logString);
-        }
-        else throw std::runtime_error("Unknown Error");
-        return false;
-    }
-    return true;
-}
-PresentShader::PresentShader()
-{
-    const auto vertCode =
-        "#version 430                                       \n"
-        "out vec2 UV;                                       \n"
-        "void main() {                                      \n"
-        "   float x = -1.0 + float((gl_VertexID & 1) << 2); \n"
-        "   float y = -1.0 + float((gl_VertexID & 2) << 1); \n"
-        "   UV.x = (x + 1.0) * 0.5;                         \n"
-        "   UV.y = 1 - (y + 1.0) * 0.5;                     \n"
-        "   gl_Position = vec4(x, y, 0, 1);                 \n"
-        "}                                                  \n"
-    ;
-    const int vertLen = strlen(vertCode);
-    const auto vertHandle = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertHandle, 1, &vertCode, &vertLen);
-    glCompileShader(vertHandle);
-    CheckShaderCompilation(vertHandle);
-    
-    const auto fragCode =
-        "#version 430                                       \n"
-        "layout(location = 0) out vec4 out_Color;           \n"
-        "layout(binding = 0) uniform sampler2D in_Color;    \n"
-        "in vec2 UV;                                        \n"
-        "void main() {                                      \n"
-        "   out_Color = texture(in_Color, UV);              \n"
-        "}                                                  \n"
-    ;
-    const int fragLen = strlen(fragCode);
-    const auto fragHandle = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragHandle, 1, &fragCode, &fragLen);
-    glCompileShader(fragHandle);
-    CheckShaderCompilation(fragHandle);
-
-    handle = glCreateProgram();
-    glAttachShader(handle, vertHandle);
-    glAttachShader(handle, fragHandle);
-    glLinkProgram(handle);
-    glDetachShader(handle, vertHandle);
-    glDetachShader(handle, fragHandle);
-    glDeleteShader(vertHandle);
-    glDeleteShader(fragHandle);
-}
-PresentShader::~PresentShader()
-{
-    glDeleteProgram(handle);
-}
-void PresentShader::Bind() const
-{
-    glUseProgram(handle);
-}
-void PresentShader::Unbind() const
-{
-    glUseProgram(0);
-}
-PresentTexture::PresentTexture(const Image::Handle& a_FromImage)
-    : target(a_FromImage->target)
-    , dataType(a_FromImage->dataType)
-    , dataFormat(a_FromImage->dataFormat)
-    , internalFormat(a_FromImage->internalFormat)
-    , extent(a_FromImage->info.extent)
-{
-    glGenSamplers(1, &samplerHandle);
-    glGenTextures(1, &handle);
-    glBindTexture(target, handle);
-    glTexStorage2D(target, 1, internalFormat, extent.width, extent.height);
-    glBindTexture(target, 0);
-}
-PresentTexture::~PresentTexture()
-{
-    glDeleteSamplers(1, &samplerHandle);
-    glDeleteTextures(1, &handle);
-}
-void PresentTexture::Bind() const
-{
-    glBindTexture(target, handle);
-}
-
-void PresentTexture::Unbind() const
-{
-    glBindTexture(target, 0);
-}
-void PresentTexture::UploadData() const
-{
-    glTexSubImage2D(
-        target, 0,
-        0, 0, extent.width, extent.height,
-        dataFormat, dataType, 0);
-}
-PresentGeometry::PresentGeometry()
-{
-    glGenBuffers(1, &VBOhandle);
-    glBindBuffer(GL_ARRAY_BUFFER, VBOhandle);
-    glBufferStorage(GL_ARRAY_BUFFER, 3, nullptr, 0);
-    glGenVertexArrays(1, &VAOhandle);
-    glBindVertexArray(VAOhandle);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_BYTE, false, 1, 0);
-
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-}
-PresentGeometry::~PresentGeometry()
-{
-    glDeleteBuffers(1, &VBOhandle);
-    glDeleteVertexArrays(1, &VAOhandle);
-}
-void PresentGeometry::Bind() const
-{
-    glBindVertexArray(VAOhandle);
-}
-void PresentGeometry::Unbind() const
-{
-    glBindVertexArray(0);
-}
-void PresentGeometry::Draw() const
-{
-    glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 }

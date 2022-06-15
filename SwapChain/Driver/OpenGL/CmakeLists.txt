@@ -15,10 +15,16 @@ set(OCRA_IMPL_SWAPCHAIN_SOURCE_FILES
 
 if (WIN32)
   set(OCRA_IMPL_SWAPCHAIN_HEADER_FILES ${OCRA_IMPL_SWAPCHAIN_HEADER_FILES}
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/PresentGeometry.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/PresentShader.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/PresentTexture.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/Surface.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/include/GL/Win32/SwapChain.hpp
   )
   set(OCRA_IMPL_SWAPCHAIN_SOURCE_FILES ${OCRA_IMPL_SWAPCHAIN_SOURCE_FILES}
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Win32/PresentGeometry.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Win32/PresentShader.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Win32/PresentTexture.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Win32/SwapChain.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Win32/Surface.cpp
   )
