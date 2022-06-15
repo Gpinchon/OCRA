@@ -233,7 +233,10 @@ struct GraphicsPipelineTestApp : TestApp
     }
     void Loop()
     {
+        FPSCounter fpsCounter;
+        auto printTime = std::chrono::high_resolution_clock::now();
         while (true) {
+            fpsCounter.StartFrame();
             window.PushEvents();
             if (close) break;
             swapChainImage = SwapChain::AcquireNextImage(device, swapChain, std::chrono::nanoseconds(15000000), nullptr, imageAcquisitionFence);
@@ -242,6 +245,12 @@ struct GraphicsPipelineTestApp : TestApp
             RecordMainCommandBuffer();
             SubmitCommandBuffer(queue, mainCommandBuffer);
             SwapChain::Present(queue, presentInfo);
+            const auto now = std::chrono::high_resolution_clock::now();
+            fpsCounter.EndFrame();
+            if (std::chrono::duration<double, std::milli>(now - printTime).count() >= 48) {
+                printTime = now;
+                fpsCounter.Print();
+            }
         }
     }
     Buffer::Handle CreateVertexBuffer() {
@@ -406,7 +415,7 @@ struct GraphicsPipelineTestApp : TestApp
         renderPassBeginInfo.framebuffer = frameBuffer;
         renderPassBeginInfo.renderArea.offset = { 0, 0 };
         renderPassBeginInfo.renderArea.extent = extent;
-        renderPassBeginInfo.colorClearValues.push_back(ColorValue(0.8118f, 0.7294f, 0.5137f, 1.f));
+        renderPassBeginInfo.colorClearValues.push_back(ColorValue(0.9529f, 0.6235f, 0.0941f, 1.f));
         Command::Buffer::Begin(drawCommandBuffer, bufferBeginInfo);
         UpdatePushConstants();
         Command::BeginRenderPass(drawCommandBuffer, renderPassBeginInfo, Command::SubPassContents::Inline);

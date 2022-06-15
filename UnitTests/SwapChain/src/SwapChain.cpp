@@ -112,7 +112,10 @@ struct SwapChainTestApp : TestApp
     }
     void Loop()
     {
+        FPSCounter fpsCounter;
+        auto printTime = std::chrono::high_resolution_clock::now();
         while (true) {
+            fpsCounter.StartFrame();
             window.PushEvents();
             if (close) break;
             const auto swapChainImage = SwapChain::AcquireNextImage(device, swapChain, std::chrono::nanoseconds(15000000), nullptr, imageAcquisitionFence);
@@ -121,6 +124,12 @@ struct SwapChainTestApp : TestApp
             RecordClearCommandBuffer(swapChainImage);
             SubmitCommandBuffer(queue, commandBuffer);
             SwapChain::Present(queue, presentInfo);
+            const auto now = std::chrono::high_resolution_clock::now();
+            fpsCounter.EndFrame();
+            if (std::chrono::duration<double, std::milli>(now - printTime).count() >= 48) {
+                printTime = now;
+                fpsCounter.Print();
+            }
         }
     }
     void RecordClearCommandBuffer(const Image::Handle& a_Image)

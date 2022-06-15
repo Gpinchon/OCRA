@@ -15,6 +15,7 @@
 #include <vector>
 #include <bitset>
 #include <functional>
+#include <numeric>
 
 OCRA_DECLARE_HANDLE(OCRA::Instance);
 OCRA_DECLARE_HANDLE(OCRA::PhysicalDevice);
@@ -36,6 +37,32 @@ struct VerboseTimer : Timer
 		std::cout << "Timer \"" << name << "\" waited : " << Elapsed().count() << " nanoseconds\n";
 	}
 	const std::string name;
+};
+
+struct FPSCounter
+{
+    FPSCounter(const size_t& a_FrameTimeBufferSize = 1000)
+        : frameTimes(a_FrameTimeBufferSize, 0)
+    {
+    }
+    void StartFrame() {
+        if (frameNbr < frameTimes.size()) ++frameNbr;
+        startTime = std::chrono::high_resolution_clock::now();
+    }
+    void EndFrame() {
+        const auto now = std::chrono::high_resolution_clock::now();
+        frameTimes.at(frameTimeIndex) = std::chrono::duration<double, std::milli>(now - startTime).count();
+        ++frameTimeIndex %= frameTimes.size();
+    }
+    void Print() const {
+        const auto meanFrameTime = std::accumulate(frameTimes.begin(), frameTimes.begin() + frameNbr, 0.0) / double(frameNbr);
+        const auto fps = 1000.0 / meanFrameTime;
+        std::cout << "\rFPS : " << fps << std::flush;
+    }
+    std::chrono::steady_clock::time_point startTime;
+    std::vector<double> frameTimes;
+    size_t frameTimeIndex{ 0 };
+    size_t frameNbr{ 0 };
 };
 
 struct Window
