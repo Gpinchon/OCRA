@@ -24,9 +24,10 @@
 
 #include <Windows.h>
 
-using namespace OCRA;
-
 #include <Pipeline/Graphics.hpp>
+
+using namespace OCRA;
+constexpr auto VSync = false;
 
 namespace OCRA {
 template <size_t C, size_t R, typename T>
@@ -185,7 +186,7 @@ SwapChain::Handle CreateSwapChain(const Device::Handle& a_Device, const Surface:
 {
     SwapChain::Info info{};
     info.oldSwapchain = a_OldSwapChain;
-    info.presentMode = SwapChain::PresentMode::Immediate;
+    info.presentMode = VSync ? SwapChain::PresentMode::Fifo : SwapChain::PresentMode::Immediate;
     info.imageColorSpace = Image::ColorSpace::sRGB;
     info.imageFormat = Image::Format::Uint8_Normalized_RGBA;
     info.imageCount = a_ImageNbr;
@@ -233,7 +234,7 @@ struct GraphicsPipelineTestApp : TestApp
     }
     void Loop()
     {
-        FPSCounter fpsCounter;
+        FPSCounter fpsCounter(1);
         auto printTime = std::chrono::high_resolution_clock::now();
         while (true) {
             fpsCounter.StartFrame();
@@ -445,12 +446,12 @@ struct GraphicsPipelineTestApp : TestApp
     }
     void RecordMainCommandBuffer()
     {
+        RecordDrawCommandBuffer();
         Command::Buffer::BeginInfo bufferBeginInfo{};
         bufferBeginInfo.flags = Command::Buffer::UsageFlagBits::None;
         Command::Buffer::Reset(mainCommandBuffer);
         Command::Buffer::Begin(mainCommandBuffer, bufferBeginInfo);
         {
-            RecordDrawCommandBuffer();
             Command::ExecuteCommandBuffer(mainCommandBuffer, drawCommandBuffer);
             {
                 Command::ImageCopy imageCopy;
@@ -463,7 +464,6 @@ struct GraphicsPipelineTestApp : TestApp
                     swapChainImage,
                     { imageCopy });
             }
-            
         }
         Command::Buffer::End(mainCommandBuffer);
     }
@@ -474,7 +474,6 @@ struct GraphicsPipelineTestApp : TestApp
         presentInfo.swapChains = { swapChain };
         CreateFrameBuffer();
         CreateGraphicsPipeline();
-        RecordDrawCommandBuffer();
     }
     void OnClose()
     {
