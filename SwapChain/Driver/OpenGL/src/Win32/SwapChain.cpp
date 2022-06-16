@@ -1,5 +1,6 @@
 #include <GL/Win32/SwapChain.hpp>
 #include <GL/Win32/PresentGeometry.hpp>
+#include <GL/Win32/PresentPixels.hpp>
 #include <GL/Win32/PresentShader.hpp>
 #include <GL/Win32/PresentTexture.hpp>
 #include <GL/Surface.hpp>
@@ -130,7 +131,11 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
             presentGeometry->Bind();
         }
         if (!WGLEW_NV_copy_image && presentPixels == nullptr) {
-            std::cerr << "SwapChain : WGL_NV_copy_image unavailable, using slower path\n";
+            static bool warningPrinted = false;
+            if (!warningPrinted) {
+                std::cerr << "SwapChain : WGL_NV_copy_image unavailable, using slower path\n";
+                warningPrinted = true;
+            }
             const auto transferBufferSize = info.imageExtent.width * info.imageExtent.height * pixelSize / 8;
             presentPixels.reset(new PresentPixels(transferBufferSize));
             presentPixels->Bind();

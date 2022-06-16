@@ -1,3 +1,5 @@
+#pragma once
+
 namespace OCRA::SwapChain::Win32 {
 struct PresentShader {
     PresentShader();
