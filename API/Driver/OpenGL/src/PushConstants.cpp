@@ -23,22 +23,33 @@ static inline auto PushConstantOffsetAlignment(const Device::Handle& a_Device) {
 	GLint offset = 0;
 	a_Device->PushCommand([&offset] {
 		glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &offset);
-		}, true);
+	}, true);
 	return offset;
 }
 
 static inline auto CreatePushConstantBuffer(const Device::Handle& a_Device, const size_t& a_Size) {
 	const auto size = RoundUp(a_Size, PushConstantOffsetAlignment(a_Device)) * PushConstantMultiBuffering;
-	GLuint handle = 0;
+	uint32_t handle{ 0 };
 	if (size > 0) {
 		a_Device->PushCommand([&handle, size] {
 			glGenBuffers(1, &handle);
 			glBindBuffer(GL_UNIFORM_BUFFER, handle);
-			glBufferStorage(GL_UNIFORM_BUFFER, size, nullptr, GL_MAP_WRITE_BIT | GL_DYNAMIC_STORAGE_BIT);
+			glBufferStorage(GL_UNIFORM_BUFFER, size, nullptr, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT);
 			glBindBuffer(GL_UNIFORM_BUFFER, 0);
 		}, true);
 	}
 	return handle;
+}
+
+static inline auto GetBufferPtr(const Device::Handle& a_Device, const uint32_t& a_Handle, const size_t& a_Size)
+{
+	void* ptr = nullptr;
+	a_Device->PushCommand([&ptr, a_Handle, a_Size] {
+		glBindBuffer(GL_UNIFORM_BUFFER, a_Handle);
+		ptr = glMapBufferRange(GL_UNIFORM_BUFFER, 0, a_Size, GL_MAP_PERSISTENT_BIT | GL_MAP_WRITE_BIT | GL_MAP_FLUSH_EXPLICIT_BIT);
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	}, true);
+	return ptr;
 }
 
 PushConstants::PushConstants(const Device::Handle& a_Device)
@@ -46,6 +57,7 @@ PushConstants::PushConstants(const Device::Handle& a_Device)
 	, size(256)
 	, offsetAlignment(PushConstantOffsetAlignment(a_Device))
 	, bufferHandle(CreatePushConstantBuffer(a_Device, size))
+	, bufferPtr(GetBufferPtr(a_Device, bufferHandle, size * PushConstantMultiBuffering))
 {}
 
 PushConstants::~PushConstants()
@@ -65,11 +77,9 @@ void PushConstants::Bind() {
 void PushConstants::Update(const size_t& a_Offset, const std::vector<char>& a_Data) {
 	++offset %= PushConstantMultiBuffering;
 	const auto currentOffset = offset * offsetAlignment;
+	std::memcpy((char*)bufferPtr + currentOffset, a_Data.data(), a_Data.size());
 	glBindBuffer(GL_UNIFORM_BUFFER, bufferHandle);
-	glBufferSubData(GL_UNIFORM_BUFFER,
-		a_Offset + currentOffset,
-		a_Data.size(),
-		a_Data.data());
+	glFlushMappedBufferRange(GL_UNIFORM_BUFFER, currentOffset, size);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 }

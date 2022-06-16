@@ -19,7 +19,8 @@ struct PushConstants {
 	const Device::WeakHandle device;
 	const uint32_t	size;
 	const uint32_t	offsetAlignment;
-	const uint32_t	bufferHandle;
+	const uint32_t  bufferHandle;
+	const void*		bufferPtr;
 	//the current offset of pushconstant buffer
 	uint32_t		offset{ 0 };
 };
