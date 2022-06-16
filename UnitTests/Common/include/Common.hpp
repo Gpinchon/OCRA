@@ -16,6 +16,7 @@
 #include <bitset>
 #include <functional>
 #include <numeric>
+#include <algorithm>
 
 OCRA_DECLARE_HANDLE(OCRA::Instance);
 OCRA_DECLARE_HANDLE(OCRA::PhysicalDevice);
@@ -39,10 +40,11 @@ struct VerboseTimer : Timer
 	const std::string name;
 };
 
-struct FPSCounter
+class FPSCounter
 {
-    FPSCounter(const size_t& a_FrameTimeBufferSize = 1000)
-        : frameTimes(a_FrameTimeBufferSize, 0)
+public:
+    FPSCounter(const size_t& a_SampleCount = 1000)
+        : frameTimes(a_SampleCount, 0)
     {
     }
     void StartFrame() {
@@ -52,17 +54,34 @@ struct FPSCounter
     void EndFrame() {
         const auto now = std::chrono::high_resolution_clock::now();
         frameTimes.at(frameTimeIndex) = std::chrono::duration<double, std::milli>(now - startTime).count();
+        const auto meanFrameTime = std::accumulate(frameTimes.begin(), frameTimes.begin() + frameNbr, 0.0) / double(frameNbr);
+        fps = 1000.0 / meanFrameTime;
         ++frameTimeIndex %= frameTimes.size();
+        _UpdateSampleCount();
     }
     void Print() const {
-        const auto meanFrameTime = std::accumulate(frameTimes.begin(), frameTimes.begin() + frameNbr, 0.0) / double(frameNbr);
-        const auto fps = 1000.0 / meanFrameTime;
         std::cout << "\rFPS : " << fps << std::flush;
     }
     std::chrono::steady_clock::time_point startTime;
     std::vector<double> frameTimes;
+    double fps{ 0 };
     size_t frameTimeIndex{ 0 };
     size_t frameNbr{ 0 };
+private:
+    void _UpdateSampleCount() {
+        size_t sampleCount = 1;
+        while (size_t(fps) / sampleCount) {
+            sampleCount *= 10;
+        }
+        sampleCount /= 10;
+        sampleCount = std::max(sampleCount, size_t(10));
+        sampleCount = sampleCount * (size_t(fps) / sampleCount);
+        if (sampleCount > 0 && sampleCount != frameTimes.size()) {
+            frameTimes.resize(sampleCount, 0);
+            frameNbr = std::clamp(frameNbr, size_t(0), frameTimes.size());
+            frameTimeIndex = std::clamp(frameTimeIndex, size_t(0), frameTimes.size() - 1);
+        }
+    }
 };
 
 struct Window
