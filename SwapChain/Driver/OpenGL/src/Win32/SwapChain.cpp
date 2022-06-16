@@ -12,6 +12,7 @@
 #include <GL/Queue/Queue.hpp>
 #include <GL/Queue/Semaphore.hpp>
 #include <GL/Queue/Fence.hpp>
+#include <GL/Common/BufferOffset.hpp>
 
 #include <GL/glew.h>
 #include <GL/wglew.h>
@@ -76,11 +77,6 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
     , images(CreateImages(a_Device, a_Info))
 {
     const auto pixelSize = GetPixelSize(info.imageFormat);
-    if (!WGL_NV_copy_image) {
-        std::cerr << "WGL_NV_copy_image unavailable : using slower path\n";
-        const auto transferBufferSize = info.imageExtent.width * info.imageExtent.height * pixelSize / 8;
-        pixelBuffer.resize(transferBufferSize, 0);
-    }
     if (info.oldSwapchain != nullptr && !info.oldSwapchain->retired) {
         auto win32SwapChain = std::static_pointer_cast<SwapChain::Win32::Impl>(info.oldSwapchain);
         win32SwapChain->workerThread.Wait();
@@ -111,7 +107,7 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
         WIN32_CHECK_ERROR(SetPixelFormat(HDC(hdc), pixelFormat, nullptr));
         hglrc = OpenGL::Win32::CreateContext(hdc);
     }
-    workerThread.PushCommand([this] {
+    workerThread.PushCommand([this, pixelSize] {
         WIN32_CHECK_ERROR(wglMakeCurrent(HDC(hdc), HGLRC(hglrc)));
         if (info.presentMode == PresentMode::Immediate) {
             WIN32_CHECK_ERROR(wglSwapIntervalEXT(0));
@@ -121,19 +117,28 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
         glDebugMessageCallback(MessageCallback, 0);
 #endif _DEBUG
-        if (presentTexture == nullptr)
+        if (presentTexture == nullptr) {
             presentTexture.reset(new PresentTexture(images.front()));
-        if (presentShader == nullptr)
+            presentTexture->Bind();
+        }
+        if (presentShader == nullptr) {
             presentShader.reset(new PresentShader);
-        if (presentGeometry == nullptr)
+            presentShader->Bind();
+        }
+        if (presentGeometry == nullptr) {
             presentGeometry.reset(new PresentGeometry);
+            presentGeometry->Bind();
+        }
+        if (!WGLEW_NV_copy_image && presentPixels == nullptr) {
+            std::cerr << "SwapChain : WGL_NV_copy_image unavailable, using slower path\n";
+            const auto transferBufferSize = info.imageExtent.width * info.imageExtent.height * pixelSize / 8;
+            presentPixels.reset(new PresentPixels(transferBufferSize));
+            presentPixels->Bind();
+        }
         glViewport(0, 0, presentTexture->extent.width, presentTexture->extent.height);
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
         glActiveTexture(GL_TEXTURE0);
         glBindSampler(0, presentTexture->samplerHandle);
-        presentGeometry->Bind();
-        presentShader->Bind();
-        presentTexture->Bind();
     }, false);
 }
 
@@ -144,6 +149,7 @@ Impl::~Impl()
         presentTexture.reset();
         presentShader.reset();
         presentGeometry.reset();
+        presentPixels.reset();
         wglMakeCurrent(nullptr, nullptr);
     }, true);
     if (hdc != nullptr)
@@ -158,6 +164,7 @@ void Impl::Retire() {
         presentShader.reset();
         presentTexture.reset();
         presentGeometry.reset();
+        presentPixels.reset();
         wglMakeCurrent(nullptr, nullptr);
     }, true);
     images.clear();
@@ -168,7 +175,7 @@ void Impl::Retire() {
 void Impl::Present(const Queue::Handle& a_Queue)
 {
     assert(!retired);
-    if (WGL_NV_copy_image) {
+    if (WGLEW_NV_copy_image) {
         PresentNV(a_Queue);
     }
     else {
@@ -182,20 +189,20 @@ void Impl::PresentNV(const Queue::Handle& a_Queue)
     const auto extent = image->info.extent;
     workerThread.PushCommand([this, queue = a_Queue, extent] {
         queue->PushCommand([this, extent] {
+            const auto& image = images.at(backBufferIndex);
             auto sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
             glClientWaitSync(sync, 0, 1000);
             glDeleteSync(sync);
-            const auto& image = images.at(backBufferIndex);
             WIN32_CHECK_ERROR(wglCopyImageSubDataNV(
                 nullptr, image->handle, image->target, //use current context
                 0, 0, 0, 0,
                 HGLRC(hglrc), presentTexture->handle, presentTexture->target,
                 0, 0, 0, 0,
                 extent.width, extent.height, 1));
-            }, true);
+        }, true);
         presentGeometry->Draw();
         WIN32_CHECK_ERROR(SwapBuffers(HDC(hdc)));
-        }, info.presentMode != PresentMode::Immediate);
+    }, info.presentMode != PresentMode::Immediate);
     backBufferIndex = (backBufferIndex + 1) % info.imageCount;
 }
 
@@ -212,16 +219,17 @@ void Impl::PresentGL(const Queue::Handle& a_Queue)
                 0,
                 image->dataFormat,
                 image->dataType,
-                pixelBuffer.data());
+                presentPixels->GetPtr());
             glBindTexture(image->target, 0);
-            }, true);
+        }, true);
+        presentPixels->Flush();
         glTexSubImage2D(
             presentTexture->target, 0,
             0, 0, extent.width, extent.height,
-            presentTexture->dataFormat, presentTexture->dataType, pixelBuffer.data());
+            presentTexture->dataFormat, presentTexture->dataType, BUFFER_OFFSET(presentPixels->offset));
         presentGeometry->Draw();
         WIN32_CHECK_ERROR(SwapBuffers(HDC(hdc)));
-        }, info.presentMode != PresentMode::Immediate);
+    }, info.presentMode != PresentMode::Immediate);
     backBufferIndex = (backBufferIndex + 1) % info.imageCount;
 }
 

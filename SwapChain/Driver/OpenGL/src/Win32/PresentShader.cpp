@@ -39,7 +39,7 @@ PresentShader::PresentShader()
         "   UV.y = 1 - (y + 1.0) * 0.5;                     \n"
         "   gl_Position = vec4(x, y, 0, 1);                 \n"
         "}                                                  \n"
-        ;
+    ;
     const int vertLen = strlen(vertCode);
     const auto vertHandle = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertHandle, 1, &vertCode, &vertLen);
@@ -47,14 +47,15 @@ PresentShader::PresentShader()
     CheckShaderCompilation(vertHandle);
 
     const auto fragCode =
-        "#version 430                                       \n"
-        "layout(location = 0) out vec4 out_Color;           \n"
-        "layout(binding = 0) uniform sampler2D in_Color;    \n"
-        "in vec2 UV;                                        \n"
-        "void main() {                                      \n"
-        "   out_Color = texture(in_Color, UV);              \n"
-        "}                                                  \n"
-        ;
+        "#version 430                                           \n"
+        "layout(location = 0) out vec4 out_Color;               \n"
+        "layout(binding = 0) uniform sampler2D in_Color;        \n"
+        "in vec2 UV;                                            \n"
+        "void main() {                                          \n"
+        "   ivec2 coord = ivec2(UV * textureSize(in_Color, 0)); \n"
+        "   out_Color = texelFetch(in_Color, coord, 0);         \n"
+        "}                                                      \n"
+    ;
     const int fragLen = strlen(fragCode);
     const auto fragHandle = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragHandle, 1, &fragCode, &fragLen);
