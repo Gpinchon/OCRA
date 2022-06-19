@@ -115,8 +115,8 @@ inline auto Compile(const Device::Handle& a_Device, const Info& a_Info, const Dy
 		const auto &fDepthBiasSlopeFactor = dynamicDepthBias ? a_ExecutionState.dynamicStates.depthBiasSlopeFactor : info.depthBiasSlopeFactor;
 		const auto &fDepthBiasClamp = dynamicDepthBias ? a_ExecutionState.dynamicStates.depthBiasClamp : info.depthBiasClamp;
 		const auto &fLineWidth = dynamicLineWidth ? a_ExecutionState.dynamicStates.lineWidth : info.lineWidth;
-		const auto &eFrontFace = dynamicFrontFace ? info.frontFace : a_ExecutionState.dynamicStates.frontFace;
-		const auto &eCullMode = dynamicCullMode ? info.cullMode : a_ExecutionState.dynamicStates.cullMode;
+		const auto &eFrontFace = dynamicFrontFace ? a_ExecutionState.dynamicStates.frontFace : info.frontFace;
+		const auto &eCullMode = dynamicCullMode ? a_ExecutionState.dynamicStates.cullMode : info.cullMode;
 		bRasterizerDiscardEnable ? glEnable(GL_RASTERIZER_DISCARD) : glDisable(GL_RASTERIZER_DISCARD);
 		info.depthClampEnable ? glEnable(GL_DEPTH_CLAMP) : glDisable(GL_DEPTH_CLAMP);
 		bDepthBiasEnable ? glEnable(info.polygonOffsetMode) : glDisable(info.polygonOffsetMode);
@@ -129,8 +129,11 @@ inline auto Compile(const Device::Handle& a_Device, const Info& a_Info, const Dy
 			fDepthBiasClamp);
 		glLineWidth(fLineWidth);
 		glFrontFace(eFrontFace);
-		eCullMode != GL_NONE ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
-		glCullFace(eCullMode);
+		if (eCullMode != GL_NONE) {
+			glEnable(GL_CULL_FACE);
+			glCullFace(eCullMode);
+		}
+		else glDisable(GL_CULL_FACE);
 	};
 }
 static inline auto Default(const Device::Handle& a_Device)

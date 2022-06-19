@@ -6,8 +6,10 @@
 */
 #pragma once
 
-#include <Image/CompareOp.hpp>
+#include <Common/Compare.hpp>
 #include <Image/Filter.hpp>
+
+OCRA_DECLARE_HANDLE(OCRA::Image::Sampler);
 
 namespace OCRA::Image::Sampler {
 enum class MipMapMode {
@@ -39,9 +41,10 @@ struct Info {
     bool anisotropyEnable { false };
     float maxAnisotropy { 0 };
     bool compareEnable { false };
-    CompareOp compareOp { CompareOp::Unknown };
+    Compare::Operation compareOp { Compare::Operation::Unknown };
     float minLod { 0 };
     float maxLod { 1000 };
     BorderColor borderColor { TransparentBlack };
 };
+Handle Create(const Device::Handle& a_Device, const Info& a_Info);
 }

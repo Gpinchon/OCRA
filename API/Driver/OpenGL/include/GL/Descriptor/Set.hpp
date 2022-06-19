@@ -32,9 +32,13 @@ struct Impl
 		const auto& srcData = a_Copy.srcSet->data.at(a_Copy.dstBinding);
 		dstData = srcData;
 	}
-	void Apply() {
+	void Bind() {
 		for (auto& setData : data)
-			setData.Apply();
+			setData.Bind();
+	}
+	void Unbind() {
+		for (auto& setData : data)
+			setData.Unbind();
 	}
 	const SetLayout::Handle layout;
 	std::vector<Data> data;

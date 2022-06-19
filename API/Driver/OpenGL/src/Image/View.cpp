@@ -68,6 +68,8 @@ static inline auto CreateImageView(const Device::Handle& a_Device, const Info& a
 Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
 	: device(a_Device)
 	, info(a_Info)
+	, target(GetGLType(info.type))
+	, format(Image::GetGLSizedFormat(a_Info.format))
 	, handle(CreateImageView(a_Device, a_Info))
 {}
 Impl::~Impl()

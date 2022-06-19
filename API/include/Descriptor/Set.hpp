@@ -5,12 +5,11 @@
 #include <Image/Layout.hpp>
 
 #include <vector>
-#include <variant>
+#include <optional>
 
 OCRA_DECLARE_HANDLE(OCRA::Device);
 OCRA_DECLARE_HANDLE(OCRA::Descriptor::Set);
 OCRA_DECLARE_HANDLE(OCRA::Buffer);
-OCRA_DECLARE_HANDLE(OCRA::Buffer::View);
 OCRA_DECLARE_HANDLE(OCRA::Image::Sampler);
 OCRA_DECLARE_HANDLE(OCRA::Image::View);
 
@@ -35,11 +34,10 @@ struct WriteOperation
     uint32_t    dstArrayElement{ 0 };
     uint32_t    dstCount{ 0 };
     Type        type{ Type::Unknown };
-	std::variant<
-        std::vector<uint8_t>,
-		BufferInfo,
-		ImageInfo,
-		Buffer::View::Handle> data;
+    std::optional<std::vector<uint8_t>> inlineUniformBlock;
+    std::optional<BufferInfo>           bufferInfo;
+    std::optional<ImageInfo>            imageInfo;
+    std::optional<Buffer::Handle>       texelBuffer;
 };
 struct CopyOperation
 {

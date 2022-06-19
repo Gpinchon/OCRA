@@ -69,7 +69,7 @@ PushConstants::~PushConstants()
 
 void PushConstants::Bind() {
 	if (size > 0) {
-		const auto currentOffset = offset * offsetAlignment;
+		const auto currentOffset = size_t(offset * offsetAlignment);
 		glBindBufferRange(GL_UNIFORM_BUFFER, PushConstantBinding, bufferHandle, currentOffset, size);
 	}
 }

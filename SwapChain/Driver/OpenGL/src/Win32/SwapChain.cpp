@@ -192,19 +192,19 @@ void Impl::PresentNV(const Queue::Handle& a_Queue)
 {
     const auto& image = images.at(backBufferIndex);
     const auto extent = image->info.extent;
-    workerThread.PushCommand([this, queue = a_Queue, extent] {
-        queue->PushCommand([this, extent] {
-            const auto& image = images.at(backBufferIndex);
-            auto sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
-            glClientWaitSync(sync, 0, 1000);
-            glDeleteSync(sync);
-            WIN32_CHECK_ERROR(wglCopyImageSubDataNV(
-                nullptr, image->handle, image->target, //use current context
-                0, 0, 0, 0,
-                HGLRC(hglrc), presentTexture->handle, presentTexture->target,
-                0, 0, 0, 0,
-                extent.width, extent.height, 1));
-        }, true);
+    a_Queue->PushCommand([this, extent] {
+        const auto& image = images.at(backBufferIndex);
+        auto sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+        glClientWaitSync(sync, 0, 1000);
+        glDeleteSync(sync);
+        WIN32_CHECK_ERROR(wglCopyImageSubDataNV(
+            nullptr, image->handle, image->target, //use current context
+            0, 0, 0, 0,
+            HGLRC(hglrc), presentTexture->handle, presentTexture->target,
+            0, 0, 0, 0,
+            extent.width, extent.height, 1));
+    }, true);
+    workerThread.PushCommand([this, extent] {
         presentGeometry->Draw();
         WIN32_CHECK_ERROR(SwapBuffers(HDC(hdc)));
     }, info.presentMode != PresentMode::Immediate);
@@ -215,18 +215,18 @@ void Impl::PresentGL(const Queue::Handle& a_Queue)
 {
     const auto& image = images.at(backBufferIndex);
     const auto extent = image->info.extent;
-    workerThread.PushCommand([this, queue = a_Queue, extent] {
-        queue->PushCommand([this, extent] {
-            const auto& image = images.at(backBufferIndex);
-            glBindTexture(image->target, image->handle);
-            glGetTexImage(
-                image->target,
-                0,
-                image->dataFormat,
-                image->dataType,
-                presentPixels->GetPtr());
-            glBindTexture(image->target, 0);
-        }, true);
+    a_Queue->PushCommand([this, extent] {
+        const auto& image = images.at(backBufferIndex);
+        glBindTexture(image->target, image->handle);
+        glGetTexImage(
+            image->target,
+            0,
+            image->dataFormat,
+            image->dataType,
+            presentPixels->GetPtr());
+        glBindTexture(image->target, 0);
+    }, true);
+    workerThread.PushCommand([this, extent] {
         presentPixels->Flush();
         glTexSubImage2D(
             presentTexture->target, 0,

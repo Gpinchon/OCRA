@@ -20,6 +20,8 @@ struct Impl {
     ~Impl();
 	const Device::WeakHandle device;
 	const Info info;
+	const uint32_t target;
+	const uint32_t format;
     const uint32_t handle;
 };
 }

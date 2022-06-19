@@ -52,6 +52,7 @@ set(OCRA_IMPL_HEADER_FILES
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Descriptor/SetLayout.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Image/Format.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Image/Image.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Image/Sampler.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Image/View.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Queue/Fence.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Queue/Queue.hpp
@@ -93,6 +94,7 @@ set(OCRA_IMPL_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Descriptor/Set.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Descriptor/SetLayout.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Image/Image.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Image/Sampler.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Image/View.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/Graphics.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/Layout.cpp

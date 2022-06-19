@@ -39,12 +39,17 @@ void BindDescriptorSets(
         bindingPoint = size_t(a_BindingPoint),
         descriptorSets](Buffer::ExecutionState& a_ExecutionState) {
         assert(descriptorSets.pipelineLayout == a_ExecutionState.pipelineState.at(bindingPoint)->layout);
-        a_ExecutionState.descriptorSets.at(bindingPoint) = descriptorSets;
-        for (auto& set : descriptorSets.descriptorSets) {
-            set->Apply();
+        if (a_ExecutionState.descriptorSets.at(bindingPoint) != descriptorSets) {
+            for (auto& set : a_ExecutionState.descriptorSets.at(bindingPoint).descriptorSets) {
+                set->Unbind();
+            }
+            for (auto& set : descriptorSets.descriptorSets) {
+                set->Bind();
+            }
+            pushConstants.Bind();
+            a_ExecutionState.descriptorSets.at(bindingPoint) = descriptorSets;
         }
-        //TODO : use descriptorSets.pipelineLayout->info.pushConstants
-        pushConstants.Bind();
+
     });
 }
 }

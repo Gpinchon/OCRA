@@ -17,6 +17,7 @@
 
 #include <vector>
 #include <array>
+#include <algorithm>
 
 OCRA_DECLARE_HANDLE(OCRA::Pipeline);
 OCRA_DECLARE_HANDLE(OCRA::Buffer);
@@ -69,6 +70,14 @@ struct DescriptorSets {
 	Pipeline::Layout::Handle pipelineLayout;
 	std::vector<Descriptor::Set::Handle> descriptorSets;
 	std::vector<uint32_t> dynamicOffset;
+	bool operator!=(const DescriptorSets& a_Other) {
+		return
+			pipelineLayout != a_Other.pipelineLayout ||
+			descriptorSets.size() != a_Other.descriptorSets.size() ||
+			!std::equal(descriptorSets.begin(), descriptorSets.end(), a_Other.descriptorSets.begin()) ||
+			dynamicOffset.size() != a_Other.dynamicOffset.size() ||
+			!std::equal(dynamicOffset.begin(), dynamicOffset.end(), a_Other.dynamicOffset.begin());
+	}
 };
 struct ExecutionState {
 	ExecutionState() {

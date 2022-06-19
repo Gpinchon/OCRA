@@ -4,6 +4,7 @@
 #include <Device.hpp>
 #include <FrameBuffer.hpp>
 #include <Memory.hpp>
+#include <Buffer.hpp>
 #include <RenderPass.hpp>
 #include <Surface.hpp>
 #include <SwapChain.hpp>
@@ -15,7 +16,9 @@
 #include <Command/Scissor.hpp>
 #include <Command/ViewPort.hpp>
 #include <Pipeline/Layout.hpp>
+#include <Descriptor/Pool.hpp>
 #include <Descriptor/Set.hpp>
+#include <Descriptor/SetLayout.hpp>
 #include <Queue/Fence.hpp>
 #include <Common/Vec3.hpp>
 
@@ -27,7 +30,7 @@
 #include <Pipeline/Graphics.hpp>
 
 using namespace OCRA;
-constexpr auto VSync = false;
+constexpr auto VSync = true;
 
 namespace OCRA {
 template <size_t C, size_t R, typename T>
@@ -64,7 +67,7 @@ struct Mat<4, 4, T> {
         return value[a_Col];
     }
     template<typename T>
-    auto Rotate(Mat<4, 4, T> const& a_M, T a_Angle, Vec<3, T> const& a_V)
+    static auto Rotate(Mat<4, 4, T> const& a_M, T a_Angle, Vec<3, T> const& a_V)
     {
         T const a = a_Angle;
         T const c = cos(a);
@@ -149,9 +152,83 @@ Vec3 HSVtoRGB(float fH, float fS, float fV) {
     return { fR, fG, fB };
 }
 
+template<typename T, size_t Binding = 0>
+struct Uniform {
+    typedef T value_type;
+    Uniform(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device)
+        : device(a_Device)
+    {
+        {
+            memory = AllocateMemory(a_PhysicalDevice, a_Device, sizeof(value_type), PhysicalDevice::MemoryPropertyFlagBits::HostVisible);
+            Buffer::Info bufferInfo{};
+            bufferInfo.size = sizeof(value_type);
+            bufferInfo.usage = Buffer::UsageFlagBits::UniformBuffer;
+            bufferInfo.queueFamilyIndices.push_back(0);
+            buffer = Buffer::Create(a_Device, bufferInfo);
+            Buffer::BindMemory(device, buffer, memory, 0);
+        }
+        {
+            Descriptor::Pool::Info poolInfo{};
+            poolInfo.maxSets = 4096;
+            poolInfo.sizes = {};
+            descriptorPool = Descriptor::Pool::Create(device, poolInfo);
+        }
+        {
+            Descriptor::SetLayout::Binding binding;
+            binding.binding = Binding;
+            binding.count = 1;
+            binding.type = Descriptor::Type::UniformBuffer;
+            Descriptor::SetLayout::Info info;
+            info.bindings.push_back(binding);
+            descriptorSetLayout = Descriptor::SetLayout::Create(a_Device, info);
+        }
+        {
+            Descriptor::Pool::AllocateInfo allocateInfo{};
+            allocateInfo.layouts.push_back(descriptorSetLayout);
+            allocateInfo.pool = descriptorPool;
+            descriptorSet = Descriptor::Pool::AllocateSet(device, allocateInfo).front();
+        }
+        {
+            Descriptor::Set::BufferInfo info;
+            info.buffer = buffer;
+            info.offset = 0;
+            info.range = sizeof(value_type);
+            std::vector<Descriptor::Set::WriteOperation> writeOperations(1);
+            Descriptor::Set::BufferInfo bufferInfo;
+            bufferInfo.buffer = buffer;
+            bufferInfo.offset = 0;
+            bufferInfo.range = sizeof(value_type);
+            writeOperations.front().bufferInfo = bufferInfo;
+            writeOperations.front().dstSet = descriptorSet;
+            writeOperations.front().dstBinding = Binding;
+            writeOperations.front().type = Descriptor::Type::UniformBuffer;
+            Descriptor::Set::Update(device, writeOperations, {});
+        }
+       
+    }
+    void Update() {
+        Memory::MappedRange range;
+        range.length = sizeof(value_type);
+        range.memory = memory;
+        auto ptr = Memory::Map(device, range);
+        std::memcpy(ptr, &data, sizeof(value_type));
+        Memory::Unmap(device, memory);
+    }
+    value_type data;
+    Device::Handle device;
+    Memory::Handle memory;
+    Buffer::Handle buffer;
+    Descriptor::Pool::Handle      descriptorPool;
+    Descriptor::Set::Handle       descriptorSet;
+    Descriptor::SetLayout::Handle descriptorSetLayout;
+};
+
+struct ProjectionMatrix {
+    Mat4x4 matrix{};
+};
+
 struct PushConstants {
     Vec3 color;
-    int  padding;
 };
 
 struct Vertex {
@@ -212,6 +289,7 @@ struct GraphicsPipelineTestApp : TestApp
         , surface(CreateSurface(instance, GetModuleHandle(0), (void*)window.nativeHandle))
         , physicalDevice(Instance::EnumeratePhysicalDevices(instance).front())
         , device(CreateDevice(physicalDevice))
+        , projectionMatrix(physicalDevice, device)
     {
         window.OnResize = [this](const Window&, const uint32_t a_Width, const uint32_t a_Height) {
             if (!close) OnResize(a_Width, a_Height);
@@ -235,8 +313,11 @@ struct GraphicsPipelineTestApp : TestApp
     void Loop()
     {
         FPSCounter fpsCounter(1);
-        auto printTime = std::chrono::high_resolution_clock::now();
+        auto lastTime = std::chrono::high_resolution_clock::now();
+        auto printTime = lastTime;
+        auto uniformUpdateTime = lastTime;
         while (true) {
+            
             fpsCounter.StartFrame();
             window.PushEvents();
             if (close) break;
@@ -246,8 +327,18 @@ struct GraphicsPipelineTestApp : TestApp
             RecordMainCommandBuffer();
             SubmitCommandBuffer(queue, mainCommandBuffer);
             SwapChain::Present(queue, presentInfo);
-            const auto now = std::chrono::high_resolution_clock::now();
             fpsCounter.EndFrame();
+            const auto now = std::chrono::high_resolution_clock::now();
+            const auto delta = std::chrono::duration<double, std::milli>(now - lastTime).count();
+            lastTime = now;
+            auto uniformUpdateDelta = std::chrono::duration<double, std::milli>(now - uniformUpdateTime).count();
+            if (uniformUpdateDelta >= 16)
+            {
+                uniformUpdateTime = now;
+                const float rotationAngle = uniformUpdateDelta * 0.0005;
+                projectionMatrix.data.matrix = Mat4x4::Rotate(projectionMatrix.data.matrix, rotationAngle, Vec3(0.f, 1.f, 0.f));
+                projectionMatrix.Update();
+            }
             if (std::chrono::duration<double, std::milli>(now - printTime).count() >= 48) {
                 printTime = now;
                 fpsCounter.Print();
@@ -297,18 +388,20 @@ struct GraphicsPipelineTestApp : TestApp
             shaderInfo.type = ShaderCompiler::Shader::Type::Vertex;
             shaderInfo.entryPoint = "main";
             shaderInfo.source = {
-                "#version 450                                 \n"
-                "layout(location = 0) in vec2 inPosition;     \n"
-                "layout(location = 1) in vec3 inColor;        \n"
-                "layout(push_constant) uniform PushConstants {\n"
-                "   vec3 color;                               \n"
-                "   int  padding;                             \n"
-                "} constants;                                 \n"
-                "layout(location = 0) out vec3 fragColor;     \n"
-                "void main() {                                \n"
-                "   gl_Position = vec4(inPosition, 0.0, 1.0); \n"
-                "   fragColor = constants.color;              \n"
-                "}                                            \n"
+                "#version 450                                               \n"
+                "layout(location = 0) in vec2 inPosition;                   \n"
+                "layout(location = 1) in vec3 inColor;                      \n"
+                "layout(push_constant) uniform PushConstants {              \n"
+                "   vec3 color;                                             \n"
+                "} constants;                                               \n"
+                "layout(binding = 0) uniform Projection {                   \n"
+                "   mat4 matrix;                                            \n"
+                "} proj;                                                    \n"
+                "layout(location = 0) out vec3 fragColor;                   \n"
+                "void main() {                                              \n"
+                "   gl_Position = proj.matrix * vec4(inPosition, 0.0, 1.0); \n"
+                "   fragColor = constants.color;                            \n"
+                "}                                                          \n"
             };
             const auto vertexShader = ShaderCompiler::Shader::Create(compiler, shaderInfo);
             Shader::Module::Info shaderModuleInfo;
@@ -359,11 +452,13 @@ struct GraphicsPipelineTestApp : TestApp
             Pipeline::Layout::PushConstantRange pushConstantRange;
             pushConstantRange.size = sizeof(PushConstants);
             pushConstantRange.stage = Shader::Stage::StageFlagBits::Vertex;
+            layoutInfo.setLayouts.push_back(projectionMatrix.descriptorSetLayout);
             layoutInfo.pushConstants.push_back(pushConstantRange);
             layout = Pipeline::Layout::Create(device, layoutInfo);
         }
         graphicsPipelineInfo.layout = layout;
         graphicsPipelineInfo.renderPass = renderPass;
+        graphicsPipelineInfo.rasterizationState.cullMode = Pipeline::RasterizationState::CullMode::None;
         graphicsPipelineInfo.inputAssemblyState.topology = Primitive::Topology::TriangleList;
         graphicsPipelineInfo.inputAssemblyState.primitiveRestartEnable = false;
         graphicsPipelineInfo.viewPortState.viewPorts = { viewport };
@@ -422,7 +517,7 @@ struct GraphicsPipelineTestApp : TestApp
         Command::BeginRenderPass(drawCommandBuffer, renderPassBeginInfo, Command::SubPassContents::Inline);
         {
             Command::BindPipeline(drawCommandBuffer, Pipeline::BindingPoint::Graphics, graphicsPipeline);
-            Command::BindDescriptorSets(drawCommandBuffer, Pipeline::BindingPoint::Graphics, graphicsPipelineInfo.layout, 0, {}, {});
+            Command::BindDescriptorSets(drawCommandBuffer, Pipeline::BindingPoint::Graphics, graphicsPipelineInfo.layout, 0, { projectionMatrix.descriptorSet }, {});
             Command::BindVertexBuffers(drawCommandBuffer, 0, { vertexBuffer }, { 0 });
             Command::Draw(drawCommandBuffer, vertices.size(), 1, 0, 0);
         }
@@ -506,6 +601,7 @@ struct GraphicsPipelineTestApp : TestApp
     Buffer::Handle          vertexBuffer;
     Memory::Handle          vertexBufferMemory;
     std::vector<Shader::Stage::Handle>   shaderStages;
+    Uniform<ProjectionMatrix, 0> projectionMatrix;
 };
 
 int main()
