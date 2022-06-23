@@ -13,12 +13,18 @@ struct Info;
 
 
 
-namespace OCRA::Pipeline::TessellationState {
-inline std::function<void(Command::Buffer::ExecutionState&)> Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info&)
+namespace OCRA::Pipeline::TessellationState
 {
-	if (a_Info.patchControlPoints > 0) return[patchControlPoints = a_Info.patchControlPoints](Command::Buffer::ExecutionState&) {
-		glPatchParameteri(GL_PATCH_VERTICES, patchControlPoints);
-	};
-	else return [](Command::Buffer::ExecutionState&) {};
-}
+struct Compile
+{
+	Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info&)
+		: patchControlPoints(a_Info.patchControlPoints)
+	{}
+	void operator()(Command::Buffer::ExecutionState& a_ExecutionState) const
+	{
+		if (patchControlPoints > 0)
+			glPatchParameteri(GL_PATCH_VERTICES, patchControlPoints);
+	}
+	const uint32_t patchControlPoints;
+};
 }

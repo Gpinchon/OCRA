@@ -13,7 +13,7 @@ struct Impl {
 		: layout(a_Layout)
 		, bindingPoint(a_BindingPoint)
 	{};
-	std::function<void(Command::Buffer::ExecutionState&)> Apply;
+	virtual void Apply(Command::Buffer::ExecutionState&) const = 0;
 	const Layout::Handle     layout;
 	const BindingPoint		 bindingPoint;
 };

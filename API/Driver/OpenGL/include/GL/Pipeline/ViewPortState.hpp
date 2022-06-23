@@ -15,14 +15,17 @@
 #include <GL/glew.h>
 
 namespace OCRA::Pipeline::ViewPortState {
-inline auto Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info& a_DynamicState)
+struct Compile
 {
-	return [
-		info = a_Info,
-		dynamicViewport(a_DynamicState.Contains(DynamicState::State::Viewport)),
-		dynamicScissor(a_DynamicState.Contains(DynamicState::State::Scissor))
-	](Command::Buffer::ExecutionState& a_ExecutionState) {
-		const auto& scissorsVector = dynamicScissor ? a_ExecutionState.dynamicStates.scissors : info.scissors;
+	Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info& a_DynamicState)
+		: dynamicViewport(a_DynamicState.Contains(DynamicState::State::Viewport))
+		, dynamicScissor(a_DynamicState.Contains(DynamicState::State::Scissor))
+		, viewPorts(a_Info.viewPorts)
+		, scissors(a_Info.scissors)
+	{}
+	void operator()(Command::Buffer::ExecutionState& a_ExecutionState) const
+	{
+		const auto& scissorsVector = dynamicScissor ? a_ExecutionState.dynamicStates.scissors : scissors;
 		for (auto index = 0u; index < scissorsVector.size(); ++index) {
 			const auto& scissor = scissorsVector.at(index);
 			glScissorIndexed(
@@ -31,7 +34,7 @@ inline auto Compile(const Device::Handle& a_Device, const Info& a_Info, const Dy
 				scissor.extent.width, scissor.extent.height
 			);
 		}
-		const auto& viewPortsVector = dynamicViewport ? a_ExecutionState.dynamicStates.viewPorts : info.viewPorts;
+		const auto& viewPortsVector = dynamicViewport ? a_ExecutionState.dynamicStates.viewPorts : viewPorts;
 		for (auto index = 0u; index < viewPortsVector.size(); ++index) {
 			const auto& viewPort = viewPortsVector.at(index);
 			glViewportIndexedf(
@@ -44,6 +47,10 @@ inline auto Compile(const Device::Handle& a_Device, const Info& a_Info, const Dy
 				viewPort.depthRange.near, viewPort.depthRange.far
 			);
 		}
-	};
-}
+	}
+	const bool dynamicViewport;
+	const bool dynamicScissor;
+	const std::vector<ViewPort> viewPorts;
+	const std::vector<Rect2D>	scissors;
+};
 }

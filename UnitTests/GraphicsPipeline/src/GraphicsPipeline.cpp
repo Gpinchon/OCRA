@@ -30,7 +30,7 @@
 #include <Pipeline/Graphics.hpp>
 
 using namespace OCRA;
-constexpr auto VSync = true;
+constexpr auto VSync = false;
 
 namespace OCRA {
 template <size_t C, size_t R, typename T>
