@@ -11,7 +11,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS_RELEASE "-Ox")
 
-if (NOT Config EXISTS)
+if (NOT Config)
   FetchContent_Declare(
     CONFIG
     GIT_REPOSITORY  https://github.com/Gpinchon/Config.git
@@ -19,7 +19,7 @@ if (NOT Config EXISTS)
   )
   FetchContent_MakeAvailable(CONFIG)
   set_subdirectory_folder("3rdparty/Config" ${config_SOURCE_DIR})
-endif (NOT Config EXISTS)
+endif (NOT Config)
 
 add_subdirectory(API)
 add_subdirectory(SwapChain)
