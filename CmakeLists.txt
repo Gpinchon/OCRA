@@ -1,14 +1,25 @@
 cmake_minimum_required(VERSION 3.19)
 cmake_policy(SET CMP0074 NEW)
 
+include(FetchContent)
+include(cmake-tools/GroupSources.cmake)
+include(cmake-tools/add_subdirectory_with_folder.cmake)
+
 project(OCRA LANGUAGES CXX)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS_RELEASE "-Ox")
 
-include(cmake-tools/GroupSources.cmake)
-include(cmake-tools/add_subdirectory_with_folder.cmake)
+if (NOT Config EXISTS)
+  FetchContent_Declare(
+    CONFIG
+    GIT_REPOSITORY  https://github.com/Gpinchon/Config.git
+    GIT_TAG         origin/main
+  )
+  FetchContent_MakeAvailable(CONFIG)
+  set_subdirectory_folder("3rdparty/Config" ${config_SOURCE_DIR})
+endif (NOT Config EXISTS)
 
 add_subdirectory(API)
 add_subdirectory(SwapChain)

@@ -81,6 +81,7 @@ target_include_directories(OCRA-ShaderCompiler-API PUBLIC
   "${CMAKE_CURRENT_SOURCE_DIR}/include"
 )
 target_link_libraries(OCRA-ShaderCompiler-API PUBLIC
+  Config
   glslang
   SPIRV
   glslang-default-resource-limits

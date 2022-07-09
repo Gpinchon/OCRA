@@ -1,5 +1,7 @@
 #include <ShaderCompiler/Shader.hpp>
 
+#include <Config.hpp>
+
 #include <glslang\Public\ShaderLang.h>
 #include <SPIRV\GlslangToSpv.h>
 #include <StandAlone\ResourceLimits.h>
@@ -59,12 +61,11 @@ struct Impl
 	const Info info;
 };
 
-constexpr auto SubPassInputOffset = 16;
-constexpr auto SetSize = 16;
-constexpr auto PushConstantBinding = 64;
-
 std::vector<uint32_t> Impl::Compile()
 {
+	const auto& setSize = Config::Global().Get("OCRA::Shader::SetSize", 16);
+	const auto& subPassInputOffset = Config::Global().Get("OCRA::Shader::SubPassInputOffset", 16);
+	const auto& pushConstantBinding = Config::Global().Get("OCRA::Shader::PushConstantBinding", 64);
 	const auto eshLang = GetEshLang(info.type);
 	//Do some reflection
 	std::string glslCode;
@@ -98,13 +99,14 @@ std::vector<uint32_t> Impl::Compile()
 			auto set = glsl.get_decoration(spi.id, spv::DecorationDescriptorSet);
 			auto binding = glsl.get_decoration(spi.id, spv::DecorationBinding);
 			auto inputIndex = glsl.get_decoration(spi.id, spv::DecorationInputAttachmentIndex);
+
 			std::cout << "Found Subpass Input " << spi.name << " set = " << set << " binding = " << binding << " input_attachment_index " << inputIndex << std::endl;
-			assert(binding < SetSize);
-			glsl.set_decoration(spi.id, spv::DecorationBinding, SubPassInputOffset + binding + SetSize * set);
-			glsl.set_decoration(spi.id, spv::DecorationLocation, SubPassInputOffset + binding + SetSize * set);
+			assert(binding < setSize);
+			glsl.set_decoration(spi.id, spv::DecorationBinding, subPassInputOffset + binding + setSize * set);
+			glsl.set_decoration(spi.id, spv::DecorationLocation, subPassInputOffset + binding + setSize * set);
 		}
 		for (const auto& pc : resources.push_constant_buffers) {
-			glsl.set_decoration(pc.id, spv::DecorationBinding, PushConstantBinding);
+			glsl.set_decoration(pc.id, spv::DecorationBinding, pushConstantBinding);
 		}
 		for (const auto& ss : resources.separate_samplers) {
 			if (!glsl.has_decoration(ss.id, spv::DecorationBinding))

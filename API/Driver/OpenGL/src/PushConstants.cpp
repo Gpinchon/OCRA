@@ -1,11 +1,12 @@
 #include <GL/PushConstants.hpp>
 #include <GL/Device.hpp>
 
+#include <Config.hpp>
+
 #include <GL/glew.h>
 
 namespace OCRA
 {
-constexpr auto PushConstantBinding = 64;
 constexpr auto PushConstantMultiBuffering = 3;
 int RoundUp(int numToRound, int multiple)
 {
@@ -70,7 +71,8 @@ PushConstants::~PushConstants()
 void PushConstants::Bind() {
 	if (size > 0) {
 		const auto currentOffset = size_t(offset * offsetAlignment);
-		glBindBufferRange(GL_UNIFORM_BUFFER, PushConstantBinding, bufferHandle, currentOffset, size);
+		const auto& pushConstantBinding = Config::Global().Get("OCRA::Shader::PushConstantBinding", 64);
+		glBindBufferRange(GL_UNIFORM_BUFFER, pushConstantBinding, bufferHandle, currentOffset, size);
 	}
 }
 
