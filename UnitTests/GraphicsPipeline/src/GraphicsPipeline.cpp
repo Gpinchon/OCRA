@@ -292,7 +292,13 @@ struct GraphicsPipelineTestApp : TestApp
         , projectionMatrix(physicalDevice, device)
     {
         window.OnResize = [this](const Window&, const uint32_t a_Width, const uint32_t a_Height) {
+            render = true;
             if (!close) OnResize(a_Width, a_Height);
+        };
+        window.OnMaximize = window.OnResize;
+        window.OnRestore = window.OnResize;
+        window.OnMinimize = [this](const Window&, const uint32_t a_Width, const uint32_t a_Height) {
+            render = false;
         };
         window.OnClose = [this](const Window&) {
             OnClose();
@@ -313,6 +319,10 @@ struct GraphicsPipelineTestApp : TestApp
     void Loop()
     {
         FPSCounter fpsCounter(1);
+        //static auto lastTime = std::chrono::high_resolution_clock::now();
+        //const auto now = std::chrono::high_resolution_clock::now();
+        //const auto delta = std::chrono::duration<double, std::milli>(now - lastTime).count();
+        //lastTime = now;
         auto lastTime = std::chrono::high_resolution_clock::now();
         auto printTime = lastTime;
         auto uniformUpdateTime = lastTime;
@@ -321,16 +331,17 @@ struct GraphicsPipelineTestApp : TestApp
             fpsCounter.StartFrame();
             window.PushEvents();
             if (close) break;
-            swapChainImage = SwapChain::AcquireNextImage(device, swapChain, std::chrono::nanoseconds(15000000), nullptr, imageAcquisitionFence);
-            Queue::Fence::WaitFor(device, imageAcquisitionFence, std::chrono::nanoseconds(15000000));
-            Queue::Fence::Reset(device, { imageAcquisitionFence });
-            RecordMainCommandBuffer();
-            SubmitCommandBuffer(queue, mainCommandBuffer);
-            SwapChain::Present(queue, presentInfo);
-            fpsCounter.EndFrame();
+            if (!render) continue;
             const auto now = std::chrono::high_resolution_clock::now();
             const auto delta = std::chrono::duration<double, std::milli>(now - lastTime).count();
             lastTime = now;
+            swapChainImage = SwapChain::AcquireNextImage(device, swapChain, std::chrono::nanoseconds(15000000), nullptr, imageAcquisitionFence);
+            Queue::Fence::WaitFor(device, imageAcquisitionFence, std::chrono::nanoseconds(15000000));
+            Queue::Fence::Reset(device, { imageAcquisitionFence });
+            RecordMainCommandBuffer(delta);
+            SubmitCommandBuffer(queue, mainCommandBuffer);
+            SwapChain::Present(queue, presentInfo);
+            fpsCounter.EndFrame();
             auto uniformUpdateDelta = std::chrono::duration<double, std::milli>(now - uniformUpdateTime).count();
             if (uniformUpdateDelta >= 16)
             {
@@ -501,7 +512,7 @@ struct GraphicsPipelineTestApp : TestApp
             frameBuffer = FrameBuffer::Create(device, frameBufferInfo);
         }
     }
-    void RecordDrawCommandBuffer()
+    void RecordDrawCommandBuffer(const double a_Delta)
     {
         Command::Buffer::BeginInfo bufferBeginInfo{};
         bufferBeginInfo.flags = Command::Buffer::UsageFlagBits::None;
@@ -513,7 +524,7 @@ struct GraphicsPipelineTestApp : TestApp
         renderPassBeginInfo.renderArea.extent = extent;
         renderPassBeginInfo.colorClearValues.push_back(ColorValue(0.9529f, 0.6235f, 0.0941f, 1.f));
         Command::Buffer::Begin(drawCommandBuffer, bufferBeginInfo);
-        UpdatePushConstants();
+        UpdatePushConstants(a_Delta);
         Command::BeginRenderPass(drawCommandBuffer, renderPassBeginInfo, Command::SubPassContents::Inline);
         {
             Command::BindPipeline(drawCommandBuffer, Pipeline::BindingPoint::Graphics, graphicsPipeline);
@@ -524,14 +535,10 @@ struct GraphicsPipelineTestApp : TestApp
         Command::EndRenderPass(drawCommandBuffer);
         Command::Buffer::End(drawCommandBuffer);
     }
-    void UpdatePushConstants()
+    void UpdatePushConstants(const double a_Delta)
     {
         static float hue = 0;
-        static auto lastTime = std::chrono::high_resolution_clock::now();
-        const auto now = std::chrono::high_resolution_clock::now();
-        const auto delta = std::chrono::duration<double, std::milli>(now - lastTime).count();
-        lastTime = now;
-        hue += 0.05 * delta;
+        hue += 0.05 * a_Delta;
         hue = hue > 360 ? 0 : hue;
         PushConstants pushConstants;
         pushConstants.color = HSVtoRGB(hue, 0.5f, 1.f);
@@ -539,9 +546,14 @@ struct GraphicsPipelineTestApp : TestApp
         std::memcpy(data.data(), &pushConstants, sizeof(pushConstants));
         Command::PushConstants(drawCommandBuffer, graphicsPipelineInfo.layout, 0, data);
     }
-    void RecordMainCommandBuffer()
+    void RecordMainCommandBuffer(float a_Delta)
     {
-        RecordDrawCommandBuffer();
+        static double drawCommandDelta = 0;
+        drawCommandDelta += a_Delta;
+        if (drawCommandDelta >= 0.032) {
+            RecordDrawCommandBuffer(drawCommandDelta);
+            drawCommandDelta = 0;
+        }
         Command::Buffer::BeginInfo bufferBeginInfo{};
         bufferBeginInfo.flags = Command::Buffer::UsageFlagBits::None;
         Command::Buffer::Reset(mainCommandBuffer);
@@ -574,6 +586,7 @@ struct GraphicsPipelineTestApp : TestApp
     {
         close = true;
     }
+    bool                     render{ true };
     bool                     close{ false };
     Window                   window;
     uExtent2D                extent{ 1280, 720 };

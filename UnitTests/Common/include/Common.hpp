@@ -92,6 +92,9 @@ struct Window
 	void Show();
 	void Update();
 	std::function<void(const Window&, const uint32_t, const uint32_t)> OnResize;
+    std::function<void(const Window&, const uint32_t, const uint32_t)> OnMinimize;
+    std::function<void(const Window&, const uint32_t, const uint32_t)> OnMaximize;
+    std::function<void(const Window&, const uint32_t, const uint32_t)> OnRestore;
 	std::function<void(const Window&)> OnClose;
 	std::function<void(const Window&)> OnPaint;
 	const void* nativeHandle;

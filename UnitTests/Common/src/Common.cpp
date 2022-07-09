@@ -22,22 +22,28 @@ LRESULT CALLBACK TestWndproc(
     switch (uMsg)
     {
     case WM_PAINT :
-        if (window->OnPaint)
-            window->OnPaint(*window);
-        return DefWindowProc(hwnd, uMsg, wParam, lParam);
+        if (window->OnPaint) window->OnPaint(*window);
         break;
     case WM_SIZE:
-        if (window->OnResize)
-            window->OnResize(*window, LOWORD(lParam), HIWORD(lParam));
+        switch (wParam) {
+        case SIZE_MAXIMIZED:
+            if (window->OnMaximize) window->OnMaximize(*window, LOWORD(lParam), HIWORD(lParam));
+            break;
+        case SIZE_MINIMIZED:
+            if (window->OnMinimize) window->OnMinimize(*window, LOWORD(lParam), HIWORD(lParam));
+            break;
+        case SIZE_RESTORED:
+            if (window->OnRestore) window->OnRestore(*window, LOWORD(lParam), HIWORD(lParam));
+            break;
+        default:
+            if (window->OnResize) window->OnResize(*window, LOWORD(lParam), HIWORD(lParam));
+        }
         break;
     case WM_CLOSE:
-        if (window->OnClose)
-            window->OnClose(*window);
+        if (window->OnClose) window->OnClose(*window);
         break;
-    default:
-        return DefWindowProc(hwnd, uMsg, wParam, lParam);
     }
-    return 0;
+    return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
 namespace OCRA
