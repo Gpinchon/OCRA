@@ -63,9 +63,9 @@ struct Impl
 
 std::vector<uint32_t> Impl::Compile()
 {
-	const auto& setSize = Config::Global().Get("OCRA::Shader::SetSize", 16);
-	const auto& subPassInputOffset = Config::Global().Get("OCRA::Shader::SubPassInputOffset", 16);
-	const auto& pushConstantBinding = Config::Global().Get("OCRA::Shader::PushConstantBinding", 64);
+	const auto& setSize = Config::Global().Get("OCRA::Shader::GL::SetSize", OCRA_SHADER_GL_SET_OFFSET);
+	const auto& subPassInputOffset = Config::Global().Get("OCRA::Shader::GL::SubPassInputOffset", OCRA_SHADER_GL_SUBPASSINPUT_OFFSET);
+	const auto& pushConstantBinding = Config::Global().Get("OCRA::Shader::GL::PushConstantBinding", OCRA_SHADER_GL_PUSHCONSTANT_BINDING);
 	const auto eshLang = GetEshLang(info.type);
 	//Do some reflection
 	std::string glslCode;

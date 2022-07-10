@@ -56,6 +56,7 @@ static inline auto GetBufferPtr(const Device::Handle& a_Device, const uint32_t& 
 PushConstants::PushConstants(const Device::Handle& a_Device)
 	: device(a_Device)
 	, size(256)
+	, bindingIndex(Config::Global().Get("OCRA::Shader::GL::PushConstantBinding", OCRA_SHADER_GL_PUSHCONSTANT_BINDING))
 	, offsetAlignment(PushConstantOffsetAlignment(a_Device))
 	, bufferHandle(CreatePushConstantBuffer(a_Device, size))
 	, bufferPtr(GetBufferPtr(a_Device, bufferHandle, size * PushConstantMultiBuffering))
@@ -70,9 +71,8 @@ PushConstants::~PushConstants()
 
 void PushConstants::Bind() {
 	if (size > 0) {
-		const auto currentOffset = size_t(offset * offsetAlignment);
-		const auto& pushConstantBinding = Config::Global().Get("OCRA::Shader::PushConstantBinding", 64);
-		glBindBufferRange(GL_UNIFORM_BUFFER, pushConstantBinding, bufferHandle, currentOffset, size);
+		const auto currentOffset = offset * offsetAlignment;
+		glBindBufferRange(GL_UNIFORM_BUFFER, bindingIndex, bufferHandle, currentOffset, size);
 	}
 }
 

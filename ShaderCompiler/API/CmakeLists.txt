@@ -63,6 +63,26 @@ FetchContent_MakeAvailable(SPIRV_CROSS)
 set_subdirectory_folder("3rdparty/SPIRV-Cross" ${spirv_cross_SOURCE_DIR})
 # Fetch SPIRV_CROSS
 
+set(
+  OCRA_SHADER_GL_SET_OFFSET 16
+  CACHE STRING "OpenGL Set emulation offset"
+)
+set(
+  OCRA_SHADER_GL_SUBPASSINPUT_OFFSET 16
+  CACHE STRING "OpenGL Subpass input emulation offset"
+)
+set(
+  OCRA_SHADER_GL_PUSHCONSTANT_BINDING 64
+  CACHE STRING "OpenGL Push Constant emulation binding"
+)
+
+add_definitions(
+  -DOCRA_SHADER_GL_SET_OFFSET=${OCRA_SHADER_GL_SET_OFFSET}
+  -DOCRA_SHADER_GL_SUBPASSINPUT_OFFSET=${OCRA_SHADER_GL_SUBPASSINPUT_OFFSET}
+  -DOCRA_SHADER_GL_PUSHCONSTANT_BINDING=${OCRA_SHADER_GL_PUSHCONSTANT_BINDING}
+)
+
+
 set(OCRA_SHADER_COMPILER_API_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/ShaderCompiler/Shader.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/ShaderCompiler/Compiler.hpp

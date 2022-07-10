@@ -17,8 +17,9 @@ struct PushConstants {
 	void Bind();
 	void Update(const size_t& a_Offset, const std::vector<char>& a_Data);
 	const Device::WeakHandle device;
-	const uint32_t	size;
-	const uint32_t	offsetAlignment;
+	const uint16_t	size;
+	const uint16_t  bindingIndex;
+	const uint16_t	offsetAlignment;
 	const uint32_t  bufferHandle;
 	const void*		bufferPtr;
 	//the current offset of pushconstant buffer
