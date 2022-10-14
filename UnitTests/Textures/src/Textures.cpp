@@ -3,12 +3,14 @@
 
 #include <Command/Pool.hpp>
 #include <Command/Buffer.hpp>
+#include <Common/Vec2.hpp>
 #include <Common/Vec3.hpp>
 #include <Common/Vec4.hpp>
 #include <Device.hpp>
 #include <Image/Image.hpp>
 #include <Instance.hpp>
 #include <Memory.hpp>
+#include <Pipeline/VertexInputState.hpp>
 #include <Queue/Fence.hpp>
 #include <Shader/Module.hpp>
 #include <Shader/Stage.hpp>
@@ -95,6 +97,34 @@ Surface::Handle CreateSurface(const Instance::Handle& a_Instance, void* const a_
     return Surface::Win32::Create(a_Instance, info);
 }
 
+struct Vertex {
+    Vec2 pos;
+    Vec2 UV;
+    static auto GetBindingDescriptions() {
+        std::vector<Pipeline::VertexInputState::BindingDescription> bindings(1);
+        bindings.at(0).binding = 0;
+        bindings.at(0).stride = sizeof(Vertex);
+        bindings.at(0).inputRate = Pipeline::VertexInputState::BindingDescription::InputRate::Vertex;
+        return bindings;
+    }
+    static auto GetAttributeDescription() {
+        std::vector<Pipeline::VertexInputState::AttributeDescription> attribs(2);
+        attribs.at(0).binding = 0;
+        attribs.at(0).location = 0;
+        attribs.at(0).format.size = decltype(pos)::length();
+        attribs.at(0).format.normalized = false;
+        attribs.at(0).format.type = VertexType::Float32;
+        attribs.at(0).offset = offsetof(Vertex, pos);
+        attribs.at(1).binding = 0;
+        attribs.at(1).location = 1;
+        attribs.at(1).format.size = decltype(UV)::length();
+        attribs.at(1).format.normalized = false;
+        attribs.at(1).format.type = VertexType::Float32;
+        attribs.at(1).offset = offsetof(Vertex, UV);
+        return attribs;
+    }
+};
+
 struct TexturesTestApp : TestApp
 {
     TexturesTestApp()
@@ -153,15 +183,15 @@ struct TexturesTestApp : TestApp
             shaderInfo.type = ShaderCompiler::Shader::Type::Vertex;
             shaderInfo.entryPoint = "main";
             shaderInfo.source = {
-                "#version 450                                               \n"
-                "layout(location = 0) in vec2 inPosition;                   \n"
-                "layout(location = 1) in vec3 inColor;                      \n"
-                "layout(binding = 0) uniform Projection {                   \n"
-                "   mat4 matrix;                                            \n"
-                "} proj;                                                    \n"
-                "void main() {                                              \n"
-                "   gl_Position = proj.matrix * vec4(inPosition, 0.0, 1.0); \n"
-                "}                                                          \n"
+                "#version 450                                       \n"
+                "layout(location = 0) out vec2 UV;                  \n"
+                "void main() {                                      \n"
+                "   float x = -1.0 + float((gl_VertexIndex & 1) << 2); \n"
+                "   float y = -1.0 + float((gl_VertexIndex & 2) << 1); \n"
+                "   UV.x = (x + 1.0) * 0.5;                         \n"
+                "   UV.y = (y + 1.0) * 0.5;                         \n"
+                "   gl_Position = vec4(x, y, 0, 1);                 \n"
+                "}                                                  \n"
             };
             const auto vertexShader = ShaderCompiler::Shader::Create(compiler, shaderInfo);
             Shader::Module::Info shaderModuleInfo;
@@ -180,9 +210,10 @@ struct TexturesTestApp : TestApp
             shaderInfo.source = {
                 "#version 450                                         \n"
                 "layout(binding = 0) uniform sampler2D uTexture;      \n"
+                "layout(location = 0) in vec2 UV;                     \n"             
                 "layout(location = 0) out vec4 outColor;              \n"
                 "void main() {                                        \n"
-                "    vec4 color = texture(uTexture, gl_FragCoord.xy); \n"
+                "    vec4 color = texture(uTexture, UV);              \n"
                 "    outColor = vec4(color);                          \n"
                 "}                                                    \n"
             };
@@ -282,6 +313,14 @@ struct TexturesTestApp : TestApp
     Texture2D               texture{ device, Image::Format::Uint8_Normalized_RGBA, 16, 16, 1 };
     Memory::Handle          textureTransferMemory;
     Buffer::Handle          textureTransferBuffer;
+    const std::vector<Vertex> vertices = {
+        {{-1.0f,  1.0f}, {1.0f, 0.0f}},
+        {{-1.0f, -1.0f}, {0.0f, 1.0f}},
+        {{ 1.0f,  1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f}, {0.0f, 0.0f}}
+    };
+    Buffer::Handle          vertexBuffer;
+    Memory::Handle          vertexBufferMemory;
     std::vector<Shader::Stage::Handle>   shaderStages;
 };
 
