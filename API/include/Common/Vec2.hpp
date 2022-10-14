@@ -7,7 +7,7 @@ template <typename T>
 struct Vec<2, T> {
 	typedef T value_type;
 	typedef Vec<2, T> type;
-	constexpr auto length() const { return 2; }
+	static constexpr auto length() { return 2; }
 	Vec<2, T>(const T& a_X, const T& a_Y) : x(a_X), y(a_Y) {}
 	union {
 		struct { T x, y; };

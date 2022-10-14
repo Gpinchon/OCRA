@@ -7,7 +7,7 @@ template <typename T>
 struct Vec<4, T> {
 	typedef T value_type;
 	typedef Vec<4, T> type;
-	constexpr auto length() const { return 4; }
+	static constexpr auto length() { return 4; }
 	Vec() : value{ 0, 0, 0, 0 } {}
 	template<typename X, typename Y, typename Z, typename W>
 	Vec(const X& a_X = X(0), const Y& a_Y = Y(0), const Z& a_Z = Z(0), const W& a_W = W(0))
