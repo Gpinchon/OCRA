@@ -109,4 +109,5 @@ enum class Format {
 	S3TC_DXT5_SRGBA,
     MaxValue
 };
+size_t GetPixelSize(const Format&);
 }

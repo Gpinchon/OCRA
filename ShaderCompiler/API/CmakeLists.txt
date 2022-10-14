@@ -36,7 +36,7 @@ FetchContent_Declare(
   GLSLANG
   GIT_REPOSITORY  https://github.com/KhronosGroup/glslang.git
 )
-#option(SKIP_GLSLANG_INSTALL "Skip Installation" ON)
+option(SKIP_GLSLANG_INSTALL "Skip Installation" ON)
 FetchContent_MakeAvailable(GLSLANG)
 set_subdirectory_folder("3rdparty/GLSLang" ${glslang_SOURCE_DIR})
 # Fetch GLSLANG

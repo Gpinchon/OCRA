@@ -125,8 +125,10 @@ Memory::Handle AllocateMemory(const PhysicalDevice::Handle& a_PhysicalDevice, co
 struct TestApp
 {
 	TestApp(const std::string& a_Name)
-		: instance(CreateInstance(a_Name))
+		: name(a_Name)
+        , instance(CreateInstance(name))
 	{}
-	Instance::Handle instance;
+    std::string         name;
+	Instance::Handle    instance;
 };
 }

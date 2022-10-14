@@ -334,10 +334,10 @@ namespace OCRA::Command
 {
 static inline void CheckValidCopy(const BufferImageCopy& a_Copy, const Image::Handle& a_Image)
 {
-    assert(a_Copy.imageOffset.x + a_Copy.imageExtent.width  < a_Image->info.extent.width);
-    assert(a_Copy.imageOffset.y + a_Copy.imageExtent.height < a_Image->info.extent.height);
-    assert(a_Copy.imageOffset.z + a_Copy.imageExtent.depth  < a_Image->info.extent.depth);
-    assert(a_Copy.imageSubresource.level < a_Image->info.mipLevels);
+    assert(a_Copy.imageOffset.x + a_Copy.imageExtent.width  <= a_Image->info.extent.width);
+    assert(a_Copy.imageOffset.y + a_Copy.imageExtent.height <= a_Image->info.extent.height);
+    assert(a_Copy.imageOffset.z + a_Copy.imageExtent.depth  <= a_Image->info.extent.depth);
+    assert(a_Copy.imageSubresource.level <= a_Image->info.mipLevels);
 }
 void CopyBufferToImage(
     const Command::Buffer::Handle& a_CommandBuffer,

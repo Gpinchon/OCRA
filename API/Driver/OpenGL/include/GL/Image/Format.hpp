@@ -529,11 +529,11 @@ inline auto GetStencilSize(const Format& format)
         return 0;
     }
 }
-inline auto GetPixelSize(const Format& a_Format)
-{
-    return
-        GetRedSize(a_Format) + GetGreenSize(a_Format) +
-        GetRedSize(a_Format) + GetAlphaSize(a_Format) +
-        GetDepthSize(a_Format) + GetStencilSize(a_Format);
-}
+//inline auto GetPixelSize(const Format& a_Format)
+//{
+//    return
+//        GetRedSize(a_Format) + GetGreenSize(a_Format) +
+//        GetRedSize(a_Format) + GetAlphaSize(a_Format) +
+//        GetDepthSize(a_Format) + GetStencilSize(a_Format);
+//}
 }

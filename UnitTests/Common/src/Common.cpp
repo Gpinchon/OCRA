@@ -35,7 +35,7 @@ LRESULT CALLBACK TestWndproc(
         case SIZE_RESTORED:
             if (window->OnRestore) window->OnRestore(*window, LOWORD(lParam), HIWORD(lParam));
             break;
-        default:
+        default :
             if (window->OnResize) window->OnResize(*window, LOWORD(lParam), HIWORD(lParam));
         }
         break;

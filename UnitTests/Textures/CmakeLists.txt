@@ -1,0 +1,18 @@
+cmake_minimum_required(VERSION 3.19)
+cmake_policy(SET CMP0074 NEW)
+
+
+set(OCRA_TEST_SWAPCHAIN_SOURCE_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Textures.cpp)
+add_executable(OCRA-UnitTests-Textures
+  ${OCRA_TEST_SWAPCHAIN_SOURCE_FILES})
+target_include_directories(OCRA-UnitTests-Textures PRIVATE
+  "${CMAKE_CURRENT_SOURCE_DIR}/include")
+
+target_link_libraries(OCRA-UnitTests-Textures OCRA-UnitTests-Common OCRA::API::Interface OCRA::API::Implementation OCRA::SwapChain::Implementation OCRA::ShaderCompiler::API)
+
+if(MSVC_IDE)
+  # Run macro
+  GroupSources(src)
+  GroupSources(include)
+endif()

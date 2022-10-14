@@ -8,6 +8,7 @@ add_subdirectory_with_folder("UnitTests" PhysicalDevice)
 add_subdirectory_with_folder("UnitTests" Queue)
 add_subdirectory_with_folder("UnitTests" ShaderCompiler)
 add_subdirectory_with_folder("UnitTests" SwapChain)
+add_subdirectory_with_folder("UnitTests" Textures)
 
 
 if(MSVC_IDE)

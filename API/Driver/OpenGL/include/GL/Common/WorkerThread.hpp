@@ -45,8 +45,8 @@ public:
     }
     inline void PushCommand(const std::function<void()>& a_Command, const bool a_Synchronous)
     {
-        const auto commandID = _commandID++;
         _mtx.lock();
+        const auto commandID = _commandID++;
         _queue.push({ a_Command, commandID, a_Synchronous });
         _mtx.unlock();
         _cv.notify_one();

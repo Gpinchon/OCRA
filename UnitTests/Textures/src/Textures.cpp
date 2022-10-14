@@ -1,14 +1,22 @@
 #include <Common.hpp>
+#include <Texture.hpp>
 
-#include <Instance.hpp>
-#include <Device.hpp>
-#include <Surface.hpp>
-#include <SwapChain.hpp>
 #include <Command/Pool.hpp>
 #include <Command/Buffer.hpp>
-#include <Image/Image.hpp>
-#include <Queue/Fence.hpp>
 #include <Common/Vec3.hpp>
+#include <Common/Vec4.hpp>
+#include <Device.hpp>
+#include <Image/Image.hpp>
+#include <Instance.hpp>
+#include <Memory.hpp>
+#include <Queue/Fence.hpp>
+#include <Shader/Module.hpp>
+#include <Shader/Stage.hpp>
+#include <Surface.hpp>
+#include <SwapChain.hpp>
+
+#include <ShaderCompiler/Compiler.hpp>
+#include <ShaderCompiler/Shader.hpp>
 
 #include <Windows.h>
 
@@ -87,10 +95,10 @@ Surface::Handle CreateSurface(const Instance::Handle& a_Instance, void* const a_
     return Surface::Win32::Create(a_Instance, info);
 }
 
-struct SwapChainTestApp : TestApp
+struct TexturesTestApp : TestApp
 {
-    SwapChainTestApp()
-        : TestApp("Test_SwapChain")
+    TexturesTestApp()
+        : TestApp("Test_Textures")
         , window(Window(name, 1280, 720))
         , surface(CreateSurface(instance, GetModuleHandle(0), (void*)window.nativeHandle))
         , physicalDevice(Instance::EnumeratePhysicalDevices(instance).front())
@@ -111,6 +119,9 @@ struct SwapChainTestApp : TestApp
         imageAcquisitionFence = Queue::Fence::Create(device);
         commandPool = CreateCommandPool(device, queueFamily);
         commandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Primary);
+        CreateShaderStages();
+        CreateTextureTranferBuffer();
+        FillTextureTransferBuffer();
     }
     void Loop()
     {
@@ -120,7 +131,6 @@ struct SwapChainTestApp : TestApp
             fpsCounter.StartFrame();
             window.PushEvents();
             if (close) break;
-            if (!render) continue;
             const auto swapChainImage = SwapChain::AcquireNextImage(device, swapChain, std::chrono::nanoseconds(15000000), nullptr, imageAcquisitionFence);
             Queue::Fence::WaitFor(device, imageAcquisitionFence, std::chrono::nanoseconds(15000000));
             Queue::Fence::Reset(device, { imageAcquisitionFence });
@@ -134,6 +144,89 @@ struct SwapChainTestApp : TestApp
                 fpsCounter.Print();
             }
         }
+    }
+    void CreateShaderStages()
+    {
+        const auto compiler = ShaderCompiler::Create();
+        {
+            ShaderCompiler::Shader::Info shaderInfo;
+            shaderInfo.type = ShaderCompiler::Shader::Type::Vertex;
+            shaderInfo.entryPoint = "main";
+            shaderInfo.source = {
+                "#version 450                                               \n"
+                "layout(location = 0) in vec2 inPosition;                   \n"
+                "layout(location = 1) in vec3 inColor;                      \n"
+                "layout(binding = 0) uniform Projection {                   \n"
+                "   mat4 matrix;                                            \n"
+                "} proj;                                                    \n"
+                "void main() {                                              \n"
+                "   gl_Position = proj.matrix * vec4(inPosition, 0.0, 1.0); \n"
+                "}                                                          \n"
+            };
+            const auto vertexShader = ShaderCompiler::Shader::Create(compiler, shaderInfo);
+            Shader::Module::Info shaderModuleInfo;
+            shaderModuleInfo.code = ShaderCompiler::Shader::Compile(vertexShader);
+            const auto shaderModule = Shader::Module::Create(device, shaderModuleInfo);
+            Shader::Stage::Info shaderStageInfo;
+            shaderStageInfo.entryPoint = "main";
+            shaderStageInfo.stage = Shader::Stage::StageFlagBits::Vertex;
+            shaderStageInfo.module = shaderModule;
+            shaderStages.push_back(Shader::Stage::Create(device, shaderStageInfo));
+        }
+        {
+            ShaderCompiler::Shader::Info shaderInfo;
+            shaderInfo.type = ShaderCompiler::Shader::Type::Fragment;
+            shaderInfo.entryPoint = "main";
+            shaderInfo.source = {
+                "#version 450                                         \n"
+                "layout(binding = 0) uniform sampler2D uTexture;      \n"
+                "layout(location = 0) out vec4 outColor;              \n"
+                "void main() {                                        \n"
+                "    vec4 color = texture(uTexture, gl_FragCoord.xy); \n"
+                "    outColor = vec4(color);                          \n"
+                "}                                                    \n"
+            };
+            const auto fragmentShader = ShaderCompiler::Shader::Create(compiler, shaderInfo);
+            Shader::Module::Info shaderModuleInfo;
+            shaderModuleInfo.code = ShaderCompiler::Shader::Compile(fragmentShader);
+            const auto shaderModule = Shader::Module::Create(device, shaderModuleInfo);
+            Shader::Stage::Info shaderStageInfo;
+            shaderStageInfo.entryPoint = "main";
+            shaderStageInfo.stage = Shader::Stage::StageFlagBits::Fragment;
+            shaderStageInfo.module = shaderModule;
+            shaderStages.push_back(Shader::Stage::Create(device, shaderStageInfo));
+        }
+    }
+    void CreateTextureTranferBuffer()
+    {
+        const auto textureSize = texture.GetWidth() * texture.GetHeight() * Image::GetPixelSize(texture.GetFormat());
+        Buffer::Info bufferInfo;
+        bufferInfo.size = textureSize;
+        bufferInfo.usage = Buffer::UsageFlagBits::TransferSrc;
+        textureTransferBuffer = Buffer::Create(device, bufferInfo);
+        textureTransferMemory = AllocateMemory(
+            physicalDevice, device,
+            textureSize,
+            PhysicalDevice::MemoryPropertyFlagBits::HostVisible);
+        Buffer::BindMemory(device, textureTransferBuffer, textureTransferMemory, 0);
+    }
+    void FillTextureTransferBuffer() {
+        const auto textureSize = texture.GetWidth() * texture.GetHeight() * Image::GetPixelSize(texture.GetFormat());
+        Memory::MappedRange range;
+        range.memory = textureTransferMemory;
+        range.length = textureSize;
+        range.offset = 0;
+        auto bufferPtr = (Vec<4, uint8_t>*)Memory::Map(device, range);
+        for (uint32_t x = 0; x < texture.GetWidth(); ++x) {
+            for (uint32_t y = 0; y < texture.GetHeight(); ++y) {
+                const auto index = x + y * texture.GetWidth();
+                bufferPtr[index].r = 255;
+                bufferPtr[index].g = (y % 2) ? 255 : 0;
+                bufferPtr[index].b = 125;
+                bufferPtr[index].a = 255;
+            }
+        }
+        Memory::Unmap(device, textureTransferMemory);
     }
     void RecordClearCommandBuffer(const Image::Handle& a_Image)
     {
@@ -150,6 +243,12 @@ struct SwapChainTestApp : TestApp
         Command::Buffer::Reset(commandBuffer);
         Command::Buffer::Begin(commandBuffer, bufferBeginInfo);
         {
+            Command::BufferImageCopy copy;
+            copy.bufferOffset = 0;
+            copy.imageExtent.width = texture.GetWidth();
+            copy.imageExtent.height = texture.GetHeight();
+            copy.imageExtent.depth = 1;
+            Command::CopyBufferToImage(commandBuffer, textureTransferBuffer, texture.GetImage(), { copy });
             ColorValue clearColor{ color.r, color.g, color.b, 1.f };
             Image::Subresource::Range range{};
             range.levelCount = 1;
@@ -180,12 +279,16 @@ struct SwapChainTestApp : TestApp
     Queue::Fence::Handle    imageAcquisitionFence;
     Command::Pool::Handle   commandPool;
     Command::Buffer::Handle commandBuffer;
+    Texture2D               texture{ device, Image::Format::Uint8_Normalized_RGBA, 16, 16, 1 };
+    Memory::Handle          textureTransferMemory;
+    Buffer::Handle          textureTransferBuffer;
+    std::vector<Shader::Stage::Handle>   shaderStages;
 };
 
 int main()
 {
     int ret = 0;
-    SwapChainTestApp testApp;
+    TexturesTestApp testApp;
     testApp.window.Show();
     testApp.Loop();
 	return ret;

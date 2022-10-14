@@ -4,7 +4,9 @@ cmake_policy(SET CMP0074 NEW)
 set(OCRA_TEST_COMMON_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Common.cpp)
 set(OCRA_TEST_COMMON_HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Common.hpp)
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Common.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Texture.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/UniformBuffer.hpp)
 
 add_library(OCRA-UnitTests-Common STATIC ${OCRA_TEST_COMMON_SOURCE_FILES} ${OCRA_TEST_COMMON_HEADER_FILES})
 target_include_directories(OCRA-UnitTests-Common PUBLIC
