@@ -96,6 +96,7 @@ public:
         imageViewInfo.image = GetImage();
         imageViewInfo.type = OCRA::Image::View::Type::View1D;
         imageViewInfo.format = a_Format;
+        imageViewInfo.components = { 1, 1, 1, 1 };
         SetImageViewInfo(imageViewInfo);
     }
 };
@@ -105,8 +106,6 @@ class Texture2D : public Texture<Binding> {
 public:
     Texture2D(const OCRA::Device::Handle& a_Device, OCRA::Image::Format a_Format, const unsigned& a_X, const unsigned& a_Y, const unsigned a_MipLevels = 1)
         : Texture(a_Device, OCRA::Image::Type::Image2D, a_Format, a_X, a_Y, 1, a_MipLevels)
-        , width(a_X)
-        , height(a_Y)
     {
         OCRA::Image::View::Info imageViewInfo;
         imageViewInfo.image = GetImage();
@@ -114,11 +113,9 @@ public:
         imageViewInfo.format = a_Format;
         SetImageViewInfo(imageViewInfo);
     }
-    auto GetWidth() const { return width; };
-    auto GetHeight() const { return height; };
+    auto GetWidth() const { return GetImageInfo().extent.width; };
+    auto GetHeight() const { return GetImageInfo().extent.height; };
 private:
-    unsigned width{ 0 };
-    unsigned height{ 0 };
 };
 
 template<uint32_t Binding>
