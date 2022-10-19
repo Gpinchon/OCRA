@@ -1,15 +1,24 @@
 #include <Common.hpp>
+#include <Window.hpp>
 #include <Texture.hpp>
 
-#include <Command/Pool.hpp>
 #include <Command/Buffer.hpp>
+#include <Command/Pool.hpp>
+#include <Command/Draw.hpp>
+#include <Common/Rect2D.hpp>
 #include <Common/Vec2.hpp>
 #include <Common/Vec3.hpp>
 #include <Common/Vec4.hpp>
+#include <Common/ViewPort.hpp>
+#include <Descriptor/Set.hpp>
 #include <Device.hpp>
+#include <FrameBuffer.hpp>
 #include <Image/Image.hpp>
+#include <Image/View.hpp>
 #include <Instance.hpp>
 #include <Memory.hpp>
+#include <Pipeline/Graphics.hpp>
+#include <Pipeline/Layout.hpp>
 #include <Pipeline/VertexInputState.hpp>
 #include <Queue/Fence.hpp>
 #include <Shader/Module.hpp>
@@ -129,26 +138,27 @@ struct TexturesTestApp : TestApp
 {
     TexturesTestApp()
         : TestApp("Test_Textures")
-        , window(Window(name, 1280, 720))
-        , surface(CreateSurface(instance, GetModuleHandle(0), (void*)window.nativeHandle))
         , physicalDevice(Instance::EnumeratePhysicalDevices(instance).front())
         , device(CreateDevice(physicalDevice))
+        , window(Window(instance, physicalDevice, device, name, 1280, 720))
     {
-        window.OnResize = [this](const Window&, const uint32_t a_Width, const uint32_t a_Height) {
+        window.OnResize = [this](const Window&, const uint32_t, const uint32_t) {
             render = true;
-            //IMPORTANT, when destroyed, swapchain switches to windowed mode
-            //If a resize is triggered by this switch it will result in a crash !
-            if (!close) OnResize(a_Width, a_Height);
+            if (!window.IsClosing()) {
+                CreateFrameBuffer();
+                CreateGraphicsPipeline();
+            }
         };
         window.OnMaximize = window.OnResize;
         window.OnRestore = window.OnResize;
         window.OnMinimize = [this](const Window&, const uint32_t, const uint32_t) { render = false; };
-        window.OnClose = [this](const Window&) { OnClose(); };
         const auto queueFamily = FindQueueFamily(physicalDevice, PhysicalDevice::QueueFlagsBits::Graphics);
         queue = Device::GetQueue(device, queueFamily, 0); //Get first available queue
         imageAcquisitionFence = Queue::Fence::Create(device);
         commandPool = CreateCommandPool(device, queueFamily);
-        commandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Primary);
+        mainCommandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Primary);
+        drawCommandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Secondary);
+        CreateRenderPass();
         CreateShaderStages();
         CreateTextureTranferBuffer();
         FillTextureTransferBuffer();
@@ -156,18 +166,22 @@ struct TexturesTestApp : TestApp
     void Loop()
     {
         FPSCounter fpsCounter;
+        auto lastTime = std::chrono::high_resolution_clock::now();
         auto printTime = std::chrono::high_resolution_clock::now();
         while (true) {
             fpsCounter.StartFrame();
             window.PushEvents();
-            if (close) break;
-            const auto swapChainImage = SwapChain::AcquireNextImage(device, swapChain, std::chrono::nanoseconds(15000000), nullptr, imageAcquisitionFence);
+            if (window.IsClosing()) break;
+            if (!render) break;
+            const auto now = std::chrono::high_resolution_clock::now();
+            const auto delta = std::chrono::duration<double, std::milli>(now - lastTime).count();
+            lastTime = now;
+            swapChainImage = window.AcquireNextImage(std::chrono::nanoseconds(15000000), nullptr, imageAcquisitionFence);
             Queue::Fence::WaitFor(device, imageAcquisitionFence, std::chrono::nanoseconds(15000000));
             Queue::Fence::Reset(device, { imageAcquisitionFence });
-            RecordClearCommandBuffer(swapChainImage);
-            SubmitCommandBuffer(queue, commandBuffer);
-            SwapChain::Present(queue, presentInfo);
-            const auto now = std::chrono::high_resolution_clock::now();
+            RecordMainCommandBuffer(delta);
+            SubmitCommandBuffer(queue, mainCommandBuffer);
+            window.Present(queue);
             fpsCounter.EndFrame();
             if (std::chrono::duration<double, std::milli>(now - printTime).count() >= 48) {
                 printTime = now;
@@ -230,19 +244,18 @@ struct TexturesTestApp : TestApp
     }
     void CreateTextureTranferBuffer()
     {
-        const auto textureSize = texture.GetWidth() * texture.GetHeight() * Image::GetPixelSize(texture.GetFormat());
         Buffer::Info bufferInfo;
-        bufferInfo.size = textureSize;
+        bufferInfo.size = texture.GetWidth() * texture.GetHeight() * Image::GetPixelSize(texture.GetImageInfo().format);
         bufferInfo.usage = Buffer::UsageFlagBits::TransferSrc;
         textureTransferBuffer = Buffer::Create(device, bufferInfo);
         textureTransferMemory = AllocateMemory(
             physicalDevice, device,
-            textureSize,
+            bufferInfo.size,
             PhysicalDevice::MemoryPropertyFlagBits::HostVisible);
         Buffer::BindMemory(device, textureTransferBuffer, textureTransferMemory, 0);
     }
     void FillTextureTransferBuffer() {
-        const auto textureSize = texture.GetWidth() * texture.GetHeight() * Image::GetPixelSize(texture.GetFormat());
+        const auto textureSize = texture.GetWidth() * texture.GetHeight() * Image::GetPixelSize(texture.GetImageInfo().format);
         Memory::MappedRange range;
         range.memory = textureTransferMemory;
         range.length = textureSize;
@@ -259,8 +272,86 @@ struct TexturesTestApp : TestApp
         }
         Memory::Unmap(device, textureTransferMemory);
     }
-    void RecordClearCommandBuffer(const Image::Handle& a_Image)
+    void CreateFrameBuffer()
     {
+        {
+            Image::Info imageInfo;
+            imageInfo.type = Image::Type::Image2D;
+            imageInfo.extent.width = window.GetExtent().width;
+            imageInfo.extent.height = window.GetExtent().height;
+            imageInfo.format = Image::Format::Uint8_Normalized_RGBA;
+            imageInfo.mipLevels = 1;
+            frameBufferImage = Image::Create(device, imageInfo);
+        }
+        Image::View::Handle imageView{};
+        {
+            Image::View::Info imageViewInfo;
+            imageViewInfo.image = frameBufferImage;
+            imageViewInfo.format = Image::Format::Uint8_Normalized_RGBA;
+            imageViewInfo.type = Image::View::Type::View2D;
+            imageViewInfo.subRange.layerCount = 1;
+            imageView = Image::View::Create(device, imageViewInfo);
+        }
+        {
+            FrameBuffer::Info frameBufferInfo{};
+            frameBufferInfo.attachments.push_back(imageView);
+            frameBufferInfo.extent.depth = 1;
+            frameBufferInfo.extent.width = window.GetExtent().width;
+            frameBufferInfo.extent.height = window.GetExtent().height;
+            frameBufferInfo.renderPass = renderPass;
+            frameBuffer = FrameBuffer::Create(device, frameBufferInfo);
+        }
+    }
+    void CreateGraphicsPipeline()
+    {
+        ViewPort viewport;
+        viewport.rect.offset = { 0, 0 };
+        viewport.rect.extent = window.GetExtent();
+        viewport.depthRange = { 0, 1 };
+        Rect2D  scissor{};
+        scissor.offset = { 0, 0 };
+        scissor.extent = window.GetExtent();
+        Pipeline::Layout::Handle layout;
+        {
+            Pipeline::Layout::Info layoutInfo;
+            layoutInfo.setLayouts.push_back(texture.GetDescriptorSetLayout());
+            layout = Pipeline::Layout::Create(device, layoutInfo);
+        }
+        graphicsPipelineInfo.layout = layout;
+        graphicsPipelineInfo.rasterizationState.cullMode = Pipeline::RasterizationState::CullMode::None;
+        graphicsPipelineInfo.inputAssemblyState.topology = Primitive::Topology::TriangleList;
+        graphicsPipelineInfo.inputAssemblyState.primitiveRestartEnable = false;
+        graphicsPipelineInfo.viewPortState.viewPorts = { viewport };
+        graphicsPipelineInfo.viewPortState.scissors = { scissor };
+        graphicsPipelineInfo.vertexInputState.attributeDescriptions = Vertex::GetAttributeDescription();
+        graphicsPipelineInfo.vertexInputState.bindingDescriptions = Vertex::GetBindingDescriptions();
+        graphicsPipelineInfo.shaderPipelineState.stages = shaderStages;
+        graphicsPipelineInfo.renderPass = renderPass;
+        graphicsPipelineInfo.subPass = 0;
+        //Everything else is left by default for now
+        graphicsPipeline = Pipeline::Graphics::Create(device, graphicsPipelineInfo);
+    }
+    void CreateRenderPass()
+    {
+        RenderPass::SubPassDescription subPassDescription{};
+        RenderPass::AttachmentReference attachmentRef{};
+        attachmentRef.location = 0;
+        subPassDescription.colorAttachments = { attachmentRef };
+        RenderPass::Info renderPassInfo{};
+        RenderPass::AttachmentDescription colorAttachment;
+        colorAttachment.loadOp = RenderPass::LoadOperation::Clear; //clear the attachment 0 on begin
+        colorAttachment.storeOp = RenderPass::StoreOperation::Store; //write the result to attachment 0
+        renderPassInfo.colorAttachments = { colorAttachment };
+        renderPassInfo.subPasses = { subPassDescription };
+        renderPass = RenderPass::Create(device, renderPassInfo);
+    }
+    void RecordMainCommandBuffer(float a_Delta)
+    {
+        drawCommandDelta += a_Delta;
+        if (drawCommandDelta >= 0.032) {
+            RecordDrawCommandBuffer(drawCommandDelta);
+            drawCommandDelta = 0;
+        }
         static float hue = 0;
         static auto lastTime = std::chrono::high_resolution_clock::now();
         const auto now = std::chrono::high_resolution_clock::now();
@@ -271,48 +362,79 @@ struct TexturesTestApp : TestApp
         const auto color = HSVtoRGB(hue, 0.5f, 1.f);
         Command::Buffer::BeginInfo bufferBeginInfo;
         bufferBeginInfo.flags = Command::Buffer::UsageFlagBits::None;
-        Command::Buffer::Reset(commandBuffer);
-        Command::Buffer::Begin(commandBuffer, bufferBeginInfo);
+        Command::Buffer::Reset(mainCommandBuffer);
+        Command::Buffer::Begin(mainCommandBuffer, bufferBeginInfo);
+        //clear background
+        {
+            ColorValue clearColor{ color.r, color.g, color.b, 1.f };
+            Image::Subresource::Range range{};
+            range.levelCount = 1;
+            Command::ClearColorImage(mainCommandBuffer, swapChainImage, Image::Layout::Unknown, clearColor, { range });
+        }
+        //fill texture
         {
             Command::BufferImageCopy copy;
             copy.bufferOffset = 0;
             copy.imageExtent.width = texture.GetWidth();
             copy.imageExtent.height = texture.GetHeight();
             copy.imageExtent.depth = 1;
-            Command::CopyBufferToImage(commandBuffer, textureTransferBuffer, texture.GetImage(), { copy });
-            ColorValue clearColor{ color.r, color.g, color.b, 1.f };
-            Image::Subresource::Range range{};
-            range.levelCount = 1;
-            Command::ClearColorImage(commandBuffer, a_Image, Image::Layout::Unknown, clearColor, { range });
+            Command::CopyBufferToImage(mainCommandBuffer, textureTransferBuffer, texture.GetImage(), { copy });
         }
-        Command::Buffer::End(commandBuffer);
+        //draw quad
+        {
+            Command::ExecuteCommandBuffer(mainCommandBuffer, drawCommandBuffer);
+        }
+        Command::Buffer::End(mainCommandBuffer);
     }
-    void OnResize(const uint32_t a_Width, const uint32_t a_Height)
+    void RecordDrawCommandBuffer(const double a_Delta)
     {
-        swapChain = CreateSwapChain(device, surface, swapChain, a_Width, a_Height, 2);
-        presentInfo.swapChains = { swapChain };
-        extent = { a_Width, a_Height };
+        Command::Buffer::BeginInfo bufferBeginInfo{};
+        bufferBeginInfo.flags = Command::Buffer::UsageFlagBits::None;
+        Command::Buffer::Reset(drawCommandBuffer);
+        Command::RenderPassBeginInfo renderPassBeginInfo{};
+        renderPassBeginInfo.renderPass = renderPass;
+        renderPassBeginInfo.framebuffer = frameBuffer;
+        renderPassBeginInfo.renderArea.offset = { 0, 0 };
+        renderPassBeginInfo.renderArea.extent = window.GetExtent();
+        renderPassBeginInfo.colorClearValues.push_back(ColorValue(0.9529f, 0.6235f, 0.0941f, 1.f));
+        Command::Buffer::Begin(drawCommandBuffer, bufferBeginInfo);
+        Command::BeginRenderPass(drawCommandBuffer, renderPassBeginInfo, Command::SubPassContents::Inline);
+        {
+            Command::BindPipeline(drawCommandBuffer, Pipeline::BindingPoint::Graphics, graphicsPipeline);
+            Command::BindDescriptorSets(drawCommandBuffer, Pipeline::BindingPoint::Graphics, graphicsPipelineInfo.layout, 0, { texture.GetDescriptorSet() }, {});
+            Command::BindVertexBuffers(drawCommandBuffer, 0, { vertexBuffer }, { 0 });
+            Command::Draw(drawCommandBuffer, vertices.size(), 1, 0, 0);
+        }
+        Command::EndRenderPass(drawCommandBuffer);
+        Command::Buffer::End(drawCommandBuffer);
     }
-    void OnClose()
-    {
-        close = true;
-    }
+    double                  drawCommandDelta{ 0 };
     bool                    render{ false };
-    bool                    close{ false };
-    Window                  window;
-    uExtent2D               extent;
-    Surface::Handle         surface;
     PhysicalDevice::Handle  physicalDevice;
     Device::Handle          device;
-    SwapChain::PresentInfo  presentInfo;
-    SwapChain::Handle       swapChain;
+    Image::Handle           swapChainImage;
+    Window                  window;    
+
     Queue::Handle           queue;
     Queue::Fence::Handle    imageAcquisitionFence;
+
     Command::Pool::Handle   commandPool;
-    Command::Buffer::Handle commandBuffer;
-    Texture2D               texture{ device, Image::Format::Uint8_Normalized_RGBA, 16, 16, 1 };
+    Command::Buffer::Handle mainCommandBuffer;
+    Command::Buffer::Handle drawCommandBuffer;
+
+    FrameBuffer::Handle      frameBuffer;
+    Image::Handle            frameBufferImage;
+
+    RenderPass::Handle       renderPass;
+    Pipeline::Graphics::Info graphicsPipelineInfo;
+    Pipeline::Handle         graphicsPipeline;
+    std::vector<Shader::Stage::Handle>   shaderStages;
+
+    Texture2D<0>            texture{ device, Image::Format::Uint8_Normalized_RGBA, 16, 16, 1 };
+    Image::Sampler::Handle  textureSampler;
     Memory::Handle          textureTransferMemory;
     Buffer::Handle          textureTransferBuffer;
+
     const std::vector<Vertex> vertices = {
         {{-1.0f,  1.0f}, {1.0f, 0.0f}},
         {{-1.0f, -1.0f}, {0.0f, 1.0f}},
@@ -321,7 +443,6 @@ struct TexturesTestApp : TestApp
     };
     Buffer::Handle          vertexBuffer;
     Memory::Handle          vertexBufferMemory;
-    std::vector<Shader::Stage::Handle>   shaderStages;
 };
 
 int main()

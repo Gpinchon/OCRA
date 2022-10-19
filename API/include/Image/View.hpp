@@ -16,7 +16,7 @@ OCRA_DECLARE_HANDLE(OCRA::Image::View);
 namespace OCRA::Image::View {
 struct SubRange {
     uint16_t baseMipLevel { 0 }, levelCount { 1000 };
-    uint16_t baseArrayLayer { 0 }, layerCount { 1000 };
+    uint16_t baseArrayLayer { 0 }, layerCount { 1 };
 };
 enum class Type {
     Unknown = -1,
