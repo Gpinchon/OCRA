@@ -63,6 +63,7 @@ static inline auto CreateImages(const Device::Handle& a_Device, const Info& a_In
             imageInfo.type = Image::Type::Image2D;
             imageInfo.extent.width = a_Info.imageExtent.width;
             imageInfo.extent.height = a_Info.imageExtent.height;
+            imageInfo.extent.depth = 1;
             imageInfo.mipLevels = 1;
             imageInfo.arrayLayers = a_Info.imageArrayLayers;
             imageInfo.format = a_Info.imageFormat;
