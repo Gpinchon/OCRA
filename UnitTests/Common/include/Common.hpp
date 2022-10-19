@@ -84,23 +84,6 @@ private:
     }
 };
 
-struct Window
-{
-	Window(const std::string& name, const uint32_t width, const uint32_t height);
-	~Window();
-	void PushEvents();
-	void Show();
-	void Update();
-	std::function<void(const Window&, const uint32_t, const uint32_t)> OnResize;
-    std::function<void(const Window&, const uint32_t, const uint32_t)> OnMinimize;
-    std::function<void(const Window&, const uint32_t, const uint32_t)> OnMaximize;
-    std::function<void(const Window&, const uint32_t, const uint32_t)> OnRestore;
-	std::function<void(const Window&)> OnClose;
-	std::function<void(const Window&)> OnPaint;
-	const void* nativeHandle;
-	bool created{ false };
-};
-
 //Create an instance with app name a_Name
 Instance::Handle CreateInstance(const std::string& a_Name);
 //Create a device with all available queues

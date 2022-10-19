@@ -9,7 +9,7 @@ add_executable(OCRA-UnitTests-SwapChain
 target_include_directories(OCRA-UnitTests-SwapChain PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-target_link_libraries(OCRA-UnitTests-SwapChain OCRA-UnitTests-Common OCRA::API::Interface OCRA::API::Implementation OCRA::SwapChain::Implementation)
+target_link_libraries(OCRA-UnitTests-SwapChain OCRA-UnitTests-Common OCRA-UnitTests-Window OCRA::API::Interface OCRA::API::Implementation OCRA::SwapChain::Implementation)
 
 if(MSVC_IDE)
   # Run macro

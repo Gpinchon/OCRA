@@ -1,4 +1,5 @@
 #include <Common.hpp>
+#include <Window.hpp>
 #include <UniformBuffer.hpp>
 
 #include <Instance.hpp>
@@ -31,7 +32,7 @@
 #include <Pipeline/Graphics.hpp>
 
 using namespace OCRA;
-constexpr auto VSync = false;
+constexpr auto VSync = true;
 
 namespace OCRA {
 template <size_t C, size_t R, typename T>
@@ -189,46 +190,26 @@ struct Vertex {
     }
 };
 
-SwapChain::Handle CreateSwapChain(const Device::Handle& a_Device, const Surface::Handle& a_Surface, const SwapChain::Handle& a_OldSwapChain, const uint32_t& a_Width, const uint32_t& a_Height, const uint32_t& a_ImageNbr)
-{
-    SwapChain::Info info{};
-    info.oldSwapchain = a_OldSwapChain;
-    info.presentMode = VSync ? SwapChain::PresentMode::Fifo : SwapChain::PresentMode::Immediate;
-    info.imageColorSpace = Image::ColorSpace::sRGB;
-    info.imageFormat = Image::Format::Uint8_Normalized_RGBA;
-    info.imageCount = a_ImageNbr;
-    info.surface = a_Surface;
-    info.imageExtent.width = a_Width;
-    info.imageExtent.height = a_Height;
-    return SwapChain::Create(a_Device, info);
-}
-
-Surface::Handle CreateSurface(const Instance::Handle& a_Instance, void* const a_HINSTANCE, void* const a_HWND)
-{
-    Surface::Win32::Info info{};
-    info.hinstance = a_HINSTANCE;
-    info.hwnd = a_HWND;
-    return Surface::Win32::Create(a_Instance, info);
-}
-
 struct GraphicsPipelineTestApp : TestApp
 {
     GraphicsPipelineTestApp()
         : TestApp("Test_GraphicsPipeline")
-        , window(Window(name, 1280, 720))
-        , surface(CreateSurface(instance, GetModuleHandle(0), (void*)window.nativeHandle))
         , physicalDevice(Instance::EnumeratePhysicalDevices(instance).front())
         , device(CreateDevice(physicalDevice))
+        , window(Window(instance, physicalDevice, device, name, 1280, 720))
         , projectionMatrix(physicalDevice, device)
     {
+        window.SetVSync(VSync);
         window.OnResize = [this](const Window&, const uint32_t a_Width, const uint32_t a_Height) {
             render = true;
-            if (!close) OnResize(a_Width, a_Height);
+            if (!window.IsClosing()) {
+                CreateFrameBuffer();
+                CreateGraphicsPipeline();
+            }
         };
         window.OnMaximize = window.OnResize;
         window.OnRestore = window.OnResize;
         window.OnMinimize = [this](const Window&, const uint32_t, const uint32_t) { render = false; };
-        window.OnClose = [this](const Window&) { OnClose(); };
         CreateShaderStages();
         const auto queueFamily = FindQueueFamily(physicalDevice, PhysicalDevice::QueueFlagsBits::Graphics);
         queue = Device::GetQueue(device, queueFamily, 0); //Get first available queue
@@ -252,18 +233,18 @@ struct GraphicsPipelineTestApp : TestApp
             
             fpsCounter.StartFrame();
             window.PushEvents();
-            if (close) break;
+            if (window.IsClosing()) break;
             if (!render) continue;
             const auto now = std::chrono::high_resolution_clock::now();
             const auto delta = std::chrono::duration<double, std::milli>(now - lastTime).count();
             lastTime = now;
-            swapChainImage = SwapChain::AcquireNextImage(device, swapChain, std::chrono::nanoseconds(15000000), nullptr, imageAcquisitionFence);
+            swapChainImage = window.AcquireNextImage(std::chrono::nanoseconds(15000000), nullptr, imageAcquisitionFence);
             Queue::Fence::WaitFor(device, imageAcquisitionFence, std::chrono::nanoseconds(15000000));
             Queue::Fence::Reset(device, { imageAcquisitionFence });
             projectionMatrix.Update();
             RecordMainCommandBuffer(delta);
             SubmitCommandBuffer(queue, mainCommandBuffer);
-            SwapChain::Present(queue, presentInfo);
+            window.Present(queue);
             fpsCounter.EndFrame();
             auto uniformUpdateDelta = std::chrono::duration<double, std::milli>(now - uniformUpdateTime).count();
             if (uniformUpdateDelta >= 16)
@@ -374,11 +355,11 @@ struct GraphicsPipelineTestApp : TestApp
     {
         ViewPort viewport;
         viewport.rect.offset = { 0, 0 };
-        viewport.rect.extent = extent;
+        viewport.rect.extent = window.GetExtent();
         viewport.depthRange = { 0, 1 };
         Rect2D  scissor{};
         scissor.offset = { 0, 0 };
-        scissor.extent = extent;
+        scissor.extent = window.GetExtent();
         Pipeline::Layout::Handle layout;
         {
             Pipeline::Layout::Info layoutInfo;
@@ -409,8 +390,8 @@ struct GraphicsPipelineTestApp : TestApp
         {
             Image::Info imageInfo;
             imageInfo.type = Image::Type::Image2D;
-            imageInfo.extent.width = extent.width;
-            imageInfo.extent.height = extent.height;
+            imageInfo.extent.width = window.GetExtent().width;
+            imageInfo.extent.height = window.GetExtent().height;
             imageInfo.format = Image::Format::Uint8_Normalized_RGBA;
             imageInfo.mipLevels = 1;
             frameBufferImage = Image::Create(device, imageInfo);
@@ -428,8 +409,8 @@ struct GraphicsPipelineTestApp : TestApp
             FrameBuffer::Info frameBufferInfo{};
             frameBufferInfo.attachments.push_back(imageView);
             frameBufferInfo.extent.depth = 1;
-            frameBufferInfo.extent.width = extent.width;
-            frameBufferInfo.extent.height = extent.height;
+            frameBufferInfo.extent.width = window.GetExtent().width;
+            frameBufferInfo.extent.height = window.GetExtent().height;
             frameBufferInfo.renderPass = renderPass;
             frameBuffer = FrameBuffer::Create(device, frameBufferInfo);
         }
@@ -443,7 +424,7 @@ struct GraphicsPipelineTestApp : TestApp
         renderPassBeginInfo.renderPass = renderPass;
         renderPassBeginInfo.framebuffer = frameBuffer;
         renderPassBeginInfo.renderArea.offset = { 0, 0 };
-        renderPassBeginInfo.renderArea.extent = extent;
+        renderPassBeginInfo.renderArea.extent = window.GetExtent();
         renderPassBeginInfo.colorClearValues.push_back(ColorValue(0.9529f, 0.6235f, 0.0941f, 1.f));
         Command::Buffer::Begin(drawCommandBuffer, bufferBeginInfo);
         UpdatePushConstants(a_Delta);
@@ -482,8 +463,8 @@ struct GraphicsPipelineTestApp : TestApp
             Command::ExecuteCommandBuffer(mainCommandBuffer, drawCommandBuffer);
             {
                 Command::ImageCopy imageCopy;
-                imageCopy.extent.width  = extent.width;
-                imageCopy.extent.height = extent.height;
+                imageCopy.extent.width  = window.GetExtent().width;
+                imageCopy.extent.height = window.GetExtent().height;
                 imageCopy.extent.depth  = 1;
                 Command::CopyImage(
                     mainCommandBuffer,
@@ -494,35 +475,20 @@ struct GraphicsPipelineTestApp : TestApp
         }
         Command::Buffer::End(mainCommandBuffer);
     }
-    void OnResize(const uint32_t a_Width, const uint32_t a_Height)
-    {
-        extent = { a_Width, a_Height };
-        swapChain = CreateSwapChain(device, surface, swapChain, a_Width, a_Height, 2);
-        presentInfo.swapChains = { swapChain };
-        CreateFrameBuffer();
-        CreateGraphicsPipeline();
-    }
-    void OnClose()
-    {
-        close = true;
-    }
     double                   drawCommandDelta{ 0 };
     float                    hue{ 0 };
     bool                     render{ false };
-    bool                     close{ false };
-    Window                   window;
-    uExtent2D                extent{ 1280, 720 };
-    Surface::Handle          surface;
     PhysicalDevice::Handle   physicalDevice;
     Device::Handle           device;
-    RenderPass::Handle       renderPass;
+    Window                   window;
+    Image::Handle            swapChainImage;
+    
     FrameBuffer::Handle      frameBuffer;
     Image::Handle            frameBufferImage;
+
+    RenderPass::Handle       renderPass;
     Pipeline::Graphics::Info graphicsPipelineInfo;
     Pipeline::Handle         graphicsPipeline;
-    SwapChain::Handle        swapChain;
-    Image::Handle            swapChainImage;
-    SwapChain::PresentInfo   presentInfo;
     Command::Pool::Handle    commandPool;
     Command::Buffer::Handle  mainCommandBuffer;
     Command::Buffer::Handle  drawCommandBuffer;

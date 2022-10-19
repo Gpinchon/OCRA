@@ -8,7 +8,18 @@ set(OCRA_TEST_COMMON_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Texture.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/UniformBuffer.hpp)
 
+set(OCRA_TEST_WINDOW_SOURCE_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Window.cpp)
+set(OCRA_TEST_WINDOW_HEADER_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Window.hpp)
+
 add_library(OCRA-UnitTests-Common STATIC ${OCRA_TEST_COMMON_SOURCE_FILES} ${OCRA_TEST_COMMON_HEADER_FILES})
+add_library(OCRA-UnitTests-Window STATIC ${OCRA_TEST_WINDOW_SOURCE_FILES} ${OCRA_TEST_WINDOW_HEADER_FILES})
+
+target_include_directories(OCRA-UnitTests-Window PUBLIC
+  "${CMAKE_CURRENT_SOURCE_DIR}/include")
+target_link_libraries(OCRA-UnitTests-Window OCRA::API::Interface OCRA::API::Implementation OCRA::SwapChain::Implementation)
+
 target_include_directories(OCRA-UnitTests-Common PUBLIC
   "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_link_libraries(OCRA-UnitTests-Common OCRA::API::Interface OCRA::API::Implementation)

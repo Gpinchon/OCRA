@@ -9,6 +9,7 @@
 #include <Image/Image.hpp>
 #include <Queue/Fence.hpp>
 #include <Common/Vec3.hpp>
+#include <Window.hpp>
 
 #include <Windows.h>
 
@@ -65,47 +66,19 @@ Vec3 HSVtoRGB(float fH, float fS, float fV) {
     return { fR, fG, fB };
 }
 
-SwapChain::Handle CreateSwapChain(const Device::Handle& a_Device, const Surface::Handle& a_Surface, const SwapChain::Handle& a_OldSwapChain, const uint32_t& a_Width, const uint32_t& a_Height, const uint32_t& a_ImageNbr)
-{
-    SwapChain::Info info{};
-    info.oldSwapchain = a_OldSwapChain;
-    info.presentMode = SwapChain::PresentMode::Immediate;
-    info.imageColorSpace = Image::ColorSpace::sRGB;
-    info.imageFormat = Image::Format::Uint8_Normalized_RGBA;
-    info.imageCount = a_ImageNbr;
-    info.surface = a_Surface;
-    info.imageExtent.width = a_Width;
-    info.imageExtent.height = a_Height;
-    return SwapChain::Create(a_Device, info);
-}
-
-Surface::Handle CreateSurface(const Instance::Handle& a_Instance, void* const a_HINSTANCE, void* const a_HWND)
-{
-    Surface::Win32::Info info{};
-    info.hinstance = a_HINSTANCE;
-    info.hwnd = a_HWND;
-    return Surface::Win32::Create(a_Instance, info);
-}
-
 struct SwapChainTestApp : TestApp
 {
     SwapChainTestApp()
         : TestApp("Test_SwapChain")
-        , window(Window(name, 1280, 720))
-        , surface(CreateSurface(instance, GetModuleHandle(0), (void*)window.nativeHandle))
         , physicalDevice(Instance::EnumeratePhysicalDevices(instance).front())
         , device(CreateDevice(physicalDevice))
+        , window(Window(instance, physicalDevice, device, name, 1280, 720))
     {
-        window.OnResize = [this](const Window&, const uint32_t a_Width, const uint32_t a_Height) {
-            render = true;
-            //IMPORTANT, when destroyed, swapchain switches to windowed mode
-            //If a resize is triggered by this switch it will result in a crash !
-            if (!close) OnResize(a_Width, a_Height);
-        };
+        window.SetSwapChainImageNbr(SWAPCHAIN_IMAGE_NBR);
+        window.OnResize = [this](const Window&, const uint32_t, const uint32_t) { render = true; };
         window.OnMaximize = window.OnResize;
         window.OnRestore = window.OnResize;
         window.OnMinimize = [this](const Window&, const uint32_t, const uint32_t) { render = false; };
-        window.OnClose = [this](const Window&) { OnClose(); };
         const auto queueFamily = FindQueueFamily(physicalDevice, PhysicalDevice::QueueFlagsBits::Graphics);
         queue = Device::GetQueue(device, queueFamily, 0); //Get first available queue
         imageAcquisitionFence = Queue::Fence::Create(device);
@@ -119,14 +92,14 @@ struct SwapChainTestApp : TestApp
         while (true) {
             fpsCounter.StartFrame();
             window.PushEvents();
-            if (close) break;
+            if (window.IsClosing()) break;
             if (!render) continue;
-            const auto swapChainImage = SwapChain::AcquireNextImage(device, swapChain, std::chrono::nanoseconds(15000000), nullptr, imageAcquisitionFence);
+            const auto swapChainImage = window.AcquireNextImage(std::chrono::nanoseconds(15000000), nullptr, imageAcquisitionFence);
             Queue::Fence::WaitFor(device, imageAcquisitionFence, std::chrono::nanoseconds(15000000));
             Queue::Fence::Reset(device, { imageAcquisitionFence });
             RecordClearCommandBuffer(swapChainImage);
             SubmitCommandBuffer(queue, commandBuffer);
-            SwapChain::Present(queue, presentInfo);
+            window.Present(queue);
             const auto now = std::chrono::high_resolution_clock::now();
             fpsCounter.EndFrame();
             if (std::chrono::duration<double, std::milli>(now - printTime).count() >= 48) {
@@ -157,25 +130,10 @@ struct SwapChainTestApp : TestApp
         }
         Command::Buffer::End(commandBuffer);
     }
-    void OnResize(const uint32_t a_Width, const uint32_t a_Height)
-    {
-        swapChain = CreateSwapChain(device, surface, swapChain, a_Width, a_Height, 2);
-        presentInfo.swapChains = { swapChain };
-        extent = { a_Width, a_Height };
-    }
-    void OnClose()
-    {
-        close = true;
-    }
     bool                    render{ false };
-    bool                    close{ false };
-    Window                  window;
-    uExtent2D               extent;
-    Surface::Handle         surface;
     PhysicalDevice::Handle  physicalDevice;
     Device::Handle          device;
-    SwapChain::PresentInfo  presentInfo;
-    SwapChain::Handle       swapChain;
+    Window                  window;
     Queue::Handle           queue;
     Queue::Fence::Handle    imageAcquisitionFence;
     Command::Pool::Handle   commandPool;
