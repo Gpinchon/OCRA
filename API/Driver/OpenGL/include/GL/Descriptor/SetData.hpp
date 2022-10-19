@@ -49,6 +49,7 @@ struct SampledImage : ImageStorage {
     }
     virtual void operator=(const WriteOperation& a_Write) override {
         ImageStorage::operator=(a_Write);
+        imageSampler = a_Write.imageInfo->sampler;
     }
     virtual void Bind(uint32_t a_BindingIndex) override {
         ImageStorage::Bind(a_BindingIndex);

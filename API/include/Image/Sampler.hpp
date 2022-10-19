@@ -9,13 +9,12 @@
 #include <Common/Compare.hpp>
 #include <Image/Filter.hpp>
 
+#include <Handle.hpp>
+
+OCRA_DECLARE_HANDLE(OCRA::Device);
 OCRA_DECLARE_HANDLE(OCRA::Image::Sampler);
 
 namespace OCRA::Image::Sampler {
-enum class MipMapMode {
-    Nearest,
-    Linear
-};
 enum class AddressMode {
     Repeat,
     MirroredRepeat,
@@ -33,7 +32,7 @@ constexpr BorderColor OpaqueWhite = BorderColor { 1, 1, 1, 1 };
 struct Info {
     Filter minFilter { Filter::Linear };
     Filter magFilter { Filter::Linear };
-    MipMapMode mipmapMode { MipMapMode::Linear };
+    Filter mipmapMode { Filter::Linear };
     AddressMode addressModeU { AddressMode::Repeat };
     AddressMode addressModeV { AddressMode::Repeat };
     AddressMode addressModeW { AddressMode::Repeat };
