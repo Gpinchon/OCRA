@@ -23,6 +23,13 @@
 #include <GL/glew.h>
 
 namespace OCRA::Image {
+static inline void CheckValidCopy(const Image::BufferCopy& a_Copy, const Image::Handle& a_Image)
+{
+    assert(a_Copy.imageOffset.x + a_Copy.imageExtent.width <= a_Image->info.extent.width);
+    assert(a_Copy.imageOffset.y + a_Copy.imageExtent.height <= a_Image->info.extent.height);
+    assert(a_Copy.imageOffset.z + a_Copy.imageExtent.depth <= a_Image->info.extent.depth);
+    assert(a_Copy.imageSubresource.level <= a_Image->info.mipLevels);
+}
 static inline auto CreateTexture(const Device::Handle& a_Device)
 {
     uint32_t handle = 0;
@@ -51,7 +58,7 @@ struct Texture : Impl {
     Texture(const Device::Handle& a_Device, const Info& a_Info, const GLenum& a_Target)
         : Impl(a_Device, a_Info, a_Target)
     {}
-	virtual void Download(const Command::BufferImageCopy& a_Copy, const size_t& a_MemoryOffset) override;
+	virtual void Download(const Image::BufferCopy& a_Copy, const size_t& a_MemoryOffset) override;
     inline void Bind() const {
         glBindTexture(target, handle); //initialize texture object
     }
@@ -61,7 +68,7 @@ struct Texture : Impl {
 };
 
 //compressed
-void Texture<true>::Download(const Command::BufferImageCopy& a_Copy, const size_t& a_MemoryOffset) {
+void Texture<true>::Download(const Image::BufferCopy& a_Copy, const size_t& a_MemoryOffset) {
 	glGetCompressedTextureSubImage(
 		handle,
 		a_Copy.imageSubresource.level,
@@ -76,7 +83,7 @@ void Texture<true>::Download(const Command::BufferImageCopy& a_Copy, const size_
 }
 
 //uncompressed
-void Texture<false>::Download(const Command::BufferImageCopy& a_Copy, const size_t& a_MemoryOffset) {
+void Texture<false>::Download(const Image::BufferCopy& a_Copy, const size_t& a_MemoryOffset) {
 	glGetTextureSubImage(
 		handle,
 		a_Copy.imageSubresource.level,
@@ -113,11 +120,11 @@ struct Texture1D : Texture<Compressed>
     }
     Texture1D(const Device::Handle& a_Device, const Info& a_Info, bool a_Empty)
         : Texture<Compressed>(a_Device, a_Info, GL_TEXTURE_1D) {}
-	virtual void Upload(const Command::BufferImageCopy& a_Copy, const size_t& a_MemoryOffset) override;
+	virtual void Upload(const Image::BufferCopy& a_Copy, const size_t& a_MemoryOffset) override;
 };
 
 //compressed
-void Texture1D<true>::Upload(const Command::BufferImageCopy& a_Copy, const size_t& a_MemoryOffset)
+void Texture1D<true>::Upload(const Image::BufferCopy& a_Copy, const size_t& a_MemoryOffset)
 {
 	Bind();//initialize texture object
 	glCompressedTexSubImage1D(
@@ -132,7 +139,7 @@ void Texture1D<true>::Upload(const Command::BufferImageCopy& a_Copy, const size_
 }
 
 //uncompressed
-void Texture1D<false>::Upload(const Command::BufferImageCopy& a_Copy, const size_t& a_MemoryOffset)
+void Texture1D<false>::Upload(const Image::BufferCopy& a_Copy, const size_t& a_MemoryOffset)
 {
 	Bind();//initialize texture object
 	glTexSubImage1D(
@@ -173,11 +180,11 @@ struct Texture2D : Texture<Compressed>
     }
     Texture2D(const Device::Handle& a_Device, const Info& a_Info, bool a_Empty)
     : Texture<Compressed>(a_Device, a_Info, a_Info.samples == Samples::Samples1 ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE) {}
-	virtual void Upload(const Command::BufferImageCopy& a_Copy, const size_t& a_MemoryOffset) override;
+	virtual void Upload(const Image::BufferCopy& a_Copy, const size_t& a_MemoryOffset) override;
 };
 
 //compressed
-void Texture2D<true>::Upload(const Command::BufferImageCopy& a_Copy, const size_t& a_MemoryOffset)
+void Texture2D<true>::Upload(const Image::BufferCopy& a_Copy, const size_t& a_MemoryOffset)
 {
 	Bind();//initialize texture object
 	glCompressedTexSubImage2D(
@@ -194,7 +201,7 @@ void Texture2D<true>::Upload(const Command::BufferImageCopy& a_Copy, const size_
 }
 
 //uncompressed
-void Texture2D<false>::Upload(const Command::BufferImageCopy& a_Copy, const size_t& a_MemoryOffset)
+void Texture2D<false>::Upload(const Image::BufferCopy& a_Copy, const size_t& a_MemoryOffset)
 {
 	Bind();//initialize texture object
 	glTexSubImage2D(
@@ -239,11 +246,11 @@ struct Texture3D : Texture<Compressed>
     }
     Texture3D(const Device::Handle& a_Device, const Info& a_Info, bool a_Empty)
     : Texture<Compressed>(a_Device, a_Info, a_Info.samples == Samples::Samples1 ? GL_TEXTURE_2D_ARRAY : GL_TEXTURE_2D_MULTISAMPLE_ARRAY) {}
-	virtual void Upload(const Command::BufferImageCopy& a_Copy, const size_t& a_MemoryOffset) override;
+	virtual void Upload(const Image::BufferCopy& a_Copy, const size_t& a_MemoryOffset) override;
 };
 
 //compressed
-void Texture3D<true>::Upload(const Command::BufferImageCopy& a_Copy, const size_t& a_MemoryOffset)
+void Texture3D<true>::Upload(const Image::BufferCopy& a_Copy, const size_t& a_MemoryOffset)
 {
 	Bind();//initialize texture object
 	glCompressedTexSubImage3D(
@@ -262,7 +269,7 @@ void Texture3D<true>::Upload(const Command::BufferImageCopy& a_Copy, const size_
 }
 
 //uncompressed
-void Texture3D<false>::Upload(const Command::BufferImageCopy& a_Copy, const size_t& a_MemoryOffset)
+void Texture3D<false>::Upload(const Image::BufferCopy& a_Copy, const size_t& a_MemoryOffset)
 {
 	Bind();//initialize texture object
 	glTexSubImage3D(
@@ -302,6 +309,7 @@ Handle Create(const Device::Handle& a_Device, const Info& a_Info)
     }
     return Handle(impl);
 }
+
 Handle CreateEmpty(const Device::Handle& a_Device, const Info& a_Info)
 {
     Impl* impl;
@@ -328,22 +336,58 @@ const Info& GetInfo(const Device::Handle& a_Device, const Handle& a_Handle)
 {
     return a_Handle->info;
 }
+
+void CopyBufferToImage(
+    const Device::Handle& a_Device,
+    const OCRA::Buffer::Handle& a_SrcBuffer,
+    const Image::Handle& a_DstImage,
+    const std::vector<Image::BufferCopy>& a_Regions)
+{
+    for (const auto& copy : a_Regions) CheckValidCopy(copy, a_DstImage);
+    a_Device->PushCommand([
+        srcBuffer = a_SrcBuffer, dstImage = a_DstImage, regions = a_Regions
+    ]() {
+        const auto& memoryBinding = srcBuffer->memoryBinding;
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, memoryBinding.memory->handle);
+        for (auto& copy : regions) dstImage->Upload(copy, memoryBinding.offset);
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+     }, false);
+}
+
+void CopyImageToBuffer(
+    const Device::Handle& a_Device,
+    const OCRA::Buffer::Handle& a_DstBuffer,
+    const Image::Handle& a_SrcImage,
+    const std::vector<Image::BufferCopy>& a_Regions)
+{
+    for (const auto& copy : a_Regions) CheckValidCopy(copy, a_SrcImage);
+    a_Device->PushCommand([
+        dstBuffer = a_DstBuffer, srcImage = a_SrcImage, regions = a_Regions
+    ]() {
+            const auto& memoryBinding = dstBuffer->memoryBinding;
+            glBindBuffer(GL_PIXEL_PACK_BUFFER, memoryBinding.memory->handle);
+            for (const auto& copy : regions)
+                srcImage->Download(copy, memoryBinding.offset);
+            glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+     }, true);
+}
+void GenerateMipMap(
+    const Device::Handle& a_Device,
+    const Image::Handle& a_Image)
+{
+    a_Device->PushCommand([image=a_Image] {
+        glGenerateTextureMipmap(image->handle);
+    }, false);
+}
 }
 
 namespace OCRA::Command
 {
-static inline void CheckValidCopy(const BufferImageCopy& a_Copy, const Image::Handle& a_Image)
-{
-    assert(a_Copy.imageOffset.x + a_Copy.imageExtent.width  <= a_Image->info.extent.width);
-    assert(a_Copy.imageOffset.y + a_Copy.imageExtent.height <= a_Image->info.extent.height);
-    assert(a_Copy.imageOffset.z + a_Copy.imageExtent.depth  <= a_Image->info.extent.depth);
-    assert(a_Copy.imageSubresource.level <= a_Image->info.mipLevels);
-}
 void CopyBufferToImage(
     const Command::Buffer::Handle& a_CommandBuffer,
     const OCRA::Buffer::Handle&    a_SrcBuffer,
     const Image::Handle&           a_DstImage,
-    const std::vector<BufferImageCopy>& a_Regions)
+    const std::vector<Image::BufferCopy>& a_Regions)
 {
     for (const auto& copy : a_Regions) CheckValidCopy(copy, a_DstImage);
     a_CommandBuffer->PushCommand([
@@ -361,7 +405,7 @@ void CopyImageToBuffer(
     const Command::Buffer::Handle& a_CommandBuffer,
     const OCRA::Buffer::Handle&    a_DstBuffer,
     const Image::Handle&           a_SrcImage,
-    const std::vector<BufferImageCopy>& a_Regions)
+    const std::vector<Image::BufferCopy>& a_Regions)
 {
     for (const auto& copy : a_Regions) CheckValidCopy(copy, a_SrcImage);
     a_CommandBuffer->PushCommand([
@@ -379,7 +423,7 @@ void CopyImage(
     const Command::Buffer::Handle&  a_CommandBuffer,
     const Image::Handle&            a_SrcImage,
     const Image::Handle&            a_DstImage,
-    const std::vector<ImageCopy>    a_Regions)
+    const std::vector<Image::Copy>  a_Regions)
 {
     a_CommandBuffer->PushCommand([
         srcImage = a_SrcImage, dstImage = a_DstImage, regions = a_Regions
@@ -391,7 +435,15 @@ void CopyImage(
                 copy.extent.width, copy.extent.height, copy.extent.depth);
         }
     });
-    
+}
+
+void GenerateMipMap(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const Image::Handle& a_Image)
+{
+    a_CommandBuffer->PushCommand([image = a_Image](Command::Buffer::ExecutionState&) {
+        glGenerateTextureMipmap(image->handle);
+    });
 }
 
 void ClearColorImage(

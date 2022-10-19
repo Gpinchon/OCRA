@@ -16,7 +16,29 @@
 OCRA_DECLARE_HANDLE(OCRA::Image);
 OCRA_DECLARE_HANDLE(OCRA::Device);
 
+#include <Buffer.hpp>
+#include <Common/Offset3D.hpp>
+#include <Common/ColorValue.hpp>
+#include <Command/Buffer.hpp>
+#include <Image/Layout.hpp>
+#include <Image/Subresource.hpp>
+
 namespace OCRA::Image {
+struct BufferCopy {
+    uint64_t bufferOffset{ 0 };
+    uint32_t bufferRowLength{ 0 };
+    uint32_t bufferImageHeight{ 0 };
+    Image::Subresource::Layers imageSubresource;
+    Offset3D imageOffset;
+    Extent3D imageExtent;
+};
+struct Copy {
+    Image::Subresource::Layers srcSubresource;
+    Offset3D                   srcOffset;
+    Image::Subresource::Layers dstSubresource;
+    Offset3D                   dstOffset;
+    Extent3D                   extent{};
+};
 enum class Samples {
     Samples1 = 1,
     Samples2 = 2,
@@ -37,6 +59,19 @@ struct Info {
     bool fixedSampleLocations { false };
 };
 Handle Create(const Device::Handle& a_Device, const Info& a_Info);
+void CopyBufferToImage(
+    const Device::Handle& a_Device,
+    const OCRA::Buffer::Handle& a_SrcBuffer,
+    const Image::Handle& a_DstImage,
+    const std::vector<Image::BufferCopy>& a_Regions);
+void CopyImageToBuffer(
+    const Device::Handle& a_Device,
+    const OCRA::Buffer::Handle& a_DstBuffer,
+    const Image::Handle& a_SrcImage,
+    const std::vector<Image::BufferCopy>& a_Regions);
+void GenerateMipMap(
+    const Device::Handle& a_Device,
+    const Image::Handle& a_Image);
 }
 
 #include <Buffer.hpp>
@@ -48,36 +83,24 @@ Handle Create(const Device::Handle& a_Device, const Info& a_Info);
 
 namespace OCRA::Command
 {
-struct BufferImageCopy {
-    uint64_t bufferOffset{ 0 };
-    uint32_t bufferRowLength{ 0 };
-    uint32_t bufferImageHeight{ 0 };
-    Image::Subresource::Layers imageSubresource;
-    Offset3D imageOffset;
-    Extent3D imageExtent;
-};
-struct ImageCopy {
-    Image::Subresource::Layers srcSubresource;
-    Offset3D                   srcOffset;
-    Image::Subresource::Layers dstSubresource;
-    Offset3D                   dstOffset;
-    Extent3D                   extent{};
-};
 void CopyBufferToImage(
-    const Command::Buffer::Handle&  a_CommandBuffer,
-    const OCRA::Buffer::Handle&     a_SrcBuffer,
-    const Image::Handle&            a_DstImage,
-    const std::vector<BufferImageCopy>& a_Regions);
+    const Command::Buffer::Handle&        a_CommandBuffer,
+    const OCRA::Buffer::Handle&           a_SrcBuffer,
+    const Image::Handle&                  a_DstImage,
+    const std::vector<Image::BufferCopy>& a_Regions);
 void CopyImageToBuffer(
-    const Command::Buffer::Handle&  a_CommandBuffer,
-    const OCRA::Buffer::Handle&     a_DstBuffer,
-    const Image::Handle&            a_SrcImage,
-    const std::vector<BufferImageCopy>& a_Regions);
+    const Command::Buffer::Handle&        a_CommandBuffer,
+    const OCRA::Buffer::Handle&           a_DstBuffer,
+    const Image::Handle&                  a_SrcImage,
+    const std::vector<Image::BufferCopy>& a_Regions);
 void CopyImage(
     const Command::Buffer::Handle&  a_CommandBuffer,
     const Image::Handle&            a_SrcImage,
     const Image::Handle&            a_DstImage,
-    const std::vector<ImageCopy>    a_Regions);
+    const std::vector<Image::Copy>  a_Regions);
+void GenerateMipMap(
+    const Command::Buffer::Handle&  a_CommandBuffer,
+    const Image::Handle&            a_Image);
 void ClearColorImage(
     const Command::Buffer::Handle&  a_CommandBuffer,
     const Image::Handle&            a_Image,

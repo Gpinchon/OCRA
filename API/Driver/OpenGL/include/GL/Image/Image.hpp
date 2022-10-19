@@ -12,15 +12,16 @@
 #include <GL/WeakHandle.hpp>
 
 OCRA_DECLARE_HANDLE(OCRA::Device);
-OCRA_DECLARE_WEAK_HANDLE(OCRA::Device)
+OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
+OCRA_DECLARE_HANDLE(OCRA::Buffer);
 
 namespace OCRA::Image {
 struct Impl
 {
     Impl(const Device::Handle& a_Device, const Info& a_Info, const uint32_t a_Target);
     ~Impl();
-    virtual void Download(const Command::BufferImageCopy& a_Copy, const size_t& a_MemoryOffset) = 0;
-    virtual void Upload(const Command::BufferImageCopy& a_Copy, const size_t& a_MemoryOffset) = 0;
+    virtual void Download(const Image::BufferCopy& a_Copy, const size_t& a_MemoryOffset) = 0;
+    virtual void Upload(const Image::BufferCopy& a_Copy, const size_t& a_MemoryOffset) = 0;
     const Device::WeakHandle device;
     const Info info;
     const uint32_t internalFormat;
