@@ -5,10 +5,11 @@
 #include <Command/Buffer.hpp>
 #include <Command/Pool.hpp>
 #include <Command/Draw.hpp>
-#include <Common/Rect2D.hpp>
+#include <Common/Vec_Boolean.hpp>
+#include <Common/Vec_Interpolation.hpp>
+#include <Common/Vec_Math.hpp>
 #include <Common/Vec2.hpp>
 #include <Common/Vec3.hpp>
-#include <Common/Vec4.hpp>
 #include <Common/ViewPort.hpp>
 #include <Descriptor/Set.hpp>
 #include <Device.hpp>
@@ -24,115 +25,75 @@
 #include <Shader/Module.hpp>
 #include <Shader/Stage.hpp>
 #include <Surface.hpp>
-#include <SwapChain.hpp>
 
 #include <ShaderCompiler/Compiler.hpp>
 #include <ShaderCompiler/Shader.hpp>
-
-#include <Windows.h>
 
 using namespace OCRA;
 
 #define SWAPCHAIN_IMAGE_NBR 2
 
-Vec3 HSVtoRGB(float fH, float fS, float fV) {
-    float fC = fV * fS; // Chroma
-    float fHPrime = fmod(fH / 60.0, 6);
-    float fX = fC * (1 - fabs(fmod(fHPrime, 2) - 1));
-    float fM = fV - fC;
-    float fR, fG, fB;
 
-    if (0 <= fHPrime && fHPrime < 1) {
-        fR = fC;
-        fG = fX;
-        fB = 0;
-    }
-    else if (1 <= fHPrime && fHPrime < 2) {
-        fR = fX;
-        fG = fC;
-        fB = 0;
-    }
-    else if (2 <= fHPrime && fHPrime < 3) {
-        fR = 0;
-        fG = fC;
-        fB = fX;
-    }
-    else if (3 <= fHPrime && fHPrime < 4) {
-        fR = 0;
-        fG = fX;
-        fB = fC;
-    }
-    else if (4 <= fHPrime && fHPrime < 5) {
-        fR = fX;
-        fG = 0;
-        fB = fC;
-    }
-    else if (5 <= fHPrime && fHPrime < 6) {
-        fR = fC;
-        fG = 0;
-        fB = fX;
-    }
-    else {
-        fR = 0;
-        fG = 0;
-        fB = 0;
-    }
-
-    fR += fM;
-    fG += fM;
-    fB += fM;
-    return { fR, fG, fB };
-}
-
-SwapChain::Handle CreateSwapChain(const Device::Handle& a_Device, const Surface::Handle& a_Surface, const SwapChain::Handle& a_OldSwapChain, const uint32_t& a_Width, const uint32_t& a_Height, const uint32_t& a_ImageNbr)
+template<unsigned L, typename T>
+inline auto abs(const Vec<L, T>& a_X)
 {
-    SwapChain::Info info{};
-    info.oldSwapchain = a_OldSwapChain;
-    info.presentMode = SwapChain::PresentMode::Immediate;
-    info.imageColorSpace = Image::ColorSpace::sRGB;
-    info.imageFormat = Image::Format::Uint8_Normalized_RGBA;
-    info.imageCount = a_ImageNbr;
-    info.surface = a_Surface;
-    info.imageExtent.width = a_Width;
-    info.imageExtent.height = a_Height;
-    return SwapChain::Create(a_Device, info);
+    Vec<L, T> result;
+    for (int i = 0; i < L; ++i)
+        result[i] = abs(a_X[i]);
+    return result;
 }
 
-Surface::Handle CreateSurface(const Instance::Handle& a_Instance, void* const a_HINSTANCE, void* const a_HWND)
+template<unsigned L, typename T>
+inline auto floor(const Vec<L, T>& a_X)
 {
-    Surface::Win32::Info info{};
-    info.hinstance = a_HINSTANCE;
-    info.hwnd = a_HWND;
-    return Surface::Win32::Create(a_Instance, info);
+    Vec<L, T> result;
+    for (int i = 0; i < L; ++i)
+        result[i] = floor(a_X[i]);
+    return result;
 }
 
-struct Vertex {
-    Vec2 pos;
-    Vec2 UV;
-    static auto GetBindingDescriptions() {
-        std::vector<Pipeline::VertexInputState::BindingDescription> bindings(1);
-        bindings.at(0).binding = 0;
-        bindings.at(0).stride = sizeof(Vertex);
-        bindings.at(0).inputRate = Pipeline::VertexInputState::BindingDescription::InputRate::Vertex;
-        return bindings;
-    }
-    static auto GetAttributeDescription() {
-        std::vector<Pipeline::VertexInputState::AttributeDescription> attribs(2);
-        attribs.at(0).binding = 0;
-        attribs.at(0).location = 0;
-        attribs.at(0).format.size = decltype(pos)::length();
-        attribs.at(0).format.normalized = false;
-        attribs.at(0).format.type = VertexType::Float32;
-        attribs.at(0).offset = offsetof(Vertex, pos);
-        attribs.at(1).binding = 0;
-        attribs.at(1).location = 1;
-        attribs.at(1).format.size = decltype(UV)::length();
-        attribs.at(1).format.normalized = false;
-        attribs.at(1).format.type = VertexType::Float32;
-        attribs.at(1).offset = offsetof(Vertex, UV);
-        return attribs;
-    }
-};
+template<typename T, typename U, typename V>
+inline auto clamp(const T& a_V, const U& a_Min, const V& a_Max)
+{
+    return std::clamp(a_V, a_Min, a_Max);
+}
+
+template<unsigned L, typename T>
+inline auto clamp(const Vec<L, T>& a_X, const T& a_Min, const T& a_Max)
+{
+    Vec<L, T> result;
+    for (int i = 0; i < L; ++i)
+        result[i] = std::clamp(a_X[i], a_Min, a_Max);
+    return result;
+}
+
+template<unsigned L, typename T>
+inline auto saturate(const Vec<L, T>& a_X)
+{
+    Vec<L, T> result;
+    for (int i = 0; i < L; ++i)
+        result[i] = std::clamp(a_X[i], T(0), T(1));
+    return result;
+}
+
+template<typename T>
+inline auto saturate(const T& a_Value)
+{
+    return clamp(a_Value, T(0), T(1));
+}
+
+template<typename T>
+inline auto fract(const T& a_Value)
+{
+    return a_Value - floor(a_Value);
+}
+
+Vec3 hue2rgb(float h)
+{
+    h = fract(saturate(h)) * 6.0 - 2.0;
+    return saturate(Vec3(abs(h - 1.0) - 1.0, 2.0 - abs(h), 2.0 - abs(h - 2.0)));
+}
+
 
 struct TexturesTestApp : TestApp
 {
@@ -147,6 +108,7 @@ struct TexturesTestApp : TestApp
             if (!window.IsClosing()) {
                 CreateFrameBuffer();
                 CreateGraphicsPipeline();
+                RecordDrawCommandBuffer();
             }
         };
         window.OnMaximize = window.OnResize;
@@ -160,26 +122,23 @@ struct TexturesTestApp : TestApp
         drawCommandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Secondary);
         CreateRenderPass();
         CreateShaderStages();
-        CreateTextureTranferBuffer();
-        FillTextureTransferBuffer();
+        FillTexture();
     }
     void Loop()
     {
         FPSCounter fpsCounter;
-        auto lastTime = std::chrono::high_resolution_clock::now();
         auto printTime = std::chrono::high_resolution_clock::now();
+        window.SetVSync(false);
         while (true) {
             fpsCounter.StartFrame();
             window.PushEvents();
             if (window.IsClosing()) break;
             if (!render) break;
             const auto now = std::chrono::high_resolution_clock::now();
-            const auto delta = std::chrono::duration<double, std::milli>(now - lastTime).count();
-            lastTime = now;
             swapChainImage = window.AcquireNextImage(std::chrono::nanoseconds(15000000), nullptr, imageAcquisitionFence);
             Queue::Fence::WaitFor(device, imageAcquisitionFence, std::chrono::nanoseconds(15000000));
             Queue::Fence::Reset(device, { imageAcquisitionFence });
-            RecordMainCommandBuffer(delta);
+            RecordMainCommandBuffer();
             SubmitCommandBuffer(queue, mainCommandBuffer);
             window.Present(queue);
             fpsCounter.EndFrame();
@@ -197,15 +156,12 @@ struct TexturesTestApp : TestApp
             shaderInfo.type = ShaderCompiler::Shader::Type::Vertex;
             shaderInfo.entryPoint = "main";
             shaderInfo.source = {
-                "#version 450                                       \n"
-                "layout(location = 0) out vec2 UV;                  \n"
-                "void main() {                                      \n"
-                "   float x = -1.0 + float((gl_VertexIndex & 1) << 2); \n"
-                "   float y = -1.0 + float((gl_VertexIndex & 2) << 1); \n"
-                "   UV.x = (x + 1.0) * 0.5;                         \n"
-                "   UV.y = (y + 1.0) * 0.5;                         \n"
-                "   gl_Position = vec4(x, y, 0, 1);                 \n"
-                "}                                                  \n"
+                "#version 450                                                   \n"
+                "layout(location = 0) out vec2 UV;                              \n"
+                "void main() {                                                  \n"
+                "   UV = vec2((gl_VertexIndex << 1) & 2, gl_VertexIndex & 2);   \n"
+                "   gl_Position = vec4(UV * 2.0f + -1.0f, 0.0f, 1.0f);          \n"
+                "}                                                              \n"
             };
             const auto vertexShader = ShaderCompiler::Shader::Create(compiler, shaderInfo);
             Shader::Module::Info shaderModuleInfo;
@@ -242,35 +198,71 @@ struct TexturesTestApp : TestApp
             shaderStages.push_back(Shader::Stage::Create(device, shaderStageInfo));
         }
     }
-    void CreateTextureTranferBuffer()
+    void FillTexture()
     {
         Buffer::Info bufferInfo;
         bufferInfo.size = texture.GetWidth() * texture.GetHeight() * Image::GetPixelSize(texture.GetImageInfo().format);
         bufferInfo.usage = Buffer::UsageFlagBits::TransferSrc;
-        textureTransferBuffer = Buffer::Create(device, bufferInfo);
-        textureTransferMemory = AllocateMemory(
+        auto textureTransferBuffer = Buffer::Create(device, bufferInfo);
+        auto textureTransferMemory = AllocateMemory(
             physicalDevice, device,
             bufferInfo.size,
             PhysicalDevice::MemoryPropertyFlagBits::HostVisible);
         Buffer::BindMemory(device, textureTransferBuffer, textureTransferMemory, 0);
-    }
-    void FillTextureTransferBuffer() {
         const auto textureSize = texture.GetWidth() * texture.GetHeight() * Image::GetPixelSize(texture.GetImageInfo().format);
         Memory::MappedRange range;
         range.memory = textureTransferMemory;
         range.length = textureSize;
         range.offset = 0;
         auto bufferPtr = (Vec<4, uint8_t>*)Memory::Map(device, range);
+        iVec2 iResolution = { texture.GetWidth(), texture.GetHeight() };
         for (uint32_t x = 0; x < texture.GetWidth(); ++x) {
             for (uint32_t y = 0; y < texture.GetHeight(); ++y) {
-                const auto index = x + y * texture.GetWidth();
-                bufferPtr[index].r = 255;
-                bufferPtr[index].g = (y % 2) ? 255 : 0;
-                bufferPtr[index].b = 125;
+                float yf = 1 - (y / float(iResolution.y));
+                Vec2 fragCoord = { x, yf * iResolution.y };
+                float scale = 27.0 / iResolution.y;                             // grid scale
+                Vec2 area = Vec2(floor(13.0 / iResolution.y * iResolution.x), 13.0); // size of inner area
+
+                Vec2 p0 = fragCoord - iResolution / 2.0; // position (pixel)
+                Vec2 p1 = p0 * scale;                       // position (grid)
+
+                // gray background with crosshair
+                float c1 = 1.0 - step(2.f, std::min(abs(p0.x), abs(p0.y))) * 0.5;
+
+                // grid lines
+                Vec2 grid = step(scale, abs(Vec2(0.5) - fract(p1 * 0.5)));
+                c1 = std::clamp(c1 + 2.0 - grid.x - grid.y, 0.0, 1.0);
+
+                // outer area checker
+                Vec2 checker = step(0.49999f, fract(floor(p1 * 0.5 + 0.5) * 0.5));
+                if (any(greaterThan(abs(p1), area))) c1 = abs(checker.x - checker.y);
+
+                float corner = sqrt(8.0) - length(abs(p1) - area + 4.0); // corner circles
+                float circle = 12.0 - length(p1);                      // big center circle
+                float mask = saturate(circle / scale);               // center circls mask
+
+                // grayscale bars
+                float bar1 = saturate(p1.y < 5.0 ? floor(p1.x / 4.0 + 3.0) / 5.0 : p1.x / 16.0 + 0.5);
+                c1 = mix(c1, bar1, mask * saturate(ceil(4.0 - abs(5.0 - p1.y))));
+
+                // basic color bars
+                Vec3 bar2 = hue2rgb((p1.y > -5.0 ? floor(p1.x / 4.0) / 6.0 : p1.x / 16.0) + 0.5);
+                Vec3 c2 = mix(Vec3(c1), bar2, mask * saturate(ceil(4.0 - abs(-5.0 - p1.y))));
+
+                // big circle line
+                c2 = mix(c2, Vec3(1.0), saturate(2.0 - abs(std::max(circle, corner)) / scale));
+                //c2 = bar2;
+                const int index = x + y * texture.GetWidth();
+                bufferPtr[index].r = c2.x * 255;
+                bufferPtr[index].g = c2.y * 255;
+                bufferPtr[index].b = c2.z * 255;
                 bufferPtr[index].a = 255;
             }
         }
         Memory::Unmap(device, textureTransferMemory);
+        Image::BufferCopy bufferCopy;
+        bufferCopy.imageExtent = texture.GetImageInfo().extent;
+        Image::CopyBufferToImage(device, textureTransferBuffer, texture.GetImage(), { bufferCopy });
     }
     void CreateFrameBuffer()
     {
@@ -279,6 +271,7 @@ struct TexturesTestApp : TestApp
             imageInfo.type = Image::Type::Image2D;
             imageInfo.extent.width = window.GetExtent().width;
             imageInfo.extent.height = window.GetExtent().height;
+            imageInfo.extent.depth = 1;
             imageInfo.format = Image::Format::Uint8_Normalized_RGBA;
             imageInfo.mipLevels = 1;
             frameBufferImage = Image::Create(device, imageInfo);
@@ -311,20 +304,24 @@ struct TexturesTestApp : TestApp
         Rect2D  scissor{};
         scissor.offset = { 0, 0 };
         scissor.extent = window.GetExtent();
-        Pipeline::Layout::Handle layout;
         {
             Pipeline::Layout::Info layoutInfo;
             layoutInfo.setLayouts.push_back(texture.GetDescriptorSetLayout());
-            layout = Pipeline::Layout::Create(device, layoutInfo);
+            graphicsPipelineLayout = Pipeline::Layout::Create(device, layoutInfo);
         }
-        graphicsPipelineInfo.layout = layout;
+        Pipeline::ColorBlendState::AttachmentState colorBlend0;
+        colorBlend0.enable = true;
+        Pipeline::Graphics::Info graphicsPipelineInfo;
+        graphicsPipelineInfo.layout = graphicsPipelineLayout;
+        graphicsPipelineInfo.colorBlendState.attachments.resize(1);
+        graphicsPipelineInfo.colorBlendState.attachments.front() = colorBlend0;
         graphicsPipelineInfo.rasterizationState.cullMode = Pipeline::RasterizationState::CullMode::None;
         graphicsPipelineInfo.inputAssemblyState.topology = Primitive::Topology::TriangleList;
         graphicsPipelineInfo.inputAssemblyState.primitiveRestartEnable = false;
         graphicsPipelineInfo.viewPortState.viewPorts = { viewport };
         graphicsPipelineInfo.viewPortState.scissors = { scissor };
-        graphicsPipelineInfo.vertexInputState.attributeDescriptions = Vertex::GetAttributeDescription();
-        graphicsPipelineInfo.vertexInputState.bindingDescriptions = Vertex::GetBindingDescriptions();
+        graphicsPipelineInfo.vertexInputState.attributeDescriptions = {}; //empty attributes
+        graphicsPipelineInfo.vertexInputState.bindingDescriptions = {}; //empty bindings
         graphicsPipelineInfo.shaderPipelineState.stages = shaderStages;
         graphicsPipelineInfo.renderPass = renderPass;
         graphicsPipelineInfo.subPass = 0;
@@ -345,13 +342,8 @@ struct TexturesTestApp : TestApp
         renderPassInfo.subPasses = { subPassDescription };
         renderPass = RenderPass::Create(device, renderPassInfo);
     }
-    void RecordMainCommandBuffer(float a_Delta)
+    void RecordMainCommandBuffer()
     {
-        drawCommandDelta += a_Delta;
-        if (drawCommandDelta >= 0.032) {
-            RecordDrawCommandBuffer(drawCommandDelta);
-            drawCommandDelta = 0;
-        }
         static float hue = 0;
         static auto lastTime = std::chrono::high_resolution_clock::now();
         const auto now = std::chrono::high_resolution_clock::now();
@@ -359,34 +351,34 @@ struct TexturesTestApp : TestApp
         lastTime = now;
         hue += 0.05 * delta;
         hue = hue > 360 ? 0 : hue;
-        const auto color = HSVtoRGB(hue, 0.5f, 1.f);
         Command::Buffer::BeginInfo bufferBeginInfo;
         bufferBeginInfo.flags = Command::Buffer::UsageFlagBits::None;
         Command::Buffer::Reset(mainCommandBuffer);
         Command::Buffer::Begin(mainCommandBuffer, bufferBeginInfo);
         //clear background
         {
-            ColorValue clearColor{ color.r, color.g, color.b, 1.f };
+            ColorValue clearColor{ 0.f, 0.f, 0.f, 1.f };
             Image::Subresource::Range range{};
             range.levelCount = 1;
             Command::ClearColorImage(mainCommandBuffer, swapChainImage, Image::Layout::Unknown, clearColor, { range });
         }
-        //fill texture
-        {
-            Command::BufferImageCopy copy;
-            copy.bufferOffset = 0;
-            copy.imageExtent.width = texture.GetWidth();
-            copy.imageExtent.height = texture.GetHeight();
-            copy.imageExtent.depth = 1;
-            Command::CopyBufferToImage(mainCommandBuffer, textureTransferBuffer, texture.GetImage(), { copy });
-        }
         //draw quad
+        Command::ExecuteCommandBuffer(mainCommandBuffer, drawCommandBuffer);
+        //copy result to swapchain
         {
-            Command::ExecuteCommandBuffer(mainCommandBuffer, drawCommandBuffer);
+            Image::Copy imageCopy;
+            imageCopy.extent.width = window.GetExtent().width;
+            imageCopy.extent.height = window.GetExtent().height;
+            imageCopy.extent.depth = 1;
+            Command::CopyImage(
+                mainCommandBuffer,
+                frameBufferImage,
+                swapChainImage,
+                { imageCopy });
         }
         Command::Buffer::End(mainCommandBuffer);
     }
-    void RecordDrawCommandBuffer(const double a_Delta)
+    void RecordDrawCommandBuffer()
     {
         Command::Buffer::BeginInfo bufferBeginInfo{};
         bufferBeginInfo.flags = Command::Buffer::UsageFlagBits::None;
@@ -401,14 +393,12 @@ struct TexturesTestApp : TestApp
         Command::BeginRenderPass(drawCommandBuffer, renderPassBeginInfo, Command::SubPassContents::Inline);
         {
             Command::BindPipeline(drawCommandBuffer, Pipeline::BindingPoint::Graphics, graphicsPipeline);
-            Command::BindDescriptorSets(drawCommandBuffer, Pipeline::BindingPoint::Graphics, graphicsPipelineInfo.layout, 0, { texture.GetDescriptorSet() }, {});
-            Command::BindVertexBuffers(drawCommandBuffer, 0, { vertexBuffer }, { 0 });
-            Command::Draw(drawCommandBuffer, vertices.size(), 1, 0, 0);
+            Command::BindDescriptorSets(drawCommandBuffer, Pipeline::BindingPoint::Graphics, graphicsPipelineLayout, 0, { texture.GetDescriptorSet() }, {});
+            Command::Draw(drawCommandBuffer, 3, 1, 0, 0);
         }
         Command::EndRenderPass(drawCommandBuffer);
         Command::Buffer::End(drawCommandBuffer);
     }
-    double                  drawCommandDelta{ 0 };
     bool                    render{ false };
     PhysicalDevice::Handle  physicalDevice;
     Device::Handle          device;
@@ -426,23 +416,14 @@ struct TexturesTestApp : TestApp
     Image::Handle            frameBufferImage;
 
     RenderPass::Handle       renderPass;
-    Pipeline::Graphics::Info graphicsPipelineInfo;
+    
     Pipeline::Handle         graphicsPipeline;
+    Pipeline::Layout::Handle graphicsPipelineLayout;
+
     std::vector<Shader::Stage::Handle>   shaderStages;
 
-    Texture2D<0>            texture{ device, Image::Format::Uint8_Normalized_RGBA, 16, 16, 1 };
+    Texture2D<0>            texture{ device, Image::Format::Uint8_Normalized_RGBA, 640, 480, 1 };
     Image::Sampler::Handle  textureSampler;
-    Memory::Handle          textureTransferMemory;
-    Buffer::Handle          textureTransferBuffer;
-
-    const std::vector<Vertex> vertices = {
-        {{-1.0f,  1.0f}, {1.0f, 0.0f}},
-        {{-1.0f, -1.0f}, {0.0f, 1.0f}},
-        {{ 1.0f,  1.0f}, {0.0f, 0.0f}},
-        {{ 1.0f, -1.0f}, {0.0f, 0.0f}}
-    };
-    Buffer::Handle          vertexBuffer;
-    Memory::Handle          vertexBufferMemory;
 };
 
 int main()
