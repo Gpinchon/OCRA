@@ -58,10 +58,10 @@ static inline auto CreateImageView(const Device::Handle& a_Device, const Info& a
 			a_Info.subRange.levelCount,
 			a_Info.subRange.baseArrayLayer,
 			a_Info.subRange.layerCount);
-		glTextureParameterfv(
+		glTextureParameterIuiv(
 			handle,
 			GL_TEXTURE_SWIZZLE_RGBA,
-			(float*)&Component::GLSwizzleMask(a_Info.components));
+			(GLenum*)&Component::GLSwizzleMask(a_Info.components));
 		}, true);
 	return handle;
 }
