@@ -69,7 +69,12 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
 	: device(a_Device)
 	, handle(CreateImageSampler(a_Device, a_Info))
 	, info(a_Info)
+{}
+Impl::~Impl()
 {
+	device.lock()->PushCommand([handle=handle] {
+		glDeleteSamplers(1, &handle);
+	}, false);
 }
 Handle Create(const Device::Handle& a_Device, const Info& a_Info) {
 	return Handle(new Impl(a_Device, a_Info));
