@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Common/Vec.hpp>
+#include <Common/Vec2.hpp>
 
 namespace OCRA {
 template <typename T>
@@ -9,10 +10,14 @@ struct Vec<3, T> {
 	typedef Vec<3, T> type;
 	static constexpr auto length() { return 3; }
 	Vec() : value{ 0, 0, 0 } {}
+	explicit Vec(T a_S) : x(a_S), y(a_S), z(a_S) {}
+	Vec(T a_X, T a_Y, T a_Z) : x(a_X), y(a_Y), z(a_Z) {}
 	template<typename X, typename Y, typename Z>
-	Vec(const X& a_X = X(0), const Y& a_Y = Y(0), const Z& a_Z = Z(0))
-		: x(a_X), y(a_Y), z(a_Z)
-	{}
+	Vec(const X& a_X, const Y& a_Y, const Z& a_Z) : x(a_X), y(a_Y), z(a_Z) {}
+	template<typename U>
+	Vec(const Vec<3, U>& a_V) : Vec(a_V.x, a_V.y, a_V.z) {}
+	template<typename U>
+	Vec(const Vec<2, U>& a_V) : Vec(a_V.x, a_V.y) {}
 	auto& operator[] (const size_t& a_Index) { return value[a_Index]; }
 	auto& operator[] (const size_t& a_Index) const { return value[a_Index]; }
 	union {
@@ -22,42 +27,6 @@ struct Vec<3, T> {
 		value_type value[3];
 	};
 };
-
-template<typename T>
-auto operator*(const T& a_Scalar, Vec<3, T> const& a_V)
-{
-	return Vec<3, T>(
-		a_Scalar * a_V.x,
-		a_Scalar * a_V.y,
-		a_Scalar * a_V.z);
-}
-
-template<typename T>
-auto operator*(Vec<3, T> const& a_V, const T& a_Scalar)
-{
-	return Vec<3, T>(
-		a_V.x * a_Scalar,
-		a_V.y * a_Scalar,
-		a_V.z * a_Scalar);
-}
-
-template<typename T>
-auto operator/(const T& a_Scalar, Vec<3, T> const& a_V)
-{
-	return Vec<3, T>(
-		a_Scalar / a_V.x,
-		a_Scalar / a_V.y,
-		a_Scalar / a_V.z);
-}
-
-template<typename T>
-auto operator/(Vec<3, T> const& a_V, const T& a_Scalar)
-{
-	return Vec<3, T>(
-		a_V.x / a_Scalar,
-		a_V.y / a_Scalar,
-		a_V.z / a_Scalar);
-}
 
 template<typename T>
 auto Normalize(Vec<3, T> const& a_V)

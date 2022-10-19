@@ -43,6 +43,9 @@ set(OCRA_API_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Vec2.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Vec3.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Vec4.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Vec_Boolean.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Vec_Interpolation.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/Vec_Math.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Common/VertexType.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/BufferBinding.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Command/Buffer.hpp
