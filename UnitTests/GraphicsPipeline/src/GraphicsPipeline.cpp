@@ -23,6 +23,7 @@
 #include <Descriptor/SetLayout.hpp>
 #include <Queue/Fence.hpp>
 #include <Common/Vec3.hpp>
+#include <Common/Vec_Math.hpp>
 
 #include <ShaderCompiler/Compiler.hpp>
 #include <ShaderCompiler/Shader.hpp>
@@ -75,7 +76,7 @@ struct Mat<4, 4, T> {
         T const c = cos(a);
         T const s = sin(a);
 
-        auto axis(Normalize(a_V));
+        auto axis(normalize(a_V));
         auto temp((T(1) - c) * axis);
 
         Mat<4, 4, T> Rotate;
@@ -462,7 +463,7 @@ struct GraphicsPipelineTestApp : TestApp
         {
             Command::ExecuteCommandBuffer(mainCommandBuffer, drawCommandBuffer);
             {
-                Command::ImageCopy imageCopy;
+                Image::Copy imageCopy;
                 imageCopy.extent.width  = window.GetExtent().width;
                 imageCopy.extent.height = window.GetExtent().height;
                 imageCopy.extent.depth  = 1;

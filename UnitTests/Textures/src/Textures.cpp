@@ -33,67 +33,11 @@ using namespace OCRA;
 
 #define SWAPCHAIN_IMAGE_NBR 2
 
-
-template<unsigned L, typename T>
-inline auto abs(const Vec<L, T>& a_X)
-{
-    Vec<L, T> result;
-    for (int i = 0; i < L; ++i)
-        result[i] = abs(a_X[i]);
-    return result;
-}
-
-template<unsigned L, typename T>
-inline auto floor(const Vec<L, T>& a_X)
-{
-    Vec<L, T> result;
-    for (int i = 0; i < L; ++i)
-        result[i] = floor(a_X[i]);
-    return result;
-}
-
-template<typename T, typename U, typename V>
-inline auto clamp(const T& a_V, const U& a_Min, const V& a_Max)
-{
-    return std::clamp(a_V, a_Min, a_Max);
-}
-
-template<unsigned L, typename T>
-inline auto clamp(const Vec<L, T>& a_X, const T& a_Min, const T& a_Max)
-{
-    Vec<L, T> result;
-    for (int i = 0; i < L; ++i)
-        result[i] = std::clamp(a_X[i], a_Min, a_Max);
-    return result;
-}
-
-template<unsigned L, typename T>
-inline auto saturate(const Vec<L, T>& a_X)
-{
-    Vec<L, T> result;
-    for (int i = 0; i < L; ++i)
-        result[i] = std::clamp(a_X[i], T(0), T(1));
-    return result;
-}
-
-template<typename T>
-inline auto saturate(const T& a_Value)
-{
-    return clamp(a_Value, T(0), T(1));
-}
-
-template<typename T>
-inline auto fract(const T& a_Value)
-{
-    return a_Value - floor(a_Value);
-}
-
 Vec3 hue2rgb(float h)
 {
     h = fract(saturate(h)) * 6.0 - 2.0;
     return saturate(Vec3(abs(h - 1.0) - 1.0, 2.0 - abs(h), 2.0 - abs(h - 2.0)));
 }
-
 
 struct TexturesTestApp : TestApp
 {
