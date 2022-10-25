@@ -13,6 +13,10 @@ template<unsigned L, typename T, typename U>
 inline auto operator+(Vec<L, T> const& a_X, U const& a_Y) {
 	return VecFunctor1<L, T, U, T>::call<std::plus<T>>(a_X, a_Y);
 }
+template<unsigned L, typename T, typename U>
+inline auto operator+(T const& a_X, Vec<L, U> const& a_Y) {
+	return VecFunctor1<L, T, U, T>::call<std::plus<T>>(a_X, a_Y);
+}
 
 template<unsigned L, typename T, typename U>
 inline auto operator-(Vec<L, T> const& a_X, Vec<L, U> const& a_Y) {
@@ -100,6 +104,36 @@ inline auto fract(const T& a_X) {
 template<unsigned L, typename T>
 inline auto fract(const Vec<L, T>& a_X) {
 	return VecFunctor<L, T, T>::call<fractF<T>>(a_X);
+}
+
+template<typename T>
+struct signF {
+	[[nodiscard]] constexpr inline T operator()(const T& x) const { return (T(0) < x) - (x < T(0)); }
+};
+template<typename T>
+inline auto sign(const T& a_X) {
+	return signF<T>{}(a_X);
+}
+template<unsigned L, typename T>
+inline auto sign(const Vec<L, T>& a_X) {
+	return VecFunctor<L, T, T>::call<signF<T>>(a_X);
+}
+
+template<typename T>
+inline auto mod(const T& a_X, const T& a_Y) {
+	return std::modulus<T>{}(a_X, a_Y);
+}
+template<unsigned L, typename T>
+inline auto mod(const Vec<L, T>& a_X, const Vec<L, T>& a_Y) {
+	return VecFunctor1<L, T, T, T>::call<std::modulus<T>>(a_X, a_Y);
+}
+template<unsigned L, typename T>
+inline auto mod(const Vec<L, T>& a_X, const T& a_Y) {
+	return VecFunctor1<L, T, T, T>::call<std::modulus<T>>(a_X, a_Y);
+}
+template<unsigned L, typename T>
+inline auto mod(const T& a_X, const Vec<L, T>& a_Y) {
+	return VecFunctor1<L, T, T, T>::call<std::modulus<T>>(a_X, a_Y);
 }
 
 template<unsigned L, typename T>
