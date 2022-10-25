@@ -28,21 +28,6 @@ struct Vec<3, T> {
 	};
 };
 
-template<typename T>
-auto Normalize(Vec<3, T> const& a_V)
-{
-	auto v = a_V;
-	auto len = std::sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
-
-	if (len != T(0))
-	{
-		v.x /= len;
-		v.y /= len;
-		v.z /= len;
-	}
-	return v;
-}
-
 typedef Vec<3, float>	 Vec3;
 typedef Vec<3, double>	 dVec3;
 typedef Vec<3, bool>	 bVec3;
