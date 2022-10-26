@@ -37,7 +37,7 @@ void BindDescriptorSets(
     a_CommandBuffer->PushCommand([
         &pushConstants = a_CommandBuffer->pushConstants,
         bindingPoint = size_t(a_BindingPoint),
-        descriptorSets](Buffer::ExecutionState& a_ExecutionState) {
+        descriptorSets = std::move(descriptorSets)](Buffer::ExecutionState& a_ExecutionState) {
         assert(descriptorSets.pipelineLayout == a_ExecutionState.pipelineState.at(bindingPoint)->layout);
         if (a_ExecutionState.descriptorSets.at(bindingPoint) != descriptorSets) {
             for (auto& set : a_ExecutionState.descriptorSets.at(bindingPoint).descriptorSets) {
@@ -49,7 +49,6 @@ void BindDescriptorSets(
             pushConstants.Bind();
             a_ExecutionState.descriptorSets.at(bindingPoint) = descriptorSets;
         }
-
     });
 }
 }
