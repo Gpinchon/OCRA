@@ -5,6 +5,7 @@
 #include <Queue/Queue.hpp>
 #include <Command/Pool.hpp>
 #include <Memory.hpp>
+#include <Descriptor/Pool.hpp>
 
 #include <iostream>
 #include <vector>
@@ -110,9 +111,7 @@ void SubmitCommandBuffer(const Queue::Handle& a_Queue, const Command::Buffer::Ha
     submitInfo.commandBuffers.push_back(a_CommandBuffer);
     Queue::Submit(a_Queue, { submitInfo });
 }
-/*
 
-*/
 uint32_t FindProperMemoryType(const PhysicalDevice::Handle& a_PhysicalDevice, const PhysicalDevice::MemoryPropertyFlags& a_MemoryProperties)
 {
     auto& memoryProperties = PhysicalDevice::GetMemoryProperties(a_PhysicalDevice);
@@ -128,11 +127,20 @@ uint32_t FindProperMemoryType(const PhysicalDevice::Handle& a_PhysicalDevice, co
     throw std::runtime_error("Could not find matching memory type");
     return (std::numeric_limits<uint32_t>::max)();
 }
+
 Memory::Handle AllocateMemory(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const uint64_t& a_Size, const PhysicalDevice::MemoryPropertyFlags& a_MemoryProperties)
 {
     Memory::Info memoryInfo;
     memoryInfo.memoryTypeIndex = FindProperMemoryType(a_PhysicalDevice, a_MemoryProperties);
     memoryInfo.size = a_Size;
     return Memory::Allocate(a_Device, memoryInfo);
+}
+
+Descriptor::Pool::Handle CreateDescriptorPool(const Device::Handle& a_Device, const size_t& a_MaxSets)
+{
+    Descriptor::Pool::Info poolInfo{};
+    poolInfo.maxSets = a_MaxSets;
+    poolInfo.sizes = {};
+    return Descriptor::Pool::Create(a_Device, poolInfo);
 }
 }

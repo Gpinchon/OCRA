@@ -24,6 +24,7 @@ OCRA_DECLARE_HANDLE(OCRA::Device);
 OCRA_DECLARE_HANDLE(OCRA::Memory);
 OCRA_DECLARE_HANDLE(OCRA::Command::Pool);
 OCRA_DECLARE_HANDLE(OCRA::Command::Buffer);
+OCRA_DECLARE_HANDLE(OCRA::Descriptor::Pool);
 
 namespace OCRA::PhysicalDevice
 {
@@ -104,6 +105,8 @@ void SubmitCommandBuffer(const Queue::Handle& a_Queue, const Command::Buffer::Ha
 uint32_t FindProperMemoryType(const PhysicalDevice::Handle& a_PhysicalDevice, const PhysicalDevice::MemoryPropertyFlags& a_MemoryProperties);
 //allocate GPU memory with the specified properties
 Memory::Handle AllocateMemory(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const uint64_t& a_Size, const PhysicalDevice::MemoryPropertyFlags& a_MemoryProperties);
+//creates a Descriptor Pool with the specified max sets
+Descriptor::Pool::Handle CreateDescriptorPool(const Device::Handle& a_Device, const size_t& a_MaxSets);
 
 struct TestApp
 {
