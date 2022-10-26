@@ -67,9 +67,9 @@ struct RenderPass
 	IndexBufferBinding				indexBufferBinding;
 };
 struct DescriptorSets {
-	Pipeline::Layout::Handle pipelineLayout;
-	std::vector<Descriptor::Set::Handle> descriptorSets;
-	std::vector<uint32_t> dynamicOffset;
+	Pipeline::Layout::Handle				pipelineLayout{ nullptr };
+	std::vector<Descriptor::Set::Handle>	descriptorSets{};
+	std::vector<uint32_t>					dynamicOffset{};
 	bool operator!=(const DescriptorSets& a_Other) {
 		return
 			pipelineLayout != a_Other.pipelineLayout ||
@@ -78,10 +78,21 @@ struct DescriptorSets {
 			dynamicOffset.size() != a_Other.dynamicOffset.size() ||
 			!std::equal(dynamicOffset.begin(), dynamicOffset.end(), a_Other.dynamicOffset.begin());
 	}
+	void clear() {
+		pipelineLayout = nullptr;
+		descriptorSets.clear();
+		dynamicOffset.clear();
+	}
 };
 struct ExecutionState {
 	ExecutionState() {
 		descriptorSets.fill({});
+		pipelineState.fill(nullptr);
+		lastPipelineState.fill(nullptr);
+	}
+	void clear() {
+		for (auto& descriptorSet : descriptorSets)
+			descriptorSet.clear();
 		pipelineState.fill(nullptr);
 		lastPipelineState.fill(nullptr);
 	}

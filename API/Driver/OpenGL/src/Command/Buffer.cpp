@@ -81,7 +81,7 @@ void OCRA::Command::Buffer::Impl::Invalidate()
     state = State::Invalid;
     commands.clear();
     secondaryBuffers.clear();
-    executionState = {};
+    executionState.clear();
 }
 
 void OCRA::Command::Buffer::Impl::Begin(const Buffer::BeginInfo& a_BeginInfo)

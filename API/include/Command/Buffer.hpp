@@ -15,6 +15,9 @@ OCRA_DECLARE_HANDLE(OCRA::Command::Buffer);
 OCRA_DECLARE_HANDLE(OCRA::Device);
 OCRA_DECLARE_HANDLE(OCRA::Pipeline::Layout);
 
+/**
+* Command buffers can hold refs to pooled objects and should always be destroyed first when exiting application
+*/
 namespace OCRA::Command::Buffer
 {
 using UsageFlags = std::bitset<3>;
