@@ -1,6 +1,6 @@
 #include <Common.hpp>
 #include <Window.hpp>
-#include <Texture.hpp>
+#include <UniformTexture.hpp>
 
 #include <Command/Buffer.hpp>
 #include <Command/Pool.hpp>
@@ -82,6 +82,7 @@ struct TexturesTestApp : TestApp
             swapChainImage = window.AcquireNextImage(std::chrono::nanoseconds(15000000), nullptr, imageAcquisitionFence);
             Queue::Fence::WaitFor(device, imageAcquisitionFence, std::chrono::nanoseconds(15000000));
             Queue::Fence::Reset(device, { imageAcquisitionFence });
+            textureUniform.Update();
             RecordMainCommandBuffer();
             SubmitCommandBuffer(queue, mainCommandBuffer);
             window.Present(queue);
@@ -250,7 +251,7 @@ struct TexturesTestApp : TestApp
         scissor.extent = window.GetExtent();
         {
             Pipeline::Layout::Info layoutInfo;
-            layoutInfo.setLayouts.push_back(texture.GetDescriptorSetLayout());
+            layoutInfo.setLayouts.push_back(textureUniform.GetDescriptorSetLayout());
             graphicsPipelineLayout = Pipeline::Layout::Create(device, layoutInfo);
         }
         Pipeline::ColorBlendState::AttachmentState colorBlend0;
@@ -337,7 +338,7 @@ struct TexturesTestApp : TestApp
         Command::BeginRenderPass(drawCommandBuffer, renderPassBeginInfo, Command::SubPassContents::Inline);
         {
             Command::BindPipeline(drawCommandBuffer, Pipeline::BindingPoint::Graphics, graphicsPipeline);
-            Command::BindDescriptorSets(drawCommandBuffer, Pipeline::BindingPoint::Graphics, graphicsPipelineLayout, 0, { texture.GetDescriptorSet() }, {});
+            Command::BindDescriptorSets(drawCommandBuffer, Pipeline::BindingPoint::Graphics, graphicsPipelineLayout, 0, textureUniform.GetDescriptorSets(), {});
             Command::Draw(drawCommandBuffer, 3, 1, 0, 0);
         }
         Command::EndRenderPass(drawCommandBuffer);
@@ -366,8 +367,8 @@ struct TexturesTestApp : TestApp
 
     std::vector<Shader::Stage::Handle>   shaderStages;
 
-    Texture2D<0>            texture{ device, Image::Format::Uint8_Normalized_RGBA, 640, 480, 1 };
-    Image::Sampler::Handle  textureSampler;
+    Texture2D                   texture{ device, Image::Format::Uint8_Normalized_RGBA, 640, 480, 1 };
+    UniformTexture              textureUniform{ 0, device, texture };
 };
 
 int main()

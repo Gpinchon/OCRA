@@ -2,11 +2,19 @@ cmake_minimum_required(VERSION 3.19)
 cmake_policy(SET CMP0074 NEW)
 
 set(OCRA_TEST_COMMON_SOURCE_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Common.cpp)
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Common.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Texture.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Uniform.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/UniformTexture.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/VertexBuffer.cpp)
 set(OCRA_TEST_COMMON_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Common.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Mesh.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Texture.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/UniformBuffer.hpp)
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Uniform.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/UniformBuffer.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/UniformTexture.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/VertexBuffer.hpp)
 
 set(OCRA_TEST_WINDOW_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Window.cpp)

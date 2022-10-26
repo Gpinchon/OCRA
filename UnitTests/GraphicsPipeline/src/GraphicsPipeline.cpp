@@ -1,6 +1,7 @@
 #include <Common.hpp>
 #include <Window.hpp>
 #include <UniformBuffer.hpp>
+#include <VertexBuffer.hpp>
 
 #include <Instance.hpp>
 #include <Device.hpp>
@@ -33,7 +34,7 @@
 #include <Pipeline/Graphics.hpp>
 
 using namespace OCRA;
-constexpr auto VSync = true;
+constexpr auto VSync = false;
 
 namespace OCRA {
 template <size_t C, size_t R, typename T>
@@ -155,10 +156,6 @@ Vec3 HSVtoRGB(float fH, float fS, float fV) {
     return { fR, fG, fB };
 }
 
-struct ProjectionMatrix {
-    Mat4x4 matrix{};
-};
-
 struct PushConstants {
     Vec3 color;
 };
@@ -198,9 +195,7 @@ struct GraphicsPipelineTestApp : TestApp
         , physicalDevice(Instance::EnumeratePhysicalDevices(instance).front())
         , device(CreateDevice(physicalDevice))
         , window(Window(instance, physicalDevice, device, name, 1280, 720))
-        , projectionMatrix(physicalDevice, device)
     {
-        window.SetVSync(VSync);
         window.OnResize = [this](const Window&, const uint32_t a_Width, const uint32_t a_Height) {
             render = true;
             if (!window.IsClosing()) {
@@ -219,10 +214,6 @@ struct GraphicsPipelineTestApp : TestApp
         imageAcquisitionFence = Queue::Fence::Create(device);
         mainCommandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Primary);
         drawCommandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Secondary);
-        vertexBuffer = CreateVertexBuffer();
-        vertexBufferMemory = AllocateVertexBuffer();
-        Buffer::BindMemory(device, vertexBuffer, vertexBufferMemory, 0);
-        FillVertexBuffer();
     }
     void Loop()
     {
@@ -230,6 +221,7 @@ struct GraphicsPipelineTestApp : TestApp
         auto lastTime = std::chrono::high_resolution_clock::now();
         auto printTime = lastTime;
         auto uniformUpdateTime = lastTime;
+        window.SetVSync(VSync);
         while (true) {
             
             fpsCounter.StartFrame();
@@ -252,34 +244,13 @@ struct GraphicsPipelineTestApp : TestApp
             {
                 uniformUpdateTime = now;
                 const float rotationAngle = uniformUpdateDelta * 0.0005;
-                projectionMatrix.Set({ Mat4x4::Rotate(projectionMatrix.Get().matrix, rotationAngle, Vec3(0.f, 1.f, 0.f)) });
+                projectionMatrix.Set({ Mat4x4::Rotate(projectionMatrix.Get(), rotationAngle, Vec3(0.f, 1.f, 0.f)) });
             }
             if (std::chrono::duration<double, std::milli>(now - printTime).count() >= 48) {
                 printTime = now;
                 fpsCounter.Print();
             }
         }
-    }
-    Buffer::Handle CreateVertexBuffer() {
-        Buffer::Info info;
-        info.size  = sizeof(vertices.front()) * vertices.size();
-        info.usage = Buffer::UsageFlagBits::VertexBuffer;
-        return Buffer::Create(device, info);
-    }
-    Memory::Handle AllocateVertexBuffer() {
-        return AllocateMemory(
-            physicalDevice, device,
-            sizeof(vertices.front()) * vertices.size(),
-            PhysicalDevice::MemoryPropertyFlagBits::HostVisible);
-    }
-    void FillVertexBuffer() {
-        Memory::MappedRange range;
-        range.memory = vertexBufferMemory;
-        range.length = sizeof(vertices.front()) * vertices.size();
-        range.offset = 0;
-        auto bufferPtr = Memory::Map(device, range);
-        std::memcpy(bufferPtr, vertices.data(), sizeof(vertices.front()) * vertices.size());
-        Memory::Unmap(device, vertexBufferMemory);
     }
     RenderPass::Handle CreateRenderPass()
     {
@@ -378,8 +349,8 @@ struct GraphicsPipelineTestApp : TestApp
         graphicsPipelineInfo.inputAssemblyState.primitiveRestartEnable = false;
         graphicsPipelineInfo.viewPortState.viewPorts = { viewport };
         graphicsPipelineInfo.viewPortState.scissors = { scissor };
-        graphicsPipelineInfo.vertexInputState.attributeDescriptions = Vertex::GetAttributeDescription();
-        graphicsPipelineInfo.vertexInputState.bindingDescriptions   = Vertex::GetBindingDescriptions();
+        graphicsPipelineInfo.vertexInputState.attributeDescriptions = vertexBuffer.GetAttribsDescriptions();
+        graphicsPipelineInfo.vertexInputState.bindingDescriptions   = vertexBuffer.GetBindingDescriptions();
         graphicsPipelineInfo.shaderPipelineState.stages = shaderStages;
 		graphicsPipelineInfo.renderPass = renderPass;
 		graphicsPipelineInfo.subPass = 0;
@@ -432,9 +403,9 @@ struct GraphicsPipelineTestApp : TestApp
         Command::BeginRenderPass(drawCommandBuffer, renderPassBeginInfo, Command::SubPassContents::Inline);
         {
             Command::BindPipeline(drawCommandBuffer, Pipeline::BindingPoint::Graphics, graphicsPipeline);
-            Command::BindDescriptorSets(drawCommandBuffer, Pipeline::BindingPoint::Graphics, graphicsPipelineInfo.layout, 0, { projectionMatrix.GetDescriptorSet()}, {});
-            Command::BindVertexBuffers(drawCommandBuffer, 0, { vertexBuffer }, { 0 });
-            Command::Draw(drawCommandBuffer, vertices.size(), 1, 0, 0);
+            Command::BindDescriptorSets(drawCommandBuffer, Pipeline::BindingPoint::Graphics, graphicsPipelineInfo.layout, 0, projectionMatrix.GetDescriptorSets(), {});
+            Command::BindVertexBuffers(drawCommandBuffer, 0, { vertexBuffer.GetBuffer() }, {0});
+            Command::Draw(drawCommandBuffer, vertexBuffer.GetVertexNbr(), 1, 0, 0);
         }
         Command::EndRenderPass(drawCommandBuffer);
         Command::Buffer::End(drawCommandBuffer);
@@ -495,15 +466,14 @@ struct GraphicsPipelineTestApp : TestApp
     Command::Buffer::Handle  drawCommandBuffer;
     Queue::Handle            queue;
     Queue::Fence::Handle     imageAcquisitionFence;
-    const std::vector<Vertex> vertices = {
+
+    VertexBuffer             vertexBuffer{ physicalDevice, device, std::vector<Vertex>{
         {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
         {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
         {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
-    };
-    Buffer::Handle          vertexBuffer;
-    Memory::Handle          vertexBufferMemory;
+    }};
     std::vector<Shader::Stage::Handle>   shaderStages;
-    UniformBuffer<ProjectionMatrix, 0> projectionMatrix;
+    UniformBuffer<Mat4x4> projectionMatrix{0, physicalDevice, device};
 };
 
 int main()
