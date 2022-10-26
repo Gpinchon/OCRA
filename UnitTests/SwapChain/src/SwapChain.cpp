@@ -89,6 +89,7 @@ struct SwapChainTestApp : TestApp
     {
         FPSCounter fpsCounter;
         auto printTime = std::chrono::high_resolution_clock::now();
+        window.SetVSync(false);
         while (true) {
             fpsCounter.StartFrame();
             window.PushEvents();

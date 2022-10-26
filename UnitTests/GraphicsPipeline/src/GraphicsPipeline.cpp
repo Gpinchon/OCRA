@@ -18,10 +18,8 @@
 #include <Command/Draw.hpp>
 #include <Command/Scissor.hpp>
 #include <Command/ViewPort.hpp>
-#include <Pipeline/Layout.hpp>
-#include <Descriptor/Pool.hpp>
 #include <Descriptor/Set.hpp>
-#include <Descriptor/SetLayout.hpp>
+#include <Pipeline/Layout.hpp>
 #include <Queue/Fence.hpp>
 #include <Common/Vec3.hpp>
 #include <Common/Vec_Math.hpp>
@@ -214,6 +212,9 @@ struct GraphicsPipelineTestApp : TestApp
         imageAcquisitionFence = Queue::Fence::Create(device);
         mainCommandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Primary);
         drawCommandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Secondary);
+    }
+    ~GraphicsPipelineTestApp() {
+        mainCommandBuffer = nullptr;
     }
     void Loop()
     {
@@ -458,6 +459,15 @@ struct GraphicsPipelineTestApp : TestApp
     FrameBuffer::Handle      frameBuffer;
     Image::Handle            frameBufferImage;
 
+    std::vector<Shader::Stage::Handle>   shaderStages;
+    VertexBuffer             vertexBuffer{ physicalDevice, device, std::vector<Vertex>{
+        {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+        {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+        {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+    }};
+    Descriptor::Pool::Handle            descriptorPool{ CreateDescriptorPool(device, 4096) };
+    UniformBuffer<Mat4x4>               projectionMatrix{ 0, physicalDevice, device, descriptorPool };
+
     RenderPass::Handle       renderPass;
     Pipeline::Graphics::Info graphicsPipelineInfo;
     Pipeline::Handle         graphicsPipeline;
@@ -466,14 +476,6 @@ struct GraphicsPipelineTestApp : TestApp
     Command::Buffer::Handle  drawCommandBuffer;
     Queue::Handle            queue;
     Queue::Fence::Handle     imageAcquisitionFence;
-
-    VertexBuffer             vertexBuffer{ physicalDevice, device, std::vector<Vertex>{
-        {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-        {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-        {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
-    }};
-    std::vector<Shader::Stage::Handle>   shaderStages;
-    UniformBuffer<Mat4x4> projectionMatrix{0, physicalDevice, device};
 };
 
 int main()

@@ -13,18 +13,20 @@ namespace OCRA {
 class Uniform {
 public:
     //We already know how our uniforms are formated
-    Uniform(const std::vector<Descriptor::SetLayout::Binding>& a_Bindings, const Device::Handle& a_Device, const Descriptor::Pool::Handle& a_DescriptorPool = nullptr)
+    Uniform(const std::vector<Descriptor::SetLayout::Binding>& a_Bindings, const Device::Handle& a_Device, const Descriptor::Pool::Handle& a_DescriptorPool)
         : device(a_Device)
-        , descriptorPool(CreateDescriptorPool(a_DescriptorPool))
+        , descriptorPool(a_DescriptorPool)
         , descriptorSetLayoutBindings(a_Bindings)
     {
         CreateDescriptorSetLayout();
         CreateDescriptorSets();
     }
+    ~Uniform()
+    {}
     //We don't know our bindings yet and will call CreateDescriptorSetLayout & CreateDescriptorSets later
-    Uniform(const Device::Handle& a_Device, const Descriptor::Pool::Handle& a_DescriptorPool = nullptr)
+    Uniform(const Device::Handle& a_Device, const Descriptor::Pool::Handle& a_DescriptorPool)
         : device(a_Device)
-        , descriptorPool(CreateDescriptorPool(a_DescriptorPool))
+        , descriptorPool(a_DescriptorPool)
     {}
     auto& GetDevice() const { return device; };
     auto& GetDescriptorPool() const { return descriptorPool; }
@@ -51,19 +53,8 @@ protected:
     };
 
 private:
-    Descriptor::Pool::Handle CreateDescriptorPool(const Descriptor::Pool::Handle& a_Pool) {
-        if (a_Pool == nullptr)
-        {
-            Descriptor::Pool::Info poolInfo{};
-            poolInfo.maxSets = 4096;
-            poolInfo.sizes = {};
-            return Descriptor::Pool::Create(device, poolInfo);
-        }
-        return a_Pool;
-    }
-    
-    const Device::Handle                                device;
-    const Descriptor::Pool::Handle                      descriptorPool;
+    const Device::Handle                          device;
+    const Descriptor::Pool::Handle                descriptorPool;
     std::vector<Descriptor::SetLayout::Binding>   descriptorSetLayoutBindings;
     Descriptor::SetLayout::Handle                 descriptorSetLayout;
     std::vector<Descriptor::Set::Handle>          descriptorSets;

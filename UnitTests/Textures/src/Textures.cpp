@@ -353,10 +353,6 @@ struct TexturesTestApp : TestApp
     Queue::Handle           queue;
     Queue::Fence::Handle    imageAcquisitionFence;
 
-    Command::Pool::Handle   commandPool;
-    Command::Buffer::Handle mainCommandBuffer;
-    Command::Buffer::Handle drawCommandBuffer;
-
     FrameBuffer::Handle      frameBuffer;
     Image::Handle            frameBufferImage;
 
@@ -367,8 +363,13 @@ struct TexturesTestApp : TestApp
 
     std::vector<Shader::Stage::Handle>   shaderStages;
 
+    Descriptor::Pool::Handle    descriptorPool{ CreateDescriptorPool(device, 4096) };
     Texture2D                   texture{ device, Image::Format::Uint8_Normalized_RGBA, 640, 480, 1 };
-    UniformTexture              textureUniform{ 0, device, texture };
+    UniformTexture              textureUniform{ 0, device, descriptorPool, texture };
+
+    Command::Pool::Handle   commandPool;
+    Command::Buffer::Handle mainCommandBuffer;
+    Command::Buffer::Handle drawCommandBuffer;
 };
 
 int main()

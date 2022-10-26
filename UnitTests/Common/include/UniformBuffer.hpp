@@ -19,7 +19,7 @@ template<typename T>
 class UniformBuffer : public Uniform {
 public:
     typedef T value_type;
-    UniformBuffer(const uint32_t& a_Binding, const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device);
+    UniformBuffer(const uint32_t& a_Binding, const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const Descriptor::Pool::Handle& a_Pool);
     virtual void Update() override;
     void Set(const value_type a_Data) {
         data = a_Data;
@@ -43,8 +43,8 @@ private:
 };
 
 template<typename T>
-inline UniformBuffer<T>::UniformBuffer(const uint32_t& a_Binding, const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device)
-    : Uniform({ CreateSetLayoutBinding(a_Binding) }, a_Device)
+inline UniformBuffer<T>::UniformBuffer(const uint32_t& a_Binding, const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const Descriptor::Pool::Handle& a_Pool)
+    : Uniform({ CreateSetLayoutBinding(a_Binding) }, a_Device, a_Pool)
 {
     memory = AllocateMemory(a_PhysicalDevice, a_Device, sizeof(value_type), PhysicalDevice::MemoryPropertyFlagBits::HostVisible);
     Buffer::Info bufferInfo{};
