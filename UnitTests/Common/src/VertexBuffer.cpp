@@ -1,4 +1,8 @@
 #include <VertexBuffer.hpp>
+#include <Common.hpp>
+
+#include <Memory.hpp>
+#include <Buffer.hpp>
 
 namespace OCRA {
 Memory::Handle VertexBuffer::AllocateMemory(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device)

@@ -1,13 +1,14 @@
 #pragma once
 
-#include <Buffer.hpp>
 #include <Common/Vec3.hpp>
 #include <Common/Vec2.hpp>
 #include <Handle.hpp>
-#include <Memory.hpp>
 #include <Pipeline/VertexInputState.hpp>
 
-#include <Common.hpp>
+OCRA_DECLARE_HANDLE(OCRA::PhysicalDevice);
+OCRA_DECLARE_HANDLE(OCRA::Device);
+OCRA_DECLARE_HANDLE(OCRA::Memory);
+OCRA_DECLARE_HANDLE(OCRA::Buffer);
 
 namespace OCRA {
 struct DefaultVertex {
