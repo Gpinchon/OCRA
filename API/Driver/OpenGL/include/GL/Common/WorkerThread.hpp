@@ -3,61 +3,57 @@
 #include <functional>
 #include <condition_variable>
 #include <queue>
-#include <set>
+#include <future>
 
 namespace OCRA
 {
 class WorkerThread
 {
 public:
-    struct Command {
-        const std::function<void()> fn;
-        const uint64_t id;
-        const bool notify;
-    };
+    using Task = std::function<void()>;
     inline WorkerThread() {
         _thread = std::thread([this] {
-            std::unique_lock<std::mutex> lock(_mtx);
-            while (!_stop) {
-                _cv.wait(lock, [this] {
-                    return !_queue.empty() || _stop;
-                });
-                std::queue<Command> queue;
-                _queue.swap(queue);
-                lock.unlock();
-                _taskMtx.lock();
-                while (!queue.empty()) {
-                    queue.front().fn();
-                    if (queue.front().notify)
-                        _finishedTasks.insert(queue.front().id);
-                    queue.pop();
+            while (true) {
+                Task task;
+                {
+                    std::unique_lock<std::mutex> lock(_mtx);
+                    _cv.wait(lock, [this] {
+                        return !_tasks.empty() || _stop;
+                        });
+                    if (_stop && _tasks.empty()) break;
+                    task = std::move(_tasks.front());
+                    _tasks.pop();
                 }
-                _taskMtx.unlock();
-                if (!_finishedTasks.empty()) _taskCv.notify_all();
-                lock.lock();
+                task();
             }
         });
     }
     inline ~WorkerThread() {
-        _stop = true;
+        {
+            std::unique_lock<std::mutex> lock(_mtx);
+            _stop = true;
+        }
         _cv.notify_one();
         _thread.join();
     }
-    inline void PushCommand(const std::function<void()>& a_Command, const bool a_Synchronous)
-    {
-        _mtx.lock();
-        const auto commandID = _commandID++;
-        _queue.push({ a_Command, commandID, a_Synchronous });
-        _mtx.unlock();
-        _cv.notify_one();
-        if (a_Synchronous) {
-            auto lock = std::unique_lock<std::mutex>(_taskMtx);
-            _taskCv.wait(lock, [this, &commandID] {
-                const auto done = _finishedTasks.find(commandID) != _finishedTasks.end();
-                if (done) _finishedTasks.erase(commandID);
-                return done;
+    template<typename T>
+    inline auto Enqueue(T task) -> std::future<decltype(task())> {
+        auto wrapper = new std::packaged_task<decltype(task()) ()>(std::move(task));
+        auto future = wrapper->get_future();
+        {
+            std::unique_lock<std::mutex> lock(_mtx);
+            _tasks.emplace([wrapper] {
+                (*wrapper)();
+                delete wrapper;
             });
         }
+        _cv.notify_one();
+        return future;
+    }
+    inline void PushCommand(const Task& a_Command, const bool a_Synchronous)
+    {
+        if (a_Synchronous) Enqueue(a_Command).get();
+        else Enqueue(a_Command);
     }
     //Pushes an empty synchronous command to wait for the thread to be done
     inline void Wait()
@@ -65,16 +61,11 @@ public:
         PushCommand([]{}, true);
     }
 private:
-    std::mutex _mtx;
+    std::mutex              _mtx;
     std::condition_variable _cv;
-    std::queue<Command> _queue;
-
-    std::mutex _taskMtx;
-    std::condition_variable _taskCv;
-    std::set<uint64_t> _finishedTasks;
+    std::queue<Task>        _tasks;
 
     std::thread _thread;
     bool _stop{ false };
-    uint64_t _commandID{ 0 };
 };
 }
