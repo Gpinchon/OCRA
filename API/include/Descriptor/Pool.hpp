@@ -14,6 +14,9 @@ namespace OCRA {
 struct AllocationCallback;
 }
 
+/**
+* One muse always make sure Descriptor Pool outlives its Descriptor Sets
+*/
 namespace OCRA::Descriptor::Pool
 {
 struct Size

@@ -13,6 +13,9 @@ namespace OCRA {
 struct AllocationCallback;
 }
 
+/**
+* One muse always make sure Command Pool outlives its Command Buffers
+*/
 namespace OCRA::Command::Pool
 {
 using CreateFlags = std::bitset<3>;
