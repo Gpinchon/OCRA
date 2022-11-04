@@ -2,7 +2,7 @@
 #include <GL/Surface.hpp>
 #include <GL/Win32/Surface.hpp>
 
-#include <GL/WeakHandle.hpp>
+#include <WeakHandle.hpp>
 #include <GL/Win32/Window.hpp>
 
 #include <windows.h>

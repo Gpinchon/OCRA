@@ -4,7 +4,7 @@
 #include <Surface.hpp>
 #include <Common/Extent2D.hpp>
 
-#include <GL/WeakHandle.hpp>
+#include <WeakHandle.hpp>
 
 #include <functional>
 #include <string>

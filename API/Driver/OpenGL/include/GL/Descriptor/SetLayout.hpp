@@ -3,7 +3,7 @@
 #include <Handle.hpp>
 #include <Descriptor/SetLayout.hpp>
 
-#include <GL/WeakHandle.hpp>
+#include <WeakHandle.hpp>
 
 #include <algorithm>
 

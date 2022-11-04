@@ -39,6 +39,76 @@ Vec3 hue2rgb(float h)
     return saturate(Vec3(abs(h - 1.0) - 1.0, 2.0 - abs(h), 2.0 - abs(h - 2.0)));
 }
 
+Texture2D CreateTexture(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device)
+{
+    auto& device = a_Device;
+    auto& physicalDevice = a_PhysicalDevice;
+    Texture2D texture(a_Device, Image::Format::Uint8_Normalized_RGBA, 640, 480, 1);
+    const auto textureSize = texture.GetWidth() * texture.GetHeight() * Image::GetPixelSize(texture.GetImageInfo().format);
+    Buffer::Info bufferInfo;
+    bufferInfo.size = textureSize;
+    bufferInfo.usage = Buffer::UsageFlagBits::TransferSrc;
+    auto textureTransferBuffer = Buffer::Create(device, bufferInfo);
+    auto textureTransferMemory = AllocateMemory(
+        physicalDevice, device,
+        bufferInfo.size,
+        PhysicalDevice::MemoryPropertyFlagBits::HostVisible);
+    Buffer::BindMemory(device, textureTransferBuffer, textureTransferMemory, 0);
+    Memory::MappedRange range;
+    range.memory = textureTransferMemory;
+    range.length = textureSize;
+    range.offset = 0;
+    auto bufferPtr = (Vec<4, uint8_t>*)Memory::Map(device, range);
+    iVec2 iResolution = { texture.GetWidth(), texture.GetHeight() };
+    for (uint32_t x = 0; x < texture.GetWidth(); ++x) {
+        for (uint32_t y = 0; y < texture.GetHeight(); ++y) {
+            float yf = 1 - (y / float(iResolution.y));
+            Vec2 fragCoord = { x, yf * iResolution.y };
+            float scale = 27.0 / iResolution.y;                             // grid scale
+            Vec2 area = Vec2(floor(13.0 / iResolution.y * iResolution.x), 13.0); // size of inner area
+
+            Vec2 p0 = fragCoord - iResolution / 2.0; // position (pixel)
+            Vec2 p1 = p0 * scale;                       // position (grid)
+
+            // gray background with crosshair
+            float c1 = 1.0 - step(2.f, std::min(abs(p0.x), abs(p0.y))) * 0.5;
+
+            // grid lines
+            Vec2 grid = step(scale, abs(Vec2(0.5) - fract(p1 * 0.5)));
+            c1 = std::clamp(c1 + 2.0 - grid.x - grid.y, 0.0, 1.0);
+
+            // outer area checker
+            Vec2 checker = step(0.49999f, fract(floor(p1 * 0.5 + 0.5) * 0.5));
+            if (any(greaterThan(abs(p1), area))) c1 = abs(checker.x - checker.y);
+
+            float corner = sqrt(8.0) - length(abs(p1) - area + 4.0); // corner circles
+            float circle = 12.0 - length(p1);                      // big center circle
+            float mask = saturate(circle / scale);               // center circls mask
+
+            // grayscale bars
+            float bar1 = saturate(p1.y < 5.0 ? floor(p1.x / 4.0 + 3.0) / 5.0 : p1.x / 16.0 + 0.5);
+            c1 = mix(c1, bar1, mask * saturate(ceil(4.0 - abs(5.0 - p1.y))));
+
+            // basic color bars
+            Vec3 bar2 = hue2rgb((p1.y > -5.0 ? floor(p1.x / 4.0) / 6.0 : p1.x / 16.0) + 0.5);
+            Vec3 c2 = mix(Vec3(c1), bar2, mask * saturate(ceil(4.0 - abs(-5.0 - p1.y))));
+
+            // big circle line
+            c2 = mix(c2, Vec3(1.0), saturate(2.0 - abs(std::max(circle, corner)) / scale));
+            const size_t index = x + y * texture.GetWidth();
+            bufferPtr[index].r = c2.x * 255;
+            bufferPtr[index].g = c2.y * 255;
+            bufferPtr[index].b = c2.z * 255;
+            bufferPtr[index].a = 255;
+        }
+    }
+    Memory::Unmap(device, textureTransferMemory);
+    Image::BufferCopy bufferCopy;
+    bufferCopy.imageExtent = texture.GetImageInfo().extent;
+    Image::CopyBufferToImage(device, textureTransferBuffer, texture.GetImage(), { bufferCopy });
+    return texture;
+}
+
 struct TexturesTestApp : TestApp
 {
     TexturesTestApp()
@@ -66,7 +136,6 @@ struct TexturesTestApp : TestApp
         drawCommandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Secondary);
         CreateRenderPass();
         CreateShaderStages();
-        FillTexture();
     }
     void Loop()
     {
@@ -142,72 +211,6 @@ struct TexturesTestApp : TestApp
             shaderStageInfo.module = shaderModule;
             shaderStages.push_back(Shader::Stage::Create(device, shaderStageInfo));
         }
-    }
-    void FillTexture()
-    {
-        Buffer::Info bufferInfo;
-        bufferInfo.size = texture.GetWidth() * texture.GetHeight() * Image::GetPixelSize(texture.GetImageInfo().format);
-        bufferInfo.usage = Buffer::UsageFlagBits::TransferSrc;
-        auto textureTransferBuffer = Buffer::Create(device, bufferInfo);
-        auto textureTransferMemory = AllocateMemory(
-            physicalDevice, device,
-            bufferInfo.size,
-            PhysicalDevice::MemoryPropertyFlagBits::HostVisible);
-        Buffer::BindMemory(device, textureTransferBuffer, textureTransferMemory, 0);
-        const auto textureSize = texture.GetWidth() * texture.GetHeight() * Image::GetPixelSize(texture.GetImageInfo().format);
-        Memory::MappedRange range;
-        range.memory = textureTransferMemory;
-        range.length = textureSize;
-        range.offset = 0;
-        auto bufferPtr = (Vec<4, uint8_t>*)Memory::Map(device, range);
-        iVec2 iResolution = { texture.GetWidth(), texture.GetHeight() };
-        for (uint32_t x = 0; x < texture.GetWidth(); ++x) {
-            for (uint32_t y = 0; y < texture.GetHeight(); ++y) {
-                float yf = 1 - (y / float(iResolution.y));
-                Vec2 fragCoord = { x, yf * iResolution.y };
-                float scale = 27.0 / iResolution.y;                             // grid scale
-                Vec2 area = Vec2(floor(13.0 / iResolution.y * iResolution.x), 13.0); // size of inner area
-
-                Vec2 p0 = fragCoord - iResolution / 2.0; // position (pixel)
-                Vec2 p1 = p0 * scale;                       // position (grid)
-
-                // gray background with crosshair
-                float c1 = 1.0 - step(2.f, std::min(abs(p0.x), abs(p0.y))) * 0.5;
-
-                // grid lines
-                Vec2 grid = step(scale, abs(Vec2(0.5) - fract(p1 * 0.5)));
-                c1 = std::clamp(c1 + 2.0 - grid.x - grid.y, 0.0, 1.0);
-
-                // outer area checker
-                Vec2 checker = step(0.49999f, fract(floor(p1 * 0.5 + 0.5) * 0.5));
-                if (any(greaterThan(abs(p1), area))) c1 = abs(checker.x - checker.y);
-
-                float corner = sqrt(8.0) - length(abs(p1) - area + 4.0); // corner circles
-                float circle = 12.0 - length(p1);                      // big center circle
-                float mask = saturate(circle / scale);               // center circls mask
-
-                // grayscale bars
-                float bar1 = saturate(p1.y < 5.0 ? floor(p1.x / 4.0 + 3.0) / 5.0 : p1.x / 16.0 + 0.5);
-                c1 = mix(c1, bar1, mask * saturate(ceil(4.0 - abs(5.0 - p1.y))));
-
-                // basic color bars
-                Vec3 bar2 = hue2rgb((p1.y > -5.0 ? floor(p1.x / 4.0) / 6.0 : p1.x / 16.0) + 0.5);
-                Vec3 c2 = mix(Vec3(c1), bar2, mask * saturate(ceil(4.0 - abs(-5.0 - p1.y))));
-
-                // big circle line
-                c2 = mix(c2, Vec3(1.0), saturate(2.0 - abs(std::max(circle, corner)) / scale));
-                //c2 = bar2;
-                const int index = x + y * texture.GetWidth();
-                bufferPtr[index].r = c2.x * 255;
-                bufferPtr[index].g = c2.y * 255;
-                bufferPtr[index].b = c2.z * 255;
-                bufferPtr[index].a = 255;
-            }
-        }
-        Memory::Unmap(device, textureTransferMemory);
-        Image::BufferCopy bufferCopy;
-        bufferCopy.imageExtent = texture.GetImageInfo().extent;
-        Image::CopyBufferToImage(device, textureTransferBuffer, texture.GetImage(), { bufferCopy });
     }
     void CreateFrameBuffer()
     {
@@ -364,8 +367,7 @@ struct TexturesTestApp : TestApp
     std::vector<Shader::Stage::Handle>   shaderStages;
 
     Descriptor::Pool::Handle    descriptorPool{ CreateDescriptorPool(device, 4096) };
-    Texture2D                   texture{ device, Image::Format::Uint8_Normalized_RGBA, 640, 480, 1 };
-    UniformTexture              textureUniform{ 0, device, descriptorPool, texture };
+    UniformTexture              textureUniform{ 0, device, descriptorPool, CreateTexture(physicalDevice, device) };
 
     Command::Pool::Handle   commandPool;
     Command::Buffer::Handle mainCommandBuffer;

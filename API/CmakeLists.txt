@@ -22,6 +22,7 @@ set(OCRA_API_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/PhysicalDevice.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/QueryPool.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/RenderPass.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/WeakHandle.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Queue/Queue.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Queue/Fence.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Queue/Semaphore.hpp

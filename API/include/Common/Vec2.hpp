@@ -16,10 +16,10 @@ struct Vec<2, T> {
 	auto& operator[](const size_t& a_Index) { return value[a_Index]; }
 	auto& operator[](const size_t& a_Index) const { return value[a_Index]; }
 	union {
+		value_type value[2];
 		struct { value_type x, y; };
 		struct { value_type r, g; };
 		struct { value_type u, v; };
-		value_type value[2];
 	};
 };
 

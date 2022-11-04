@@ -1,3 +1,5 @@
+#include "Buffer.hpp"
+#include "Buffer.hpp"
 #include <Buffer.hpp>
 #include <Allocator.hpp>
 
@@ -28,6 +30,43 @@ void BindMemory(const Device::Handle& a_Device, const Handle& a_Buffer, const Me
 #include <GL/Common/IndexType.hpp>
 
 namespace OCRA::Command {
+void Update(
+    const Command::Buffer::Handle&  a_CommandBuffer,
+    const OCRA::Buffer::Handle&     a_DstBuffer,
+    const size_t&                   a_Offset,
+    const size_t&                   a_Size,
+    const std::byte*                a_Data)
+{
+    assert(a_Size <= 65536);
+    auto data = new std::byte[a_Size];
+    std::memcpy(data, a_Data, a_Size);
+    a_CommandBuffer->PushCommand([
+        dstBuffer = a_DstBuffer,
+        offset = a_Offset,
+        size = a_Size,
+        data
+    ](Buffer::ExecutionState& executionState) {
+        auto& dstMemory = dstBuffer->memoryBinding;
+        glNamedBufferSubData(dstMemory.memory->handle, dstMemory.offset + offset, size, data);
+        delete[] data;
+    });
+}
+void Update(
+    const Command::Buffer::Handle&  a_CommandBuffer,
+    const OCRA::Buffer::Handle&     a_DstBuffer,
+    const size_t&                   a_Offset,
+    const std::vector<std::byte>&   a_Data)
+{
+    assert(a_Data.size() <= 65536);
+    a_CommandBuffer->PushCommand([
+        dstBuffer = a_DstBuffer,
+        offset = a_Offset,
+        data = a_Data
+    ](Buffer::ExecutionState& executionState) {
+        auto& dstMemory = dstBuffer->memoryBinding;
+        glNamedBufferSubData(dstMemory.memory->handle, dstMemory.offset + offset, data.size(), data.data());
+    });
+}
 void CopyBuffer(
     const Command::Buffer::Handle& a_CommandBuffer,
     const OCRA::Buffer::Handle&    a_SrcBuffer,

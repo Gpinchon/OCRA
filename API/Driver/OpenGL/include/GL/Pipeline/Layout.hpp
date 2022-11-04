@@ -2,7 +2,7 @@
 
 #include <Pipeline/Layout.hpp>
 
-#include <GL/WeakHandle.hpp>
+#include <WeakHandle.hpp>
 
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
 

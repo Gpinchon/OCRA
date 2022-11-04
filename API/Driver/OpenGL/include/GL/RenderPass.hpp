@@ -1,7 +1,7 @@
 #pragma once
 
 #include <RenderPass.hpp>
-#include <GL/WeakHandle.hpp>
+#include <WeakHandle.hpp>
 
 #include <vector>
 

@@ -55,7 +55,6 @@ set(OCRA_IMPL_HEADER_FILES
   ${OCRA_IMPL_INCLUDE_DIR}/GL/PhysicalDevice.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/PushConstants.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/RenderPass.hpp
-  ${OCRA_IMPL_INCLUDE_DIR}/GL/WeakHandle.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Command/Buffer.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Command/ExecutionState.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Command/Pool.hpp

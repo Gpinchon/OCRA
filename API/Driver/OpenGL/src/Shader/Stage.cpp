@@ -9,7 +9,7 @@
 
 #include <GL/Shader/Stage.hpp>
 #include <GL/Device.hpp>
-#include <GL/WeakHandle.hpp>
+#include <WeakHandle.hpp>
 
 #include <GL/glew.h>
 

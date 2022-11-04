@@ -8,7 +8,7 @@
 #include <Command/Buffer.hpp>
 #include <Queue/Queue.hpp>
 
-#include <GL/WeakHandle.hpp>
+#include <WeakHandle.hpp>
 #include <GL/Command/Buffer.hpp>
 #include <GL/Command/ExecutionState.hpp>
 
@@ -45,7 +45,7 @@ void PushConstants(
     const Command::Buffer::Handle& a_CommandBuffer,
     const Pipeline::Layout::Handle& a_PipelineLayout,
     const uint8_t a_Offset,
-    const std::vector<char>& a_Data)
+    const std::vector<std::byte>& a_Data)
 {
     a_CommandBuffer->PushCommand([
         &pushConstants = a_CommandBuffer->pushConstants,
@@ -81,7 +81,7 @@ void OCRA::Command::Buffer::Impl::Invalidate()
     state = State::Invalid;
     commands.clear();
     secondaryBuffers.clear();
-    executionState.clear();
+    executionState = {};
 }
 
 void OCRA::Command::Buffer::Impl::Begin(const Buffer::BeginInfo& a_BeginInfo)

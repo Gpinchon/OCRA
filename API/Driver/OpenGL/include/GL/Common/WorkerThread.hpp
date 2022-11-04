@@ -38,9 +38,10 @@ public:
     }
     template<typename T>
     inline auto Enqueue(T task) -> std::future<decltype(task())> {
-        auto wrapper = new std::packaged_task<decltype(task()) ()>(std::move(task));
-        auto future = wrapper->get_future();
+        std::future<decltype(task())> future;
         {
+            auto wrapper = new std::packaged_task<decltype(task()) ()>(std::move(task));
+            future = wrapper->get_future();
             std::unique_lock<std::mutex> lock(_mtx);
             _tasks.emplace([wrapper] {
                 (*wrapper)();

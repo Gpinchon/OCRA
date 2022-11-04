@@ -50,5 +50,5 @@ void PushConstants(
 	const Command::Buffer::Handle& a_CommandBuffer,
 	const Pipeline::Layout::Handle& a_PipelineLayout,
 	const uint8_t a_Offset,
-	const std::vector<char>& a_Data);
+	const std::vector<std::byte>& a_Data);
 }

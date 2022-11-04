@@ -21,10 +21,10 @@ struct Vec<3, T> {
 	auto& operator[] (const size_t& a_Index) { return value[a_Index]; }
 	auto& operator[] (const size_t& a_Index) const { return value[a_Index]; }
 	union {
+		value_type value[3];
 		struct { value_type x, y, z; };
 		struct { value_type r, g, b; };
 		struct { value_type u, v, s; };
-		value_type value[3];
 	};
 };
 

@@ -3,8 +3,8 @@
 #include <Config.hpp>
 
 #include <glslang\Public\ShaderLang.h>
+#include <glslang\Public\ResourceLimits.h>
 #include <SPIRV\GlslangToSpv.h>
-#include <StandAlone\ResourceLimits.h>
 #include <spirv_cross.hpp>
 #include <spirv_glsl.hpp>
 
@@ -78,7 +78,7 @@ std::vector<uint32_t> Impl::Compile()
 		shader.setEnvTarget(glslang::EshTargetSpv, glslang::EShTargetSpv_1_0);
 		//shader.setEntryPoint(name.c_str());
 		//shader.setSourceEntryPoint(name.c_str());
-		if (!shader.parse(&glslang::DefaultTBuiltInResource, 100, false, EShMsgDefault))
+		if (!shader.parse(GetDefaultResources(), 100, false, EShMsgDefault))
 			std::cerr << shader.getInfoLog() << std::endl;
 		glslang::TProgram program;
 		program.addShader(&shader);
@@ -129,7 +129,7 @@ std::vector<uint32_t> Impl::Compile()
 		shader.setEnvTarget(glslang::EshTargetSpv, glslang::EShTargetSpv_1_0);
 		shader.setEntryPoint(info.entryPoint.c_str());
 		shader.setSourceEntryPoint(info.entryPoint.c_str());
-		if (!shader.parse(&glslang::DefaultTBuiltInResource, 100, false, EShMsgDefault)) {
+		if (!shader.parse(GetDefaultResources(), 100, false, EShMsgDefault)) {
 			const auto error = shader.getInfoLog();
 			std::cerr << error << std::endl;
 			throw std::runtime_error(error);

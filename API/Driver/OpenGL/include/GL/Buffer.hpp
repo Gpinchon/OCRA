@@ -3,7 +3,7 @@
 #include <Handle.hpp>
 #include <Buffer.hpp>
 
-#include <GL/WeakHandle.hpp>
+#include <WeakHandle.hpp>
 
 #include <cassert>
 

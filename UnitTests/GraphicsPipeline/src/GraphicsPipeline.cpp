@@ -1,18 +1,15 @@
 #include <Common.hpp>
+#include <Mat4x4.hpp>
+#include <Mesh.hpp>
+#include <PBRMaterial.hpp>
 #include <Window.hpp>
-#include <UniformBuffer.hpp>
-#include <VertexBuffer.hpp>
 
 #include <Instance.hpp>
 #include <Device.hpp>
 #include <FrameBuffer.hpp>
-#include <Memory.hpp>
-#include <Buffer.hpp>
 #include <RenderPass.hpp>
 #include <Surface.hpp>
 #include <SwapChain.hpp>
-#include <Image/Image.hpp>
-#include <Image/View.hpp>
 #include <Command/Pool.hpp>
 #include <Command/Buffer.hpp>
 #include <Command/Draw.hpp>
@@ -33,77 +30,6 @@
 
 using namespace OCRA;
 constexpr auto VSync = false;
-
-namespace OCRA {
-template <size_t C, size_t R, typename T>
-struct Mat;
-template <typename T>
-struct Mat<4, 4, T> {
-    typedef T value_type;
-    typedef Mat<4, 4, T> type;
-    typedef Vec<4, T> col_type;
-    typedef Vec<4, T> row_type;
-
-    Mat() : value{
-        col_type(1, 0, 0, 0),
-        col_type(0, 1, 0, 0),
-        col_type(0, 0, 1, 0),
-        col_type(0, 0, 0, 1) }
-    {}
-
-    template<typename V1, typename V2, typename V3, typename V4>
-    Mat(col_type const& a_V1,
-        col_type const& a_V2,
-        col_type const& a_V3,
-        col_type const& a_V4)
-    {
-        value[0] = a_V1;
-        value[1] = a_V2;
-        value[2] = a_V3;
-        value[3] = a_V4;
-    }
-    auto& operator[](size_t const& a_Col) {
-        return value[a_Col];
-    }
-    auto& operator[](size_t const& a_Col) const {
-        return value[a_Col];
-    }
-    template<typename T>
-    static auto Rotate(Mat<4, 4, T> const& a_M, T a_Angle, Vec<3, T> const& a_V)
-    {
-        T const a = a_Angle;
-        T const c = cos(a);
-        T const s = sin(a);
-
-        auto axis(normalize(a_V));
-        auto temp((T(1) - c) * axis);
-
-        Mat<4, 4, T> Rotate;
-        Rotate[0][0] = c + temp[0] * axis[0];
-        Rotate[0][1] = temp[0] * axis[1] + s * axis[2];
-        Rotate[0][2] = temp[0] * axis[2] - s * axis[1];
-
-        Rotate[1][0] = temp[1] * axis[0] - s * axis[2];
-        Rotate[1][1] = c + temp[1] * axis[1];
-        Rotate[1][2] = temp[1] * axis[2] + s * axis[0];
-
-        Rotate[2][0] = temp[2] * axis[0] + s * axis[1];
-        Rotate[2][1] = temp[2] * axis[1] - s * axis[0];
-        Rotate[2][2] = c + temp[2] * axis[2];
-
-        Mat<4, 4, T> Result;
-        Result[0] = a_M[0] * Rotate[0][0] + a_M[1] * Rotate[0][1] + a_M[2] * Rotate[0][2];
-        Result[1] = a_M[0] * Rotate[1][0] + a_M[1] * Rotate[1][1] + a_M[2] * Rotate[1][2];
-        Result[2] = a_M[0] * Rotate[2][0] + a_M[1] * Rotate[2][1] + a_M[2] * Rotate[2][2];
-        Result[3] = a_M[3];
-        return Result;
-    }
-
-private:
-    col_type value[4];
-};
-typedef Mat<4, 4, float> Mat4x4;
-}
 
 Vec3 HSVtoRGB(float fH, float fS, float fV) {
     float fC = fV * fS; // Chroma
@@ -154,10 +80,6 @@ Vec3 HSVtoRGB(float fH, float fS, float fV) {
     return { fR, fG, fB };
 }
 
-struct PushConstants {
-    Vec3 color;
-};
-
 struct Vertex {
     Vec2 pos;
     Vec3 color;
@@ -204,7 +126,6 @@ struct GraphicsPipelineTestApp : TestApp
         window.OnMaximize = window.OnResize;
         window.OnRestore = window.OnResize;
         window.OnMinimize = [this](const Window&, const uint32_t, const uint32_t) { render = false; };
-        CreateShaderStages();
         const auto queueFamily = FindQueueFamily(physicalDevice, PhysicalDevice::QueueFlagsBits::Graphics);
         queue = Device::GetQueue(device, queueFamily, 0); //Get first available queue
         commandPool = CreateCommandPool(device, queueFamily);
@@ -224,7 +145,6 @@ struct GraphicsPipelineTestApp : TestApp
         auto uniformUpdateTime = lastTime;
         window.SetVSync(VSync);
         while (true) {
-            
             fpsCounter.StartFrame();
             window.PushEvents();
             if (window.IsClosing()) break;
@@ -235,7 +155,6 @@ struct GraphicsPipelineTestApp : TestApp
             swapChainImage = window.AcquireNextImage(std::chrono::nanoseconds(15000000), nullptr, imageAcquisitionFence);
             Queue::Fence::WaitFor(device, imageAcquisitionFence, std::chrono::nanoseconds(15000000));
             Queue::Fence::Reset(device, { imageAcquisitionFence });
-            projectionMatrix.Update();
             RecordMainCommandBuffer(delta);
             SubmitCommandBuffer(queue, mainCommandBuffer);
             window.Present(queue);
@@ -245,12 +164,14 @@ struct GraphicsPipelineTestApp : TestApp
             {
                 uniformUpdateTime = now;
                 const float rotationAngle = uniformUpdateDelta * 0.0005;
-                projectionMatrix.Set({ Mat4x4::Rotate(projectionMatrix.Get(), rotationAngle, Vec3(0.f, 1.f, 0.f)) });
+                mesh.SetProjectionMatrix(Mat4x4::Rotate(mesh.GetProjectionMatrix(), rotationAngle, Vec3(0.f, 1.f, 0.f)));
+                
             }
             if (std::chrono::duration<double, std::milli>(now - printTime).count() >= 48) {
                 printTime = now;
                 fpsCounter.Print();
             }
+            firstLoop = false;
         }
     }
     RenderPass::Handle CreateRenderPass()
@@ -267,63 +188,6 @@ struct GraphicsPipelineTestApp : TestApp
 		renderPassInfo.subPasses = { subPassDescription };
         return RenderPass::Create(device, renderPassInfo);
     }
-    void CreateShaderStages()
-    {
-        const auto compiler = ShaderCompiler::Create();
-        {
-            ShaderCompiler::Shader::Info shaderInfo;
-            shaderInfo.type = ShaderCompiler::Shader::Type::Vertex;
-            shaderInfo.entryPoint = "main";
-            shaderInfo.source = {
-                "#version 450                                               \n"
-                "layout(location = 0) in vec2 inPosition;                   \n"
-                "layout(location = 1) in vec3 inColor;                      \n"
-                "layout(push_constant) uniform PushConstants {              \n"
-                "   vec3 color;                                             \n"
-                "} constants;                                               \n"
-                "layout(binding = 0) uniform Projection {                   \n"
-                "   mat4 matrix;                                            \n"
-                "} proj;                                                    \n"
-                "layout(location = 0) out vec3 fragColor;                   \n"
-                "void main() {                                              \n"
-                "   gl_Position = proj.matrix * vec4(inPosition, 0.0, 1.0); \n"
-                "   fragColor = constants.color;                            \n"
-                "}                                                          \n"
-            };
-            const auto vertexShader = ShaderCompiler::Shader::Create(compiler, shaderInfo);
-            Shader::Module::Info shaderModuleInfo;
-            shaderModuleInfo.code = ShaderCompiler::Shader::Compile(vertexShader);
-            const auto shaderModule = Shader::Module::Create(device, shaderModuleInfo);
-            Shader::Stage::Info shaderStageInfo;
-            shaderStageInfo.entryPoint = "main";
-            shaderStageInfo.stage = Shader::Stage::StageFlagBits::Vertex;
-            shaderStageInfo.module = shaderModule;
-            shaderStages.push_back(Shader::Stage::Create(device, shaderStageInfo));
-        }
-        {
-            ShaderCompiler::Shader::Info shaderInfo;
-            shaderInfo.type = ShaderCompiler::Shader::Type::Fragment;
-            shaderInfo.entryPoint = "main";
-            shaderInfo.source = {
-                "#version 450                            \n"
-                "layout(location = 0) out vec4 outColor; \n"
-                "layout(location = 0) in vec3 fragColor; \n"
-                "void main() {                           \n"
-                "    outColor = vec4(fragColor, 1.0);    \n"
-                "}                                       \n"
-            };
-            const auto fragmentShader = ShaderCompiler::Shader::Create(compiler, shaderInfo);
-            Shader::Module::Info shaderModuleInfo;
-            shaderModuleInfo.code = ShaderCompiler::Shader::Compile(fragmentShader);
-            const auto shaderModule = Shader::Module::Create(device, shaderModuleInfo);
-            Shader::Stage::Info shaderStageInfo;
-            shaderStageInfo.entryPoint = "main";
-            shaderStageInfo.stage = Shader::Stage::StageFlagBits::Fragment;
-            shaderStageInfo.module = shaderModule;
-            shaderStages.push_back(Shader::Stage::Create(device, shaderStageInfo));
-        }
-        
-    }
     void CreateGraphicsPipeline()
     {
         ViewPort viewport;
@@ -333,27 +197,19 @@ struct GraphicsPipelineTestApp : TestApp
         Rect2D  scissor{};
         scissor.offset = { 0, 0 };
         scissor.extent = window.GetExtent();
-        Pipeline::Layout::Handle layout;
-        {
-            Pipeline::Layout::Info layoutInfo;
-            Pipeline::Layout::PushConstantRange pushConstantRange;
-            pushConstantRange.size = sizeof(PushConstants);
-            pushConstantRange.stage = Shader::Stage::StageFlagBits::Vertex;
-            layoutInfo.setLayouts.push_back(projectionMatrix.GetDescriptorSetLayout());
-            layoutInfo.pushConstants.push_back(pushConstantRange);
-            layout = Pipeline::Layout::Create(device, layoutInfo);
-        }
-        graphicsPipelineInfo.layout = layout;
-        graphicsPipelineInfo.renderPass = renderPass;
-        graphicsPipelineInfo.rasterizationState.cullMode = Pipeline::RasterizationState::CullMode::None;
-        graphicsPipelineInfo.inputAssemblyState.topology = Primitive::Topology::TriangleList;
-        graphicsPipelineInfo.inputAssemblyState.primitiveRestartEnable = false;
+        Pipeline::Graphics::Info graphicsPipelineInfo;
         graphicsPipelineInfo.viewPortState.viewPorts = { viewport };
         graphicsPipelineInfo.viewPortState.scissors = { scissor };
-        graphicsPipelineInfo.vertexInputState.attributeDescriptions = vertexBuffer.GetAttribsDescriptions();
-        graphicsPipelineInfo.vertexInputState.bindingDescriptions   = vertexBuffer.GetBindingDescriptions();
-        graphicsPipelineInfo.shaderPipelineState.stages = shaderStages;
-		graphicsPipelineInfo.renderPass = renderPass;
+
+        graphicsPipelineInfo.renderPass = renderPass;
+        graphicsPipelineInfo.rasterizationState.cullMode = Pipeline::RasterizationState::CullMode::None;
+
+        graphicsPipelineInfo.layout = mesh.GetPipelineLayout();
+        graphicsPipelineInfo.inputAssemblyState = mesh.GetInputAssembly();
+        graphicsPipelineInfo.vertexInputState.attributeDescriptions = mesh.GetVertexBuffer().GetAttribsDescriptions();
+        graphicsPipelineInfo.vertexInputState.bindingDescriptions   = mesh.GetVertexBuffer().GetBindingDescriptions();
+        graphicsPipelineInfo.shaderPipelineState.stages = mesh.GetShaderStages();
+
 		graphicsPipelineInfo.subPass = 0;
         //Everything else is left by default for now
         graphicsPipeline = Pipeline::Graphics::Create(device, graphicsPipelineInfo);
@@ -399,32 +255,29 @@ struct GraphicsPipelineTestApp : TestApp
         renderPassBeginInfo.renderArea.offset = { 0, 0 };
         renderPassBeginInfo.renderArea.extent = window.GetExtent();
         renderPassBeginInfo.colorClearValues.push_back(ColorValue(0.9529f, 0.6235f, 0.0941f, 1.f));
+        mesh.Update();
+        UpdateMeshColor(a_Delta);
         Command::Buffer::Begin(drawCommandBuffer, bufferBeginInfo);
-        UpdatePushConstants(a_Delta);
         Command::BeginRenderPass(drawCommandBuffer, renderPassBeginInfo, Command::SubPassContents::Inline);
         {
             Command::BindPipeline(drawCommandBuffer, Pipeline::BindingPoint::Graphics, graphicsPipeline);
-            Command::BindDescriptorSets(drawCommandBuffer, Pipeline::BindingPoint::Graphics, graphicsPipelineInfo.layout, 0, projectionMatrix.GetDescriptorSets(), {});
-            Command::BindVertexBuffers(drawCommandBuffer, 0, { vertexBuffer.GetBuffer() }, {0});
-            Command::Draw(drawCommandBuffer, vertexBuffer.GetVertexNbr(), 1, 0, 0);
+            mesh.Draw(drawCommandBuffer);
         }
         Command::EndRenderPass(drawCommandBuffer);
         Command::Buffer::End(drawCommandBuffer);
     }
-    void UpdatePushConstants(const double a_Delta)
+    void UpdateMeshColor(const double a_Delta)
     {
         hue += 0.05 * a_Delta;
         hue = hue > 360 ? 0 : hue;
-        PushConstants pushConstants;
-        pushConstants.color = HSVtoRGB(hue, 0.5f, 1.f);
-        std::vector<char> data(sizeof(pushConstants));
-        std::memcpy(data.data(), &pushConstants, sizeof(pushConstants));
-        Command::PushConstants(drawCommandBuffer, graphicsPipelineInfo.layout, 0, data);
+        PBRParameters param = mesh.GetMaterial().GetParameters<PBRParameters>();
+        param.albedo = { HSVtoRGB(hue, 0.5f, 1.f), 1.f };
+        mesh.GetMaterial().SetParameters(param);
     }
     void RecordMainCommandBuffer(float a_Delta)
     {
         drawCommandDelta += a_Delta;
-        if (drawCommandDelta >= 0.032) {
+        if (drawCommandDelta >= 32 || firstLoop) {
             RecordDrawCommandBuffer(drawCommandDelta);
             drawCommandDelta = 0;
         }
@@ -451,6 +304,7 @@ struct GraphicsPipelineTestApp : TestApp
     double                   drawCommandDelta{ 0 };
     float                    hue{ 0 };
     bool                     render{ false };
+    bool                     firstLoop{ true };
     PhysicalDevice::Handle   physicalDevice;
     Device::Handle           device;
     Window                   window;
@@ -459,17 +313,16 @@ struct GraphicsPipelineTestApp : TestApp
     FrameBuffer::Handle      frameBuffer;
     Image::Handle            frameBufferImage;
 
-    std::vector<Shader::Stage::Handle>   shaderStages;
-    VertexBuffer             vertexBuffer{ physicalDevice, device, std::vector<Vertex>{
-        {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-        {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-        {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
-    }};
-    Descriptor::Pool::Handle            descriptorPool{ CreateDescriptorPool(device, 4096) };
-    UniformBuffer<Mat4x4>               projectionMatrix{ 0, physicalDevice, device, descriptorPool };
+    Descriptor::Pool::Handle             descriptorPool{ CreateDescriptorPool(device, 4096) };
+    Mesh            mesh{ physicalDevice, device, descriptorPool,
+        VertexBuffer(physicalDevice, device, std::vector<Vertex>{
+            { {0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+            {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+            {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+        }),
+        PBRMaterial(physicalDevice, device, descriptorPool) };
 
     RenderPass::Handle       renderPass;
-    Pipeline::Graphics::Info graphicsPipelineInfo;
     Pipeline::Handle         graphicsPipeline;
     Command::Pool::Handle    commandPool;
     Command::Buffer::Handle  mainCommandBuffer;

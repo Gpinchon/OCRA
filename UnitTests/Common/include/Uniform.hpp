@@ -12,6 +12,8 @@ OCRA_DECLARE_HANDLE(OCRA::Descriptor::SetLayout);
 namespace OCRA {
 class Uniform {
 public:
+    Uniform() = default;
+    Uniform(const Uniform&) = default;
     //We already know how our uniforms are formated
     Uniform(const std::vector<Descriptor::SetLayout::Binding>& a_Bindings, const Device::Handle& a_Device, const Descriptor::Pool::Handle& a_DescriptorPool)
         : device(a_Device)
@@ -21,8 +23,6 @@ public:
         CreateDescriptorSetLayout();
         CreateDescriptorSets();
     }
-    ~Uniform()
-    {}
     //We don't know our bindings yet and will call CreateDescriptorSetLayout & CreateDescriptorSets later
     Uniform(const Device::Handle& a_Device, const Descriptor::Pool::Handle& a_DescriptorPool)
         : device(a_Device)

@@ -1,5 +1,5 @@
 #include <GL/Command/Pool.hpp>
-#include <GL/WeakHandle.hpp>
+#include <WeakHandle.hpp>
 #include <GL/Command/Buffer.hpp>
 
 #include <memory>

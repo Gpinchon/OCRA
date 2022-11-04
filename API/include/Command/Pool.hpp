@@ -33,7 +33,7 @@ struct Info
 struct AllocateInfo {
     Handle      pool;
     enum class Level {
-        Unknown = -1, Primary, Secondary
+        Unknown = -1, Primary, Secondary, MaxValue
     }           level{ Level::Unknown };
     uint32_t    count{ 0 };
 };

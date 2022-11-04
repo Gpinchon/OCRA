@@ -3,7 +3,7 @@
 #include <Handle.hpp>
 #include <Device.hpp>
 
-#include <GL/WeakHandle.hpp>
+#include <WeakHandle.hpp>
 #include <GL/PhysicalDevice.hpp>
 
 #include <functional>

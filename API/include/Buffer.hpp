@@ -65,6 +65,25 @@ struct BufferCopyRegion
 {
     uint64_t readOffset{ 0 }, writeOffset{ 0 }, size{ 0 };
 };
+/**
+* Update a buffer's contents from host memory
+* Size is limited to 65536
+*/
+void Update(
+    const Command::Buffer::Handle&  a_CommandBuffer,
+    const OCRA::Buffer::Handle&     a_DstBuffer,
+    const size_t&                   a_Offset,
+    const size_t&                   a_Size,
+    const std::byte*                a_Data);
+/**
+* Update a buffer's contents from host memory
+* Size is limited to 65536
+*/
+void Update(
+    const Command::Buffer::Handle&  a_CommandBuffer,
+    const OCRA::Buffer::Handle&     a_DstBuffer,
+    const size_t&                   a_Offset,
+    const std::vector<std::byte>&   a_Data);
 //Copies data from srcBuffer to dstBuffer
 void CopyBuffer(
     const Command::Buffer::Handle& a_CommandBuffer,

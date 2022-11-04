@@ -76,7 +76,7 @@ void PushConstants::Bind() {
 	}
 }
 
-void PushConstants::Update(const size_t& a_Offset, const std::vector<char>& a_Data) {
+void PushConstants::Update(const size_t& a_Offset, const std::vector<std::byte>& a_Data) {
 	++offset %= PushConstantMultiBuffering;
 	const auto currentOffset = offset * offsetAlignment;
 	std::memcpy((char*)bufferPtr + currentOffset, a_Data.data(), a_Data.size());

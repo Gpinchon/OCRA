@@ -4,7 +4,7 @@
 #include <Command/Pool.hpp>
 
 //#include <GL/Common/MemoryPool.hpp>
-#include <GL/WeakHandle.hpp>
+#include <WeakHandle.hpp>
 #include <GL/Command/Buffer.hpp>
 
 #include <functional>

@@ -4,7 +4,7 @@
 #include <PhysicalDevice.hpp>
 
 #include <GL/Common/WorkerThread.hpp>
-#include <GL/WeakHandle.hpp>
+#include <WeakHandle.hpp>
 
 #include <functional>
 #include <cassert>

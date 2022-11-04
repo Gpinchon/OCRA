@@ -1,84 +1,71 @@
 #pragma once
 
 #include <Handle.hpp>
-#include <Common/Vec3.hpp>
-#include <Common/Vec4.hpp>
+#include <Pipeline/InputAssemblyState.hpp>
 
+#include <Pipeline/Graphics.hpp>
+
+#include <Mat4x4.hpp>
+#include <Material.hpp>
 #include <Texture.hpp>
+#include <VertexBuffer.hpp>
 
 #include <vector>
-#include <memory>
 
 OCRA_DECLARE_HANDLE(OCRA::PhysicalDevice);
 OCRA_DECLARE_HANDLE(OCRA::Device);
 
-#include <UniformBuffer.hpp>
-#include <UniformTexture.hpp>
-#include <VertexBuffer.hpp>
-
 namespace OCRA {
-class Material
-{
-public:
-    struct Parameters {
-        Vec4 diffuse{ 1, 1, 1, 1 };
-        float roughness{ 0.5 };
-        float metallic{ 0 };
-    };
-    Material(const PhysicalDevice::Handle& a_PhysicalDevice,
-             const Device::Handle& a_Device,
-             const Texture& a_DiffuseTexture = {},
-             const Parameters& a_Parameters = {})
-        : parameters(0, a_PhysicalDevice, a_Device)
-        , diffuseTexture(0, a_Device, a_DiffuseTexture)
-    {}
-
-    auto& GetParameters() const {
-        return parameters.Get();
-    }
-    void SetParameters(const Parameters& a_Parameter) {
-        parameters.Set(a_Parameter);
-    }
-
-    auto& GetDiffuseTexture() const {
-        return diffuseTexture;
-    }
-    void SetDiffuseTexture(const Texture2D& a_Texture) {
-        diffuseTexture.SetTexture(a_Texture);
-    }
-
-    void Update() {
-        parameters.Update();
-        diffuseTexture.Update();
-    }
-
-private:
-    std::vector<Descriptor::SetLayout::Binding> GetBindingLayouts() {
-        std::vector<Descriptor::SetLayout::Binding> bindings;
-        bindings.emplace_back(parameters.GetDescriptorSetLayoutBindings());
-        bindings.emplace_back(diffuseTexture.GetDescriptorSetLayoutBindings());
-        return bindings;
-    }
-    UniformBuffer<Parameters>   parameters;
-    UniformTexture              diffuseTexture;
+struct Traverser {
+    Pipeline::ViewPortState::Info viewPort{};
 };
-
-template<typename V = DefaultVertex>
 class Mesh {
 public:
-    Mesh(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const VertexBuffer<V>& a_VertexBuffer, const Material& a_Material)
-        : device(a_Device)
-        , material(a_Material)
-        , vertexBuffer(a_VertexBuffer)
-    {}
-    void Update() {
-        material.Update();
+    Mesh(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const Descriptor::Pool::Handle& a_DescriptorPool, const VertexBuffer& a_VertexBuffer, const Material& a_Material);
+
+    auto& GetProjectionMatrix() const {
+        return projectionMatrix.Get<Mat4x4>();
+    }
+    void SetProjectionMatrix(const Mat4x4& a_ProjectionMatrix) {
+        projectionMatrix.Set(a_ProjectionMatrix);
     }
 
+    auto& GetVertexShader() const { return vertexShader; }
+    void SetVertexShader(const Shader::Stage::Handle& a_Shader) { vertexShader = a_Shader; }
+
+    auto& GetPipelineLayout() const { return layout; }
+    auto& GetVertexBuffer() const { return vertexBuffer; }
+    auto& GetMaterial() { return material; }
+    auto& GetDescriptorSets() const { return descriptorSets; }
+    auto& GetDescriptorSetLayouts() const { return descriptorSetLayouts; }
+    auto& GetDescriptorSetLayoutBindings() const { return descriptorSetLayoutBindings; }
+    std::vector<Shader::Stage::Handle> GetShaderStages() const {
+        return { material.GetFragmentShader(), GetVertexShader() };
+    }
+
+    auto GetInputAssembly() const { return inputAssembly; }
+    void SetInputAssembly(const Pipeline::InputAssemblyState::Info& a_InputAssembly) {
+        inputAssembly = a_InputAssembly;
+    }
+
+    void Update() {
+        material.Update();
+        projectionMatrix.Update();
+    }
+
+    void Draw(const Command::Buffer::Handle& a_CommandBuffer);
+
 private:
-    OCRA::Device::Handle    device;
-    bool                    dirty{ true };
+    void UpdateDescriptor();
+    OCRA::Device::Handle     device;
+    Pipeline::Layout::Handle layout;
+    Shader::Stage::Handle    vertexShader;
+    Pipeline::InputAssemblyState::Info inputAssembly;
     Material                material;
-    VertexBuffer<V>          vertexBuffer;
+    VertexBuffer            vertexBuffer;
+    UniformBuffer           projectionMatrix;
+    std::vector<Descriptor::Set::Handle>        descriptorSets;
+    std::vector<Descriptor::SetLayout::Handle>  descriptorSetLayouts;
+    std::vector<Descriptor::SetLayout::Binding> descriptorSetLayoutBindings;
 };
 }

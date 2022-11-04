@@ -227,10 +227,12 @@ struct Data
 		*storage = a_Write;
 	}
     void Bind() {
-        storage->Bind(bindingIndex);
+        if (storage != nullptr)
+            storage->Bind(bindingIndex);
     }
     void Unbind() {
-        storage->Bind(bindingIndex);
+        if (storage != nullptr)
+            storage->Unbind(bindingIndex);
     }
     const Type type;
     const uint32_t bindingIndex;

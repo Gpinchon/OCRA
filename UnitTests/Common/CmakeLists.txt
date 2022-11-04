@@ -5,11 +5,12 @@ set(OCRA_TEST_COMMON_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Common.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Texture.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Uniform.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/UniformBuffer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/UniformTexture.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/VertexBuffer.cpp)
 set(OCRA_TEST_COMMON_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Common.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Mesh.hpp
+  
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Texture.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Uniform.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/UniformBuffer.hpp
@@ -21,8 +22,23 @@ set(OCRA_TEST_WINDOW_SOURCE_FILES
 set(OCRA_TEST_WINDOW_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Window.hpp)
 
+set(OCRA_TEST_MESH_SOURCE_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Material.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Mesh.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/PBRMaterial.cpp)
+set(OCRA_TEST_MESH_HEADER_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Mat4x4.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Material.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Mesh.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/PBRMaterial.hpp)
+
 add_library(OCRA-UnitTests-Common STATIC ${OCRA_TEST_COMMON_SOURCE_FILES} ${OCRA_TEST_COMMON_HEADER_FILES})
+add_library(OCRA-UnitTests-Mesh STATIC ${OCRA_TEST_MESH_SOURCE_FILES} ${OCRA_TEST_MESH_HEADER_FILES})
 add_library(OCRA-UnitTests-Window STATIC ${OCRA_TEST_WINDOW_SOURCE_FILES} ${OCRA_TEST_WINDOW_HEADER_FILES})
+
+target_include_directories(OCRA-UnitTests-Mesh PUBLIC
+  "${CMAKE_CURRENT_SOURCE_DIR}/include")
+target_link_libraries(OCRA-UnitTests-Mesh OCRA::API::Interface OCRA::API::Implementation OCRA::ShaderCompiler::API)
 
 target_include_directories(OCRA-UnitTests-Window PUBLIC
   "${CMAKE_CURRENT_SOURCE_DIR}/include")
