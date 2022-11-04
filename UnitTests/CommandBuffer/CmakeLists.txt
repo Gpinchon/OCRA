@@ -8,7 +8,7 @@ add_executable(OCRA-UnitTests-CommandBuffer
 target_include_directories(OCRA-UnitTests-CommandBuffer PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-target_link_libraries(OCRA-UnitTests-CommandBuffer OCRA-UnitTests-Common OCRA::API::Interface OCRA::API::Implementation)
+target_link_libraries(OCRA-UnitTests-CommandBuffer OCRA-UnitTests-Lib-Common OCRA::API::Interface OCRA::API::Implementation)
 
 if(MSVC_IDE)
   # Run macro

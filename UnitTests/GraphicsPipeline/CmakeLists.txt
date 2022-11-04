@@ -8,7 +8,7 @@ add_executable(OCRA-UnitTests-GraphicsPipeline
 target_include_directories(OCRA-UnitTests-GraphicsPipeline PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-target_link_libraries(OCRA-UnitTests-GraphicsPipeline OCRA-UnitTests-Common OCRA-UnitTests-Window OCRA-UnitTests-Mesh OCRA::API::Interface OCRA::API::Implementation OCRA::SwapChain::Implementation)
+target_link_libraries(OCRA-UnitTests-GraphicsPipeline OCRA-UnitTests-Lib-Common OCRA-UnitTests-Lib-Window OCRA-UnitTests-Lib-Mesh OCRA::API::Interface OCRA::API::Implementation OCRA::SwapChain::Implementation)
 
 if(MSVC_IDE)
   # Run macro

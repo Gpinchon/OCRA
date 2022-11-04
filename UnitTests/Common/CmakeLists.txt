@@ -32,21 +32,21 @@ set(OCRA_TEST_MESH_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/Mesh.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/PBRMaterial.hpp)
 
-add_library(OCRA-UnitTests-Common STATIC ${OCRA_TEST_COMMON_SOURCE_FILES} ${OCRA_TEST_COMMON_HEADER_FILES})
-add_library(OCRA-UnitTests-Mesh STATIC ${OCRA_TEST_MESH_SOURCE_FILES} ${OCRA_TEST_MESH_HEADER_FILES})
-add_library(OCRA-UnitTests-Window STATIC ${OCRA_TEST_WINDOW_SOURCE_FILES} ${OCRA_TEST_WINDOW_HEADER_FILES})
+add_library(OCRA-UnitTests-Lib-Common STATIC ${OCRA_TEST_COMMON_SOURCE_FILES} ${OCRA_TEST_COMMON_HEADER_FILES})
+add_library(OCRA-UnitTests-Lib-Mesh STATIC ${OCRA_TEST_MESH_SOURCE_FILES} ${OCRA_TEST_MESH_HEADER_FILES})
+add_library(OCRA-UnitTests-Lib-Window STATIC ${OCRA_TEST_WINDOW_SOURCE_FILES} ${OCRA_TEST_WINDOW_HEADER_FILES})
 
-target_include_directories(OCRA-UnitTests-Mesh PUBLIC
+target_include_directories(OCRA-UnitTests-Lib-Mesh PUBLIC
   "${CMAKE_CURRENT_SOURCE_DIR}/include")
-target_link_libraries(OCRA-UnitTests-Mesh OCRA::API::Interface OCRA::API::Implementation OCRA::ShaderCompiler::API)
+target_link_libraries(OCRA-UnitTests-Lib-Mesh OCRA::API::Interface OCRA::API::Implementation OCRA::ShaderCompiler::API)
 
-target_include_directories(OCRA-UnitTests-Window PUBLIC
+target_include_directories(OCRA-UnitTests-Lib-Window PUBLIC
   "${CMAKE_CURRENT_SOURCE_DIR}/include")
-target_link_libraries(OCRA-UnitTests-Window OCRA::API::Interface OCRA::API::Implementation OCRA::SwapChain::Implementation)
+target_link_libraries(OCRA-UnitTests-Lib-Window OCRA::API::Interface OCRA::API::Implementation OCRA::SwapChain::Implementation)
 
-target_include_directories(OCRA-UnitTests-Common PUBLIC
+target_include_directories(OCRA-UnitTests-Lib-Common PUBLIC
   "${CMAKE_CURRENT_SOURCE_DIR}/include")
-target_link_libraries(OCRA-UnitTests-Common OCRA::API::Interface OCRA::API::Implementation)
+target_link_libraries(OCRA-UnitTests-Lib-Common OCRA::API::Interface OCRA::API::Implementation)
 
 if(MSVC_IDE)
   # Run macro
