@@ -12,6 +12,6 @@
 
 namespace OCRA::Pipeline::ShaderPipelineState {
 struct Info {
-	std::vector<Shader::Stage::Handle> stages;
+    std::vector<Shader::Stage::Handle> stages;
 };
 }

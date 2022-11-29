@@ -147,5 +147,5 @@ int main()
     SwapChainTestApp testApp;
     testApp.window.Show();
     testApp.Loop();
-	return ret;
+    return ret;
 }

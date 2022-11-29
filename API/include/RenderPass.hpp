@@ -35,24 +35,24 @@ struct AttachmentDescription {
 };
 
 struct AttachmentReference {
-	int8_t  location{ -1 }; //location of the output, -1 means none
+    int8_t  location{ -1 }; //location of the output, -1 means none
 };
 
 struct SubPassDescription {
-	Pipeline::BindingPoint           pipelineBindingPoint{ Pipeline::BindingPoint::Unknown };
-	std::vector<AttachmentReference> colorAttachments{};
-	AttachmentReference              depthAttachment{};
-	AttachmentReference              stencilAttachment{};
+    Pipeline::BindingPoint           pipelineBindingPoint{ Pipeline::BindingPoint::Unknown };
+    std::vector<AttachmentReference> colorAttachments{};
+    AttachmentReference              depthAttachment{};
+    AttachmentReference              stencilAttachment{};
 };
 
 /**
  * Specifies the outputs of the RenderPass and clear operations
  */
 struct Info {
-	std::vector<SubPassDescription>	   subPasses;
-	std::vector<AttachmentDescription> colorAttachments;
-	AttachmentDescription              depthAttachment;
-	AttachmentDescription              stencilAttachment;
+    std::vector<SubPassDescription>    subPasses;
+    std::vector<AttachmentDescription> colorAttachments;
+    AttachmentDescription              depthAttachment;
+    AttachmentDescription              stencilAttachment;
 };
 
 Handle Create(const Device::Handle& a_Device, const Info& a_Info);

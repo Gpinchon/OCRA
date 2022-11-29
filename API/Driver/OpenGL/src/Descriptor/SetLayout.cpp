@@ -6,6 +6,6 @@ namespace OCRA::Descriptor::SetLayout
 {
 Handle Create(const Device::Handle& a_Device, const Info& a_Info, const AllocationCallback* a_Allocator)
 {
-	return Handle(new Impl(a_Device, a_Info));
+    return Handle(new Impl(a_Device, a_Info));
 }
 }

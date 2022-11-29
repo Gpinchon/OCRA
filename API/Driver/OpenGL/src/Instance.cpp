@@ -14,23 +14,23 @@ Impl::Impl(const Info& a_Info)
 }
 
 Handle Create(
-	const Info& a_Info,
-	const AllocationCallback* a_Allocator)
+    const Info& a_Info,
+    const AllocationCallback* a_Allocator)
 {
 #ifdef _WIN32
-	return Instance::Win32::Create(a_Info);
+    return Instance::Win32::Create(a_Info);
 #endif //_WIN32
 }
 const std::string GetType(const Handle& a_Instance)
 {
-	return Impl::type;
+    return Impl::type;
 }
 const Info& GetInfo(const Handle& a_Instance)
 {
-	return a_Instance->info;
+    return a_Instance->info;
 }
 const std::vector<PhysicalDevice::Handle>& EnumeratePhysicalDevices(const Instance::Handle& a_Instance)
 {
-	return a_Instance->physicalDevices;
+    return a_Instance->physicalDevices;
 }
 }

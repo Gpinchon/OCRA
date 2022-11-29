@@ -16,12 +16,12 @@ OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
 
 namespace OCRA::Image::View {
 struct Impl {
-	Impl(const Device::Handle& a_Device, const Info& a_Info);
+    Impl(const Device::Handle& a_Device, const Info& a_Info);
     ~Impl();
-	const Device::WeakHandle device;
-	const Info info;
-	const uint32_t target;
-	const uint32_t format;
+    const Device::WeakHandle device;
+    const Info info;
+    const uint32_t target;
+    const uint32_t format;
     const uint32_t handle;
 };
 }

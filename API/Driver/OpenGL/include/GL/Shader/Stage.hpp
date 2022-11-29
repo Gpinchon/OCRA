@@ -16,12 +16,12 @@ OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
 
 namespace OCRA::Shader::Stage {
 struct Impl {
-	Impl(const Device::Handle& a_Device, const Info& a_Info);
-	~Impl();
+    Impl(const Device::Handle& a_Device, const Info& a_Info);
+    ~Impl();
     const Device::WeakHandle device;
     const Info info;
     const uint32_t handle;
-	const uint32_t stage;
-	const uint32_t stageBits;
+    const uint32_t stage;
+    const uint32_t stageBits;
 };
 }

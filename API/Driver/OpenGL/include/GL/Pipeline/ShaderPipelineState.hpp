@@ -24,12 +24,12 @@ struct ExecutionState;
 namespace OCRA::Pipeline::ShaderPipelineState {
 //compiles the specified stages into a program pipeline
 struct Compile {
-	Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info&);
-	Compile(const Compile& a_Other);
-	~Compile();
-	void operator()(Command::Buffer::ExecutionState&) const;
-	const Device::WeakHandle device;
-	const Info& info;
-	mutable uint32_t handle{ 0 };
+    Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info&);
+    Compile(const Compile& a_Other);
+    ~Compile();
+    void operator()(Command::Buffer::ExecutionState&) const;
+    const Device::WeakHandle device;
+    const Info& info;
+    mutable uint32_t handle{ 0 };
 };
 }

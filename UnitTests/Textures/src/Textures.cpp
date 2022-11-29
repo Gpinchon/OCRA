@@ -380,5 +380,5 @@ int main()
     TexturesTestApp testApp;
     testApp.window.Show();
     testApp.Loop();
-	return ret;
+    return ret;
 }

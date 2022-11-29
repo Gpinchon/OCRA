@@ -16,11 +16,11 @@ namespace OCRA::Instance
 {
 struct Info
 {
-	Application::Info applicationInfo;
+    Application::Info applicationInfo;
 };
 Handle Create(
-	const Info& a_Info,
-	const AllocationCallback* a_Allocator = nullptr);
+    const Info& a_Info,
+    const AllocationCallback* a_Allocator = nullptr);
 /**
  * @brief Returns the type of Instance :
  *  - OpenGL

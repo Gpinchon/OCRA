@@ -176,16 +176,16 @@ struct GraphicsPipelineTestApp : TestApp
     }
     RenderPass::Handle CreateRenderPass()
     {
-		RenderPass::SubPassDescription subPassDescription{};
-		RenderPass::AttachmentReference attachmentRef{};
-		attachmentRef.location = 0;
-		subPassDescription.colorAttachments = { attachmentRef };
+        RenderPass::SubPassDescription subPassDescription{};
+        RenderPass::AttachmentReference attachmentRef{};
+        attachmentRef.location = 0;
+        subPassDescription.colorAttachments = { attachmentRef };
         RenderPass::Info renderPassInfo{};
         RenderPass::AttachmentDescription colorAttachment;
         colorAttachment.loadOp = RenderPass::LoadOperation::Clear; //clear the attachment 0 on begin
         colorAttachment.storeOp = RenderPass::StoreOperation::Store; //write the result to attachment 0
         renderPassInfo.colorAttachments = { colorAttachment };
-		renderPassInfo.subPasses = { subPassDescription };
+        renderPassInfo.subPasses = { subPassDescription };
         return RenderPass::Create(device, renderPassInfo);
     }
     void CreateGraphicsPipeline()
@@ -210,7 +210,7 @@ struct GraphicsPipelineTestApp : TestApp
         graphicsPipelineInfo.vertexInputState.bindingDescriptions   = mesh.GetVertexBuffer().GetBindingDescriptions();
         graphicsPipelineInfo.shaderPipelineState.stages = mesh.GetShaderStages();
 
-		graphicsPipelineInfo.subPass = 0;
+        graphicsPipelineInfo.subPass = 0;
         //Everything else is left by default for now
         graphicsPipeline = Pipeline::Graphics::Create(device, graphicsPipelineInfo);
     }

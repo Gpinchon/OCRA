@@ -18,28 +18,28 @@
 namespace OCRA::Command::Buffer
 {
 void Begin(const Handle& a_CommandBuffer, const BeginInfo& a_BeginInfo) {
-	a_CommandBuffer->Begin(a_BeginInfo);
+    a_CommandBuffer->Begin(a_BeginInfo);
 }
 void End(const Handle& a_CommandBuffer) {
-	a_CommandBuffer->End();
+    a_CommandBuffer->End();
 }
 void Reset(const Handle& a_CommandBuffer) {
-	a_CommandBuffer->Reset();
+    a_CommandBuffer->Reset();
 }
 }
 
 namespace OCRA::Command
 {
 void ExecuteCommandBuffer(
-	const Buffer::Handle& a_CommandBuffer,
-	const Buffer::Handle& a_SecondaryCommandBuffer)
+    const Buffer::Handle& a_CommandBuffer,
+    const Buffer::Handle& a_SecondaryCommandBuffer)
 {
-	a_CommandBuffer->secondaryBuffers.push_back(a_SecondaryCommandBuffer);
-	a_CommandBuffer->PushCommand([
-		commandBuffer = a_SecondaryCommandBuffer.get()
-	](Buffer::ExecutionState& executionState) {
-		commandBuffer->ExecuteSecondary(executionState);
-	});
+    a_CommandBuffer->secondaryBuffers.push_back(a_SecondaryCommandBuffer);
+    a_CommandBuffer->PushCommand([
+        commandBuffer = a_SecondaryCommandBuffer.get()
+    ](Buffer::ExecutionState& executionState) {
+        commandBuffer->ExecuteSecondary(executionState);
+    });
 }
 void PushConstants(
     const Command::Buffer::Handle& a_CommandBuffer,

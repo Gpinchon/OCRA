@@ -29,11 +29,11 @@ static UsageFlags SimultaneousUse = 0b001;
 };
 struct BeginInfo
 {
-	UsageFlags flags{ UsageFlagBits::None };
+    UsageFlags flags{ UsageFlagBits::None };
 };
 //Begin Command Buffer recording, switching it to Recording state
 void Begin(const Handle& a_CommandBuffer,
-		   const BeginInfo& a_BeginInfo);
+           const BeginInfo& a_BeginInfo);
 //End Command Buffer recording, switching it to Executable state
 void End(const Handle& a_CommandBuffer);
 //Reset Command Buffer to Initial state
@@ -44,11 +44,11 @@ namespace OCRA::Command
 {
 //Add a secondary Command Buffer to execute
 void ExecuteCommandBuffer(
-	const Buffer::Handle& a_CommandBuffer,
-	const Buffer::Handle& a_SecondaryCommandBuffer);
+    const Buffer::Handle& a_CommandBuffer,
+    const Buffer::Handle& a_SecondaryCommandBuffer);
 void PushConstants(
-	const Command::Buffer::Handle& a_CommandBuffer,
-	const Pipeline::Layout::Handle& a_PipelineLayout,
-	const uint8_t a_Offset,
-	const std::vector<std::byte>& a_Data);
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const Pipeline::Layout::Handle& a_PipelineLayout,
+    const uint8_t a_Offset,
+    const std::vector<std::byte>& a_Data);
 }

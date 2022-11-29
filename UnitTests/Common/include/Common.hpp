@@ -34,11 +34,11 @@ using QueueFlags = std::bitset<5>;
 namespace OCRA {
 struct VerboseTimer : Timer
 {
-	VerboseTimer(const std::string& a_Name) : name(a_Name) {}
-	~VerboseTimer() {
-		std::cout << "Timer \"" << name << "\" waited : " << Elapsed().count() << " nanoseconds\n";
-	}
-	const std::string name;
+    VerboseTimer(const std::string& a_Name) : name(a_Name) {}
+    ~VerboseTimer() {
+        std::cout << "Timer \"" << name << "\" waited : " << Elapsed().count() << " nanoseconds\n";
+    }
+    const std::string name;
 };
 
 class FPSCounter
@@ -110,11 +110,11 @@ Descriptor::Pool::Handle CreateDescriptorPool(const Device::Handle& a_Device, co
 
 struct TestApp
 {
-	TestApp(const std::string& a_Name)
-		: name(a_Name)
+    TestApp(const std::string& a_Name)
+        : name(a_Name)
         , instance(CreateInstance(name))
-	{}
+    {}
     std::string         name;
-	Instance::Handle    instance;
+    Instance::Handle    instance;
 };
 }

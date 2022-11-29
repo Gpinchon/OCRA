@@ -10,11 +10,11 @@ OCRA_DECLARE_HANDLE(OCRA::ShaderCompiler::Shader);
 namespace OCRA::ShaderCompiler::Shader
 {
 enum class Type {
-	Unknown = -1,
-	Vertex, Geometry, Fragment,
-	Compute,
-	TessControl, TessEval,
-	MaxValue
+    Unknown = -1,
+    Vertex, Geometry, Fragment,
+    Compute,
+    TessControl, TessEval,
+    MaxValue
 };
 /**
 * @arg type : the shader's type (Vertex, Geometry, Fragment...)
@@ -22,7 +22,7 @@ enum class Type {
 * @arg source : the shader's human readable source code
 */
 struct Info {
-	Type        type{ Type::Unknown };
+    Type        type{ Type::Unknown };
     std::string entryPoint{};
     std::string source{};
 };

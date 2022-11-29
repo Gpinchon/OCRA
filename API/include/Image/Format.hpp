@@ -106,7 +106,7 @@ enum class Format {
     /// Compressed pixel types
     /// </summary>
     S3TC_DXT5_RGBA,
-	S3TC_DXT5_SRGBA,
+    S3TC_DXT5_SRGBA,
     MaxValue
 };
 size_t GetPixelSize(const Format&);

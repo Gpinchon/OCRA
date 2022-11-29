@@ -38,9 +38,9 @@ struct Info { //describes a graphics pipeline with each stage
     VertexInputState::Info      vertexInputState{};
     ViewPortState::Info         viewPortState{};
     DynamicState::Info          dynamicState{};
-	Layout::Handle				layout{};
-	RenderPass::Handle			renderPass{}; //the RenderPass this Graphics Pipeline will be used with
-	uint8_t						subPass{ 0 }; //the subPass to "start" with inside the RenderPass
+    Layout::Handle              layout{};
+    RenderPass::Handle          renderPass{}; //the RenderPass this Graphics Pipeline will be used with
+    uint8_t                     subPass{ 0 }; //the subPass to "start" with inside the RenderPass
 };
 Handle Create(const Device::Handle& a_Device, const Info& a_Info);
 const Info& GetInfo(const Device::Handle& a_Device, const Handle& a_Handle);

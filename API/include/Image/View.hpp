@@ -34,7 +34,7 @@ struct Info {
     Type type { Type::Unknown };
     Image::Handle image { 0 };
     Image::Format format { Image::Format::Unknown };
-	Component::Mapping components {};
+    Component::Mapping components {};
     SubRange subRange {};
 };
 Handle Create(const Device::Handle& a_Device, const Info& a_Info);

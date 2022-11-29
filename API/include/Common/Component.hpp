@@ -8,15 +8,15 @@
 
 namespace OCRA::Component {
 enum class Swizzle {
-	Identity,
-	Zero, One,
-	R, G, B, A,
-	MaxValue
+    Identity,
+    Zero, One,
+    R, G, B, A,
+    MaxValue
 };
 struct Mapping {
-	Swizzle r{ Swizzle::R };
-	Swizzle g{ Swizzle::G };
-	Swizzle b{ Swizzle::B };
-	Swizzle a{ Swizzle::A };
+    Swizzle r{ Swizzle::R };
+    Swizzle g{ Swizzle::G };
+    Swizzle b{ Swizzle::B };
+    Swizzle a{ Swizzle::A };
 };
 }

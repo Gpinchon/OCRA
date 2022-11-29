@@ -25,8 +25,8 @@ struct Limits {
     uint32_t              maxPushConstantsSize;
     uint32_t              maxMemoryAllocationCount;
     uint32_t              maxSamplerAllocationCount;
-    uint64_t	          bufferImageGranularity;
-    uint64_t	          sparseAddressSpaceSize;
+    uint64_t              bufferImageGranularity;
+    uint64_t              sparseAddressSpaceSize;
     uint32_t              maxBoundDescriptorSets;
     uint32_t              maxPerStageDescriptorSamplers;
     uint32_t              maxPerStageDescriptorUniformBuffers;
@@ -81,9 +81,9 @@ struct Limits {
     float                 viewportBoundsRange[2];
     uint32_t              viewportSubPixelBits;
     size_t                minMemoryMapAlignment;
-    uint64_t	          minTexelBufferOffsetAlignment;
-    uint64_t	          minUniformBufferOffsetAlignment;
-    uint64_t	          minStorageBufferOffsetAlignment;
+    uint64_t              minTexelBufferOffsetAlignment;
+    uint64_t              minUniformBufferOffsetAlignment;
+    uint64_t              minStorageBufferOffsetAlignment;
     int32_t               minTexelOffset;
     uint32_t              maxTexelOffset;
     int32_t               minTexelGatherOffset;
@@ -94,18 +94,18 @@ struct Limits {
     uint32_t              maxFramebufferWidth;
     uint32_t              maxFramebufferHeight;
     uint32_t              maxFramebufferLayers;
-    SampleCount			  framebufferColorSampleCounts;
-    SampleCount			  framebufferDepthSampleCounts;
-    SampleCount			  framebufferStencilSampleCounts;
-    SampleCount			  framebufferNoAttachmentsSampleCounts;
+    SampleCount           framebufferColorSampleCounts;
+    SampleCount           framebufferDepthSampleCounts;
+    SampleCount           framebufferStencilSampleCounts;
+    SampleCount           framebufferNoAttachmentsSampleCounts;
     uint32_t              maxColorAttachments;
-    SampleCount			  sampledImageColorSampleCounts;
-    SampleCount			  sampledImageIntegerSampleCounts;
-    SampleCount			  sampledImageDepthSampleCounts;
-    SampleCount			  sampledImageStencilSampleCounts;
-    SampleCount			  storageImageSampleCounts;
+    SampleCount           sampledImageColorSampleCounts;
+    SampleCount           sampledImageIntegerSampleCounts;
+    SampleCount           sampledImageDepthSampleCounts;
+    SampleCount           sampledImageStencilSampleCounts;
+    SampleCount           storageImageSampleCounts;
     uint32_t              maxSampleMaskWords;
-    bool	              timestampComputeAndGraphics;
+    bool                  timestampComputeAndGraphics;
     float                 timestampPeriod;
     uint32_t              maxClipDistances;
     uint32_t              maxCullDistances;
@@ -115,11 +115,11 @@ struct Limits {
     float                 lineWidthRange[2];
     float                 pointSizeGranularity;
     float                 lineWidthGranularity;
-    bool	              strictLines;
-    bool	              standardSampleLocations;
-    uint64_t	          optimalBufferCopyOffsetAlignment;
-    uint64_t	          optimalBufferCopyRowPitchAlignment;
-    uint64_t	          nonCoherentAtomSize;
+    bool                  strictLines;
+    bool                  standardSampleLocations;
+    uint64_t              optimalBufferCopyOffsetAlignment;
+    uint64_t              optimalBufferCopyRowPitchAlignment;
+    uint64_t              nonCoherentAtomSize;
 };
 struct SparseProperties {
     bool    residencyStandard2DBlockShape{ false };
@@ -137,16 +137,16 @@ enum class Type {
     MaxValue
 };
 struct Properties {
-    uint32_t				apiVersion{ 0 };
-    uint64_t				driverVersion{ 0 };
-    uint32_t				vendorID{ 0 };
-    uint32_t				deviceID{ 0 };
-    Type					deviceType;
-    std::string				vendorName;
-    std::string				deviceName;
-    std::array<uint8_t, 16>	pipelineCacheUUID;
-    Limits					limits;
-    SparseProperties		sparseProperties;
+    uint32_t                apiVersion{ 0 };
+    uint64_t                driverVersion{ 0 };
+    uint32_t                vendorID{ 0 };
+    uint32_t                deviceID{ 0 };
+    Type                    deviceType;
+    std::string             vendorName;
+    std::string             deviceName;
+    std::array<uint8_t, 16> pipelineCacheUUID;
+    Limits                  limits;
+    SparseProperties        sparseProperties;
 };
 struct Features {
     bool    robustBufferAccess{ false };

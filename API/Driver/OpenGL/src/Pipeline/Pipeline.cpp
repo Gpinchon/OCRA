@@ -10,15 +10,15 @@
 namespace OCRA::Command
 {
 void BindPipeline(
-	const Command::Buffer::Handle& a_CommandBuffer,
-	const OCRA::Pipeline::BindingPoint& a_BindingPoint,
-	const OCRA::Pipeline::Handle& a_Pipeline)
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const OCRA::Pipeline::BindingPoint& a_BindingPoint,
+    const OCRA::Pipeline::Handle& a_Pipeline)
 {
-	a_CommandBuffer->PushCommand([
-		bindingPoint = size_t(a_BindingPoint),
-		pipeline = a_Pipeline
-	](Buffer::ExecutionState& executionState){
-		executionState.pipelineState.at(bindingPoint) = pipeline;
-	});
+    a_CommandBuffer->PushCommand([
+        bindingPoint = size_t(a_BindingPoint),
+        pipeline = a_Pipeline
+    ](Buffer::ExecutionState& executionState){
+        executionState.pipelineState.at(bindingPoint) = pipeline;
+    });
 }
 }

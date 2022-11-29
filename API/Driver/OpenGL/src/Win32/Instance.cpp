@@ -10,7 +10,7 @@
 namespace OCRA::Instance::Win32
 {
 Impl::Impl(const Instance::Info& a_Info)
-	: Instance::Impl(a_Info)
+    : Instance::Impl(a_Info)
 {
     OpenGL::Win32::Initialize();
     std::string windowClassName = "DummyWindow" + std::to_string(id);

@@ -23,13 +23,13 @@ struct Storage {
     virtual void Unbind(uint32_t a_BindingIndex) = 0;
 };
 struct ImageStorage : Storage {
-	virtual void operator=(const Storage& a_Other) override {
-		auto& data = static_cast<const ImageStorage&>(a_Other);
+    virtual void operator=(const Storage& a_Other) override {
+        auto& data = static_cast<const ImageStorage&>(a_Other);
         imageView = data.imageView;
-	}
-	virtual void operator=(const WriteOperation& a_Write) override {
+    }
+    virtual void operator=(const WriteOperation& a_Write) override {
         imageView = a_Write.imageInfo->imageView;
-	}
+    }
     virtual void Bind(uint32_t a_BindingIndex) override {
         glActiveTexture(GL_TEXTURE0 + a_BindingIndex);
         glBindTexture(imageView->target, imageView->handle);
@@ -38,8 +38,8 @@ struct ImageStorage : Storage {
         glActiveTexture(GL_TEXTURE0 + a_BindingIndex);
         glBindTexture(imageView->target, 0);
     }
-	OCRA::Image::View::Handle     imageView{ nullptr };
-	
+    OCRA::Image::View::Handle     imageView{ nullptr };
+    
 };
 struct SampledImage : ImageStorage {
     virtual void operator=(const Storage& a_Other) override {
@@ -81,22 +81,22 @@ struct StorageImage : ImageStorage {
 };
 
 struct BufferStorage : Storage {
-	virtual void operator=(const Storage& a_Other) override {
-		auto& data = static_cast<const BufferStorage&>(a_Other);
+    virtual void operator=(const Storage& a_Other) override {
+        auto& data = static_cast<const BufferStorage&>(a_Other);
         buffer = data.buffer;
         offset = data.offset;
         range  = data.range;
-	}
-	virtual void operator=(const WriteOperation& a_Write) override {
+    }
+    virtual void operator=(const WriteOperation& a_Write) override {
         buffer = a_Write.bufferInfo->buffer;
         offset = a_Write.bufferInfo->offset + buffer->memoryBinding.offset;
-		range = a_Write.bufferInfo->range;
-	}
+        range = a_Write.bufferInfo->range;
+    }
     virtual void Bind(uint32_t a_BindingIndex) override {}
     virtual void Unbind(uint32_t a_BindingIndex) override {}
-	OCRA::Buffer::Handle buffer;
-	size_t				 offset{ 0 };
-	size_t				 range{ 0 };
+    OCRA::Buffer::Handle buffer;
+    size_t               offset{ 0 };
+    size_t               range{ 0 };
 };
 struct UniformTexelBuffer : BufferStorage {
 };
@@ -218,14 +218,14 @@ struct Data
         assert(a_Other.type == type);
         storage.swap(a_Other.storage);
     }
-	void operator=(const Data& a_Other) {
-		assert(a_Other.type == type);
-		*storage = *a_Other.storage;
-	}
+    void operator=(const Data& a_Other) {
+        assert(a_Other.type == type);
+        *storage = *a_Other.storage;
+    }
     void operator=(const WriteOperation& a_Write) {
-		assert(a_Write.type == type);
-		*storage = a_Write;
-	}
+        assert(a_Write.type == type);
+        *storage = a_Write;
+    }
     void Bind() {
         if (storage != nullptr)
             storage->Bind(bindingIndex);

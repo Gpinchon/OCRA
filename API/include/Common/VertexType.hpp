@@ -9,15 +9,15 @@
 namespace OCRA
 {
 enum class VertexType {
-	None,
-	Float32,
-	Float16,
-	int32_t,
-	uint32_t,
-	Int16,
-	uint16_t,
-	Int8,
-	uint8_t,
-	MaxValue
+    None,
+    Float32,
+    Float16,
+    int32_t,
+    uint32_t,
+    Int16,
+    uint16_t,
+    Int8,
+    uint8_t,
+    MaxValue
 };
 }

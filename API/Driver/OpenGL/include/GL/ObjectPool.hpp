@@ -93,8 +93,8 @@ struct ObjectPool {
         auto& refCount{ objectRef.at(a_Index) };
         if (refCount > 0)
             --refCount;
-		else
-			throw std::runtime_error("Attempted to unref released object");
+        else
+            throw std::runtime_error("Attempted to unref released object");
         if (refCount == 0)
             ReleaseObject(a_Index);
     }

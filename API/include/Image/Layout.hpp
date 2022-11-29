@@ -2,7 +2,7 @@
 
 namespace OCRA::Image {
 enum class Layout {
-	Unknown = -1,
-	MaxValue
+    Unknown = -1,
+    MaxValue
 };
 }

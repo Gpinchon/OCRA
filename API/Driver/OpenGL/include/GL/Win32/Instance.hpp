@@ -6,7 +6,7 @@ namespace OCRA::Instance::Win32
 {
 struct Impl : Instance::Impl
 {
-	Impl(const Info& a_Info);
+    Impl(const Info& a_Info);
     ~Impl();
     //required for OGL context creation on Windows
     void* hwnd;

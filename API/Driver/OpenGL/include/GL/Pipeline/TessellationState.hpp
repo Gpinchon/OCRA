@@ -17,14 +17,14 @@ namespace OCRA::Pipeline::TessellationState
 {
 struct Compile
 {
-	Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info&)
-		: patchControlPoints(a_Info.patchControlPoints)
-	{}
-	void operator()(Command::Buffer::ExecutionState& a_ExecutionState) const
-	{
-		if (patchControlPoints > 0)
-			glPatchParameteri(GL_PATCH_VERTICES, patchControlPoints);
-	}
-	const uint32_t patchControlPoints;
+    Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info&)
+        : patchControlPoints(a_Info.patchControlPoints)
+    {}
+    void operator()(Command::Buffer::ExecutionState& a_ExecutionState) const
+    {
+        if (patchControlPoints > 0)
+            glPatchParameteri(GL_PATCH_VERTICES, patchControlPoints);
+    }
+    const uint32_t patchControlPoints;
 };
 }

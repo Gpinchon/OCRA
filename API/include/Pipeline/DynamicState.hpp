@@ -6,32 +6,32 @@
 //TODO decide if this is relevant
 namespace OCRA::Pipeline::DynamicState {
 enum class State {
-	Viewport,
-	Scissor,
-	LineWidth,
-	DepthBias,
-	BlendConstants,
-	DepthBounds,
-	StencilCompareMask,
-	StencilWriteMask,
-	StencilReference,
-	//VK 1.3
-	CullMode,
-	FrontFace,
-	PrimitiveTopology,
-	ViewportWithCount,
-	ScissorWithCount,
-	VertexInputBindingStride,
-	DepthTestEnable,
-	DepthWriteEnable,
-	DepthBoundsTestEnable,
-	DepthCompareOP,
-	StencilTestEnable,
-	StencilOP,
-	RasterizerDiscardEnable,
-	DepthBiasEnable,
-	PrimitiveRestartEnable,
-	MaxValue
+    Viewport,
+    Scissor,
+    LineWidth,
+    DepthBias,
+    BlendConstants,
+    DepthBounds,
+    StencilCompareMask,
+    StencilWriteMask,
+    StencilReference,
+    //VK 1.3
+    CullMode,
+    FrontFace,
+    PrimitiveTopology,
+    ViewportWithCount,
+    ScissorWithCount,
+    VertexInputBindingStride,
+    DepthTestEnable,
+    DepthWriteEnable,
+    DepthBoundsTestEnable,
+    DepthCompareOP,
+    StencilTestEnable,
+    StencilOP,
+    RasterizerDiscardEnable,
+    DepthBiasEnable,
+    PrimitiveRestartEnable,
+    MaxValue
 };
 struct Info {
     std::list<State> dynamicStates;

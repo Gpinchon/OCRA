@@ -336,7 +336,7 @@ const MemoryProperties& GetMemoryProperties(const Handle& a_PhysicalDevice)
 }
 const Properties& GetProperties(const Handle& a_PhysicalDevice)
 {
-	return a_PhysicalDevice->properties;
+    return a_PhysicalDevice->properties;
 }
 const Features& GetFeatures(const Handle& a_PhysicalDevice)
 {

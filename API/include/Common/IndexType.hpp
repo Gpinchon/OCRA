@@ -11,21 +11,21 @@
 namespace OCRA
 {
 enum class IndexType {
-	None,
-	Uint8,
-	Uint16,
-	Uint32,
-	MaxValue
+    None,
+    Uint8,
+    Uint16,
+    Uint32,
+    MaxValue
 };
 static inline auto GetIndexTypeSize(const IndexType& a_IndexType){
-	switch (a_IndexType) {
-	case IndexType::Uint8 :
-		return 1;
-	case IndexType::Uint16 :
-		return 2;
-	case IndexType::Uint32 :
-		return 4;
-	default : throw std::runtime_error("Unknown Index Type");
-	}
+    switch (a_IndexType) {
+    case IndexType::Uint8 :
+        return 1;
+    case IndexType::Uint16 :
+        return 2;
+    case IndexType::Uint32 :
+        return 4;
+    default : throw std::runtime_error("Unknown Index Type");
+    }
 }
 }
