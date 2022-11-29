@@ -3,7 +3,6 @@
 #include <Handle.hpp>
 #include <SwapChain.hpp>
 
-#include <WeakHandle.hpp>
 
 OCRA_DECLARE_HANDLE(OCRA::Device);
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);

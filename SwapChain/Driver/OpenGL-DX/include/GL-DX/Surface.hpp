@@ -4,8 +4,6 @@
 #include <Surface.hpp>
 #include <Common/Extent2D.hpp>
 
-#include <GL/WeakHandle.hpp>
-
 #include <functional>
 #include <string>
 #include <vector>

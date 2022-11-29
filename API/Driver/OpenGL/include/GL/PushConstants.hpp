@@ -2,7 +2,6 @@
 
 #include <Handle.hpp>
 
-#include <WeakHandle.hpp>
 
 #include <vector>
 

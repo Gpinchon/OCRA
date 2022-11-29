@@ -2,7 +2,6 @@
 
 #include <Command/Draw.hpp>
 #include <Pipeline/Layout.hpp>
-#include <WeakHandle.hpp>
 
 #include <ShaderCompiler/Compiler.hpp>
 #include <ShaderCompiler/Shader.hpp>

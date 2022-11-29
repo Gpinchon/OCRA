@@ -3,7 +3,6 @@
 #include <Handle.hpp>
 #include <Buffer.hpp>
 
-#include <WeakHandle.hpp>
 
 #include <cassert>
 

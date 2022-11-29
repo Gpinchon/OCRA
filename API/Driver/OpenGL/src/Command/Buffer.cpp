@@ -8,7 +8,6 @@
 #include <Command/Buffer.hpp>
 #include <Queue/Queue.hpp>
 
-#include <WeakHandle.hpp>
 #include <GL/Command/Buffer.hpp>
 #include <GL/Command/ExecutionState.hpp>
 

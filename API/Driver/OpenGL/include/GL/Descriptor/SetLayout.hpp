@@ -3,7 +3,6 @@
 #include <Handle.hpp>
 #include <Descriptor/SetLayout.hpp>
 
-#include <WeakHandle.hpp>
 
 #include <algorithm>
 

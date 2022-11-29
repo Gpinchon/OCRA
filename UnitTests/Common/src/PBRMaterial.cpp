@@ -1,7 +1,6 @@
 #include <PBRMaterial.hpp>
 
 #include <Memory.hpp>
-#include <WeakHandle.hpp>
 
 #include <ShaderCompiler/Compiler.hpp>
 #include <ShaderCompiler/Shader.hpp>

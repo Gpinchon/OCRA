@@ -1,6 +1,5 @@
 #pragma once
 
-#include <GL/WeakHandle.hpp>
 #include <GL/Device.hpp>
 #include <GL/Win32/Error.hpp>
 

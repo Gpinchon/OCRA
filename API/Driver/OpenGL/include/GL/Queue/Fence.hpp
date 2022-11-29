@@ -3,7 +3,6 @@
 #include <Queue/Fence.hpp>
 #include <Common/Timer.hpp>
 
-#include <WeakHandle.hpp>
 #include <GL/Device.hpp>
 #include <GL/glew.h>
 

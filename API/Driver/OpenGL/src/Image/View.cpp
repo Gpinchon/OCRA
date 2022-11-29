@@ -16,7 +16,6 @@
 #include <GL/Image/Image.hpp>
 #include <GL/Image/View.hpp>
 #include <GL/Common/Component.hpp>
-#include <WeakHandle.hpp>
 #include <GL/glew.h>
 
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);

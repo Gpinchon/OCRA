@@ -2,7 +2,6 @@
 
 #include <Handle.hpp>
 #include <QueryPool.hpp>
-#include <WeakHandle.hpp>
 
 #include <GL/glew.h>
 

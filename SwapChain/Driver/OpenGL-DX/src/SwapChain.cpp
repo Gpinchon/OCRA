@@ -12,7 +12,6 @@
 #include <GL/Device.hpp>
 #include <GL/Image/Image.hpp>
 #include <GL/Image/Format.hpp>
-#include <GL/WeakHandle.hpp>
 #include <GL/glew.h>
 
 #include <cassert>
