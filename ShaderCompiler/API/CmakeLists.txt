@@ -25,8 +25,8 @@ FetchContent_Declare(
     GOOGLE_TEST
     GIT_REPOSITORY  https://github.com/google/googletest.git
     GIT_TAG         25dcdc7e8bfac8967f20fb2c0a628f5cf442188d
-    #SOURCE_DIR      ${spirv_tools_SOURCE_DIR}/external/googletest
 )
+option(INSTALL_GTEST "Install Google Test" OFF)
 FetchContent_MakeAvailable(GOOGLE_TEST)
 set_subdirectory_folder("3rdparty/GoogleTest" ${google_test_SOURCE_DIR})
 # Fetch GOOGLE_TEST
