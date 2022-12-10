@@ -34,7 +34,7 @@ if (OCRA_SWAPCHAIN_IMPL STREQUAL "OpenGL")
 add_subdirectory(Driver/OpenGL)
 elseif (OCRA_SWAPCHAIN_IMPL STREQUAL "OpenGL-DX")
 add_subdirectory(Driver/OpenGL-DX)
-endif (OCRA_SWAPCHAIN_IMPL STREQUAL "OpenGL-DX")
+endif (OCRA_SWAPCHAIN_IMPL STREQUAL "OpenGL")
 
 if(MSVC_IDE)
   set(CMAKE_DEBUG_POSTFIX "d")
