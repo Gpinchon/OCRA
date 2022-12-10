@@ -1,5 +1,6 @@
 #include <Descriptor/Pool.hpp>
 
+#include <GL/Common/MemoryPool.hpp>
 #include <GL/Descriptor/Set.hpp>
 
 #include <memory_resource>
@@ -28,9 +29,7 @@ struct Impl
     }
 #endif
     const Info                                  info;
-    std::vector<std::byte>                      memory{ sizeof(Set::Impl) * info.maxSets };
-    std::pmr::monotonic_buffer_resource         memoryPool{ memory.data(), memory.size() };
-    std::pmr::polymorphic_allocator<Set::Impl>  allocator{ &memoryPool };
+    MemoryPool<Set::Impl>                       memoryPool{ info.maxSets };
 #ifdef _DEBUG
     std::vector<Set::WeakHandle>                allocated;
 #endif
@@ -50,8 +49,9 @@ std::vector<Set::Handle> AllocateSet(const Device::Handle& a_Device, const Alloc
 {
     std::vector<Set::Handle> sets;
     sets.reserve(a_Info.layouts.size());
+    auto& memoryPool = a_Info.pool->memoryPool;
     for (const auto& layout : a_Info.layouts) {
-        auto set = std::allocate_shared<Set::Impl>(a_Info.pool->allocator, layout);
+        auto set = std::shared_ptr<Set::Impl>(new(memoryPool.allocate()) Set::Impl(layout), memoryPool.deleter());
         sets.push_back(set);
 #ifdef _DEBUG
         auto& allocated = a_Info.pool->allocated;

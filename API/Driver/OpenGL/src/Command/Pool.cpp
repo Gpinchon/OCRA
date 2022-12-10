@@ -1,5 +1,8 @@
-#include <GL/Command/Pool.hpp>
 #include <GL/Command/Buffer.hpp>
+
+#include <GL/Common/FixedSizeMemoryPool.hpp>
+
+#include <Command/Pool.hpp>
 
 #include <memory>
 #include <set>
@@ -29,9 +32,7 @@ struct Impl
     }
 #endif
     const Info info;
-    std::byte                                       memory[sizeof(Buffer::Impl) * MaxCommandBufferNbr];
-    std::pmr::monotonic_buffer_resource             memoryPool{ memory, sizeof(Buffer::Impl) * MaxCommandBufferNbr };
-    std::pmr::polymorphic_allocator<Buffer::Impl>   bufferAllocator{ &memoryPool };
+    FixedSizeMemoryPool<Buffer::Impl, MaxCommandBufferNbr>  memoryPool;
 #ifdef _DEBUG
     std::vector<Buffer::WeakHandle>                 allocated;
 #endif
@@ -51,8 +52,9 @@ std::vector<Buffer::Handle> AllocateBuffer(const Device::Handle& a_Device, const
 {
     std::vector<Buffer::Handle> commandBuffers;
     commandBuffers.reserve(a_Info.count);
+    auto& memoryPool = a_Info.pool->memoryPool;
     for (auto i = 0u; i < a_Info.count; ++i) {
-        auto buffer = std::allocate_shared<Buffer::Impl>(a_Info.pool->bufferAllocator, a_Device, Buffer::Level(a_Info.level));
+        auto buffer = std::shared_ptr<Buffer::Impl>(new(memoryPool.allocate()) Buffer::Impl(a_Device, Buffer::Level(a_Info.level)), memoryPool.deleter());
         commandBuffers.push_back(buffer);
 #ifdef _DEBUG
         auto& allocated = a_Info.pool->allocated;

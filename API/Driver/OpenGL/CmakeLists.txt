@@ -57,11 +57,12 @@ set(OCRA_IMPL_HEADER_FILES
   ${OCRA_IMPL_INCLUDE_DIR}/GL/RenderPass.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Command/Buffer.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Command/ExecutionState.hpp
-  ${OCRA_IMPL_INCLUDE_DIR}/GL/Command/Pool.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/Blend.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/Compare.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/FixedSizeMemoryPool.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/IndexType.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/Logic.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/MemoryPool.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/Stencil.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/VertexType.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/WorkerThread.hpp
