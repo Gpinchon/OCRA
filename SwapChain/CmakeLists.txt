@@ -4,10 +4,10 @@ cmake_policy(SET CMP0074 NEW)
 project(OCRA LANGUAGES CXX)
 
 #[[SwapChain Impl]]
-set(OCRA_SWAPCHAIN_IMPL "OpenGL-DX" CACHE STRING
+set(OCRA_SWAPCHAIN_IMPL "OpenGL" CACHE STRING
   "SwapChain Impl used at compile-time")
 set(RenderingAPIValues
-  "OpenGL-DX;OpenGL;Direct-X;Vulkan")
+  "OpenGL;OpenGL-DX;Direct-X;Vulkan")
 set_property(CACHE OCRA_SWAPCHAIN_IMPL PROPERTY STRINGS ${RenderingAPIValues})
 add_compile_definitions(OCRA_SWAPCHAIN_IMPL=${OCRA_SWAPCHAIN_IMPL})
 
@@ -30,10 +30,10 @@ set_target_properties(
   PROPERTIES FOLDER "SwapChain"
 )
 
-if (OCRA_SWAPCHAIN_IMPL STREQUAL "OpenGL-DX")
-add_subdirectory(Driver/OpenGL-DX)
-elseif (OCRA_SWAPCHAIN_IMPL STREQUAL "OpenGL")
+if (OCRA_SWAPCHAIN_IMPL STREQUAL "OpenGL")
 add_subdirectory(Driver/OpenGL)
+elseif (OCRA_SWAPCHAIN_IMPL STREQUAL "OpenGL-DX")
+add_subdirectory(Driver/OpenGL-DX)
 endif (OCRA_SWAPCHAIN_IMPL STREQUAL "OpenGL-DX")
 
 if(MSVC_IDE)
