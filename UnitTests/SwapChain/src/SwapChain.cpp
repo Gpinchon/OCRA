@@ -74,7 +74,6 @@ struct SwapChainTestApp : TestApp
         , device(CreateDevice(physicalDevice))
         , window(Window(instance, physicalDevice, device, name, 1280, 720))
     {
-        window.SetSwapChainImageNbr(SWAPCHAIN_IMAGE_NBR);
         window.OnResize = [this](const Window&, const uint32_t, const uint32_t) { render = true; };
         window.OnMaximize = window.OnResize;
         window.OnRestore = window.OnResize;
@@ -146,6 +145,7 @@ int main()
     int ret = 0;
     SwapChainTestApp testApp;
     testApp.window.Show();
+    testApp.window.SetSwapChainImageNbr(SWAPCHAIN_IMAGE_NBR);
     testApp.Loop();
     return ret;
 }

@@ -30,6 +30,7 @@
 
 using namespace OCRA;
 constexpr auto VSync = false;
+constexpr auto SwapChainImageNbr = 3;
 
 Vec3 HSVtoRGB(float fH, float fS, float fV) {
     float fC = fV * fS; // Chroma
@@ -133,9 +134,6 @@ struct GraphicsPipelineTestApp : TestApp
         imageAcquisitionFence = Queue::Fence::Create(device);
         mainCommandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Primary);
         drawCommandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Secondary);
-    }
-    ~GraphicsPipelineTestApp() {
-        mainCommandBuffer = nullptr;
     }
     void Loop()
     {
@@ -313,8 +311,8 @@ struct GraphicsPipelineTestApp : TestApp
     FrameBuffer::Handle      frameBuffer;
     Image::Handle            frameBufferImage;
 
-    Descriptor::Pool::Handle             descriptorPool{ CreateDescriptorPool(device, 4096) };
-    Mesh            mesh{ physicalDevice, device, descriptorPool,
+    Descriptor::Pool::Handle descriptorPool{ CreateDescriptorPool(device, 4096) };
+    Mesh    mesh{ physicalDevice, device, descriptorPool,
         VertexBuffer(physicalDevice, device, std::vector<Vertex>{
             { {0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
             {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
@@ -327,8 +325,8 @@ struct GraphicsPipelineTestApp : TestApp
     Command::Pool::Handle    commandPool;
     Command::Buffer::Handle  mainCommandBuffer;
     Command::Buffer::Handle  drawCommandBuffer;
-    Queue::Handle            queue;
     Queue::Fence::Handle     imageAcquisitionFence;
+    Queue::Handle            queue;
 };
 
 int main()
@@ -337,6 +335,7 @@ int main()
     //basic setup as usual
     GraphicsPipelineTestApp testApp;
     testApp.window.Show();
+    testApp.window.SetSwapChainImageNbr(SwapChainImageNbr);
     testApp.Loop();
     return ret;
 }
