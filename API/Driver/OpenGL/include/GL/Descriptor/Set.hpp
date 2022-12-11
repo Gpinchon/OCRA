@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Handle.hpp>
-#include <Descriptor/Set.hpp>
+#include <OCRA/Handle.hpp>
+#include <OCRA/Descriptor/Set.hpp>
 
 #include <GL/Descriptor/SetData.hpp>
 

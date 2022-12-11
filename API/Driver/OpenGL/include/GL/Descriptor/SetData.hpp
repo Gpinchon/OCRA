@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Descriptor/Type.hpp>
+#include <OCRA/Descriptor/Type.hpp>
 
 #include <GL/Descriptor/SetLayout.hpp>
 

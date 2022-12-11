@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include <Common/Logic.hpp>
+#include <OCRA/Common/Logic.hpp>
 
 #include <stdexcept>
 

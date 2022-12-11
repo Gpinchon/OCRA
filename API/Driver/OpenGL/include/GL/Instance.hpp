@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Handle.hpp>
-#include <Instance.hpp>
+#include <OCRA/Handle.hpp>
+#include <OCRA/Instance.hpp>
 
 #include <functional>
 

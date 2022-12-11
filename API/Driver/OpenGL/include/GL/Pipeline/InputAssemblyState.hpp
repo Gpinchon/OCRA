@@ -1,8 +1,8 @@
 #pragma once
 
-#include <Pipeline/InputAssemblyState.hpp>
-#include <Primitive/Topology.hpp>
-#include <Pipeline/DynamicState.hpp>
+#include <OCRA/Pipeline/InputAssemblyState.hpp>
+#include <OCRA/Primitive/Topology.hpp>
+#include <OCRA/Pipeline/DynamicState.hpp>
 
 #include <GL/Command/ExecutionState.hpp>
 #include <GL/glew.h>

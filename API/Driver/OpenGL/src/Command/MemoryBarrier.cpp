@@ -1,4 +1,4 @@
-#include <Command/MemoryBarrier.hpp>
+#include <OCRA/Command/MemoryBarrier.hpp>
 
 #include <GL/Command/Buffer.hpp>
 

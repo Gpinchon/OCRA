@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include <Pipeline/ShaderPipelineState.hpp>
+#include <OCRA/Pipeline/ShaderPipelineState.hpp>
 
 
 OCRA_DECLARE_HANDLE(OCRA::Device);

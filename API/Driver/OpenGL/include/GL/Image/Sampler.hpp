@@ -1,8 +1,8 @@
 #pragma once
 
-#include <Image/Sampler.hpp>
+#include <OCRA/Image/Sampler.hpp>
 
-#include <Handle.hpp>
+#include <OCRA/Handle.hpp>
 
 OCRA_DECLARE_HANDLE(OCRA::Device);
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);

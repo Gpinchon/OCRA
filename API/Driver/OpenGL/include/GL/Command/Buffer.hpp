@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Handle.hpp>
-#include <Command/Buffer.hpp>
+#include <OCRA/Handle.hpp>
+#include <OCRA/Command/Buffer.hpp>
 
 #include <GL/Command/ExecutionState.hpp>
 #include <GL/PushConstants.hpp>

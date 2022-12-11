@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include <Pipeline/ColorBlendState.hpp>
-#include <Pipeline/DynamicState.hpp>
+#include <OCRA/Pipeline/ColorBlendState.hpp>
+#include <OCRA/Pipeline/DynamicState.hpp>
 
 #include <GL/Command/ExecutionState.hpp>
 #include <GL/Common/Blend.hpp>

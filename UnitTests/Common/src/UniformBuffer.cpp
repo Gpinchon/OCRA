@@ -1,7 +1,7 @@
 #include <UniformBuffer.hpp>
 
-#include <Descriptor/Set.hpp>
-#include <Memory.hpp>
+#include <OCRA/Descriptor/Set.hpp>
+#include <OCRA/Memory.hpp>
 
 namespace OCRA {
 void UniformBuffer::Update() {

@@ -1,4 +1,4 @@
-#include <RenderPass.hpp>
+#include <OCRA/RenderPass.hpp>
 
 #include <GL/FrameBuffer.hpp>
 #include <GL/RenderPass.hpp>

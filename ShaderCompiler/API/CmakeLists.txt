@@ -84,9 +84,9 @@ add_definitions(
 
 
 set(OCRA_SHADER_COMPILER_API_HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/ShaderCompiler/Shader.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/ShaderCompiler/Compiler.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/ShaderCompiler/Handle.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/ShaderCompiler/Shader.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/ShaderCompiler/Compiler.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/ShaderCompiler/Handle.hpp
 )
 
 set(OCRA_SHADER_COMPILER_API_SOURCE_FILES

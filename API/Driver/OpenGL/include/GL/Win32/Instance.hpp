@@ -1,5 +1,5 @@
 #pragma once
-#include <Instance.hpp>
+#include <OCRA/Instance.hpp>
 #include <GL/Instance.hpp>
 
 namespace OCRA::Instance::Win32

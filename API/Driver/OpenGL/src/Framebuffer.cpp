@@ -1,4 +1,4 @@
-#include <FrameBuffer.hpp>
+#include <OCRA/FrameBuffer.hpp>
 
 #include <GL/Device.hpp>
 #include <GL/FrameBuffer.hpp>
@@ -6,7 +6,6 @@
 #include <GL/glew.h>
 
 #include <cassert>
-#include "FrameBuffer.hpp"
 
 namespace OCRA::FrameBuffer {
 static inline auto CreateFrameBuffer(const Device::Handle& a_Device, const Info& a_Info)

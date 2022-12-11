@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include <Common/IndexType.hpp>
+#include <OCRA/Common/IndexType.hpp>
 
 #include <GL/glew.h>
 

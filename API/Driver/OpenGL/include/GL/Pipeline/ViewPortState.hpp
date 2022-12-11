@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include <Pipeline/ViewPortState.hpp>
-#include <Common/Rect2D.hpp>
+#include <OCRA/Pipeline/ViewPortState.hpp>
+#include <OCRA/Common/Rect2D.hpp>
 
 #include <array>
 

@@ -4,9 +4,9 @@
 * @Last Modified by:   gpinchon
 * @Last Modified time: 2021-10-07 18:55:03
 */
-#include <Buffer.hpp>
-#include <Handle.hpp>
-#include <Image/Image.hpp>
+#include <OCRA/Buffer.hpp>
+#include <OCRA/Handle.hpp>
+#include <OCRA/Image/Image.hpp>
 
 #include <cassert>
 #include <functional>

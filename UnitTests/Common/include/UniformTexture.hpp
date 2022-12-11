@@ -3,7 +3,7 @@
 #include <Texture.hpp>
 #include <Uniform.hpp>
 
-#include <Handle.hpp>
+#include <OCRA/Handle.hpp>
 
 OCRA_DECLARE_HANDLE(OCRA::Device);
 

@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include <Common/Component.hpp>
+#include <OCRA/Common/Component.hpp>
 
 #include <GL/glew.h>
 

@@ -1,7 +1,5 @@
-#include "Buffer.hpp"
-#include "Buffer.hpp"
-#include <Buffer.hpp>
-#include <Allocator.hpp>
+#include <OCRA/Buffer.hpp>
+#include <OCRA/Allocator.hpp>
 
 #include <GL/Buffer.hpp>
 #include <GL/Memory.hpp>

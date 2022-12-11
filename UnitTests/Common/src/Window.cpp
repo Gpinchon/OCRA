@@ -1,7 +1,8 @@
 #include <Window.hpp>
-#include <Device.hpp>
-#include <Surface.hpp>
-#include <SwapChain.hpp>
+
+#include <OCRA/Device.hpp>
+#include <OCRA/Surface.hpp>
+#include <OCRA/SwapChain.hpp>
 
 #include <iostream>
 #include <windows.h>

@@ -1,5 +1,5 @@
-#include <Handle.hpp>
-#include <Queue/Semaphore.hpp>
+#include <OCRA/Handle.hpp>
+#include <OCRA/Queue/Semaphore.hpp>
 
 #include <GL/Device.hpp>
 #include <GL/Queue/Queue.hpp>

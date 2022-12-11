@@ -1,6 +1,6 @@
-#include <ShaderCompiler/Compiler.hpp>
+#include <OCRA/ShaderCompiler/Compiler.hpp>
 
-#include <glslang\Public\ShaderLang.h>
+#include <glslang/Public/ShaderLang.h>
 
 namespace OCRA::ShaderCompiler
 {

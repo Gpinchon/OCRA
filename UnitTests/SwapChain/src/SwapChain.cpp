@@ -1,15 +1,15 @@
 #include <Common.hpp>
-
-#include <Instance.hpp>
-#include <Device.hpp>
-#include <Surface.hpp>
-#include <SwapChain.hpp>
-#include <Command/Pool.hpp>
-#include <Command/Buffer.hpp>
-#include <Image/Image.hpp>
-#include <Queue/Fence.hpp>
-#include <Common/Vec3.hpp>
 #include <Window.hpp>
+
+#include <OCRA/Instance.hpp>
+#include <OCRA/Device.hpp>
+#include <OCRA/Surface.hpp>
+#include <OCRA/SwapChain.hpp>
+#include <OCRA/Command/Pool.hpp>
+#include <OCRA/Command/Buffer.hpp>
+#include <OCRA/Image/Image.hpp>
+#include <OCRA/Queue/Fence.hpp>
+#include <OCRA/Common/Vec3.hpp>
 
 #include <Windows.h>
 

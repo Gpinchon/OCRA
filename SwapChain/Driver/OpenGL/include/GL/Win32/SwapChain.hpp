@@ -2,8 +2,8 @@
 
 #include <GL/SwapChain.hpp>
 
-#include <Common/Extent3D.hpp>
-#include <Common/Vec2.hpp>
+#include <OCRA/Common/Extent3D.hpp>
+#include <OCRA/Common/Vec2.hpp>
 
 #include <GL/Common/WorkerThread.hpp>
 

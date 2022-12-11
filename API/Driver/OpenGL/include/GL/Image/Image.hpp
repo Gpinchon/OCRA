@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include <Handle.hpp>
-#include <Image/Image.hpp>
+#include <OCRA/Handle.hpp>
+#include <OCRA/Image/Image.hpp>
 
 
 OCRA_DECLARE_HANDLE(OCRA::Device);

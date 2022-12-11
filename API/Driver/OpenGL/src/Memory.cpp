@@ -1,5 +1,5 @@
-#include <Memory.hpp>
-#include <PhysicalDevice.hpp>
+#include <OCRA/Memory.hpp>
+#include <OCRA/PhysicalDevice.hpp>
 
 #include <GL/Device.hpp>
 #include <GL/Memory.hpp>

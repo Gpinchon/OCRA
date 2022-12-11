@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include <Image/Format.hpp>
+#include <OCRA/Image/Format.hpp>
 
 #include <stdexcept>
 

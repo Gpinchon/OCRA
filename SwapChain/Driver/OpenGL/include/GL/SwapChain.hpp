@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Handle.hpp>
-#include <SwapChain.hpp>
+#include <OCRA/Handle.hpp>
+#include <OCRA/SwapChain.hpp>
 
 
 OCRA_DECLARE_HANDLE(OCRA::Device);

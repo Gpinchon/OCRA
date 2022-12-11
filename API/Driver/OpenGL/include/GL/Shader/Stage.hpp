@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include <Handle.hpp>
-#include <Shader/Stage.hpp>
+#include <OCRA/Handle.hpp>
+#include <OCRA/Shader/Stage.hpp>
 
 
 OCRA_DECLARE_HANDLE(OCRA::Device);

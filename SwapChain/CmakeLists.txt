@@ -16,8 +16,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS_RELEASE "-Ox")
 
 set(OCRA_SWAPCHAIN_HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/SwapChain.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/Surface.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/SwapChain.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Surface.hpp
 )
 
 add_library(OCRA-SwapChain-Interface INTERFACE ${OCRA_SWAPCHAIN_HEADER_FILES})

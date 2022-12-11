@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Pipeline/Pipeline.hpp>
+#include <OCRA/Pipeline/Pipeline.hpp>
 
 #include <functional>
 

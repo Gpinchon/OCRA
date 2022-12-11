@@ -1,8 +1,8 @@
 #pragma once
 
-#include <SwapChain.hpp>
-#include <Common/Rect2D.hpp>
-#include <Handle.hpp>
+#include <OCRA/SwapChain.hpp>
+#include <OCRA/Common/Rect2D.hpp>
+#include <OCRA/Handle.hpp>
 
 #include <chrono>
 #include <functional>

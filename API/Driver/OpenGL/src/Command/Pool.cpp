@@ -1,8 +1,7 @@
+#include <OCRA/Command/Pool.hpp>
+
 #include <GL/Command/Buffer.hpp>
-
 #include <GL/Common/FixedSizeMemoryPool.hpp>
-
-#include <Command/Pool.hpp>
 
 #include <memory>
 #include <set>

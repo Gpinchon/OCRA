@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Handle.hpp>
-#include <Memory.hpp>
+#include <OCRA/Handle.hpp>
+#include <OCRA/Memory.hpp>
 
 
 OCRA_DECLARE_HANDLE(OCRA::Device);

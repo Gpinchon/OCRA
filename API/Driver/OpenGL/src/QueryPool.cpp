@@ -1,4 +1,4 @@
-#include <QueryPool.hpp>
+#include <OCRA/QueryPool.hpp>
 
 #include <GL/Device.hpp>
 #include <GL/QueryPool.hpp>

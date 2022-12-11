@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Handle.hpp>
-#include <Common/Extent3D.hpp>
+#include <OCRA/Handle.hpp>
+#include <OCRA/Common/Extent3D.hpp>
 
 OCRA_DECLARE_HANDLE(OCRA::Image);
 

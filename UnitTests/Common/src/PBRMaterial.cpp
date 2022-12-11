@@ -1,9 +1,9 @@
 #include <PBRMaterial.hpp>
 
-#include <Memory.hpp>
+#include <OCRA/Memory.hpp>
 
-#include <ShaderCompiler/Compiler.hpp>
-#include <ShaderCompiler/Shader.hpp>
+#include <OCRA/ShaderCompiler/Compiler.hpp>
+#include <OCRA/ShaderCompiler/Shader.hpp>
 
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Shader::Stage);
 

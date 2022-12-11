@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Handle.hpp>
-#include <QueryPool.hpp>
+#include <OCRA/Handle.hpp>
+#include <OCRA/QueryPool.hpp>
 
 #include <GL/glew.h>
 

@@ -1,16 +1,16 @@
 #pragma once
 
-#include <Handle.hpp>
-#include <Common/ClearValue.hpp>
-#include <Common/Compare.hpp>
-#include <Common/DepthBounds.hpp>
-#include <Common/Stencil.hpp>
-#include <Common/Rect2D.hpp>
-#include <Common/Vec4.hpp>
+#include <OCRA/Handle.hpp>
+#include <OCRA/Common/ClearValue.hpp>
+#include <OCRA/Common/Compare.hpp>
+#include <OCRA/Common/DepthBounds.hpp>
+#include <OCRA/Common/Stencil.hpp>
+#include <OCRA/Common/Rect2D.hpp>
+#include <OCRA/Common/Vec4.hpp>
 
-#include <Common/ViewPort.hpp>
-#include <FrameBuffer.hpp>
-#include <RenderPass.hpp>
+#include <OCRA/Common/ViewPort.hpp>
+#include <OCRA/FrameBuffer.hpp>
+#include <OCRA/RenderPass.hpp>
 
 #include <GL/Common/Stencil.hpp>
 #include <GL/glew.h>

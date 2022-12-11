@@ -1,9 +1,9 @@
 #pragma once
 
-#include <Common/Vec3.hpp>
-#include <Common/Vec2.hpp>
-#include <Handle.hpp>
-#include <Pipeline/VertexInputState.hpp>
+#include <OCRA/Common/Vec3.hpp>
+#include <OCRA/Common/Vec2.hpp>
+#include <OCRA/Handle.hpp>
+#include <OCRA/Pipeline/VertexInputState.hpp>
 
 OCRA_DECLARE_HANDLE(OCRA::PhysicalDevice);
 OCRA_DECLARE_HANDLE(OCRA::Device);

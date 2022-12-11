@@ -6,9 +6,9 @@
 */
 #pragma once
 
-#include <Handle.hpp>
-#include <Pipeline/DynamicState.hpp>
-#include <Pipeline/DepthStencilState.hpp>
+#include <OCRA/Handle.hpp>
+#include <OCRA/Pipeline/DynamicState.hpp>
+#include <OCRA/Pipeline/DepthStencilState.hpp>
 
 #include <GL/Command/ExecutionState.hpp>
 #include <GL/Common/Compare.hpp>

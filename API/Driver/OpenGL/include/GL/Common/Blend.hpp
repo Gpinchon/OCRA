@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include <Common/Blend.hpp>
+#include <OCRA/Common/Blend.hpp>
 
 #include <GL/glew.h>
 

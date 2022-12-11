@@ -1,5 +1,5 @@
-#include <Command/Buffer.hpp>
-#include <Pipeline/Pipeline.hpp>
+#include <OCRA/Command/Buffer.hpp>
+#include <OCRA/Pipeline/Pipeline.hpp>
 
 #include <GL/Device.hpp>
 #include <GL/Pipeline/Pipeline.hpp>

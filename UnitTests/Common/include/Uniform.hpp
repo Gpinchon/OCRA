@@ -1,9 +1,9 @@
 #pragma once
 
-#include <Descriptor/Pool.hpp>
-#include <Descriptor/SetLayout.hpp>
+#include <OCRA/Descriptor/Pool.hpp>
+#include <OCRA/Descriptor/SetLayout.hpp>
 
-#include <Handle.hpp>
+#include <OCRA/Handle.hpp>
 
 OCRA_DECLARE_HANDLE(OCRA::Descriptor::Pool);
 OCRA_DECLARE_HANDLE(OCRA::Descriptor::Set);

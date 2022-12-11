@@ -6,9 +6,9 @@
 */
 #pragma once
 
-#include <Handle.hpp>
-#include <Pipeline/RasterizationState.hpp>
-#include <Pipeline/DynamicState.hpp>
+#include <OCRA/Handle.hpp>
+#include <OCRA/Pipeline/RasterizationState.hpp>
+#include <OCRA/Pipeline/DynamicState.hpp>
 
 #include <GL/Command/ExecutionState.hpp>
 #include <GL/glew.h>

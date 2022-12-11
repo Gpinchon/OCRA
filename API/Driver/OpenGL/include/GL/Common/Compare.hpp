@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include <Common/Compare.hpp>
+#include <OCRA/Common/Compare.hpp>
 
 #include <GL/glew.h>
 

@@ -1,5 +1,5 @@
 #pragma once
-#include <Buffer.hpp>
+#include <OCRA/Buffer.hpp>
 
 #include <Common.hpp>
 #include <Uniform.hpp>

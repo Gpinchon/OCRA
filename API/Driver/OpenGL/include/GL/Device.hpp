@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Handle.hpp>
-#include <Device.hpp>
+#include <OCRA/Handle.hpp>
+#include <OCRA/Device.hpp>
 
 #include <GL/PhysicalDevice.hpp>
 

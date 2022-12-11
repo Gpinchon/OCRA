@@ -3,12 +3,12 @@
  * @brief Unit test's common tools
  */
 
-#include <Handle.hpp>
-#include <Queue/Queue.hpp>
-#include <Command/Pool.hpp>
-#include <PhysicalDevice.hpp>
+#include <OCRA/Handle.hpp>
+#include <OCRA/Queue/Queue.hpp>
+#include <OCRA/Command/Pool.hpp>
+#include <OCRA/PhysicalDevice.hpp>
 
-#include <Common/Timer.hpp>
+#include <OCRA/Common/Timer.hpp>
 
 #include <iostream>
 #include <string>

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Handle.hpp>
-#include <Buffer.hpp>
+#include <OCRA/Handle.hpp>
+#include <OCRA/Buffer.hpp>
 
 
 #include <cassert>

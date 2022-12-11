@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Common/Vec4.hpp>
+#include <OCRA/Common/Vec4.hpp>
 
 #include <Material.hpp>
 

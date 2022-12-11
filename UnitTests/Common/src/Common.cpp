@@ -1,11 +1,11 @@
 #include <Common.hpp>
-#include <Instance.hpp>
-#include <PhysicalDevice.hpp>
-#include <Device.hpp>
-#include <Queue/Queue.hpp>
-#include <Command/Pool.hpp>
-#include <Memory.hpp>
-#include <Descriptor/Pool.hpp>
+#include <OCRA/Instance.hpp>
+#include <OCRA/PhysicalDevice.hpp>
+#include <OCRA/Device.hpp>
+#include <OCRA/Queue/Queue.hpp>
+#include <OCRA/Command/Pool.hpp>
+#include <OCRA/Memory.hpp>
+#include <OCRA/Descriptor/Pool.hpp>
 
 #include <iostream>
 #include <vector>

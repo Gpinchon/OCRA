@@ -1,6 +1,6 @@
 #pragma once
 
-#include <RenderPass.hpp>
+#include <OCRA/RenderPass.hpp>
 
 #include <vector>
 

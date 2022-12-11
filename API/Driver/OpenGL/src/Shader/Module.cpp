@@ -1,4 +1,4 @@
-#include <Shader/Module.hpp>
+#include <OCRA/Shader/Module.hpp>
 
 namespace OCRA::Shader::Module {
 struct Impl

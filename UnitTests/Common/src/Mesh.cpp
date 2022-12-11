@@ -1,10 +1,10 @@
 #include <Mesh.hpp>
 
-#include <Command/Draw.hpp>
-#include <Pipeline/Layout.hpp>
+#include <OCRA/Command/Draw.hpp>
+#include <OCRA/Pipeline/Layout.hpp>
 
-#include <ShaderCompiler/Compiler.hpp>
-#include <ShaderCompiler/Shader.hpp>
+#include <OCRA/ShaderCompiler/Compiler.hpp>
+#include <OCRA/ShaderCompiler/Shader.hpp>
 
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Shader::Stage);
 

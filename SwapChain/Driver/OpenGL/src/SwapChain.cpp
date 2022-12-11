@@ -1,5 +1,5 @@
-#include <SwapChain.hpp>
-#include <Image/Image.hpp>
+#include <OCRA/SwapChain.hpp>
+#include <OCRA/Image/Image.hpp>
 
 #ifdef _WIN32
 #include <GL/Win32/SwapChain.hpp>

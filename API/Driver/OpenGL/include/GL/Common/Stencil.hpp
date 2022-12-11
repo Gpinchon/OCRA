@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include <Common/Stencil.hpp>
+#include <OCRA/Common/Stencil.hpp>
 
 #include <GL/Common/Compare.hpp>
 #include <GL/glew.h>

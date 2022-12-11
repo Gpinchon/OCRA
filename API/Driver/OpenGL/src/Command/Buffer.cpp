@@ -5,8 +5,8 @@
 * @Last Modified time: 2021-09-26 14:26:36
 */
 
-#include <Command/Buffer.hpp>
-#include <Queue/Queue.hpp>
+#include <OCRA/Command/Buffer.hpp>
+#include <OCRA/Queue/Queue.hpp>
 
 #include <GL/Command/Buffer.hpp>
 #include <GL/Command/ExecutionState.hpp>

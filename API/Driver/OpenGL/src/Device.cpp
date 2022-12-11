@@ -1,5 +1,5 @@
-#include <Device.hpp>
-#include <PhysicalDevice.hpp>
+#include <OCRA/Device.hpp>
+#include <OCRA/PhysicalDevice.hpp>
 
 #include <GL/Device.hpp>
 #include <GL/Queue/Queue.hpp>

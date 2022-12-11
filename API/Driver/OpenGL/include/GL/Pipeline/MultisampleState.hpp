@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include <Pipeline/MultisampleState.hpp>
+#include <OCRA/Pipeline/MultisampleState.hpp>
 
 #include <array>
 

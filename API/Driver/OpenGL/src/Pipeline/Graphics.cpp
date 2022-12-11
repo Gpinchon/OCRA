@@ -4,8 +4,8 @@
 * @Last Modified by:   gpinchon
 * @Last Modified time: 2021-09-26 15:03:53
 */
-#include <Pipeline/Pipeline.hpp>
-#include <Pipeline/Graphics.hpp>
+#include <OCRA/Pipeline/Pipeline.hpp>
+#include <OCRA/Pipeline/Graphics.hpp>
 
 #include <GL/Pipeline/Pipeline.hpp>
 #include <GL/Pipeline/ColorBlendState.hpp>

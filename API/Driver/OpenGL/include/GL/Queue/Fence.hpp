@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Queue/Fence.hpp>
-#include <Common/Timer.hpp>
+#include <OCRA/Queue/Fence.hpp>
+#include <OCRA/Common/Timer.hpp>
 
 #include <GL/Device.hpp>
 #include <GL/glew.h>

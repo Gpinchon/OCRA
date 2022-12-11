@@ -4,8 +4,8 @@
 * @Last Modified by:   gpinchon
 * @Last Modified time: 2021-10-04 20:35:26
 */
-#include <Handle.hpp>
-#include <Shader/Stage.hpp>
+#include <OCRA/Handle.hpp>
+#include <OCRA/Shader/Stage.hpp>
 
 #include <GL/Shader/Stage.hpp>
 #include <GL/Device.hpp>

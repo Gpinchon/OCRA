@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include <Handle.hpp>
-#include <Pipeline/VertexInputState.hpp>
+#include <OCRA/Handle.hpp>
+#include <OCRA/Pipeline/VertexInputState.hpp>
 
 #include <GL/Common/VertexType.hpp>
 

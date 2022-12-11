@@ -1,9 +1,9 @@
 #pragma once
 
-#include <Handle.hpp>
-#include <Pipeline/InputAssemblyState.hpp>
+#include <OCRA/Handle.hpp>
+#include <OCRA/Pipeline/InputAssemblyState.hpp>
 
-#include <Pipeline/Graphics.hpp>
+#include <OCRA/Pipeline/Graphics.hpp>
 
 #include <Mat4x4.hpp>
 #include <Material.hpp>

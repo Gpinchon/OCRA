@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include <Handle.hpp>
-#include <Image/View.hpp>
+#include <OCRA/Handle.hpp>
+#include <OCRA/Image/View.hpp>
 
 #include <stdexcept>
 

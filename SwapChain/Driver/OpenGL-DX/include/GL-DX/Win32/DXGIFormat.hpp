@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Image/Image.hpp>
+#include <OCRA/Image/Image.hpp>
 
 #include <dxgi1_3.h>
 

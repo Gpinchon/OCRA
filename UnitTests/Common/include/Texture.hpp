@@ -1,11 +1,11 @@
 #pragma once
 
-#include <Image/Image.hpp>
-#include <Image/Sampler.hpp>
-#include <Image/View.hpp>
-#include <Descriptor/Pool.hpp>
-#include <Descriptor/Set.hpp>
-#include <Descriptor/SetLayout.hpp>
+#include <OCRA/Image/Image.hpp>
+#include <OCRA/Image/Sampler.hpp>
+#include <OCRA/Image/View.hpp>
+#include <OCRA/Descriptor/Pool.hpp>
+#include <OCRA/Descriptor/Set.hpp>
+#include <OCRA/Descriptor/SetLayout.hpp>
 
 OCRA_DECLARE_HANDLE(OCRA::Descriptor::Pool);
 OCRA_DECLARE_HANDLE(OCRA::Descriptor::Set);

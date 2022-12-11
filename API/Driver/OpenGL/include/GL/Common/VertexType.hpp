@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include <Common/VertexType.hpp>
+#include <OCRA/Common/VertexType.hpp>
 
 #include <GL/glew.h>
 

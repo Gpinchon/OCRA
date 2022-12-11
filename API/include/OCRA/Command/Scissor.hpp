@@ -1,0 +1,16 @@
+#pragma once
+
+#include <OCRA/Common/Rect2D.hpp>
+#include <OCRA/Handle.hpp>
+
+#include <vector>
+
+OCRA_DECLARE_HANDLE(OCRA::Command::Buffer);
+
+namespace OCRA::Command
+{
+void SetScissor(
+    const Command::Buffer::Handle&  a_CommandBuffer,
+    const uint32_t&                 a_FirstScissor,
+    const std::vector<Rect2D>&      a_Scissors);
+}
