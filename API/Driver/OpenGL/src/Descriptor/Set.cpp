@@ -25,7 +25,7 @@ namespace OCRA::Command
 void BindDescriptorSets(
     const Command::Buffer::Handle&  a_CommandBuffer,
     const Pipeline::BindingPoint&   a_BindingPoint,
-    const Pipeline::Layout::Handle& a_PipelineLayout,
+    const Pipeline::Layout::Handle& a_Layout,
     const uint32_t&                 a_firstSet,
     const std::vector<Descriptor::Set::Handle>  a_DescriptorSets,
     const std::vector<uint32_t>                 a_DynamicOffsets)
@@ -35,9 +35,10 @@ void BindDescriptorSets(
     descriptorSets.dynamicOffset = a_DynamicOffsets;
     a_CommandBuffer->PushCommand([
         bindingPoint = size_t(a_BindingPoint),
-        pipelineLayout = a_PipelineLayout,
-        descriptorSets = std::move(descriptorSets)](Buffer::ExecutionState& a_ExecutionState) {
-        assert(pipelineLayout == a_ExecutionState.pipelineState.at(bindingPoint)->layout);
+        layout = a_Layout,
+        descriptorSets = std::move(descriptorSets)
+    ](Buffer::ExecutionState& a_ExecutionState) {
+        assert(layout == a_ExecutionState.pipelineState.at(bindingPoint)->layout);
         a_ExecutionState.descriptorSets.at(bindingPoint) = descriptorSets;
     });
 }

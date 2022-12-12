@@ -72,13 +72,6 @@ struct RenderPass
 struct DescriptorSets {
     std::vector<Descriptor::Set::Handle>    descriptorSets{};
     std::vector<uint32_t>                   dynamicOffset{};
-    bool operator!=(const DescriptorSets& a_Other) {
-        return
-            descriptorSets.size() != a_Other.descriptorSets.size() ||
-            !std::equal(descriptorSets.begin(), descriptorSets.end(), a_Other.descriptorSets.begin()) ||
-            dynamicOffset.size() != a_Other.dynamicOffset.size() ||
-            !std::equal(dynamicOffset.begin(), dynamicOffset.end(), a_Other.dynamicOffset.begin());
-    }
 };
 
 struct PushDescriptorSets {
