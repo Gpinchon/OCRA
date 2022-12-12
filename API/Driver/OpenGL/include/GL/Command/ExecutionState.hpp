@@ -12,6 +12,8 @@
 #include <OCRA/FrameBuffer.hpp>
 #include <OCRA/RenderPass.hpp>
 
+#include <GL/PushConstants.hpp>
+#include <GL/Descriptor/Set.hpp>
 #include <GL/Common/Stencil.hpp>
 #include <GL/glew.h>
 
@@ -66,32 +68,55 @@ struct RenderPass
     std::vector<VertexInputBinding> vertexInputBindings;
     IndexBufferBinding              indexBufferBinding;
 };
+
 struct DescriptorSets {
-    Pipeline::Layout::Handle                pipelineLayout{ nullptr };
     std::vector<Descriptor::Set::Handle>    descriptorSets{};
     std::vector<uint32_t>                   dynamicOffset{};
     bool operator!=(const DescriptorSets& a_Other) {
         return
-            pipelineLayout != a_Other.pipelineLayout ||
             descriptorSets.size() != a_Other.descriptorSets.size() ||
             !std::equal(descriptorSets.begin(), descriptorSets.end(), a_Other.descriptorSets.begin()) ||
             dynamicOffset.size() != a_Other.dynamicOffset.size() ||
             !std::equal(dynamicOffset.begin(), dynamicOffset.end(), a_Other.dynamicOffset.begin());
     }
 };
+
+struct PushDescriptorSets {
+    std::array<Descriptor::Set::Impl, 16>   descriptorSets{};
+};
+
 struct ExecutionState {
-    ExecutionState() {
+    ExecutionState(const Device::Handle& a_Device)
+        : pushConstants(a_Device)
+    {
+        Reset();
+    }
+    ~ExecutionState() {
+        Reset();
+    }
+    void Reset() {
+        once = false;
+        subpassIndex = uint32_t(-1);
+        primitiveTopology = GL_NONE;
+        renderPass = {};
+        dynamicStates = {};
+
         descriptorSets.fill({});
+        pushDescriptorSets.fill({});
         pipelineState.fill(nullptr);
         lastPipelineState.fill(nullptr);
     }
+
     bool                once{ false };
-    RenderPass          renderPass{};
     uint32_t            subpassIndex{ uint32_t(-1) };
-    std::array<DescriptorSets, size_t(OCRA::Pipeline::BindingPoint::MaxValue)>          descriptorSets{};
-    std::array<OCRA::Pipeline::Handle, size_t(OCRA::Pipeline::BindingPoint::MaxValue)>  pipelineState{};
-    std::array<OCRA::Pipeline::Handle, size_t(OCRA::Pipeline::BindingPoint::MaxValue)>  lastPipelineState{};
-    DynamicStates       dynamicStates{};
     GLenum              primitiveTopology{ GL_NONE };
+    RenderPass          renderPass{};
+    DynamicStates       dynamicStates{};
+    OCRA::PushConstants pushConstants;
+    std::array<DescriptorSets, size_t(Pipeline::BindingPoint::MaxValue)>           descriptorSets{};
+    std::array<PushDescriptorSets, size_t(Pipeline::BindingPoint::MaxValue)>       pushDescriptorSets{};
+    std::array<Pipeline::Handle, size_t(Pipeline::BindingPoint::MaxValue)>         pipelineState{};
+    std::array<Pipeline::Handle, size_t(Pipeline::BindingPoint::MaxValue)>         lastPipelineState{};
+    
 };
 }

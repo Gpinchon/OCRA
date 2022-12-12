@@ -47,11 +47,11 @@ void PushConstants(
     const std::vector<std::byte>& a_Data)
 {
     a_CommandBuffer->PushCommand([
-        &pushConstants = a_CommandBuffer->pushConstants,
         pipelineLayout = a_PipelineLayout,
         offset = size_t(a_Offset),
-        data = a_Data](Buffer::ExecutionState& a_ExecutionState) {
-            pushConstants.Update(offset, data);
+        data = a_Data
+    ](Buffer::ExecutionState& a_ExecutionState) {
+        a_ExecutionState.pushConstants.Update(offset, data);
     });
 }
 }
@@ -67,7 +67,7 @@ void OCRA::Command::Buffer::Impl::Reset()
     state = State::Initial;
     commands.clear();
     secondaryBuffers.clear();
-    executionState = {};
+    executionState.Reset();
 }
 
 void OCRA::Command::Buffer::Impl::Invalidate()
@@ -80,7 +80,7 @@ void OCRA::Command::Buffer::Impl::Invalidate()
     state = State::Invalid;
     commands.clear();
     secondaryBuffers.clear();
-    executionState = {};
+    executionState.Reset();
 }
 
 void OCRA::Command::Buffer::Impl::Begin(const Buffer::BeginInfo& a_BeginInfo)

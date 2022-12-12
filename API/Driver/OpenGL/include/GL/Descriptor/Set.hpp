@@ -15,14 +15,15 @@ namespace OCRA::Descriptor::Set
 {
 struct Impl
 {
+    Impl() = default;
     Impl(const SetLayout::Handle& a_Layout)
-        : layout(a_Layout)
     {
+        layout = a_Layout;
         data.reserve(a_Layout->bindings.size());
-        for (const auto& binding : a_Layout->bindings) {
+        for (const auto& binding : layout->bindings) {
             data.push_back(Data(binding.type, binding.binding));
         }
-    };
+    }
     void Write(const WriteOperation& a_Write) {
         auto& dstData = data.at(a_Write.dstBinding);
         dstData = a_Write;
@@ -40,7 +41,7 @@ struct Impl
         for (auto& setData : data)
             setData.Unbind();
     }
-    const SetLayout::Handle layout;
+    SetLayout::Handle layout;
     std::vector<Data> data;
 };
 }

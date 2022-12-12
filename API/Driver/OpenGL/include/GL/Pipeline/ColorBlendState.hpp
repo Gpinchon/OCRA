@@ -8,10 +8,12 @@
 
 #include <OCRA/Pipeline/ColorBlendState.hpp>
 #include <OCRA/Pipeline/DynamicState.hpp>
+#include <OCRA/Common/Vec_Boolean.hpp>
 
 #include <GL/Command/ExecutionState.hpp>
 #include <GL/Common/Blend.hpp>
 #include <GL/Common/Logic.hpp>
+
 #include <GL/glew.h>
 
 #include <functional>

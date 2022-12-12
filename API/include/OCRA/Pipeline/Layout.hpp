@@ -20,7 +20,7 @@ struct PushConstantRange {
 struct Info
 {
     std::vector<Descriptor::SetLayout::Handle>  setLayouts;
-    std::vector<PushConstantRange>              pushConstants; //might be unavailable
+    std::vector<PushConstantRange>              pushConstants;
 };
 Handle Create(const Device::Handle& a_Device, const Info& a_Info, const AllocationCallback* a_Allocator = nullptr);
 }

@@ -50,9 +50,9 @@ struct CopyOperation
     uint32_t    srcArrayElement{ 0 };
 };
 void Update(
-    const Device::Handle&       a_Device,
-    const std::vector<WriteOperation>    a_Writes,
-    const std::vector<CopyOperation>     a_Copies);
+    const Device::Handle&               a_Device,
+    const std::vector<WriteOperation>&  a_Writes,
+    const std::vector<CopyOperation>&   a_Copies);
 }
 
 #include <OCRA/Pipeline/Pipeline.hpp>
@@ -68,4 +68,10 @@ void BindDescriptorSets(
     const uint32_t&                 a_firstSet,
     const std::vector<Descriptor::Set::Handle>  a_DescriptorSets,
     const std::vector<uint32_t>                 a_DynamicOffsets);
+void PushDescriptorSet(
+    const Command::Buffer::Handle&  a_CommandBuffer,
+    const Pipeline::BindingPoint&   a_PipelineBindPoint,
+    const Pipeline::Layout::Handle& a_Layout,
+    const uint32_t&                 a_Set,
+    const std::vector<Descriptor::Set::WriteOperation>& a_Writes);
 }

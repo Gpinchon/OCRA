@@ -6,7 +6,7 @@
 namespace OCRA {
 template<unsigned L, typename T>
 inline auto equal(const Vec<L, T>& a_X, const Vec<L, T>& a_Y) {
-    return VecFunctor1<L, T, T, bool>::call<std::equal<T>>(a_X, a_Y);
+    return VecFunctor1<L, T, T, bool>::call<std::equal_to<T>>(a_X, a_Y);
 }
 
 template<unsigned L, typename T>

@@ -43,15 +43,39 @@ struct Impl : Pipeline::Impl {
             a_ExecutionState.subpassIndex = subPass;
             a_ExecutionState.renderPass.renderPass->BeginSubPass(a_ExecutionState);
         }
-        colorBlendState(a_ExecutionState);
-        depthStencilState(a_ExecutionState);
-        inputAssemblyState(a_ExecutionState);
-        multisampleState(a_ExecutionState);
-        rasterizationState(a_ExecutionState);
-        shaderPipelineState(a_ExecutionState);
-        tessellationState(a_ExecutionState);
-        viewportState(a_ExecutionState);
-        vertexInputState(a_ExecutionState);
+        const auto& lastState = std::static_pointer_cast<Impl>(a_ExecutionState.lastPipelineState.at(size_t(BindingPoint::Graphics)));
+        if (lastState == nullptr) { //first graphics pipeline on this command buffer, just apply the states
+            colorBlendState(a_ExecutionState);
+            depthStencilState(a_ExecutionState);
+            inputAssemblyState(a_ExecutionState);
+            multisampleState(a_ExecutionState);
+            rasterizationState(a_ExecutionState);
+            shaderPipelineState(a_ExecutionState);
+            tessellationState(a_ExecutionState);
+            viewportState(a_ExecutionState);
+            vertexInputState(a_ExecutionState);
+        }
+        else {
+            if (std::memcmp(&lastState->colorBlendState, &colorBlendState, sizeof(colorBlendState)) == 0)
+                colorBlendState(a_ExecutionState);
+            if (std::memcmp(&lastState->depthStencilState, &depthStencilState, sizeof(depthStencilState)) == 0)
+                depthStencilState(a_ExecutionState);
+            if (std::memcmp(&lastState->inputAssemblyState, &inputAssemblyState, sizeof(inputAssemblyState)) == 0)
+                inputAssemblyState(a_ExecutionState);
+            if (std::memcmp(&lastState->multisampleState, &multisampleState, sizeof(multisampleState)) == 0)
+                multisampleState(a_ExecutionState);
+            if (std::memcmp(&lastState->rasterizationState, &rasterizationState, sizeof(rasterizationState)) == 0)
+                rasterizationState(a_ExecutionState);
+            if (std::memcmp(&lastState->shaderPipelineState, &shaderPipelineState, sizeof(shaderPipelineState)) == 0)
+                shaderPipelineState(a_ExecutionState);
+            if (std::memcmp(&lastState->tessellationState, &tessellationState, sizeof(tessellationState)) == 0)
+                tessellationState(a_ExecutionState);
+            if (std::memcmp(&lastState->viewportState, &viewportState, sizeof(viewportState)) == 0)
+                viewportState(a_ExecutionState);
+            if (std::memcmp(&lastState->vertexInputState, &vertexInputState, sizeof(vertexInputState)) == 0)
+                vertexInputState(a_ExecutionState);
+        }
+        
     }
     const uint32_t                      subPass;
     const RenderPass::Handle            renderPass;
