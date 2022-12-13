@@ -163,7 +163,6 @@ struct MutableValve : Storage {
 };
 struct Data
 {
-    Data() = default;
     Data(const Type& a_Type, uint32_t a_BindingIndex)
         : type(a_Type)
         , bindingIndex(a_BindingIndex)
@@ -208,22 +207,25 @@ struct Data
             break;
         }
     }
-    Data(Data&& a_Other) noexcept {
-        *this = std::move(a_Other);
+
+    Data(Data&& a_Other) noexcept
+        : type(std::move(a_Other.type))
+        , bindingIndex(std::move(a_Other.bindingIndex))
+        , storage(std::move(a_Other.storage))
+    {}
+
+    Data(const Data& a_Other)
+        : Data(a_Other.type, a_Other.bindingIndex)
+    {
+        *storage = *a_Other.storage;
     }
-    Data(const Data& a_Other) noexcept {
-        *this = a_Other;
-    }
+
     Data(const WriteOperation& a_Write, uint32_t a_BindingIndex)
         : Data(a_Write.type, a_BindingIndex)
     {
         *storage = a_Write;
     }
-    void operator=(Data&& a_Other) noexcept {
-        type = std::move(a_Other.type);
-        bindingIndex = std::move(a_Other.bindingIndex);
-        storage.swap(a_Other.storage);
-    }
+
     void operator=(const Data& a_Other) {
         assert(type == a_Other.type);
         bindingIndex = a_Other.bindingIndex;
@@ -233,6 +235,7 @@ struct Data
         assert(type == a_Write.type);
         *storage = a_Write;
     }
+
     void Bind() {
         if (storage != nullptr)
             storage->Bind(bindingIndex);
@@ -241,8 +244,9 @@ struct Data
         if (storage != nullptr)
             storage->Unbind(bindingIndex);
     }
-    Type        type{ Type::Unknown };
-    uint32_t    bindingIndex{ uint32_t(-1) };
-    std::unique_ptr<Storage> storage{ nullptr };
+
+    const Type                  type{ Type::Unknown };
+    uint32_t                    bindingIndex{ uint32_t(-1) };
+    std::unique_ptr<Storage>    storage{ nullptr };
 };
 }
