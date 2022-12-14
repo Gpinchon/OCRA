@@ -68,7 +68,7 @@ private:
     size_type               _max_size{ 0 };
     size_type               _cellNumUsed{ 0 };
     size_type               _cellNumFree{ max_size() };
-    alignas(value_type) std::byte* _memory{ new std::byte[_max_size] };
+    alignas(value_type) std::byte* _memory{ new std::byte[_max_size * sizeof(value_type)]};
     std::byte* _next{ _memory };
 };
 
