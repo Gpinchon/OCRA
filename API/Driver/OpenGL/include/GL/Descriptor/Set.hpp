@@ -3,7 +3,7 @@
 #include <OCRA/Handle.hpp>
 #include <OCRA/Descriptor/Set.hpp>
 
-#include <GL/Descriptor/SetData.hpp>
+#include <GL/Descriptor/SetBinding.hpp>
 
 #include <vector>
 

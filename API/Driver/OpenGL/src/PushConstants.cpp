@@ -1,8 +1,6 @@
 #include <GL/PushConstants.hpp>
 #include <GL/Device.hpp>
 
-#include <Config.hpp>
-
 #include <GL/glew.h>
 
 namespace OCRA
@@ -56,7 +54,6 @@ static inline auto GetBufferPtr(const Device::Handle& a_Device, const uint32_t& 
 PushConstants::PushConstants(const Device::Handle& a_Device)
     : device(a_Device)
     , size(256)
-    , bindingIndex(Config::Global().Get("OCRA::Shader::GL::PushConstantBinding", OCRA_SHADER_GL_PUSHCONSTANT_BINDING))
     , offsetAlignment(PushConstantOffsetAlignment(a_Device))
     , bufferHandle(CreatePushConstantBuffer(a_Device, size))
     , bufferPtr(GetBufferPtr(a_Device, bufferHandle, size * PushConstantMultiBuffering))
@@ -72,13 +69,13 @@ PushConstants::~PushConstants()
 void PushConstants::Bind() {
     if (size > 0) {
         const auto currentOffset = offset * offsetAlignment;
-        glBindBufferRange(GL_UNIFORM_BUFFER, bindingIndex, bufferHandle, currentOffset, size);
+        glBindBufferRange(GL_UNIFORM_BUFFER, OCRA_GL_SHADER_PUSHCONSTANT_BINDING, bufferHandle, currentOffset, size);
     }
 }
 
 void PushConstants::Unbind()
 {
-    glBindBufferBase(GL_UNIFORM_BUFFER, bindingIndex, 0);
+    glBindBufferBase(GL_UNIFORM_BUFFER, OCRA_GL_SHADER_PUSHCONSTANT_BINDING, 0);
 }
 
 void PushConstants::Update(const size_t& a_Offset, const std::vector<std::byte>& a_Data) {

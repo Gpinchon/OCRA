@@ -77,10 +77,13 @@ struct PushDescriptorSet {
 };
 
 struct PipelineState {
+    PipelineState() {
+        descriptorDynamicOffsets.fill(0);
+    }
     Pipeline::Handle pipeline;
-    std::array<PushDescriptorSet, 4>        pushDescriptorSets;
-    std::array<Descriptor::Set::Handle, 4>  descriptorSets{};
-    std::array<uint32_t, 4>                 descriptorDynamicOffsets{ 0, 0, 0, 0 };
+    std::array<PushDescriptorSet, OCRA_GL_MAX_BOUND_DESCRIPTOR_SETS>        pushDescriptorSets;
+    std::array<Descriptor::Set::Handle, OCRA_GL_MAX_BOUND_DESCRIPTOR_SETS>  descriptorSets;
+    std::array<uint32_t, OCRA_GL_MAX_BOUND_DESCRIPTOR_SETS>                 descriptorDynamicOffsets;
 };
 
 struct ExecutionState {

@@ -8,8 +8,6 @@
 
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
 
-constexpr uint32_t MAX_BOUND_DESCRIPTOR_SETS = 4;
-
 namespace OCRA::Pipeline::Layout
 {
 class Impl
@@ -43,7 +41,7 @@ private:
     };
 
     const uint32_t descriptorSetCount = 0;
-    std::array<DescriptorSet, MAX_BOUND_DESCRIPTOR_SETS> descriptorSets;
+    std::array<DescriptorSet, OCRA_GL_MAX_BOUND_DESCRIPTOR_SETS> descriptorSets;
     std::vector<PushConstantRange> pushConstantRanges;
 };
 }

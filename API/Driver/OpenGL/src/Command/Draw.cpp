@@ -33,8 +33,8 @@ void ApplyPipelineStates(Buffer::ExecutionState& a_ExecutionState) {
             descriptor->Bind();
     }
     for (auto& pushDescriptor : pipelineState.pushDescriptorSets) {
-        for (auto& data : pushDescriptor.data)
-            data.Bind();
+        for (auto& binding : pushDescriptor.bindings)
+            binding.Bind();
     }
 }
 //Draw commands
