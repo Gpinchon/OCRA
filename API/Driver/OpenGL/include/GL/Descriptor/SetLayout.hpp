@@ -8,8 +8,6 @@
 OCRA_DECLARE_HANDLE(OCRA::Device);
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
 
-
-
 namespace OCRA::Descriptor::SetLayout
 {
 static inline auto CreateDirectIndexedLayout(const std::vector<Binding>& a_Bindings)

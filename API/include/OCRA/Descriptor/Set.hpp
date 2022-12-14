@@ -66,8 +66,8 @@ void BindDescriptorSets(
     const Pipeline::BindingPoint&   a_BindingPoint,
     const Pipeline::Layout::Handle& a_PipelineLayout,
     const uint32_t&                 a_firstSet,
-    const std::vector<Descriptor::Set::Handle>  a_DescriptorSets,
-    const std::vector<uint32_t>                 a_DynamicOffsets);
+    const std::vector<Descriptor::Set::Handle>& a_DescriptorSets,
+    const std::vector<uint32_t>&                a_DynamicOffsets);
 void PushDescriptorSet(
     const Command::Buffer::Handle&  a_CommandBuffer,
     const Pipeline::BindingPoint&   a_PipelineBindPoint,

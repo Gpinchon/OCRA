@@ -38,13 +38,16 @@ struct Impl : Pipeline::Impl {
         , vertexInputState(VertexInputState::Compile(a_Device, a_Info.vertexInputState, a_Info.dynamicState))
     {}
     virtual void Apply(Command::Buffer::ExecutionState& a_ExecutionState) const override {
+#ifdef _DEBUG
         assert(renderPass == a_ExecutionState.renderPass.renderPass);
+#endif
         if (a_ExecutionState.subpassIndex != subPass) {
             a_ExecutionState.subpassIndex = subPass;
             a_ExecutionState.renderPass.renderPass->BeginSubPass(a_ExecutionState);
         }
-        const auto& lastState = std::static_pointer_cast<Impl>(a_ExecutionState.lastPipelineState.at(size_t(BindingPoint::Graphics)));
-        if (lastState == nullptr) { //first graphics pipeline on this command buffer, just apply the states
+        const auto& lastPipeline = std::static_pointer_cast<Impl>(a_ExecutionState.lastPipelineState.at(size_t(BindingPoint::Graphics)).pipeline);
+        if (lastPipeline.get() == this) return; //we did not change states set
+        if (lastPipeline == nullptr) { //first graphics pipeline on this command buffer, just apply the states
             colorBlendState(a_ExecutionState);
             depthStencilState(a_ExecutionState);
             inputAssemblyState(a_ExecutionState);
@@ -56,23 +59,23 @@ struct Impl : Pipeline::Impl {
             vertexInputState(a_ExecutionState);
         }
         else {
-            if (std::memcmp(&lastState->colorBlendState, &colorBlendState, sizeof(colorBlendState)) == 0)
+            if (std::memcmp(&lastPipeline->colorBlendState, &colorBlendState, sizeof(colorBlendState)) == 0)
                 colorBlendState(a_ExecutionState);
-            if (std::memcmp(&lastState->depthStencilState, &depthStencilState, sizeof(depthStencilState)) == 0)
+            if (std::memcmp(&lastPipeline->depthStencilState, &depthStencilState, sizeof(depthStencilState)) == 0)
                 depthStencilState(a_ExecutionState);
-            if (std::memcmp(&lastState->inputAssemblyState, &inputAssemblyState, sizeof(inputAssemblyState)) == 0)
+            if (std::memcmp(&lastPipeline->inputAssemblyState, &inputAssemblyState, sizeof(inputAssemblyState)) == 0)
                 inputAssemblyState(a_ExecutionState);
-            if (std::memcmp(&lastState->multisampleState, &multisampleState, sizeof(multisampleState)) == 0)
+            if (std::memcmp(&lastPipeline->multisampleState, &multisampleState, sizeof(multisampleState)) == 0)
                 multisampleState(a_ExecutionState);
-            if (std::memcmp(&lastState->rasterizationState, &rasterizationState, sizeof(rasterizationState)) == 0)
+            if (std::memcmp(&lastPipeline->rasterizationState, &rasterizationState, sizeof(rasterizationState)) == 0)
                 rasterizationState(a_ExecutionState);
-            if (std::memcmp(&lastState->shaderPipelineState, &shaderPipelineState, sizeof(shaderPipelineState)) == 0)
+            if (std::memcmp(&lastPipeline->shaderPipelineState, &shaderPipelineState, sizeof(shaderPipelineState)) == 0)
                 shaderPipelineState(a_ExecutionState);
-            if (std::memcmp(&lastState->tessellationState, &tessellationState, sizeof(tessellationState)) == 0)
+            if (std::memcmp(&lastPipeline->tessellationState, &tessellationState, sizeof(tessellationState)) == 0)
                 tessellationState(a_ExecutionState);
-            if (std::memcmp(&lastState->viewportState, &viewportState, sizeof(viewportState)) == 0)
+            if (std::memcmp(&lastPipeline->viewportState, &viewportState, sizeof(viewportState)) == 0)
                 viewportState(a_ExecutionState);
-            if (std::memcmp(&lastState->vertexInputState, &vertexInputState, sizeof(vertexInputState)) == 0)
+            if (std::memcmp(&lastPipeline->vertexInputState, &vertexInputState, sizeof(vertexInputState)) == 0)
                 vertexInputState(a_ExecutionState);
         }
         

@@ -13,7 +13,7 @@
 #include <OCRA/RenderPass.hpp>
 
 #include <GL/PushConstants.hpp>
-#include <GL/Descriptor/Set.hpp>
+#include <GL/Descriptor/SetData.hpp>
 #include <GL/Common/Stencil.hpp>
 #include <GL/glew.h>
 
@@ -50,13 +50,16 @@ struct DynamicStates {
     GLenum                  cullMode{ GL_BACK };
     GLenum                  frontFace{ GL_CCW };
 };
+
 struct VertexInputBinding {
     OCRA::Buffer::Handle    buffer{ 0 };
     uint64_t                offset{ 0 };
 };
+
 struct IndexBufferBinding : VertexInputBinding {
     GLenum type{ GL_NONE };
 };
+
 struct RenderPass
 {
     OCRA::RenderPass::Handle        renderPass;
@@ -69,13 +72,15 @@ struct RenderPass
     IndexBufferBinding              indexBufferBinding;
 };
 
-struct DescriptorSets {
-    std::vector<Descriptor::Set::Handle>    descriptorSets{};
-    std::vector<uint32_t>                   dynamicOffset{};
+struct PushDescriptorSet {
+    std::vector<Descriptor::Set::Data> data;
 };
 
-struct PushDescriptorSets {
-    std::array<Descriptor::Set::Impl, 16>   descriptorSets{};
+struct PipelineState {
+    Pipeline::Handle pipeline;
+    std::array<PushDescriptorSet, 4>        pushDescriptorSets;
+    std::array<Descriptor::Set::Handle, 4>  descriptorSets{};
+    std::array<uint32_t, 4>                 descriptorDynamicOffsets{ 0, 0, 0, 0 };
 };
 
 struct ExecutionState {
@@ -94,10 +99,8 @@ struct ExecutionState {
         renderPass = {};
         dynamicStates = {};
 
-        descriptorSets.fill({});
-        pushDescriptorSets.fill({});
-        pipelineState.fill(nullptr);
-        lastPipelineState.fill(nullptr);
+        pipelineState.fill({});
+        lastPipelineState.fill({});
     }
 
     bool                once{ false };
@@ -106,10 +109,8 @@ struct ExecutionState {
     RenderPass          renderPass{};
     DynamicStates       dynamicStates{};
     OCRA::PushConstants pushConstants;
-    std::array<DescriptorSets, size_t(Pipeline::BindingPoint::MaxValue)>           descriptorSets{};
-    std::array<PushDescriptorSets, size_t(Pipeline::BindingPoint::MaxValue)>       pushDescriptorSets{};
-    std::array<Pipeline::Handle, size_t(Pipeline::BindingPoint::MaxValue)>         pipelineState{};
-    std::array<Pipeline::Handle, size_t(Pipeline::BindingPoint::MaxValue)>         lastPipelineState{};
+    std::array<PipelineState, size_t(Pipeline::BindingPoint::MaxValue)>         pipelineState{};
+    std::array<PipelineState, size_t(Pipeline::BindingPoint::MaxValue)>         lastPipelineState{};
     
 };
 }

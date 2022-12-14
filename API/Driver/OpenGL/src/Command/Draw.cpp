@@ -4,6 +4,7 @@
 #include <GL/Command/Buffer.hpp>
 #include <GL/Common/IndexType.hpp>
 #include <GL/Common/BufferOffset.hpp>
+#include <GL/Descriptor/Set.hpp>
 #include <GL/Buffer.hpp>
 #include <GL/Memory.hpp>
 #include <GL/Pipeline/Pipeline.hpp>
@@ -24,20 +25,16 @@ struct DrawElementsIndirectCommand {
     uint32_t baseInstance;
 };
 void ApplyPipelineStates(Buffer::ExecutionState& a_ExecutionState) {
-    auto& descriptorSet = a_ExecutionState.descriptorSets.at(size_t(Pipeline::BindingPoint::Graphics));
-    auto& pushDescriptors = a_ExecutionState.pushDescriptorSets.at(size_t(Pipeline::BindingPoint::Graphics));
     auto& pipelineState = a_ExecutionState.pipelineState.at(size_t(Pipeline::BindingPoint::Graphics));
-    auto& lastPipelineState = a_ExecutionState.lastPipelineState.at(size_t(Pipeline::BindingPoint::Graphics));
-    if (pipelineState != lastPipelineState) {
-        pipelineState->Apply(a_ExecutionState);
-        lastPipelineState = pipelineState;
-    }
+    pipelineState.pipeline->Apply(a_ExecutionState);
     a_ExecutionState.pushConstants.Bind();
-    for (auto& descriptor : descriptorSet.descriptorSets) {
-        descriptor->Bind();
+    for (auto& descriptor : pipelineState.descriptorSets) {
+        if (descriptor != nullptr)
+            descriptor->Bind();
     }
-    for (auto& descriptor : pushDescriptors.descriptorSets) {
-        descriptor.Bind();
+    for (auto& pushDescriptor : pipelineState.pushDescriptorSets) {
+        for (auto& data : pushDescriptor.data)
+            data.Bind();
     }
 }
 //Draw commands

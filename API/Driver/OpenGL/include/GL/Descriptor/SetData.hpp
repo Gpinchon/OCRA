@@ -1,5 +1,6 @@
 #pragma once
 
+#include <OCRA/Descriptor/Set.hpp>
 #include <OCRA/Descriptor/Type.hpp>
 
 #include <GL/Descriptor/SetLayout.hpp>
@@ -10,19 +11,23 @@
 #include <GL/Image/View.hpp>
 #include <GL/Image/Sampler.hpp>
 
-#include <cassert>
-#include <memory>
 #include <GL/glew.h>
+
+#ifdef _DEBUG
+#include <cassert>
+#endif
 
 namespace OCRA::Descriptor::Set
 {
 struct Storage {
+    virtual ~Storage() = default;
     virtual void operator=(const Storage& a_Other) = 0;
     virtual void operator=(const WriteOperation& a_Write) = 0;
     virtual void Bind(uint32_t a_BindingIndex) = 0;
     virtual void Unbind(uint32_t a_BindingIndex) = 0;
 };
 struct ImageStorage : Storage {
+    virtual ~ImageStorage() override = default;
     virtual void operator=(const Storage& a_Other) override {
         auto& data = static_cast<const ImageStorage&>(a_Other);
         imageView = data.imageView;
@@ -42,6 +47,7 @@ struct ImageStorage : Storage {
     
 };
 struct SampledImage : ImageStorage {
+    virtual ~SampledImage() override = default;
     virtual void operator=(const Storage& a_Other) override {
         ImageStorage::operator=(a_Other);
         auto& data = static_cast<const SampledImage&>(a_Other);
@@ -81,6 +87,7 @@ struct StorageImage : ImageStorage {
 };
 
 struct BufferStorage : Storage {
+    virtual ~BufferStorage() override = default;
     virtual void operator=(const Storage& a_Other) override {
         auto& data = static_cast<const BufferStorage&>(a_Other);
         buffer = data.buffer;
@@ -94,7 +101,7 @@ struct BufferStorage : Storage {
     }
     virtual void Bind(uint32_t a_BindingIndex) override {}
     virtual void Unbind(uint32_t a_BindingIndex) override {}
-    OCRA::Buffer::Handle buffer;
+    OCRA::Buffer::Handle buffer{ nullptr };
     size_t               offset{ 0 };
     size_t               range{ 0 };
 };
@@ -161,92 +168,139 @@ struct MutableValve : Storage {
     virtual void Bind(uint32_t a_BindingIndex) override {}
     virtual void Unbind(uint32_t a_BindingIndex) override {}
 };
-struct Data
+
+class Data
 {
-    Data(const Type& a_Type, uint32_t a_BindingIndex)
-        : type(a_Type)
-        , bindingIndex(a_BindingIndex)
-    {
-        switch (type)
-        {
-        case Type::SampledImage:
-            storage.reset(new SampledImage);
-            break;
-        case Type::StorageImage:
-            storage.reset(new StorageImage);
-            break;
-        case Type::UniformTexelBuffer:
-            storage.reset(new UniformTexelBuffer);
-            break;
-        case Type::StorageTexelBuffer:
-            storage.reset(new StorageTexelBuffer);
-            break;
-        case Type::UniformBuffer:
-            storage.reset(new UniformBuffer);
-            break;
-        case Type::StorageBuffer:
-            storage.reset(new StorageBuffer);
-            break;
-        case Type::UniformBufferDynamic:
-            storage.reset(new UniformBufferDynamic);
-            break;
-        case Type::StorageBufferDynamic:
-            storage.reset(new StorageBufferDynamic);
-            break;
-        case Type::InputAttachment:
-            storage.reset(new InputAttachment);
-            break;
-        case Type::InlineUniformBlock:
-            storage.reset(new InlineUniformBlock);
-            break;
-        case Type::AccelerationStructure:
-            storage.reset(new AccelerationStructure);
-            break;
-        case Type::MutableValve:
-            storage.reset(new MutableValve);
-            break;
-        }
-    }
+public:
+    Data() = default;
+    Data(const Type& a_Type, uint32_t a_BindingIndex);
+    Data(Data&& a_Other) noexcept;
+    Data(const Data& a_Other) noexcept;
+    Data(const WriteOperation& a_Write, uint32_t a_BindingIndex);
+    ~Data();
 
-    Data(Data&& a_Other) noexcept
-        : type(std::move(a_Other.type))
-        , bindingIndex(std::move(a_Other.bindingIndex))
-        , storage(std::move(a_Other.storage))
-    {}
-
-    Data(const Data& a_Other)
-        : Data(a_Other.type, a_Other.bindingIndex)
-    {
-        *storage = *a_Other.storage;
-    }
-
-    Data(const WriteOperation& a_Write, uint32_t a_BindingIndex)
-        : Data(a_Write.type, a_BindingIndex)
-    {
-        *storage = a_Write;
-    }
+    void Bind();
+    void Unbind();
 
     void operator=(const Data& a_Other) {
+#ifdef _DEBUG
         assert(type == a_Other.type);
+#endif
         bindingIndex = a_Other.bindingIndex;
         *storage = *a_Other.storage;
     }
     void operator=(const WriteOperation& a_Write) {
+#ifdef _DEBUG
         assert(type == a_Write.type);
+#endif
         *storage = a_Write;
     }
 
-    void Bind() {
-        if (storage != nullptr)
-            storage->Bind(bindingIndex);
-    }
-    void Unbind() {
-        if (storage != nullptr)
-            storage->Unbind(bindingIndex);
-    }
+    Type        type{ Type::Unknown };
+    uint32_t    bindingIndex{ uint32_t(-1) };
+    //this is a "fake" pointer to avoid heap allocation and allow for virtuals
+    Storage*    storage{ nullptr };
 
-    const Type                  type{ Type::Unknown };
-    uint32_t                    bindingIndex{ uint32_t(-1) };
-    std::unique_ptr<Storage>    storage{ nullptr };
+private:
+    //use union as storage because we get aligned memory
+    union Memory {
+        Memory() {};
+        ~Memory() {};
+        ImageStorage imageStorage;
+        SampledImage sampledImage;
+        StorageImage storageImage;
+        BufferStorage bufferStorage;
+        UniformTexelBuffer uniformTexelBuffer;
+        StorageTexelBuffer storageTexelBuffer;
+        UniformBuffer uniformBuffer;
+        UniformBufferDynamic uniformBufferDynamic;
+        StorageBuffer storageBuffer;
+        StorageBufferDynamic storageBufferDynamic;
+        InputAttachment inputAttachment;
+        InlineUniformBlock inlineUniformBlock;
+        AccelerationStructure accelerationStructure;
+        MutableValve mutableValve;
+    } _memory{};
 };
+
+inline Data::Data(const Type& a_Type, uint32_t a_BindingIndex)
+    : type(a_Type)
+    , bindingIndex(a_BindingIndex)
+{
+    switch (type)
+    {
+    case Type::SampledImage:
+        storage = new(&_memory.sampledImage) SampledImage;
+        break;
+    case Type::StorageImage:
+        storage = new(&_memory.storageImage) StorageImage;
+        break;
+    case Type::UniformTexelBuffer:
+        storage = new(&_memory.uniformTexelBuffer) UniformTexelBuffer;
+        break;
+    case Type::StorageTexelBuffer:
+        storage = new(&_memory.storageTexelBuffer) StorageTexelBuffer;
+        break;
+    case Type::UniformBuffer:
+        storage = new(&_memory.uniformBuffer) UniformBuffer;
+        break;
+    case Type::StorageBuffer:
+        storage = new(&_memory.storageBuffer) StorageBuffer;
+        break;
+    case Type::UniformBufferDynamic:
+        storage = new(&_memory.uniformBufferDynamic) UniformBufferDynamic;
+        break;
+    case Type::StorageBufferDynamic:
+        storage = new(&_memory.storageBufferDynamic) StorageBufferDynamic;
+        break;
+    case Type::InputAttachment:
+        storage = new(&_memory.inputAttachment) InputAttachment;
+        break;
+    case Type::InlineUniformBlock:
+        storage = new(&_memory.inlineUniformBlock) InlineUniformBlock;
+        break;
+    case Type::AccelerationStructure:
+        storage = new(&_memory.accelerationStructure) AccelerationStructure;
+        break;
+    case Type::MutableValve:
+        storage = new(&_memory.mutableValve) MutableValve;
+        break;
+    }
+}
+
+inline Data::Data(Data&& a_Other) noexcept
+    : Data(a_Other.type, a_Other.bindingIndex)
+{
+    if (a_Other.storage != nullptr) //else we have unknown set data
+        *storage = std::move(*a_Other.storage);
+}
+
+inline Data::Data(const Data& a_Other) noexcept
+    : Data(a_Other.type, a_Other.bindingIndex)
+{
+    if (a_Other.storage != nullptr) //else we have unknown set data
+        *storage = *a_Other.storage;
+}
+
+inline Data::Data(const WriteOperation& a_Write, uint32_t a_BindingIndex)
+    : Data(a_Write.type, a_BindingIndex)
+{
+    *storage = a_Write;
+}
+
+inline Data::~Data() {
+    if (storage != nullptr)
+        std::destroy_at(storage);
+}
+
+inline void Data::Bind() {
+    if (storage != nullptr)
+        storage->Bind(bindingIndex);
+}
+
+inline void Data::Unbind() {
+    if (storage != nullptr)
+        storage->Unbind(bindingIndex);
+}
+
 }
