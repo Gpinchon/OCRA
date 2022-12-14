@@ -64,9 +64,9 @@ void OCRA::Command::PushDescriptorSet(
         set = a_Set,
         writes = a_Writes
     ](Buffer::ExecutionState& a_ExecutionState) {
-        auto& setData = a_ExecutionState.pipelineState.at(bindingPoint).pushDescriptorSets.at(set);
+        auto& pushDescriptor = a_ExecutionState.pipelineState.at(bindingPoint).pushDescriptorSets.at(set);
         for (const auto& write : writes) {
-            setData.data.push_back({ write, write.dstBinding });
+            pushDescriptor.bindings.push_back({ write, write.dstBinding });
         }
     });
 }

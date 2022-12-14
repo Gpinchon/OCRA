@@ -28,33 +28,32 @@ struct Impl
     }
     template<typename... Args>
     void PushData(Args&&... a_Args) {
-        data.push_back({ std::forward<Args>(a_Args)... });
+        bindings.push_back({ std::forward<Args>(a_Args)... });
     }
     void Write(const WriteOperation& a_Write) {
 #ifdef _DEBUG
-        assert(a_Write.dstBinding < data.size());
+        assert(a_Write.dstBinding < bindings.size());
 #endif
-        auto& dstData = data.at(a_Write.dstBinding);
-        dstData = a_Write;
+        auto& dstBinding = bindings.at(a_Write.dstBinding);
+        dstBinding = a_Write;
     }
     void Copy(const CopyOperation& a_Copy) {
 #ifdef _DEBUG
-        assert(a_Copy.dstBinding < data.size());
-        assert(a_Copy.srcBinding < a_Copy.srcSet->data.size());
+        assert(a_Copy.dstBinding < bindings.size());
+        assert(a_Copy.srcBinding < a_Copy.srcSet->bindings.size());
 #endif
-        auto& dstData = data.at(a_Copy.dstBinding);
-        const auto& srcData = a_Copy.srcSet->data.at(a_Copy.srcBinding);
-        dstData = srcData;
+        auto& dstBinding = bindings.at(a_Copy.dstBinding);
+        dstBinding = a_Copy.srcSet->bindings.at(a_Copy.srcBinding);
     }
     void Bind() {
-        for (auto& data : data)
-            data.Bind();
+        for (auto& binding : bindings)
+            binding.Bind();
     }
     void Unbind() {
-        for (auto& data : data)
-            data.Unbind();
+        for (auto& binding : bindings)
+            binding.Unbind();
     }
     SetLayout::Handle       layout;
-    std::vector<Data>       data;
+    std::vector<Binding>    bindings;
 };
 }

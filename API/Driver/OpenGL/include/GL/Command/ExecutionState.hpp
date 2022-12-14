@@ -12,9 +12,9 @@
 #include <OCRA/FrameBuffer.hpp>
 #include <OCRA/RenderPass.hpp>
 
-#include <GL/PushConstants.hpp>
-#include <GL/Descriptor/SetData.hpp>
 #include <GL/Common/Stencil.hpp>
+#include <GL/Descriptor/SetBinding.hpp>
+#include <GL/PushConstants.hpp>
 #include <GL/glew.h>
 
 #include <vector>
@@ -73,7 +73,7 @@ struct RenderPass
 };
 
 struct PushDescriptorSet {
-    std::vector<Descriptor::Set::Data> data;
+    std::vector<Descriptor::Set::Binding>   bindings;
 };
 
 struct PipelineState {

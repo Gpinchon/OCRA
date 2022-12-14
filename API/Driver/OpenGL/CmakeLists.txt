@@ -67,7 +67,7 @@ set(OCRA_IMPL_HEADER_FILES
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/VertexType.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/WorkerThread.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Descriptor/Set.hpp
-  ${OCRA_IMPL_INCLUDE_DIR}/GL/Descriptor/SetData.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Descriptor/SetBinding.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Descriptor/SetLayout.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Image/Format.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Image/Image.hpp

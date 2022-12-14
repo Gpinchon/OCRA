@@ -169,20 +169,20 @@ struct MutableValve : Storage {
     virtual void Unbind(uint32_t a_BindingIndex) override {}
 };
 
-class Data
+class Binding
 {
 public:
-    Data() = default;
-    Data(const Type& a_Type, uint32_t a_BindingIndex);
-    Data(Data&& a_Other) noexcept;
-    Data(const Data& a_Other) noexcept;
-    Data(const WriteOperation& a_Write, uint32_t a_BindingIndex);
-    ~Data();
+    Binding() = default;
+    Binding(const Type& a_Type, uint32_t a_BindingIndex);
+    Binding(Binding&& a_Other) noexcept;
+    Binding(const Binding& a_Other) noexcept;
+    Binding(const WriteOperation& a_Write, uint32_t a_BindingIndex);
+    ~Binding();
 
     void Bind();
     void Unbind();
 
-    void operator=(const Data& a_Other) {
+    void operator=(const Binding& a_Other) {
 #ifdef _DEBUG
         assert(type == a_Other.type);
 #endif
@@ -223,7 +223,7 @@ private:
     } _memory{};
 };
 
-inline Data::Data(const Type& a_Type, uint32_t a_BindingIndex)
+inline Binding::Binding(const Type& a_Type, uint32_t a_BindingIndex)
     : type(a_Type)
     , bindingIndex(a_BindingIndex)
 {
@@ -268,37 +268,37 @@ inline Data::Data(const Type& a_Type, uint32_t a_BindingIndex)
     }
 }
 
-inline Data::Data(Data&& a_Other) noexcept
-    : Data(a_Other.type, a_Other.bindingIndex)
+inline Binding::Binding(Binding&& a_Other) noexcept
+    : Binding(a_Other.type, a_Other.bindingIndex)
 {
     if (a_Other.storage != nullptr) //else we have unknown set data
         *storage = std::move(*a_Other.storage);
 }
 
-inline Data::Data(const Data& a_Other) noexcept
-    : Data(a_Other.type, a_Other.bindingIndex)
+inline Binding::Binding(const Binding& a_Other) noexcept
+    : Binding(a_Other.type, a_Other.bindingIndex)
 {
     if (a_Other.storage != nullptr) //else we have unknown set data
         *storage = *a_Other.storage;
 }
 
-inline Data::Data(const WriteOperation& a_Write, uint32_t a_BindingIndex)
-    : Data(a_Write.type, a_BindingIndex)
+inline Binding::Binding(const WriteOperation& a_Write, uint32_t a_BindingIndex)
+    : Binding(a_Write.type, a_BindingIndex)
 {
     *storage = a_Write;
 }
 
-inline Data::~Data() {
+inline Binding::~Binding() {
     if (storage != nullptr)
         std::destroy_at(storage);
 }
 
-inline void Data::Bind() {
+inline void Binding::Bind() {
     if (storage != nullptr)
         storage->Bind(bindingIndex);
 }
 
-inline void Data::Unbind() {
+inline void Binding::Unbind() {
     if (storage != nullptr)
         storage->Unbind(bindingIndex);
 }

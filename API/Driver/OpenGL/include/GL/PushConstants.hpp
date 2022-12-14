@@ -14,6 +14,7 @@ struct PushConstants {
     PushConstants(const Device::Handle& a_Device);
     ~PushConstants();
     void Bind();
+    void Unbind();
     void Update(const size_t& a_Offset, const std::vector<std::byte>& a_Data);
     const Device::WeakHandle device;
     const uint16_t  size;

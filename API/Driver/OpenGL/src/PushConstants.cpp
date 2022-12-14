@@ -76,6 +76,11 @@ void PushConstants::Bind() {
     }
 }
 
+void PushConstants::Unbind()
+{
+    glBindBufferBase(GL_UNIFORM_BUFFER, bindingIndex, 0);
+}
+
 void PushConstants::Update(const size_t& a_Offset, const std::vector<std::byte>& a_Data) {
     ++offset %= PushConstantMultiBuffering;
     const auto currentOffset = offset * offsetAlignment;
