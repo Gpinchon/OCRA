@@ -117,9 +117,9 @@ struct TexturesTestApp : TestApp
         , device(CreateDevice(physicalDevice))
         , window(Window(instance, physicalDevice, device, name, 1280, 720))
     {
-        window.OnResize = [this](const Window&, const uint32_t, const uint32_t) {
-            render = true;
-            if (!window.IsClosing()) {
+        window.OnResize = [this](const Window&, const uint32_t a_Width, const uint32_t a_Height) {
+            render = a_Width > 0 && a_Height > 0;
+            if (render && !window.IsClosing()) {
                 CreateFrameBuffer();
                 CreateGraphicsPipeline();
                 RecordDrawCommandBuffer();
@@ -146,7 +146,7 @@ struct TexturesTestApp : TestApp
             fpsCounter.StartFrame();
             window.PushEvents();
             if (window.IsClosing()) break;
-            if (!render) break;
+            if (!render) continue;
             const auto now = std::chrono::high_resolution_clock::now();
             swapChainImage = window.AcquireNextImage(std::chrono::nanoseconds(15000000), nullptr, imageAcquisitionFence);
             Queue::Fence::WaitFor(device, imageAcquisitionFence, std::chrono::nanoseconds(15000000));

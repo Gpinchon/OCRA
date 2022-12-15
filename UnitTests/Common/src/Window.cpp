@@ -158,7 +158,8 @@ void Window::ResizeCallback(const uint32_t a_Width, const uint32_t a_Height)
     info.surface = surface;
     info.imageExtent.width = a_Width;
     info.imageExtent.height = a_Height;
-    swapChain = SwapChain::Create(device, info);
+    if (a_Width > 0 && a_Height > 0)
+        swapChain = SwapChain::Create(device, info);
     extent = { a_Width, a_Height };
     presentInfo.swapChains = { swapChain };
 }

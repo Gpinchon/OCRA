@@ -118,8 +118,8 @@ struct GraphicsPipelineTestApp : TestApp
         , window(Window(instance, physicalDevice, device, name, 1280, 720))
     {
         window.OnResize = [this](const Window&, const uint32_t a_Width, const uint32_t a_Height) {
-            render = true;
-            if (!window.IsClosing()) {
+            render = a_Width > 0 && a_Height > 0;
+            if (render && !window.IsClosing()) {
                 CreateFrameBuffer();
                 CreateGraphicsPipeline();
             }
