@@ -145,7 +145,10 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
         glActiveTexture(GL_TEXTURE0);
         glBindSampler(0, presentTexture->samplerHandle);
-    }, false);
+    }, true);
+#ifdef _DEBUG
+    assert(info.surface != nullptr);
+#endif
 }
 
 Impl::~Impl()

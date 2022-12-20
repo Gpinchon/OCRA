@@ -24,17 +24,17 @@ static inline auto GetGLVertexType(const VertexType& a_VertexType)
         return GL_FLOAT;
     case OCRA::VertexType::Float16:
         return GL_HALF_FLOAT;
-    case OCRA::VertexType::int32_t:
+    case OCRA::VertexType::Int32:
         return GL_INT;
-    case OCRA::VertexType::uint32_t:
+    case OCRA::VertexType::Uint32:
         return GL_UNSIGNED_INT;
     case OCRA::VertexType::Int16:
         return GL_SHORT;
-    case OCRA::VertexType::uint16_t:
+    case OCRA::VertexType::Uint16:
         return GL_UNSIGNED_SHORT;
     case OCRA::VertexType::Int8:
         return GL_BYTE;
-    case OCRA::VertexType::uint8_t:
+    case OCRA::VertexType::Uint8:
         return GL_UNSIGNED_BYTE;
     default:
         throw std::runtime_error("Unknown Vertex Type");
