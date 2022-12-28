@@ -48,7 +48,7 @@ static inline auto GetPhysicalDeviceLimitsGL()
     limits.bufferImageGranularity = 0; //no granularity imposed by OGL
     limits.sparseAddressSpaceSize = (std::numeric_limits<uint64_t>::max)();
 
-    limits.maxBoundDescriptorSets = 8; //typical in Vulkan
+    limits.maxBoundDescriptorSets = OCRA_GL_MAX_BOUND_DESCRIPTOR_SETS;
     limits.maxPerStageDescriptorSamplers = 4000;
     limits.maxPerStageDescriptorUniformBuffers = GetInteger(GL_MAX_UNIFORM_BUFFER_BINDINGS) / 6; //divided by the number of shader stages
     limits.maxPerStageDescriptorStorageBuffers = GetInteger(GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS) / 6; //divided by the number of shader stages

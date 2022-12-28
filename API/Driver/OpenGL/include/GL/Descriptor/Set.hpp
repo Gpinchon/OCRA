@@ -45,13 +45,13 @@ struct Impl
         auto& dstBinding = bindings.at(a_Copy.dstBinding);
         dstBinding = a_Copy.srcSet->bindings.at(a_Copy.srcBinding);
     }
-    void Bind() {
+    void Bind(uint32_t a_SetIndex) {
         for (auto& binding : bindings)
-            binding.Bind();
+            binding.Bind(a_SetIndex);
     }
-    void Unbind() {
+    void Unbind(uint32_t a_SetIndex) {
         for (auto& binding : bindings)
-            binding.Unbind();
+            binding.Unbind(a_SetIndex);
     }
     SetLayout::Handle       layout;
     std::vector<Binding>    bindings;

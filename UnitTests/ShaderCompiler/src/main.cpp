@@ -130,8 +130,8 @@ int main()
         shaderInfo.source = {
             "#version 430                                               \n"
             "layout(location = 0) in vec3 vPosition;                    \n"
-            "layout(binding = 0) uniform sampler2D uTexture;            \n"
-            "layout(binding = 0) uniform camera {                       \n"
+            "layout(set = 0, binding = 0) uniform sampler2D uTexture;   \n"
+            "layout(set = 0, binding = 0) uniform camera {              \n"
             "   mat4 viewMatrix;                                        \n"
             "} uCamera;                                                 \n"
             "void uniformLocation() {                                   \n"

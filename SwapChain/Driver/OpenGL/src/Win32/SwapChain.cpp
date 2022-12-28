@@ -98,7 +98,7 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
             WGL_ACCELERATION_ARB,   WGL_FULL_ACCELERATION_ARB,
             WGL_COLORSPACE_EXT,     WGL_COLORSPACE_SRGB_EXT,
             WGL_PIXEL_TYPE_ARB,     WGL_TYPE_RGBA_ARB,
-            WGL_COLOR_BITS_ARB,     pixelSize,
+            WGL_COLOR_BITS_ARB,     int(pixelSize),
             0
         };
         int32_t  pixelFormat = 0;

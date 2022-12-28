@@ -28,13 +28,17 @@ void ApplyPipelineStates(Buffer::ExecutionState& a_ExecutionState) {
     auto& pipelineState = a_ExecutionState.pipelineState.at(size_t(Pipeline::BindingPoint::Graphics));
     pipelineState.pipeline->Apply(a_ExecutionState);
     a_ExecutionState.pushConstants.Bind();
+    uint32_t setIndex = 0;
     for (auto& descriptor : pipelineState.descriptorSets) {
         if (descriptor != nullptr)
-            descriptor->Bind();
+            descriptor->Bind(setIndex);
+        ++setIndex;
     }
+    setIndex = 0;
     for (auto& pushDescriptor : pipelineState.pushDescriptorSets) {
         for (auto& binding : pushDescriptor.bindings)
-            binding.Bind();
+            binding.Bind(setIndex);
+        ++setIndex;
     }
 }
 //Draw commands
