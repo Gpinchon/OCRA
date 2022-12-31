@@ -16,9 +16,7 @@ class PBRMaterial : public Material
 public:
     PBRMaterial(
         const PhysicalDevice::Handle& a_PhysicalDevice,
-        const Device::Handle& a_Device,
-        const Descriptor::Pool::Handle a_DescriptorPool
-    );
+        const Device::Handle& a_Device);
 
     auto& GetAbledoTexture() const {
         return GetTexture(0);

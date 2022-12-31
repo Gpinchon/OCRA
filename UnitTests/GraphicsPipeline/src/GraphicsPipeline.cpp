@@ -311,14 +311,13 @@ struct GraphicsPipelineTestApp : TestApp
     FrameBuffer::Handle      frameBuffer;
     Image::Handle            frameBufferImage;
 
-    Descriptor::Pool::Handle descriptorPool{ CreateDescriptorPool(device, 4096) };
-    Mesh    mesh{ physicalDevice, device, descriptorPool,
+    Mesh    mesh{ physicalDevice, device,
         VertexBuffer(physicalDevice, device, std::vector<Vertex>{
             { {0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
             {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
             {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
         }),
-        PBRMaterial(physicalDevice, device, descriptorPool) };
+        PBRMaterial(physicalDevice, device) };
 
     RenderPass::Handle       renderPass;
     Pipeline::Handle         graphicsPipeline;

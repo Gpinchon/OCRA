@@ -20,7 +20,7 @@ auto PBRFragmentShader(const Device::Handle& a_Device)
         "#version 450                                           \n"
         "layout(location = 0) in vec3 vertColor;                \n"
         "layout(location = 0) out vec4 outColor;                \n"
-        "layout(binding = 0) uniform PBRParameters {            \n"
+        "layout(set = 1, binding = 1) uniform PBRParameters {   \n"
         "    vec4 albedo;                                       \n"
         "    float roughness;                                   \n"
         "    float metallic;                                    \n"
@@ -41,10 +41,10 @@ auto PBRFragmentShader(const Device::Handle& a_Device)
     shaderStage = shaderStageHandle;
     return shaderStageHandle;
 }
-PBRMaterial::PBRMaterial(const PhysicalDevice::Handle& a_PhysicalDevice,
-    const Device::Handle& a_Device,
-    const Descriptor::Pool::Handle a_DescriptorPool)
-    : Material(a_PhysicalDevice, a_Device, a_DescriptorPool, PBRParameters{}, { Texture2D(a_Device, Image::Format::Uint8_Normalized_RGBA, 1, 1) }, PBRFragmentShader(a_Device))
+PBRMaterial::PBRMaterial(
+    const PhysicalDevice::Handle& a_PhysicalDevice,
+    const Device::Handle& a_Device)
+    : Material(a_PhysicalDevice, a_Device, PBRParameters{}, { Texture2D(a_Device, Image::Format::Uint8_Normalized_RGBA, 1, 1) }, PBRFragmentShader(a_Device))
 {
     //Fill texture with white
     auto& texture = static_cast<const Texture2D&>(GetTexture(0));

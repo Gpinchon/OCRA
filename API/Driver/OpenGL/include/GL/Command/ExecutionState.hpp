@@ -15,6 +15,7 @@
 #include <GL/Common/Stencil.hpp>
 #include <GL/Descriptor/SetBinding.hpp>
 #include <GL/PushConstants.hpp>
+#include <GL/Common/FixedSizeMemoryPool.hpp>
 #include <GL/glew.h>
 
 #include <vector>
@@ -72,18 +73,21 @@ struct RenderPass
     IndexBufferBinding              indexBufferBinding;
 };
 
-struct PushDescriptorSet {
-    std::vector<Descriptor::Set::Binding>   bindings;
-};
+using DescriptorSet = std::vector<Descriptor::Set::Binding>;
 
 struct PipelineState {
     PipelineState() {
+        Reset();
+    }
+    void Reset() {
         descriptorDynamicOffsets.fill(0);
+        pipeline.reset();
+        for (auto& set : descriptorSets)
+            set.clear();
     }
     Pipeline::Handle pipeline;
-    std::array<PushDescriptorSet, OCRA_GL_MAX_BOUND_DESCRIPTOR_SETS>        pushDescriptorSets;
-    std::array<Descriptor::Set::Handle, OCRA_GL_MAX_BOUND_DESCRIPTOR_SETS>  descriptorSets;
-    std::array<uint32_t, OCRA_GL_MAX_BOUND_DESCRIPTOR_SETS>                 descriptorDynamicOffsets;
+    std::array<DescriptorSet, OCRA_GL_MAX_BOUND_DESCRIPTOR_SETS> descriptorSets;
+    std::array<uint32_t, OCRA_GL_MAX_BOUND_DESCRIPTOR_SETS>      descriptorDynamicOffsets;
 };
 
 struct ExecutionState {
@@ -101,9 +105,10 @@ struct ExecutionState {
         primitiveTopology = GL_NONE;
         renderPass = {};
         dynamicStates = {};
-
-        pipelineState.fill({});
-        lastPipelineState.fill({});
+        for (auto& state : pipelineState)
+            state.Reset();
+        for (auto& state : lastPipelineState)
+            state.Reset();
     }
 
     bool                once{ false };
@@ -112,8 +117,8 @@ struct ExecutionState {
     RenderPass          renderPass{};
     DynamicStates       dynamicStates{};
     OCRA::PushConstants pushConstants;
-    std::array<PipelineState, size_t(Pipeline::BindingPoint::MaxValue)>         pipelineState{};
-    std::array<PipelineState, size_t(Pipeline::BindingPoint::MaxValue)>         lastPipelineState{};
+    std::array<PipelineState, size_t(Pipeline::BindingPoint::MaxValue)> pipelineState{};
+    std::array<PipelineState, size_t(Pipeline::BindingPoint::MaxValue)> lastPipelineState{};
     
 };
 }

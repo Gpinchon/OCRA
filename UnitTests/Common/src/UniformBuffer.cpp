@@ -16,10 +16,9 @@ void UniformBuffer::Update() {
         bufferInfo.offset = 0;
         bufferInfo.range = data.size();
         writeOperations.front().bufferInfo = bufferInfo;
-        writeOperations.front().dstSet = GetDescriptorSets().front();
         writeOperations.front().dstBinding = GetDescriptorSetLayoutBindings().front().binding;
         writeOperations.front().type = Descriptor::Type::UniformBuffer;
-        Descriptor::Set::Update(GetDevice(), writeOperations, {});
+        SetWriteOperations(writeOperations);
         dirtyDescriptorSet = false;
     }
     if (dirtyData) {

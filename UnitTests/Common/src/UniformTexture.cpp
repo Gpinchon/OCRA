@@ -9,9 +9,8 @@ void UniformTexture::Update()
     setImageInfo.imageView = texture.GetImageView();
     setImageInfo.sampler = texture.GetSampler();
     writeOp.type = Descriptor::Type::SampledImage;
-    writeOp.dstSet = GetDescriptorSets().front();
     writeOp.imageInfo = setImageInfo;
-    Descriptor::Set::Update(GetDevice(), {writeOp}, {});
+    SetWriteOperations({ writeOp });
     dirty = false;
 }
 

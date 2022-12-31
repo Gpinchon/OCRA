@@ -11,7 +11,6 @@
 #include <OCRA/Common/Vec2.hpp>
 #include <OCRA/Common/Vec3.hpp>
 #include <OCRA/Common/ViewPort.hpp>
-#include <OCRA/Descriptor/Set.hpp>
 #include <OCRA/Device.hpp>
 #include <OCRA/FrameBuffer.hpp>
 #include <OCRA/Image/Image.hpp>
@@ -254,7 +253,9 @@ struct TexturesTestApp : TestApp
         scissor.extent = window.GetExtent();
         {
             Pipeline::Layout::Info layoutInfo;
-            layoutInfo.setLayouts.push_back(textureUniform.GetDescriptorSetLayout());
+            Descriptor::SetLayout::Info descriptorInfo;
+            descriptorInfo.bindings = textureUniform.GetDescriptorSetLayoutBindings();
+            layoutInfo.setLayouts.push_back(Descriptor::SetLayout::Create(device, descriptorInfo));
             graphicsPipelineLayout = Pipeline::Layout::Create(device, layoutInfo);
         }
         Pipeline::ColorBlendState::AttachmentState colorBlend0;
@@ -328,6 +329,7 @@ struct TexturesTestApp : TestApp
     }
     void RecordDrawCommandBuffer()
     {
+        textureUniform.Update();
         Command::Buffer::BeginInfo bufferBeginInfo{};
         bufferBeginInfo.flags = Command::Buffer::UsageFlagBits::None;
         Command::Buffer::Reset(drawCommandBuffer);
@@ -341,7 +343,7 @@ struct TexturesTestApp : TestApp
         Command::BeginRenderPass(drawCommandBuffer, renderPassBeginInfo, Command::SubPassContents::Inline);
         {
             Command::BindPipeline(drawCommandBuffer, Pipeline::BindingPoint::Graphics, graphicsPipeline);
-            Command::BindDescriptorSets(drawCommandBuffer, Pipeline::BindingPoint::Graphics, graphicsPipelineLayout, 0, textureUniform.GetDescriptorSets(), {});
+            Command::PushDescriptorSet(drawCommandBuffer, Pipeline::BindingPoint::Graphics, graphicsPipelineLayout, 0, textureUniform.GetWriteOperations());
             Command::Draw(drawCommandBuffer, 3, 1, 0, 0);
         }
         Command::EndRenderPass(drawCommandBuffer);
@@ -366,8 +368,7 @@ struct TexturesTestApp : TestApp
 
     std::vector<Shader::Stage::Handle>   shaderStages;
 
-    Descriptor::Pool::Handle    descriptorPool{ CreateDescriptorPool(device, 4096) };
-    UniformTexture              textureUniform{ 0, device, descriptorPool, CreateTexture(physicalDevice, device) };
+    UniformTexture              textureUniform{ device, 0, CreateTexture(physicalDevice, device) };
 
     Command::Pool::Handle   commandPool;
     Command::Buffer::Handle mainCommandBuffer;

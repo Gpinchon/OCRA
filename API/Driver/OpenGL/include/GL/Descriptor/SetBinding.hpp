@@ -179,8 +179,8 @@ public:
     Binding(const WriteOperation& a_Write, uint32_t a_BindingIndex);
     ~Binding();
 
-    void Bind(uint32_t a_SetIndex);
-    void Unbind(uint32_t a_SetIndex);
+    void Bind();
+    void Unbind();
 
     void operator=(const Binding& a_Other) {
 #ifdef _DEBUG
@@ -293,14 +293,14 @@ inline Binding::~Binding() {
         std::destroy_at(storage);
 }
 
-inline void Binding::Bind(uint32_t a_SetIndex) {
+inline void Binding::Bind() {
     if (storage != nullptr)
-        storage->Bind(a_SetIndex * OCRA_GL_SHADER_SET_OFFSET + bindingIndex);
+        storage->Bind(bindingIndex);
 }
 
-inline void Binding::Unbind(uint32_t a_SetIndex) {
+inline void Binding::Unbind() {
     if (storage != nullptr)
-        storage->Unbind(a_SetIndex * OCRA_GL_SHADER_SET_OFFSET + bindingIndex);
+        storage->Unbind(bindingIndex);
 }
 
 }

@@ -23,6 +23,8 @@ void Update(
 }
 }
 
+#include <algorithm>
+
 namespace OCRA::Command
 {
 void BindDescriptorSets(
@@ -43,7 +45,12 @@ void BindDescriptorSets(
     ](Buffer::ExecutionState& a_ExecutionState){
         auto& pipelineState = a_ExecutionState.pipelineState.at(bindingPoint);
         for (uint32_t i = firstSet; i < sets.size(); ++i) {
-            pipelineState.descriptorSets.at(i) = sets.at(i);
+            auto& descriptorSet = pipelineState.descriptorSets.at(i);
+            const auto& bindings = sets.at(i)->bindings;
+            descriptorSet.clear();
+            for (const auto& binding : sets.at(i)->bindings) {
+                descriptorSet.push_back(binding);
+            }
         }
         for (uint32_t i = firstDynamicOffset; i < dynamicOffsets.size(); ++i) {
             pipelineState.descriptorDynamicOffsets.at(i) = dynamicOffsets.at(i);
@@ -64,9 +71,9 @@ void OCRA::Command::PushDescriptorSet(
         set = a_Set,
         writes = a_Writes
     ](Buffer::ExecutionState& a_ExecutionState) {
-        auto& pushDescriptor = a_ExecutionState.pipelineState.at(bindingPoint).pushDescriptorSets.at(set);
+        auto& descriptorSet = a_ExecutionState.pipelineState.at(bindingPoint).descriptorSets.at(set);
         for (const auto& write : writes) {
-            pushDescriptor.bindings.push_back({ write, write.dstBinding });
+            descriptorSet.push_back({ write, write.dstBinding });
         }
     });
 }

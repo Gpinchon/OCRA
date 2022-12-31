@@ -21,7 +21,11 @@ struct Traverser {
 };
 class Mesh {
 public:
-    Mesh(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const Descriptor::Pool::Handle& a_DescriptorPool, const VertexBuffer& a_VertexBuffer, const Material& a_Material);
+    Mesh(
+        const PhysicalDevice::Handle& a_PhysicalDevice,
+        const Device::Handle& a_Device,
+        const VertexBuffer& a_VertexBuffer,
+        const Material& a_Material);
 
     auto& GetProjectionMatrix() const {
         return projectionMatrix.Get<Mat4x4>();
@@ -56,7 +60,6 @@ public:
     void Draw(const Command::Buffer::Handle& a_CommandBuffer);
 
 private:
-    void UpdateDescriptor();
     OCRA::Device::Handle     device;
     Pipeline::Layout::Handle layout;
     Shader::Stage::Handle    vertexShader;

@@ -17,13 +17,13 @@ Impl::Impl(const Info& a_Info)
         if (setLayout == nullptr) continue;
         auto bindingsSize = setLayout->bindings.size();
         auto& descriptorSet = descriptorSets.at(i);
-        descriptorSet.bindings.resize(bindingsSize);
+        descriptorSet.resize(bindingsSize);
         for (uint32_t j = 0; j < bindingsSize; ++j) {
-            descriptorSet.bindings[j].type = setLayout->bindings.at(j).type;
-            descriptorSet.bindings[j].dynamicOffset = dynamicOffset;
+            descriptorSet.at(j).type = setLayout->bindings.at(j).type;
+            descriptorSet.at(j).dynamicOffset = dynamicOffset;
             //descriptorSet.bindings[j].offset = setLayout->bindings.at(j).offset;
-            if (descriptorSet.bindings[j].type == Descriptor::Type::StorageBufferDynamic
-            ||  descriptorSet.bindings[j].type == Descriptor::Type::UniformBufferDynamic)
+            if (descriptorSet.at(j).type == Descriptor::Type::StorageBufferDynamic
+            ||  descriptorSet.at(j).type == Descriptor::Type::UniformBufferDynamic)
                 dynamicOffset += setLayout->bindings.at(j).count;
         }
     }

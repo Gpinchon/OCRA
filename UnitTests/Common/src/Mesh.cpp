@@ -20,7 +20,7 @@ auto DefaultVertexShader(const Device::Handle& a_Device) {
         "#version 450                                                       \n"
         "layout(location = 0) in vec2 inPosition;                           \n"
         "layout(location = 1) in vec3 inColor;                              \n"
-        "layout(binding = 1) uniform Transforms {                           \n"
+        "layout(set = 0, binding = 0) uniform Transforms {                  \n"
         "   mat4 matrix;                                                    \n"
         "} transforms;                                                      \n"
         "layout(location = 0) out vec3 vertColor;                           \n"
@@ -41,14 +41,13 @@ auto DefaultVertexShader(const Device::Handle& a_Device) {
     shaderStage = shaderStageHandle;
     return shaderStageHandle;
 }
-Mesh::Mesh(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const Descriptor::Pool::Handle& a_DescriptorPool, const VertexBuffer& a_VertexBuffer, const Material& a_Material)
+Mesh::Mesh(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const VertexBuffer& a_VertexBuffer, const Material& a_Material)
     : device(a_Device)
     , material(a_Material)
     , vertexBuffer(a_VertexBuffer)
-    , projectionMatrix(1, a_PhysicalDevice, a_Device, a_DescriptorPool, Mat4x4{})
+    , projectionMatrix(a_PhysicalDevice, a_Device, 0, Mat4x4{})
     , vertexShader(DefaultVertexShader(a_Device))
 {
-    UpdateDescriptor();
     Pipeline::Layout::Info layoutInfo;
     layoutInfo.setLayouts = GetDescriptorSetLayouts();
     layout = Pipeline::Layout::Create(device, layoutInfo);
@@ -58,22 +57,9 @@ Mesh::Mesh(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle&
 }
 
 void Mesh::Draw(const Command::Buffer::Handle& a_CommandBuffer) {
-    Command::BindDescriptorSets(a_CommandBuffer, Pipeline::BindingPoint::Graphics, layout, 0, GetDescriptorSets(), {});
+    Command::PushDescriptorSet(a_CommandBuffer, Pipeline::BindingPoint::Graphics, layout, 0, projectionMatrix.GetWriteOperations());
+    Command::PushDescriptorSet(a_CommandBuffer, Pipeline::BindingPoint::Graphics, layout, 1, material.GetWriteOperations());
     Command::BindVertexBuffers(a_CommandBuffer, 0, { GetVertexBuffer().GetBuffer() }, { 0 });
     Command::Draw(a_CommandBuffer, GetVertexBuffer().GetVertexNbr(), 1, 0, 0);
-}
-
-void Mesh::UpdateDescriptor() {
-    descriptorSets.clear();
-    descriptorSets.insert(descriptorSets.end(), material.GetDescriptorSets().begin(), material.GetDescriptorSets().end());
-    descriptorSets.insert(descriptorSets.end(), projectionMatrix.GetDescriptorSets().begin(), projectionMatrix.GetDescriptorSets().end());
-
-    descriptorSetLayouts.clear();
-    descriptorSetLayouts.insert(descriptorSetLayouts.end(), material.GetDescriptorSetLayouts().begin(), material.GetDescriptorSetLayouts().end());
-    descriptorSetLayouts.push_back(projectionMatrix.GetDescriptorSetLayout());
-
-    descriptorSetLayoutBindings.clear();
-    descriptorSetLayoutBindings.insert(descriptorSetLayoutBindings.end(), material.GetDescriptorSetLayoutBindings().begin(), material.GetDescriptorSetLayoutBindings().end());
-    descriptorSetLayoutBindings.insert(descriptorSetLayoutBindings.end(), projectionMatrix.GetDescriptorSetLayoutBindings().begin(), projectionMatrix.GetDescriptorSetLayoutBindings().end());
 }
 }
