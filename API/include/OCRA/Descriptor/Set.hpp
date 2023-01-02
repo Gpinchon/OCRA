@@ -29,7 +29,7 @@ struct ImageInfo
 };
 struct WriteOperation
 {
-    Handle      dstDescriptor; //ignored when using PushDescriptor
+    Handle      dstSet; //ignored when using PushDescriptor
     uint32_t    dstBinding{ 0 };
     uint32_t    dstArrayElement{ 0 };
     uint32_t    dstCount{ 0 };
@@ -41,11 +41,11 @@ struct WriteOperation
 };
 struct CopyOperation
 {
-    Handle      dstDescriptor;
+    Handle      dstSet;
     uint32_t    dstBinding{ 0 };
     uint32_t    dstArrayElement{ 0 };
     uint32_t    count{ 0 };
-    Handle      srcDescriptor;
+    Handle      srcSet;
     uint32_t    srcBinding{ 0 };
     uint32_t    srcArrayElement{ 0 };
 };
@@ -61,14 +61,18 @@ OCRA_DECLARE_HANDLE(OCRA::Pipeline::SetLayout);
 
 namespace OCRA::Command
 {
-//Replaces the command buffer's bindings with the specified descriptor's
+/**
+* @brief Replaces the command buffer's bindings with the specified descriptor's.
+*/
 void BindDescriptorSet(
     const Command::Buffer::Handle&  a_CommandBuffer,
     const Pipeline::BindingPoint&   a_BindingPoint,
     const Pipeline::Layout::Handle& a_PipelineLayout,
     const Descriptor::Set::Handle&  a_Descriptor,
     const std::vector<uint32_t>&    a_DynamicOffset);
-//Pushes the specified descriptor to the command buffer's bindings
+/**
+* @brief Pushes the specified descriptor to the command buffer's bindings
+*/
 void PushDescriptorSet(
     const Command::Buffer::Handle&  a_CommandBuffer,
     const Pipeline::BindingPoint&   a_PipelineBindPoint,

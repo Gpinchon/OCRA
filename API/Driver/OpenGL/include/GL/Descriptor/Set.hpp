@@ -40,10 +40,10 @@ struct Impl
     void Copy(const CopyOperation& a_Copy) {
 #ifdef _DEBUG
         assert(a_Copy.dstBinding < bindings.size());
-        assert(a_Copy.srcBinding < a_Copy.srcDescriptor->bindings.size());
+        assert(a_Copy.srcBinding < a_Copy.srcSet->bindings.size());
 #endif
         auto& dstBinding = bindings.at(a_Copy.dstBinding);
-        dstBinding = a_Copy.dstDescriptor->bindings.at(a_Copy.srcBinding);
+        dstBinding = a_Copy.srcSet->bindings.at(a_Copy.srcBinding);
     }
     void Bind() {
         for (auto& binding : bindings)

@@ -15,10 +15,10 @@ void Update(
     const std::vector<CopyOperation>&   a_Copies)
 {
     for (const auto& writeOperation : a_Writes) {
-        writeOperation.dstDescriptor->Write(writeOperation);
+        writeOperation.dstSet->Write(writeOperation);
     }
     for (const auto& copyOperation : a_Copies) {
-        copyOperation.dstDescriptor->Copy(copyOperation);
+        copyOperation.dstSet->Copy(copyOperation);
     }
 }
 }
@@ -29,18 +29,18 @@ void OCRA::Command::BindDescriptorSet(
     const Command::Buffer::Handle&  a_CommandBuffer,
     const Pipeline::BindingPoint&   a_BindingPoint,
     const Pipeline::Layout::Handle& a_Layout,
-    const Descriptor::Set::Handle&  a_Descriptor,
+    const Descriptor::Set::Handle& a_DescriptorSet,
     const std::vector<uint32_t>&    a_DynamicOffsets)
 {
     auto firstDynamicOffset = !a_DynamicOffsets.empty() ? a_Layout->GetDynamicOffset(0) : 0;
     a_CommandBuffer->PushCommand([
         bindingPoint = uint8_t(a_BindingPoint),
-        descriptor = a_Descriptor,
+        descriptorSet = a_DescriptorSet,
         firstDynamicOffset,
         dynamicOffsets = a_DynamicOffsets
     ](Buffer::ExecutionState& a_ExecutionState){
         auto& pipelineState = a_ExecutionState.pipelineState.at(bindingPoint);
-        const auto& bindings = descriptor->bindings;
+        const auto& bindings = descriptorSet->bindings;
         pipelineState.descriptorSet.clear();
         for (const auto& binding : bindings) {
             pipelineState.descriptorSet.push_back(binding);
