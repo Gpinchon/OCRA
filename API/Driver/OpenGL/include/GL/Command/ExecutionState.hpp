@@ -73,7 +73,7 @@ struct RenderPass
     IndexBufferBinding              indexBufferBinding;
 };
 
-using DescriptorSet = std::vector<Descriptor::Set::Binding>;
+using PushDescriptorSet = std::vector<Descriptor::Set::Binding>;
 
 struct PipelineState {
     PipelineState() {
@@ -85,10 +85,10 @@ struct PipelineState {
         descriptorSet.reset();
         pushDescriptorSet.clear();
     }
-    Pipeline::Handle pipeline;
+    Pipeline::Handle        pipeline;
     Descriptor::Set::Handle descriptorSet;
-    DescriptorSet pushDescriptorSet;
-    uint32_t      descriptorDynamicOffset;
+    PushDescriptorSet       pushDescriptorSet;
+    uint32_t                descriptorDynamicOffset;
 };
 
 struct ExecutionState {
