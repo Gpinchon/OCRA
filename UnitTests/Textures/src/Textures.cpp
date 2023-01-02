@@ -192,7 +192,7 @@ struct TexturesTestApp : TestApp
             shaderInfo.entryPoint = "main";
             shaderInfo.source = {
                 "#version 450                                         \n"
-                "layout(binding = 0) uniform sampler2D uTexture;      \n"
+                "layout(binding = 1) uniform sampler2D uTexture;      \n"
                 "layout(location = 0) in vec2 UV;                     \n"             
                 "layout(location = 0) out vec4 outColor;              \n"
                 "void main() {                                        \n"
@@ -343,7 +343,7 @@ struct TexturesTestApp : TestApp
         Command::BeginRenderPass(drawCommandBuffer, renderPassBeginInfo, Command::SubPassContents::Inline);
         {
             Command::BindPipeline(drawCommandBuffer, Pipeline::BindingPoint::Graphics, graphicsPipeline);
-            Command::PushDescriptorSet(drawCommandBuffer, Pipeline::BindingPoint::Graphics, graphicsPipelineLayout, 0, textureUniform.GetWriteOperations());
+            Command::PushDescriptorSet(drawCommandBuffer, Pipeline::BindingPoint::Graphics, graphicsPipelineLayout, textureUniform.GetWriteOperations());
             Command::Draw(drawCommandBuffer, 3, 1, 0, 0);
         }
         Command::EndRenderPass(drawCommandBuffer);
@@ -368,7 +368,7 @@ struct TexturesTestApp : TestApp
 
     std::vector<Shader::Stage::Handle>   shaderStages;
 
-    UniformTexture              textureUniform{ device, 0, CreateTexture(physicalDevice, device) };
+    UniformTexture              textureUniform{ device, 1, CreateTexture(physicalDevice, device) };
 
     Command::Pool::Handle   commandPool;
     Command::Buffer::Handle mainCommandBuffer;

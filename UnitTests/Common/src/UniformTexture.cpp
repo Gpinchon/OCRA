@@ -10,6 +10,7 @@ void UniformTexture::Update()
     setImageInfo.sampler = texture.GetSampler();
     writeOp.type = Descriptor::Type::SampledImage;
     writeOp.imageInfo = setImageInfo;
+    writeOp.dstBinding = GetDescriptorSetLayoutBindings().front().binding;
     SetWriteOperations({ writeOp });
     dirty = false;
 }

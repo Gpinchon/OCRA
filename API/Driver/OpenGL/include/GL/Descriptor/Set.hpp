@@ -3,7 +3,7 @@
 #include <OCRA/Handle.hpp>
 #include <OCRA/Descriptor/Set.hpp>
 
-#include <GL/Descriptor/SetBinding.hpp>
+#include <GL/Descriptor/Binding.hpp>
 
 #include <vector>
 
@@ -40,10 +40,10 @@ struct Impl
     void Copy(const CopyOperation& a_Copy) {
 #ifdef _DEBUG
         assert(a_Copy.dstBinding < bindings.size());
-        assert(a_Copy.srcBinding < a_Copy.srcSet->bindings.size());
+        assert(a_Copy.srcBinding < a_Copy.srcDescriptor->bindings.size());
 #endif
         auto& dstBinding = bindings.at(a_Copy.dstBinding);
-        dstBinding = a_Copy.srcSet->bindings.at(a_Copy.srcBinding);
+        dstBinding = a_Copy.dstDescriptor->bindings.at(a_Copy.srcBinding);
     }
     void Bind() {
         for (auto& binding : bindings)
@@ -53,7 +53,7 @@ struct Impl
         for (auto& binding : bindings)
             binding.Unbind();
     }
-    SetLayout::Handle       layout;
-    std::vector<Binding>    bindings;
+    SetLayout::Handle    layout;
+    std::vector<Binding> bindings;
 };
 }

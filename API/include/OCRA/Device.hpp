@@ -25,10 +25,19 @@ struct Info {
     std::vector<std::string>    enabledExtensionNames;
     PhysicalDevice::Features    enabledFeatures;
 };
+/**
+* @brief creates a logical device that'll use the specified physical device
+*/
 Handle Create(
     const PhysicalDevice::Handle& a_PhysicalDevice,
     const Info& a_Info,
     const AllocationCallback* a_Allocator = nullptr);
+
+/**
+* @brief on OpenGL, there is only one queue
+* @return the handle to a que of specified Family.
+* To get family index, use GetQueueFamilyProperties
+*/
 Queue::Handle GetQueue(
     const Handle& a_Device,
     uint32_t a_FamilyIndex,

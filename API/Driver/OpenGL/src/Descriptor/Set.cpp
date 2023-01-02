@@ -15,45 +15,38 @@ void Update(
     const std::vector<CopyOperation>&   a_Copies)
 {
     for (const auto& writeOperation : a_Writes) {
-        writeOperation.dstSet->Write(writeOperation);
+        writeOperation.dstDescriptor->Write(writeOperation);
     }
     for (const auto& copyOperation : a_Copies) {
-        copyOperation.dstSet->Copy(copyOperation);
+        copyOperation.dstDescriptor->Copy(copyOperation);
     }
 }
 }
 
 #include <algorithm>
 
-namespace OCRA::Command
-{
-void BindDescriptorSets(
+void OCRA::Command::BindDescriptorSet(
     const Command::Buffer::Handle&  a_CommandBuffer,
     const Pipeline::BindingPoint&   a_BindingPoint,
     const Pipeline::Layout::Handle& a_Layout,
-    const uint32_t&                 a_FirstSet,
-    const std::vector<Descriptor::Set::Handle>&  a_DescriptorSets,
-    const std::vector<uint32_t>&                 a_DynamicOffsets)
+    const Descriptor::Set::Handle&  a_Descriptor,
+    const std::vector<uint32_t>&    a_DynamicOffsets)
 {
-    auto firstDynamicOffset = !a_DynamicOffsets.empty() ? a_Layout->GetDynamicOffset(a_FirstSet, 0) : 0;
+    auto firstDynamicOffset = !a_DynamicOffsets.empty() ? a_Layout->GetDynamicOffset(0) : 0;
     a_CommandBuffer->PushCommand([
         bindingPoint = uint8_t(a_BindingPoint),
-        firstSet = a_FirstSet,
-        sets = a_DescriptorSets,
+        descriptor = a_Descriptor,
         firstDynamicOffset,
         dynamicOffsets = a_DynamicOffsets
     ](Buffer::ExecutionState& a_ExecutionState){
         auto& pipelineState = a_ExecutionState.pipelineState.at(bindingPoint);
-        for (uint32_t i = firstSet; i < sets.size(); ++i) {
-            auto& descriptorSet = pipelineState.descriptorSets.at(i);
-            const auto& bindings = sets.at(i)->bindings;
-            descriptorSet.clear();
-            for (const auto& binding : sets.at(i)->bindings) {
-                descriptorSet.push_back(binding);
-            }
+        const auto& bindings = descriptor->bindings;
+        pipelineState.descriptorSet.clear();
+        for (const auto& binding : bindings) {
+            pipelineState.descriptorSet.push_back(binding);
         }
         for (uint32_t i = firstDynamicOffset; i < dynamicOffsets.size(); ++i) {
-            pipelineState.descriptorDynamicOffsets.at(i) = dynamicOffsets.at(i);
+            pipelineState.descriptorDynamicOffset = dynamicOffsets.at(i);
         }
     });
 }
@@ -62,20 +55,16 @@ void OCRA::Command::PushDescriptorSet(
     const Command::Buffer::Handle&  a_CommandBuffer,
     const Pipeline::BindingPoint&   a_BindingPoint,
     const Pipeline::Layout::Handle& a_Layout,
-    const uint32_t&                 a_Set,
     const std::vector<Descriptor::Set::WriteOperation>& a_Writes)
 {
     a_CommandBuffer->PushCommand([
         bindingPoint = uint8_t(a_BindingPoint),
         layout = a_Layout,
-        set = a_Set,
         writes = a_Writes
     ](Buffer::ExecutionState& a_ExecutionState) {
-        auto& descriptorSet = a_ExecutionState.pipelineState.at(bindingPoint).descriptorSets.at(set);
+        auto& descriptorSet = a_ExecutionState.pipelineState.at(bindingPoint).descriptorSet;
         for (const auto& write : writes) {
             descriptorSet.push_back({ write, write.dstBinding });
         }
     });
 }
-}
-

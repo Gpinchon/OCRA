@@ -369,7 +369,7 @@ void CopyImageToBuffer(
             for (const auto& copy : regions)
                 srcImage->Download(copy, memoryBinding.offset);
             glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-     }, true);
+     }, false);
 }
 void GenerateMipMap(
     const Device::Handle& a_Device,

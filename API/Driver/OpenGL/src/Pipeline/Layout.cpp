@@ -16,7 +16,6 @@ Impl::Impl(const Info& a_Info)
         const auto& setLayout = a_Info.setLayouts.at(i);
         if (setLayout == nullptr) continue;
         auto bindingsSize = setLayout->bindings.size();
-        auto& descriptorSet = descriptorSets.at(i);
         descriptorSet.resize(bindingsSize);
         for (uint32_t j = 0; j < bindingsSize; ++j) {
             descriptorSet.at(j).type = setLayout->bindings.at(j).type;

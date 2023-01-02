@@ -16,17 +16,17 @@ public:
     Impl(const Info& a_Info);
     bool IsCompatibleWith(const Handle& a_Layout);
 
-    auto GetType(uint32_t a_SetIndex, uint32_t a_BindingIndex) const {
-        return descriptorSets.at(a_SetIndex).at(a_BindingIndex).type;
+    auto GetType(uint32_t a_BindingIndex) const {
+        return descriptorSet.at(a_BindingIndex).type;
     }
-    auto GetOffset(uint32_t a_SetIndex, uint32_t a_BindingIndex) const {
-        return descriptorSets.at(a_SetIndex).at(a_BindingIndex).offset;
+    auto GetOffset(uint32_t a_BindingIndex) const {
+        return descriptorSet.at(a_BindingIndex).offset;
     }
-    auto GetDynamicOffset(uint32_t a_SetIndex, uint32_t a_BindingIndex) const {
-        return descriptorSets.at(a_SetIndex).at(a_BindingIndex).dynamicOffset;
+    auto GetDynamicOffset(uint32_t a_BindingIndex) const {
+        return descriptorSet.at(a_BindingIndex).dynamicOffset;
     }
-    auto GetDescriptorCount(uint32_t a_SetIndex, uint32_t a_BindingIndex) const {
-        return descriptorSets.at(a_SetIndex).at(a_BindingIndex).descriptorCount;
+    auto GetDescriptorCount(uint32_t a_BindingIndex) const {
+        return descriptorSet.at(a_BindingIndex).descriptorCount;
     }
 
 private:
@@ -39,7 +39,7 @@ private:
     using DescriptorSet = std::vector<Binding>;
 
     const uint32_t descriptorSetCount = 0;
-    std::array<DescriptorSet, OCRA_GL_MAX_BOUND_DESCRIPTOR_SETS> descriptorSets;
+    DescriptorSet descriptorSet;
     std::vector<PushConstantRange> pushConstantRanges;
 };
 }

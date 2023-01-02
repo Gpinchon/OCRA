@@ -90,31 +90,38 @@ std::vector<uint32_t> Impl::Compile()
         options.emit_push_constant_as_uniform_buffer = true;
         glsl.set_common_options(options);
         const auto resources = glsl.get_shader_resources();
-        for (const auto& spi : resources.subpass_inputs) {
-            auto set        = glsl.get_decoration(spi.id, spv::DecorationDescriptorSet);
-            auto binding    = glsl.get_decoration(spi.id, spv::DecorationBinding);
-            auto inputIndex = glsl.get_decoration(spi.id, spv::DecorationInputAttachmentIndex);
-            std::cout << "Found Subpass Input " << spi.name << " set = " << set << " binding = " << binding << " input_attachment_index " << inputIndex << std::endl;
-
-            glsl.set_decoration(spi.id, spv::DecorationBinding,  OCRA_GL_SHADER_SUBPASSINPUT_OFFSET + inputIndex + binding);
-            glsl.set_decoration(spi.id, spv::DecorationLocation, OCRA_GL_SHADER_SUBPASSINPUT_OFFSET + inputIndex + binding);
+        for (const auto& res : resources.subpass_inputs) {
+            auto set        = glsl.get_decoration(res.id, spv::DecorationDescriptorSet);
+            auto binding    = glsl.get_decoration(res.id, spv::DecorationBinding);
+            auto inputIndex = glsl.get_decoration(res.id, spv::DecorationInputAttachmentIndex);
+            assert(set == 0 && "Descriptor set unsupported, use set 0");
+            assert(glsl.has_decoration(res.id, spv::DecorationBinding) && "Binding required");
+            glsl.set_decoration(res.id, spv::DecorationBinding,  OCRA_GL_SHADER_SUBPASSINPUT_OFFSET + inputIndex + binding);
+            glsl.set_decoration(res.id, spv::DecorationLocation, OCRA_GL_SHADER_SUBPASSINPUT_OFFSET + inputIndex + binding);
         }
-        for (const auto& v : resources.uniform_buffers) {
-            auto set     = glsl.get_decoration(v.id, spv::DecorationDescriptorSet);
-            auto binding = glsl.get_decoration(v.id, spv::DecorationBinding);
-            glsl.set_decoration(v.id, spv::DecorationBinding, binding);
+        for (const auto& res : resources.uniform_buffers) {
+            auto set     = glsl.get_decoration(res.id, spv::DecorationDescriptorSet);
+            auto binding = glsl.get_decoration(res.id, spv::DecorationBinding);
+            assert(set == 0 && "Descriptor set unsupported, use set 0");
+            assert(glsl.has_decoration(res.id, spv::DecorationBinding) && "Binding required");
+            //glsl.set_decoration(res.id, spv::DecorationBinding, binding);
         }
-        for (const auto& pc : resources.push_constant_buffers) {
-            glsl.set_decoration(pc.id, spv::DecorationBinding, OCRA_GL_SHADER_PUSHCONSTANT_BINDING);
+        for (const auto& res : resources.push_constant_buffers) {
+            glsl.set_decoration(res.id, spv::DecorationBinding, OCRA_GL_SHADER_PUSHCONSTANT_BINDING);
         }
-        for (const auto& ss : resources.separate_samplers) {
-            if (!glsl.has_decoration(ss.id, spv::DecorationBinding))
-                glsl.set_decoration(ss.id, spv::DecorationBinding, glsl.get_decoration(ss.id, spv::DecorationLocation));
+        for (const auto& res : resources.separate_samplers) {
+            auto set     = glsl.get_decoration(res.id, spv::DecorationDescriptorSet);
+            auto binding = glsl.get_decoration(res.id, spv::DecorationBinding);
+            assert(set == 0 && "Descriptor set unsupported, use set 0");
+            assert(glsl.has_decoration(res.id, spv::DecorationBinding) && "Binding required");
+            //glsl.set_decoration(res.id, spv::DecorationLocation, glsl.get_decoration(res.id, spv::DecorationBinding));
         }
-        for (const auto& si : resources.sampled_images) {
-            auto set     = glsl.get_decoration(si.id, spv::DecorationDescriptorSet);
-            auto binding = glsl.get_decoration(si.id, spv::DecorationBinding);
-            glsl.set_decoration(si.id, spv::DecorationLocation, glsl.get_decoration(si.id, spv::DecorationBinding));
+        for (const auto& res : resources.sampled_images) {
+            auto set     = glsl.get_decoration(res.id, spv::DecorationDescriptorSet);
+            auto binding = glsl.get_decoration(res.id, spv::DecorationBinding);
+            assert(set == 0 && "Descriptor set unsupported, use set 0");
+            assert(glsl.has_decoration(res.id, spv::DecorationBinding) && "Binding required");
+            //glsl.set_decoration(res.id, spv::DecorationLocation, glsl.get_decoration(res.id, spv::DecorationBinding));
         }
         //glsl.set_entry_point(name, GetExecutionModel(type));
         glslCode = glsl.compile();

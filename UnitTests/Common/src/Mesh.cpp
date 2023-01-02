@@ -18,15 +18,18 @@ auto DefaultVertexShader(const Device::Handle& a_Device) {
     shaderInfo.entryPoint = "main";
     shaderInfo.source = {
         "#version 450                                                       \n"
-        "layout(location = 0) in vec2 inPosition;                           \n"
-        "layout(location = 1) in vec3 inColor;                              \n"
-        "layout(set = 0, binding = 0) uniform Transforms {                  \n"
+        "layout(binding = 0) uniform Transforms {                           \n"
         "   mat4 matrix;                                                    \n"
         "} transforms;                                                      \n"
+        "layout(location = 0) in vec2 inPosition;                           \n"
+        "layout(location = 1) in vec3 inColor;                              \n"
+        "layout(location = 2) in vec2 inTexCoord;                           \n"
         "layout(location = 0) out vec3 vertColor;                           \n"
+        "layout(location = 1) out vec2 vertTexCoord;                        \n"
         "void main() {                                                      \n"
         "   gl_Position = transforms.matrix * vec4(inPosition, 0.0, 1.0);   \n"
         "   vertColor = inColor;                                            \n"
+        "   vertTexCoord = inTexCoord;                                      \n"
         "}                                                                  \n"
     };
     const auto vertexShader = ShaderCompiler::Shader::Create(compiler, shaderInfo);
@@ -57,8 +60,8 @@ Mesh::Mesh(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle&
 }
 
 void Mesh::Draw(const Command::Buffer::Handle& a_CommandBuffer) {
-    Command::PushDescriptorSet(a_CommandBuffer, Pipeline::BindingPoint::Graphics, layout, 0, projectionMatrix.GetWriteOperations());
-    Command::PushDescriptorSet(a_CommandBuffer, Pipeline::BindingPoint::Graphics, layout, 1, material.GetWriteOperations());
+    Command::PushDescriptorSet(a_CommandBuffer, Pipeline::BindingPoint::Graphics, layout, projectionMatrix.GetWriteOperations());
+    Command::PushDescriptorSet(a_CommandBuffer, Pipeline::BindingPoint::Graphics, layout, material.GetWriteOperations());
     Command::BindVertexBuffers(a_CommandBuffer, 0, { GetVertexBuffer().GetBuffer() }, { 0 });
     Command::Draw(a_CommandBuffer, GetVertexBuffer().GetVertexNbr(), 1, 0, 0);
 }

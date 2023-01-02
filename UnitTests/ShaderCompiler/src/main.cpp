@@ -94,13 +94,13 @@ int main()
         shaderInfo.type = ShaderCompiler::Shader::Type::Fragment;
         shaderInfo.entryPoint = "subpassShader";
         shaderInfo.source = {
-            "#version 430                                                                               \n"
-            "layout(set = 0, binding = 0, input_attachment_index = 0) uniform subpassInput uLastColor;  \n"
-            "layout(location = 0) out vec4 color;                                                       \n"
-            "void subpassShader() {                                                                     \n"
-            "   color = subpassLoad(uLastColor);                                                        \n"
-            "}                                                                                          \n"
-            "void main() { subpassShader(); }                                                           \n"
+            "#version 430                                                                      \n"
+            "layout(binding = 0, input_attachment_index = 0) uniform subpassInput uLastColor;  \n"
+            "layout(location = 0) out vec4 color;                                              \n"
+            "void subpassShader() {                                                            \n"
+            "   color = subpassLoad(uLastColor);                                               \n"
+            "}                                                                                 \n"
+            "void main() { subpassShader(); }                                                  \n"
         };
         const auto shader = ShaderCompiler::Shader::Create(compiler, shaderInfo);
         ret |= ShaderCompiler::Shader::Compile(shader).empty() ? -1 : 0;
@@ -110,15 +110,15 @@ int main()
         shaderInfo.type = ShaderCompiler::Shader::Type::Fragment;
         shaderInfo.entryPoint = "multipleSet";
         shaderInfo.source = {
-            "#version 430                                                                               \n"
-            "layout(set = 0, binding = 0, input_attachment_index = 0) uniform subpassInput uLastColor;  \n"
-            "layout(set = 1, binding = 0, input_attachment_index = 0) uniform subpassInput uLastDepth;  \n"
-            "layout(location = 0) out vec4 color;                                                       \n"
-            "void multipleSet() {                                                                       \n"
-            "   color = subpassLoad(uLastColor);                                                        \n"
-            "   gl_FragDepth = subpassLoad(uLastDepth).r;                                               \n"
-            "}                                                                                          \n"
-            "void main() { multipleSet(); }                                                             \n"
+            "#version 430                                                                      \n"
+            "layout(binding = 0, input_attachment_index = 0) uniform subpassInput uLastColor;  \n"
+            "layout(binding = 1, input_attachment_index = 1) uniform subpassInput uLastDepth;  \n"
+            "layout(location = 0) out vec4 color;                                              \n"
+            "void multipleSet() {                                                              \n"
+            "   color = subpassLoad(uLastColor);                                               \n"
+            "   gl_FragDepth = subpassLoad(uLastDepth).r;                                      \n"
+            "}                                                                                 \n"
+            "void main() { multipleSet(); }                                                    \n"
         };
         const auto shader = ShaderCompiler::Shader::Create(compiler, shaderInfo);
         ret |= ShaderCompiler::Shader::Compile(shader).empty() ? -1 : 0;
@@ -130,8 +130,8 @@ int main()
         shaderInfo.source = {
             "#version 430                                               \n"
             "layout(location = 0) in vec3 vPosition;                    \n"
-            "layout(set = 0, binding = 0) uniform sampler2D uTexture;   \n"
-            "layout(set = 0, binding = 0) uniform camera {              \n"
+            "layout(binding = 0) uniform sampler2D uTexture;            \n"
+            "layout(binding = 0) uniform camera {                       \n"
             "   mat4 viewMatrix;                                        \n"
             "} uCamera;                                                 \n"
             "void uniformLocation() {                                   \n"

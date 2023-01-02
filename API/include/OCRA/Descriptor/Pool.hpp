@@ -7,8 +7,8 @@
 
 OCRA_DECLARE_HANDLE(OCRA::Device);
 OCRA_DECLARE_HANDLE(OCRA::Descriptor::Pool);
-OCRA_DECLARE_HANDLE(OCRA::Descriptor::SetLayout);
 OCRA_DECLARE_HANDLE(OCRA::Descriptor::Set);
+OCRA_DECLARE_HANDLE(OCRA::Descriptor::SetLayout);
 
 namespace OCRA {
 struct AllocationCallback;
@@ -26,14 +26,20 @@ struct Size
 };
 struct Info
 {
-    uint32_t            maxSets{ 0 };
-    std::vector<Size>   sizes;
+    uint32_t maxSets = 0;
+    std::vector<Size>   sizes;//the types the allocated descriptors can contain
 };
 struct AllocateInfo
 {
-    Pool::Handle                    pool;
-    std::vector<SetLayout::Handle>  layouts;
+    Pool::Handle       pool;
+    SetLayout::Handle  layout;
 };
+/**
+* Creates a descriptor pool with specified size
+*/
 Handle Create(const Device::Handle& a_Device, const Info& a_Info, const AllocationCallback* a_Allocator = nullptr);
-std::vector<Set::Handle> AllocateSet(const Device::Handle& a_Device, const AllocateInfo& a_Info);
+/**
+* Allocates a descriptor with the corresponding layout
+*/
+Descriptor::Set::Handle AllocateSet(const Device::Handle& a_Device, const AllocateInfo& a_Info);
 }

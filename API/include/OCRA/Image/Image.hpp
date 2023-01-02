@@ -58,17 +58,40 @@ struct Info {
     uint16_t mipLevels { 0 }, arrayLayers { 0 };
     bool fixedSampleLocations { false };
 };
+
 Handle Create(const Device::Handle& a_Device, const Info& a_Info);
+
+/**
+* @brief Copies the specified buffer to the specified image.
+* This command is asynchronous, meaning that you have to synchronize
+* it if you wanna read from the Image's memory.
+* You can force sync by using WaitIdle.
+*/
 void CopyBufferToImage(
     const Device::Handle& a_Device,
     const OCRA::Buffer::Handle& a_SrcBuffer,
     const Image::Handle& a_DstImage,
     const std::vector<Image::BufferCopy>& a_Regions);
+
+/**
+* @brief Copies the specified image to the specified buffer.
+* This command is asynchronous, meaning that you have to synchronize
+* it if you wanna read from the buffer's memory.
+* You can force sync by using WaitIdle.
+*/
 void CopyImageToBuffer(
     const Device::Handle& a_Device,
     const OCRA::Buffer::Handle& a_DstBuffer,
     const Image::Handle& a_SrcImage,
     const std::vector<Image::BufferCopy>& a_Regions);
+
+/**
+* @brief Generates the mipmaps for the specified Image.
+* On OpenGL this is a native function, on VK it's emulated.
+* This command is asynchronous, meaning that you have to synchronize
+* it if you wanna read from the buffer's memory.
+* You can force sync by using WaitIdle.
+*/
 void GenerateMipMap(
     const Device::Handle& a_Device,
     const Image::Handle& a_Image);

@@ -13,7 +13,7 @@
 #include <OCRA/RenderPass.hpp>
 
 #include <GL/Common/Stencil.hpp>
-#include <GL/Descriptor/SetBinding.hpp>
+#include <GL/Descriptor/Binding.hpp>
 #include <GL/PushConstants.hpp>
 #include <GL/Common/FixedSizeMemoryPool.hpp>
 #include <GL/glew.h>
@@ -80,14 +80,13 @@ struct PipelineState {
         Reset();
     }
     void Reset() {
-        descriptorDynamicOffsets.fill(0);
         pipeline.reset();
-        for (auto& set : descriptorSets)
-            set.clear();
+        descriptorDynamicOffset = 0;
+        descriptorSet.clear();
     }
     Pipeline::Handle pipeline;
-    std::array<DescriptorSet, OCRA_GL_MAX_BOUND_DESCRIPTOR_SETS> descriptorSets;
-    std::array<uint32_t, OCRA_GL_MAX_BOUND_DESCRIPTOR_SETS>      descriptorDynamicOffsets;
+    DescriptorSet descriptorSet;
+    uint32_t      descriptorDynamicOffset;
 };
 
 struct ExecutionState {

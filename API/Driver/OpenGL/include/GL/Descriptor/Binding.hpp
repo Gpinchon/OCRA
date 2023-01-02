@@ -4,10 +4,8 @@
 #include <OCRA/Descriptor/Type.hpp>
 
 #include <GL/Descriptor/SetLayout.hpp>
-
 #include <GL/Buffer.hpp>
 #include <GL/Memory.hpp>
-
 #include <GL/Image/View.hpp>
 #include <GL/Image/Sampler.hpp>
 
@@ -60,26 +58,18 @@ struct SampledImage : ImageStorage {
     virtual void Bind(uint32_t a_BindingIndex) override {
         ImageStorage::Bind(a_BindingIndex);
         glBindSampler(a_BindingIndex, imageSampler->handle);
-        glBindImageTexture(
-            a_BindingIndex,
-            imageView->handle,
-            0, //level
-            GL_FALSE, //layered
-            0, //layer
-            GL_READ_WRITE,
-            imageView->format);
     }
     virtual void Unbind(uint32_t a_BindingIndex) override {
         ImageStorage::Unbind(a_BindingIndex);
         glBindSampler(a_BindingIndex, 0);
-        glBindImageTexture(
+        /*glBindImageTexture(
             a_BindingIndex,
             0,
             0, //level
             GL_FALSE, //layered
             0, //layer
             GL_READ_WRITE,
-            imageView->format);
+            imageView->format);*/
     }
     OCRA::Image::Sampler::Handle  imageSampler{ nullptr };
 };

@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <unordered_map>
 
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Instance);
 
@@ -48,7 +49,7 @@ static inline auto GetPhysicalDeviceLimitsGL()
     limits.bufferImageGranularity = 0; //no granularity imposed by OGL
     limits.sparseAddressSpaceSize = (std::numeric_limits<uint64_t>::max)();
 
-    limits.maxBoundDescriptorSets = OCRA_GL_MAX_BOUND_DESCRIPTOR_SETS;
+    limits.maxBoundDescriptorSets = 1; //We don't support multiple descriptor sets since only Vulkan has that
     limits.maxPerStageDescriptorSamplers = 4000;
     limits.maxPerStageDescriptorUniformBuffers = GetInteger(GL_MAX_UNIFORM_BUFFER_BINDINGS) / 6; //divided by the number of shader stages
     limits.maxPerStageDescriptorStorageBuffers = GetInteger(GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS) / 6; //divided by the number of shader stages
@@ -299,14 +300,40 @@ void GLAPIENTRY MessageCallback(
     const GLchar* message,
     const void* userParam)
 {
-    if (type == GL_DEBUG_TYPE_ERROR)
-    {
-        std::stringstream ss;
-        ss << "GL CALLBACK : **GL ERROR * *\n" <<
-            " type     = " << type << "\n" <<
-            " severity = " << severity << "\n" <<
-            " message  = " << message;
-        std::cerr << ss.str() << std::endl;
+    static const std::unordered_map<GLenum, std::string> sourceStrings{
+        {GL_DEBUG_SOURCE_API,             "API"},
+        {GL_DEBUG_SOURCE_APPLICATION,     "Application"},
+        {GL_DEBUG_SOURCE_OTHER,           "Other"},
+        {GL_DEBUG_SOURCE_SHADER_COMPILER, "Shader Compiler"},
+        {GL_DEBUG_SOURCE_THIRD_PARTY,     "Third Party"},
+        {GL_DEBUG_SOURCE_WINDOW_SYSTEM,   "Window System"}
+    };
+    static const std::unordered_map<GLenum, std::string> typeStrings{
+        {GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR, "Deprecated Behavior"},
+        {GL_DEBUG_TYPE_ERROR,               "Error"},
+        {GL_DEBUG_TYPE_MARKER,              "Marker"},
+        {GL_DEBUG_TYPE_OTHER,               "Other"},
+        {GL_DEBUG_TYPE_PERFORMANCE,         "Performance"},
+        {GL_DEBUG_TYPE_POP_GROUP,           "Pop Group"},
+        {GL_DEBUG_TYPE_PORTABILITY,         "Portability"},
+        {GL_DEBUG_TYPE_PUSH_GROUP,          "Push Group"},
+        {GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR,  "Undefined Behavior"}
+    };
+    static const std::unordered_map<GLenum, std::string> severityStrings{
+        {GL_DEBUG_SEVERITY_HIGH,          "High"},
+        {GL_DEBUG_SEVERITY_MEDIUM,        "Medium"},
+        {GL_DEBUG_SEVERITY_LOW,           "Low"},
+        {GL_DEBUG_SEVERITY_NOTIFICATION,  "Notification"}
+    };
+    std::stringstream ss;
+
+    ss << "**GL CALLBACK**\n";
+    ss << "  SOURCE   : " << sourceStrings.at(source) << '\n';
+    ss << "  TYPE     : " << typeStrings.at(type) << '\n';
+    ss << "  SEVERITY : " << severityStrings.at(severity) << '\n';
+    ss << "  MESSAGE  : " << message << '\n';
+    std::cerr << ss.str() << std::endl;
+    if (type == GL_DEBUG_TYPE_ERROR) {
         throw std::runtime_error(ss.str());
     }
 }
@@ -322,6 +349,7 @@ void Impl::GetProperties()
     PushCommand([this] {
 #ifdef _DEBUG
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
         glDebugMessageCallback(MessageCallback, 0);
 #endif _DEBUG
         properties = GetPhysicalDevicePropertiesGL();

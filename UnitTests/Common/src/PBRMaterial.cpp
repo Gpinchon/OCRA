@@ -19,14 +19,17 @@ auto PBRFragmentShader(const Device::Handle& a_Device)
     shaderInfo.source = {
         "#version 450                                           \n"
         "layout(location = 0) in vec3 vertColor;                \n"
+        "layout(location = 1) in vec2 vertTexCoord;             \n"
         "layout(location = 0) out vec4 outColor;                \n"
-        "layout(set = 1, binding = 1) uniform PBRParameters {   \n"
+        "layout(binding = 1) uniform PBRParameters {            \n"
         "    vec4 albedo;                                       \n"
         "    float roughness;                                   \n"
         "    float metallic;                                    \n"
         "} matParam;                                            \n"
+        "layout(binding = 2) uniform sampler2D albedoTexture;   \n"
         "void main() {                                          \n"
         "    outColor = matParam.albedo * vec4(vertColor, 1.0); \n"
+        "    outColor *= texture(albedoTexture, vertTexCoord);  \n"
         "}                                                      \n"
     };
     const auto fragmentShader = ShaderCompiler::Shader::Create(compiler, shaderInfo);
@@ -72,7 +75,15 @@ PBRMaterial::PBRMaterial(
             bufferPtr[index].a = 255;
         }
     }
-
-    
+    Memory::Unmap(a_Device, textureTransferMemory);
+    Image::BufferCopy bufferCopy;
+    bufferCopy.bufferImageHeight = texture.GetHeight();
+    bufferCopy.bufferRowLength   = texture.GetWidth();
+    bufferCopy.bufferOffset      = 0;
+    bufferCopy.imageExtent.width  = texture.GetWidth();
+    bufferCopy.imageExtent.height = texture.GetHeight();
+    bufferCopy.imageExtent.depth  = 1;
+    bufferCopy.imageSubresource.level = 0;
+    Image::CopyBufferToImage(a_Device, textureTransferBuffer, texture.GetImage(), { bufferCopy });
 }
 }

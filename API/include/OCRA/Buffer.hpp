@@ -45,10 +45,20 @@ struct Info {
     SharingMode             sharingMode{ SharingMode::Exclusive };
     std::vector<uint32_t>   queueFamilyIndices;
 };
+
+/**
+* @brief Creates an empty buffer, unuseable without binding Memory to it
+*/
 Handle Create(
     const Device::Handle&       a_Device,
     const Info&                 a_Info,
     const AllocationCallback*   a_Allocator = nullptr);
+
+/**
+* @brief Binds the specified memory to the specified Buffer.
+* On OpenGL, this will update internal structure to use a certain range of the GPU buffer.
+* This comes with limitations, especially regarding indices and instanciated draw calls.
+*/
 void BindMemory(
     const Device::Handle&   a_Device,
     const Handle&           a_Buffer,
@@ -65,6 +75,7 @@ struct BufferCopyRegion
 {
     uint64_t readOffset{ 0 }, writeOffset{ 0 }, size{ 0 };
 };
+
 /**
 * Update a buffer's contents from host memory
 * Size is limited to 65536
@@ -75,6 +86,7 @@ void Update(
     const size_t&                   a_Offset,
     const size_t&                   a_Size,
     const std::byte*                a_Data);
+
 /**
 * Update a buffer's contents from host memory
 * Size is limited to 65536
@@ -84,19 +96,28 @@ void Update(
     const OCRA::Buffer::Handle&     a_DstBuffer,
     const size_t&                   a_Offset,
     const std::vector<std::byte>&   a_Data);
-//Copies data from srcBuffer to dstBuffer
+
+/**
+* @brief Copies data from srcBuffer to dstBuffer
+*/
 void CopyBuffer(
     const Command::Buffer::Handle& a_CommandBuffer,
     const OCRA::Buffer::Handle&    a_SrcBuffer,
     const OCRA::Buffer::Handle&    a_DstBuffer,
     const std::vector<BufferCopyRegion>&  a_Regions);
-//Bind specified Vertex Buffers to Render Pass currently bound to this Command Buffer
+
+/**
+* @brief Bind specified Vertex Buffers to Render Pass currently bound to this Command Buffer
+*/
 void BindVertexBuffers(
     const Command::Buffer::Handle&              a_CommandBuffer,
     const uint32_t                              a_FirstBinding,
     const std::vector<OCRA::Buffer::Handle>&    a_VertexBuffers,
     const std::vector<uint64_t>&                a_Offsets);
-//Bind specified Vertex Buffer to Render Pass currently bound to this Command Buffer
+
+/**
+* @brief Bind specified Vertex Buffer to Render Pass currently bound to this Command Buffer
+*/
 void BindIndexBuffer(
     const Command::Buffer::Handle&  a_CommandBuffer,
     const OCRA::Buffer::Handle&     a_IndexBuffer,

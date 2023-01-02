@@ -17,16 +17,17 @@ enum class Type {
     TessControl, TessEval,
     MaxValue
 };
-/**
-* @arg type : the shader's type (Vertex, Geometry, Fragment...)
-* @arg entryPoint : the shader's entry point
-* @arg source : the shader's human readable source code
-*/
+
 struct Info {
-    Type        type{ Type::Unknown };
-    std::string entryPoint{};
-    std::string source{};
+    Type        type{ Type::Unknown }; //the shader's type (Vertex, Geometry, Fragment...)
+    std::string entryPoint{};          //the shader's entry point
+    std::string source{};              //the shader's human readable source code
 };
+/**
+* @brief The shader language is vulkan glsl.
+* Multiple descriptor sets aren't supported,
+* either use set=0 or no set at all.
+*/
 Handle Create(const ShaderCompiler::Handle& a_Compiler, const Info& a_Info);
 std::vector<uint32_t> Compile(const Handle& a_Shader);
 }

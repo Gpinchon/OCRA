@@ -45,21 +45,16 @@ const Info& GetInfo(const Handle& a_CommandPool)
 {
     return a_CommandPool->info;
 }
-std::vector<Set::Handle> AllocateSet(const Device::Handle& a_Device, const AllocateInfo& a_Info)
+Set::Handle AllocateSet(const Device::Handle& a_Device, const AllocateInfo& a_Info)
 {
-    std::vector<Set::Handle> sets;
-    sets.reserve(a_Info.layouts.size());
     auto& memoryPool = a_Info.pool->memoryPool;
-    for (const auto& layout : a_Info.layouts) {
-        auto set = std::shared_ptr<Set::Impl>(new(memoryPool.allocate()) Set::Impl(layout), memoryPool.deleter());
-        sets.push_back(set);
+    auto set = std::shared_ptr<Set::Impl>(new(memoryPool.allocate()) Set::Impl(a_Info.layout), memoryPool.deleter());
 #ifdef _DEBUG
-        auto& allocated = a_Info.pool->allocated;
-        allocated.push_back(set);
-        //cleanup while we're at it
-        allocated.erase(std::remove_if(allocated.begin(), allocated.end(), [](auto& allocated) { return allocated.expired(); }), allocated.end());
+    auto& allocated = a_Info.pool->allocated;
+    allocated.push_back(set);
+    //cleanup while we're at it
+    allocated.erase(std::remove_if(allocated.begin(), allocated.end(), [](auto& allocated) { return allocated.expired(); }), allocated.end());
 #endif
-    }
-    return sets;
+    return set;
 }
 }

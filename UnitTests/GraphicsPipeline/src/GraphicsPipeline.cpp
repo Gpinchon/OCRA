@@ -81,33 +81,33 @@ Vec3 HSVtoRGB(float fH, float fS, float fV) {
     return { fR, fG, fB };
 }
 
-struct Vertex {
-    Vec2 pos;
-    Vec3 color;
-    static auto GetBindingDescriptions() {
-        std::vector<Pipeline::VertexInputState::BindingDescription> bindings(1);
-        bindings.at(0).binding = 0;
-        bindings.at(0).stride = sizeof(Vertex);
-        bindings.at(0).inputRate = Pipeline::VertexInputState::BindingDescription::InputRate::Vertex;
-        return bindings;
-    }
-    static auto GetAttributeDescription() {
-        std::vector<Pipeline::VertexInputState::AttributeDescription> attribs(2);
-        attribs.at(0).binding = 0;
-        attribs.at(0).location = 0;
-        attribs.at(0).format.size = 2;
-        attribs.at(0).format.normalized = false;
-        attribs.at(0).format.type = VertexType::Float32;
-        attribs.at(0).offset = offsetof(Vertex, pos);
-        attribs.at(1).binding = 0;
-        attribs.at(1).location = 1;
-        attribs.at(1).format.size = 3;
-        attribs.at(1).format.normalized = true;
-        attribs.at(1).format.type = VertexType::Float32;
-        attribs.at(1).offset = offsetof(Vertex, color);
-        return attribs;
-    }
-};
+//struct Vertex {
+//    Vec2 pos;
+//    Vec3 color;
+//    static auto GetBindingDescriptions() {
+//        std::vector<Pipeline::VertexInputState::BindingDescription> bindings(1);
+//        bindings.at(0).binding = 0;
+//        bindings.at(0).stride = sizeof(Vertex);
+//        bindings.at(0).inputRate = Pipeline::VertexInputState::BindingDescription::InputRate::Vertex;
+//        return bindings;
+//    }
+//    static auto GetAttributeDescription() {
+//        std::vector<Pipeline::VertexInputState::AttributeDescription> attribs(2);
+//        attribs.at(0).binding = 0;
+//        attribs.at(0).location = 0;
+//        attribs.at(0).format.size = 2;
+//        attribs.at(0).format.normalized = false;
+//        attribs.at(0).format.type = VertexType::Float32;
+//        attribs.at(0).offset = offsetof(Vertex, pos);
+//        attribs.at(1).binding = 0;
+//        attribs.at(1).location = 1;
+//        attribs.at(1).format.size = 3;
+//        attribs.at(1).format.normalized = true;
+//        attribs.at(1).format.type = VertexType::Float32;
+//        attribs.at(1).offset = offsetof(Vertex, color);
+//        return attribs;
+//    }
+//};
 
 struct GraphicsPipelineTestApp : TestApp
 {
@@ -275,7 +275,7 @@ struct GraphicsPipelineTestApp : TestApp
     void RecordMainCommandBuffer(float a_Delta)
     {
         drawCommandDelta += a_Delta;
-        if (drawCommandDelta >= 32 || firstLoop) {
+        if (drawCommandDelta >= 31 || firstLoop) {
             RecordDrawCommandBuffer(drawCommandDelta);
             drawCommandDelta = 0;
         }
@@ -312,10 +312,10 @@ struct GraphicsPipelineTestApp : TestApp
     Image::Handle            frameBufferImage;
 
     Mesh    mesh{ physicalDevice, device,
-        VertexBuffer(physicalDevice, device, std::vector<Vertex>{
-            { {0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-            {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-            {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+        VertexBuffer(physicalDevice, device, std::vector<DefaultVertex>{
+            { {  0.0f, -0.5f, 0.f }, { 1.0f, 0.0f, 0.0f }, { 0.f, 1.f }},
+            { {  0.5f,  0.5f, 0.f }, { 0.0f, 1.0f, 0.0f }, { 1.f, 0.f }},
+            { { -0.5f,  0.5f, 0.f }, { 0.0f, 0.0f, 1.0f }, { 1.f, 1.f }}
         }),
         PBRMaterial(physicalDevice, device) };
 

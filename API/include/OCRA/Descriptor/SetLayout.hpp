@@ -24,7 +24,7 @@ struct Binding
 };
 struct Info
 {
-    std::vector<Binding> bindings;
+    std::vector<Binding> bindings; //the bindings of this descriptor, must be compatible with Pool::Info::sizes
 };
 Handle Create(const Device::Handle& a_Device, const Info& a_Info, const AllocationCallback* a_Allocator = nullptr);
 }
