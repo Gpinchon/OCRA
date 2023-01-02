@@ -82,10 +82,12 @@ struct PipelineState {
     void Reset() {
         pipeline.reset();
         descriptorDynamicOffset = 0;
-        descriptorSet.clear();
+        descriptorSet.reset();
+        pushDescriptorSet.clear();
     }
     Pipeline::Handle pipeline;
-    DescriptorSet descriptorSet;
+    Descriptor::Set::Handle descriptorSet;
+    DescriptorSet pushDescriptorSet;
     uint32_t      descriptorDynamicOffset;
 };
 

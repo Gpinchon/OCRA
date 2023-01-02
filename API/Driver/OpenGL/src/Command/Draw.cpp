@@ -28,9 +28,10 @@ void ApplyPipelineStates(Buffer::ExecutionState& a_ExecutionState) {
     auto& pipelineState = a_ExecutionState.pipelineState.at(size_t(Pipeline::BindingPoint::Graphics));
     pipelineState.pipeline->Apply(a_ExecutionState);
     a_ExecutionState.pushConstants.Bind();
-    for (auto& binding : pipelineState.descriptorSet) {
+    for (auto& binding : pipelineState.pushDescriptorSet)
         binding.Bind();
-    }
+    if (pipelineState.descriptorSet != nullptr)
+        pipelineState.descriptorSet->Bind();
 }
 //Draw commands
 void Draw(

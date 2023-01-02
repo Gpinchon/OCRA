@@ -40,11 +40,7 @@ void OCRA::Command::BindDescriptorSet(
         dynamicOffsets = a_DynamicOffsets
     ](Buffer::ExecutionState& a_ExecutionState){
         auto& pipelineState = a_ExecutionState.pipelineState.at(bindingPoint);
-        const auto& bindings = descriptorSet->bindings;
-        pipelineState.descriptorSet.clear();
-        for (const auto& binding : bindings) {
-            pipelineState.descriptorSet.push_back(binding);
-        }
+        pipelineState.descriptorSet = descriptorSet;
         for (uint32_t i = firstDynamicOffset; i < dynamicOffsets.size(); ++i) {
             pipelineState.descriptorDynamicOffset = dynamicOffsets.at(i);
         }
@@ -62,7 +58,7 @@ void OCRA::Command::PushDescriptorSet(
         layout = a_Layout,
         writes = a_Writes
     ](Buffer::ExecutionState& a_ExecutionState) {
-        auto& descriptorSet = a_ExecutionState.pipelineState.at(bindingPoint).descriptorSet;
+        auto& descriptorSet = a_ExecutionState.pipelineState.at(bindingPoint).pushDescriptorSet;
         for (const auto& write : writes) {
             descriptorSet.push_back({ write, write.dstBinding });
         }
