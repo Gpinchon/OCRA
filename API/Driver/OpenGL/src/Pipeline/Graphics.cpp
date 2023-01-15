@@ -23,63 +23,8 @@
 
 namespace OCRA::Pipeline::Graphics {
 struct Impl : Pipeline::Impl {
-    Impl(const Device::Handle& a_Device, const Info& a_Info)
-        : Pipeline::Impl(BindingPoint::Graphics, a_Info.layout)
-        , renderPass(a_Info.renderPass)
-        , subPass(a_Info.subPass)
-        , colorBlendState(ColorBlendState::Compile(a_Device, a_Info.colorBlendState, a_Info.dynamicState))
-        , depthStencilState(DepthStencilState::Compile(a_Device, a_Info.depthStencilState, a_Info.dynamicState))
-        , inputAssemblyState(InputAssemblyState::Compile(a_Device, a_Info.inputAssemblyState, a_Info.dynamicState))
-        , multisampleState(MultisampleState::Compile(a_Device, a_Info.multisampleState, a_Info.dynamicState))
-        , rasterizationState(RasterizationState::Compile(a_Device, a_Info.rasterizationState, a_Info.dynamicState))
-        , shaderPipelineState(ShaderPipelineState::Compile(a_Device, a_Info.shaderPipelineState, a_Info.dynamicState))
-        , tessellationState(TessellationState::Compile(a_Device, a_Info.tessellationState, a_Info.dynamicState))
-        , viewportState(ViewPortState::Compile(a_Device, a_Info.viewPortState, a_Info.dynamicState))
-        , vertexInputState(VertexInputState::Compile(a_Device, a_Info.vertexInputState, a_Info.dynamicState))
-    {}
-    virtual void Apply(Command::Buffer::ExecutionState& a_ExecutionState) const override {
-#ifdef _DEBUG
-        assert(renderPass == a_ExecutionState.renderPass.renderPass);
-#endif
-        if (a_ExecutionState.subpassIndex != subPass) {
-            a_ExecutionState.subpassIndex = subPass;
-            a_ExecutionState.renderPass.renderPass->BeginSubPass(a_ExecutionState);
-        }
-        const auto& lastPipeline = std::static_pointer_cast<Impl>(a_ExecutionState.lastPipelineState.at(size_t(BindingPoint::Graphics)).pipeline);
-        if (lastPipeline.get() == this) return; //we did not change states set
-        if (lastPipeline == nullptr) { //first graphics pipeline on this command buffer, just apply the states
-            colorBlendState(a_ExecutionState);
-            depthStencilState(a_ExecutionState);
-            inputAssemblyState(a_ExecutionState);
-            multisampleState(a_ExecutionState);
-            rasterizationState(a_ExecutionState);
-            shaderPipelineState(a_ExecutionState);
-            tessellationState(a_ExecutionState);
-            viewportState(a_ExecutionState);
-            vertexInputState(a_ExecutionState);
-        }
-        else {
-            if (std::memcmp(&lastPipeline->colorBlendState, &colorBlendState, sizeof(colorBlendState)) == 0)
-                colorBlendState(a_ExecutionState);
-            if (std::memcmp(&lastPipeline->depthStencilState, &depthStencilState, sizeof(depthStencilState)) == 0)
-                depthStencilState(a_ExecutionState);
-            if (std::memcmp(&lastPipeline->inputAssemblyState, &inputAssemblyState, sizeof(inputAssemblyState)) == 0)
-                inputAssemblyState(a_ExecutionState);
-            if (std::memcmp(&lastPipeline->multisampleState, &multisampleState, sizeof(multisampleState)) == 0)
-                multisampleState(a_ExecutionState);
-            if (std::memcmp(&lastPipeline->rasterizationState, &rasterizationState, sizeof(rasterizationState)) == 0)
-                rasterizationState(a_ExecutionState);
-            if (std::memcmp(&lastPipeline->shaderPipelineState, &shaderPipelineState, sizeof(shaderPipelineState)) == 0)
-                shaderPipelineState(a_ExecutionState);
-            if (std::memcmp(&lastPipeline->tessellationState, &tessellationState, sizeof(tessellationState)) == 0)
-                tessellationState(a_ExecutionState);
-            if (std::memcmp(&lastPipeline->viewportState, &viewportState, sizeof(viewportState)) == 0)
-                viewportState(a_ExecutionState);
-            if (std::memcmp(&lastPipeline->vertexInputState, &vertexInputState, sizeof(vertexInputState)) == 0)
-                vertexInputState(a_ExecutionState);
-        }
-        
-    }
+    Impl::Impl(const Device::Handle& a_Device, const Info& a_Info);
+    virtual void Impl::Apply(Command::Buffer::ExecutionState& a_ExecutionState) const override;
     const uint32_t                      subPass;
     const RenderPass::Handle            renderPass;
     const ColorBlendState::Compile      colorBlendState;
@@ -92,6 +37,65 @@ struct Impl : Pipeline::Impl {
     const ViewPortState::Compile        viewportState;
     const VertexInputState::Compile     vertexInputState;
 };
+
+Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
+    : Pipeline::Impl(BindingPoint::Graphics, a_Info.layout)
+    , renderPass(a_Info.renderPass)
+    , subPass(a_Info.subPass)
+    , colorBlendState(ColorBlendState::Compile(a_Device, a_Info.colorBlendState, a_Info.dynamicState))
+    , depthStencilState(DepthStencilState::Compile(a_Device, a_Info.depthStencilState, a_Info.dynamicState))
+    , inputAssemblyState(InputAssemblyState::Compile(a_Device, a_Info.inputAssemblyState, a_Info.dynamicState))
+    , multisampleState(MultisampleState::Compile(a_Device, a_Info.multisampleState, a_Info.dynamicState))
+    , rasterizationState(RasterizationState::Compile(a_Device, a_Info.rasterizationState, a_Info.dynamicState))
+    , shaderPipelineState(ShaderPipelineState::Compile(a_Device, a_Info.shaderPipelineState, a_Info.dynamicState))
+    , tessellationState(TessellationState::Compile(a_Device, a_Info.tessellationState, a_Info.dynamicState))
+    , viewportState(ViewPortState::Compile(a_Device, a_Info.viewPortState, a_Info.dynamicState))
+    , vertexInputState(VertexInputState::Compile(a_Device, a_Info.vertexInputState, a_Info.dynamicState))
+{}
+
+void Impl::Apply(Command::Buffer::ExecutionState& a_ExecutionState) const {
+#ifdef _DEBUG
+    assert(renderPass == a_ExecutionState.renderPass.renderPass);
+#endif
+    if (a_ExecutionState.subpassIndex != subPass) {
+        a_ExecutionState.subpassIndex = subPass;
+        a_ExecutionState.renderPass.renderPass->BeginSubPass(a_ExecutionState);
+    }
+    const auto& lastPipeline = std::static_pointer_cast<Impl>(a_ExecutionState.lastPipelineState.at(size_t(BindingPoint::Graphics)).pipeline);
+    if (lastPipeline.get() == this) return; //we did not change states set
+    if (lastPipeline == nullptr) { //first graphics pipeline on this command buffer, just apply the states
+        colorBlendState(a_ExecutionState);
+        depthStencilState(a_ExecutionState);
+        inputAssemblyState(a_ExecutionState);
+        multisampleState(a_ExecutionState);
+        rasterizationState(a_ExecutionState);
+        shaderPipelineState(a_ExecutionState);
+        tessellationState(a_ExecutionState);
+        viewportState(a_ExecutionState);
+        vertexInputState(a_ExecutionState);
+    }
+    else {
+        if (std::memcmp(&lastPipeline->colorBlendState, &colorBlendState, sizeof(colorBlendState)) != 0)
+            colorBlendState(a_ExecutionState);
+        if (std::memcmp(&lastPipeline->depthStencilState, &depthStencilState, sizeof(depthStencilState)) != 0)
+            depthStencilState(a_ExecutionState);
+        if (std::memcmp(&lastPipeline->inputAssemblyState, &inputAssemblyState, sizeof(inputAssemblyState)) != 0)
+            inputAssemblyState(a_ExecutionState);
+        if (std::memcmp(&lastPipeline->multisampleState, &multisampleState, sizeof(multisampleState)) != 0)
+            multisampleState(a_ExecutionState);
+        if (std::memcmp(&lastPipeline->rasterizationState, &rasterizationState, sizeof(rasterizationState)) != 0)
+            rasterizationState(a_ExecutionState);
+        if (std::memcmp(&lastPipeline->shaderPipelineState, &shaderPipelineState, sizeof(shaderPipelineState)) != 0)
+            shaderPipelineState(a_ExecutionState);
+        if (std::memcmp(&lastPipeline->tessellationState, &tessellationState, sizeof(tessellationState)) != 0)
+            tessellationState(a_ExecutionState);
+        if (std::memcmp(&lastPipeline->viewportState, &viewportState, sizeof(viewportState)) != 0)
+            viewportState(a_ExecutionState);
+        if (std::memcmp(&lastPipeline->vertexInputState, &vertexInputState, sizeof(vertexInputState)) != 0)
+            vertexInputState(a_ExecutionState);
+    }
+}
+
 Handle Create(const Device::Handle& a_Device, const Info& a_Info) {
     return Handle(new Graphics::Impl(a_Device, a_Info));
 }

@@ -29,21 +29,17 @@ void OCRA::Command::BindDescriptorSet(
     const Command::Buffer::Handle&  a_CommandBuffer,
     const Pipeline::BindingPoint&   a_BindingPoint,
     const Pipeline::Layout::Handle& a_Layout,
-    const Descriptor::Set::Handle& a_DescriptorSet,
-    const std::vector<uint32_t>&    a_DynamicOffsets)
+    const Descriptor::Set::Handle&  a_DescriptorSet,
+    const uint32_t                  a_DynamicOffset)
 {
-    auto firstDynamicOffset = !a_DynamicOffsets.empty() ? a_Layout->GetDynamicOffset(0) : 0;
     a_CommandBuffer->PushCommand([
         bindingPoint = uint8_t(a_BindingPoint),
         descriptorSet = a_DescriptorSet,
-        firstDynamicOffset,
-        dynamicOffsets = a_DynamicOffsets
+        dynamicOffset = a_DynamicOffset
     ](Buffer::ExecutionState& a_ExecutionState){
         auto& pipelineState = a_ExecutionState.pipelineState.at(bindingPoint);
         pipelineState.descriptorSet = descriptorSet;
-        for (uint32_t i = firstDynamicOffset; i < dynamicOffsets.size(); ++i) {
-            pipelineState.descriptorDynamicOffset = dynamicOffsets.at(i);
-        }
+        pipelineState.descriptorDynamicOffset = dynamicOffset;
     });
 }
 

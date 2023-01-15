@@ -7,60 +7,15 @@
 #include <GL/glew.h>
 
 namespace OCRA::Pipeline::VertexInputState {
-struct VertexArray
-{
-    VertexArray(const Device::Handle& a_Device, const Info& a_Info)
-        : device(a_Device)
-    {
-        a_Device->PushCommand([this, info = a_Info] {
-            glGenVertexArrays(1, &handle);
-            Bind();
-            for (const auto& attribute : info.attributeDescriptions) {
-                glEnableVertexAttribArray(attribute.location);
-                glVertexAttribFormat(
-                    attribute.location,
-                    attribute.format.size,
-                    GetGLVertexType(attribute.format.type),
-                    attribute.format.normalized,
-                    attribute.offset);
-                glVertexAttribBinding(
-                    attribute.location,
-                    attribute.binding);
-            }
-            for (const auto& bindingDescription : info.bindingDescriptions) {
-                //Is this binding divided by instance or by vertex ?
-                const auto divideByInstance = bindingDescription.inputRate == BindingDescription::InputRate::Instance;
-                glVertexBindingDivisor(
-                    bindingDescription.binding,
-                    divideByInstance ? 1 : 0);
-            }
-            Unbind();
-        }, false);
-    }
-    ~VertexArray()
-    {
-        device.lock()->PushCommand([handle = handle] {
-            glDeleteVertexArrays(1, &handle);
-        }, false);
-    }
-    void Bind() const {
-        glBindVertexArray(handle);
-    }
-    void Unbind() const {
-        glBindVertexArray(0);
-    }
-    const Device::WeakHandle device;
-    uint32_t handle{ 0 };
-};
-
 Compile::Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info& a_DynamicState)
     : device(a_Device)
-    , info(a_Info)
+    , primitiveRestartIndex(a_Info.primitiveRestartIndex)
+    , bindingDescriptions(a_Info.bindingDescriptions)
 {
-    a_Device->PushCommand([this, info = a_Info] {
+    a_Device->PushCommand([this, &a_Info] {
         glGenVertexArrays(1, &handle);
         glBindVertexArray(handle);
-        for (const auto& attribute : info.attributeDescriptions) {
+        for (const auto& attribute : a_Info.attributeDescriptions) {
             glEnableVertexAttribArray(attribute.location);
             glVertexAttribFormat(
                 attribute.location,
@@ -72,11 +27,11 @@ Compile::Compile(const Device::Handle& a_Device, const Info& a_Info, const Dynam
                 attribute.location,
                 attribute.binding);
         }
-        for (const auto& bindingDescription : info.bindingDescriptions) {
+        for (const auto& description : a_Info.bindingDescriptions) {
             //Is this binding divided by instance or by vertex ?
-            const auto divideByInstance = bindingDescription.inputRate == BindingDescription::InputRate::Instance;
+            const auto divideByInstance = description.inputRate == BindingDescription::InputRate::Instance;
             glVertexBindingDivisor(
-                bindingDescription.binding,
+                description.binding,
                 divideByInstance ? 1 : 0);
         }
         glBindVertexArray(0);
@@ -85,7 +40,8 @@ Compile::Compile(const Device::Handle& a_Device, const Info& a_Info, const Dynam
 
 Compile::Compile(const Compile& a_Other)
     : device(a_Other.device)
-    , info(a_Other.info)
+    , primitiveRestartIndex(a_Other.primitiveRestartIndex)
+    , bindingDescriptions(a_Other.bindingDescriptions)
     , handle(std::exchange(a_Other.handle, 0))
 {}
 
@@ -99,17 +55,25 @@ Compile::~Compile()
 
 void Compile::operator()(Command::Buffer::ExecutionState& a_ExecutionState) const
 {
-    glPrimitiveRestartIndex(info.primitiveRestartIndex);
+    glPrimitiveRestartIndex(primitiveRestartIndex);
     glBindVertexArray(handle);
-    for (const auto& bindingDescription : info.bindingDescriptions) {
+    for (const auto& bindingDescription : bindingDescriptions) {
         const auto& vertexInput = a_ExecutionState.renderPass.vertexInputBindings.at(bindingDescription.binding);
-        const auto& vertexMemory = vertexInput.buffer->memoryBinding;
-        //Is this binding divided by instance or by vertex ?
-        glBindVertexBuffer(
-            bindingDescription.binding,
-            vertexMemory.memory->handle,
-            vertexMemory.offset + vertexInput.offset,
-            bindingDescription.stride);
+        const auto& vertexBuffer = vertexInput.buffer;
+        if (vertexBuffer == nullptr) {
+            glBindVertexBuffer(
+                bindingDescription.binding,
+                0, 0,
+                bindingDescription.stride);
+        }
+        else {
+            const auto& vertexMemory = vertexBuffer->memoryBinding;
+            glBindVertexBuffer(
+                bindingDescription.binding,
+                vertexMemory.memory->handle,
+                vertexInput.offset,
+                bindingDescription.stride);
+        }
     }
 }
 }

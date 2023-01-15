@@ -69,7 +69,8 @@ void BindDescriptorSet(
     const Pipeline::BindingPoint&   a_BindingPoint,
     const Pipeline::Layout::Handle& a_PipelineLayout,
     const Descriptor::Set::Handle&  a_Descriptor,
-    const std::vector<uint32_t>&    a_DynamicOffset);
+    const uint32_t                  a_DynamicOffset);
+
 /**
 * @brief Pushes the specified descriptor to the command buffer's bindings
 */

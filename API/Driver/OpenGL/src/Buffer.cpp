@@ -88,32 +88,41 @@ void CopyBuffer(
         }
     });
 }
+
 void BindIndexBuffer(
     const Command::Buffer::Handle& a_CommandBuffer,
     const OCRA::Buffer::Handle& a_IndexBuffer,
     const uint64_t a_Offset,
     const IndexType a_IndexType)
 {
+    const auto& indexBufferMemory = a_IndexBuffer->memoryBinding;
     a_CommandBuffer->PushCommand([
         indexBuffer = a_IndexBuffer,
-        offset = a_Offset, indexType = GetGLIndexType(a_IndexType)
-    ](Buffer::ExecutionState& executionState) {
-        executionState.renderPass.indexBufferBinding.buffer = indexBuffer;
-        executionState.renderPass.indexBufferBinding.offset = offset;
-        executionState.renderPass.indexBufferBinding.type   = indexType;
+        offset = a_Offset + indexBufferMemory.offset, indexType = GetGLIndexType(a_IndexType)
+    ](Buffer::ExecutionState& a_ExecutionState) {
+        a_ExecutionState.renderPass.indexBufferBinding.buffer = indexBuffer;
+        a_ExecutionState.renderPass.indexBufferBinding.offset = offset;
+        a_ExecutionState.renderPass.indexBufferBinding.type   = indexType;
     });
     
 }
+
 void BindVertexBuffers(
     const Command::Buffer::Handle& a_CommandBuffer,
     const uint32_t a_FirstBinding,
     const std::vector<OCRA::Buffer::Handle>& a_VertexBuffers,
     const std::vector<uint64_t>& a_Offsets)
 {
+    std::vector<uint64_t> offsets = a_Offsets;
+    for (auto i = 0u; i < a_Offsets.size(); ++i) {
+        const auto& vertexBuffer = a_VertexBuffers.at(i);
+        const auto& vertexMemory = vertexBuffer->memoryBinding;
+        offsets.at(i) += vertexMemory.offset; //offset binding according to memory offset
+    }
     a_CommandBuffer->PushCommand([
             firstBinding = a_FirstBinding,
             vertexBuffers = a_VertexBuffers,
-            offsets = a_Offsets
+            offsets
         ](Buffer::ExecutionState& a_ExecutionState) {
             a_ExecutionState.renderPass.vertexInputBindings.resize(vertexBuffers.size());
             for (auto index = 0u; index < vertexBuffers.size(); ++index)

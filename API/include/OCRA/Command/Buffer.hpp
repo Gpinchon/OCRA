@@ -10,10 +10,14 @@
 
 #include <bitset>
 #include <vector>
+#include <optional>
 
 OCRA_DECLARE_HANDLE(OCRA::Command::Buffer);
 OCRA_DECLARE_HANDLE(OCRA::Device);
 OCRA_DECLARE_HANDLE(OCRA::Pipeline::Layout);
+OCRA_DECLARE_HANDLE(OCRA::RenderPass);
+OCRA_DECLARE_HANDLE(OCRA::FrameBuffer);
+
 
 /**
 * Command buffers can hold refs to pooled objects and should always be destroyed first when exiting application
@@ -27,9 +31,17 @@ static UsageFlags OneTimeSubmit = 0b100;
 static UsageFlags RenderPassContinue = 0b010;
 static UsageFlags SimultaneousUse = 0b001;
 };
+
+struct InheritanceInfo {
+    OCRA::RenderPass::Handle renderPass;
+    uint32_t                 subpass;
+    FrameBuffer::Handle      framebuffer;
+};
+
 struct BeginInfo
 {
     UsageFlags flags{ UsageFlagBits::None };
+    std::optional<InheritanceInfo> inheritanceInfo; //must be valid if this command buffer is secondary
 };
 //Begin Command Buffer recording, switching it to Recording state
 void Begin(const Handle& a_CommandBuffer,

@@ -82,8 +82,6 @@ void PushConstants::Update(const size_t& a_Offset, const std::vector<std::byte>&
     ++offset %= PushConstantMultiBuffering;
     const auto currentOffset = offset * offsetAlignment;
     std::memcpy((char*)bufferPtr + currentOffset, a_Data.data(), a_Data.size());
-    glBindBuffer(GL_UNIFORM_BUFFER, bufferHandle);
-    glFlushMappedBufferRange(GL_UNIFORM_BUFFER, currentOffset, size);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    glFlushMappedNamedBufferRangeEXT(bufferHandle, currentOffset, size);
 }
 }

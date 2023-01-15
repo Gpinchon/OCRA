@@ -17,8 +17,8 @@ void BindPipeline(
     a_CommandBuffer->PushCommand([
         bindingPoint = uint8_t(a_BindingPoint),
         pipeline = a_Pipeline
-    ](Buffer::ExecutionState& executionState){
-        executionState.pipelineState.at(bindingPoint).pipeline = pipeline;
+    ](Buffer::ExecutionState& a_ExecutionState){
+        a_ExecutionState.pipelineState.at(bindingPoint).pipeline = pipeline;
     });
 }
 }

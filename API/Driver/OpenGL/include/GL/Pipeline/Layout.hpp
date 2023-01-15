@@ -36,10 +36,7 @@ private:
         uint32_t dynamicOffset;
         uint32_t descriptorCount;
     };
-    using DescriptorSet = std::vector<Binding>;
-
-    const uint32_t descriptorSetCount = 0;
-    DescriptorSet descriptorSet;
+    std::vector<Binding> descriptorSet;
     std::vector<PushConstantRange> pushConstantRanges;
 };
 }

@@ -33,11 +33,10 @@ void ExecuteCommandBuffer(
     const Buffer::Handle& a_CommandBuffer,
     const Buffer::Handle& a_SecondaryCommandBuffer)
 {
-    a_CommandBuffer->secondaryBuffers.push_back(a_SecondaryCommandBuffer);
     a_CommandBuffer->PushCommand([
         commandBuffer = a_SecondaryCommandBuffer.get()
-    ](Buffer::ExecutionState& executionState) {
-        commandBuffer->ExecuteSecondary(executionState);
+    ](Buffer::ExecutionState& a_ExecutionState) {
+        commandBuffer->ExecuteSecondary(a_ExecutionState);
     });
 }
 void PushConstants(
@@ -47,11 +46,12 @@ void PushConstants(
     const std::vector<std::byte>& a_Data)
 {
     a_CommandBuffer->PushCommand([
+        &pushConstants = a_CommandBuffer->pushConstants,
         pipelineLayout = a_PipelineLayout,
         offset = size_t(a_Offset),
         data = a_Data
-    ](Buffer::ExecutionState& a_ExecutionState) {
-        a_ExecutionState.pushConstants.Update(offset, data);
+    ](Buffer::ExecutionState&) {
+        pushConstants.Update(offset, data);
     });
 }
 }
@@ -66,8 +66,14 @@ void OCRA::Command::Buffer::Impl::Reset()
     );
     state = State::Initial;
     commands.clear();
-    secondaryBuffers.clear();
     executionState.Reset();
+    for (auto& parentBuffer : parentBuffers) {
+        auto parentBufferPtr = parentBuffer.lock();
+        auto parentState = parentBufferPtr->state;
+        if (parentState == State::Recording ||
+            parentState == State::Executable)
+            parentBufferPtr->Invalidate();
+    }
 }
 
 void OCRA::Command::Buffer::Impl::Invalidate()
@@ -79,7 +85,6 @@ void OCRA::Command::Buffer::Impl::Invalidate()
     );
     state = State::Invalid;
     commands.clear();
-    secondaryBuffers.clear();
     executionState.Reset();
 }
 
@@ -87,7 +92,16 @@ void OCRA::Command::Buffer::Impl::Begin(const Buffer::BeginInfo& a_BeginInfo)
 {
     assert(state == State::Initial);
     state = State::Recording;
-    beginInfo = a_BeginInfo;
+    usageFlags = a_BeginInfo.flags;
+    if (level == Level::Secondary) {
+        auto& inheritanceInfo = a_BeginInfo.inheritanceInfo.value(); //should throw if empty
+        if ((usageFlags & UsageFlagBits::RenderPassContinue) != 0)
+        {
+            executionState.subpassIndex = inheritanceInfo.subpass;
+            executionState.renderPass.renderPass = inheritanceInfo.renderPass;
+            executionState.renderPass.framebuffer = inheritanceInfo.framebuffer;
+        }
+    }
 }
 
 void OCRA::Command::Buffer::Impl::End()
@@ -102,10 +116,15 @@ void OCRA::Command::Buffer::Impl::ExecutePrimary()
     Execute(executionState);
 }
 
-void OCRA::Command::Buffer::Impl::ExecuteSecondary(ExecutionState& a_ExecutionState)
+void OCRA::Command::Buffer::Impl::ExecuteSecondary(ExecutionState& a_PrimaryExecutionState)
 {
     assert(level == Level::Secondary);
-    Execute(a_ExecutionState);
+    if ((usageFlags & UsageFlagBits::RenderPassContinue) != 0) {
+        executionState.renderPass = a_PrimaryExecutionState.renderPass;
+        executionState.renderPass.indexBufferBinding = {};
+        executionState.renderPass.vertexInputBindings.clear();
+    }
+    Execute(executionState);
 }
 
 void OCRA::Command::Buffer::Impl::Execute(ExecutionState& a_ExecutionState)
@@ -114,7 +133,10 @@ void OCRA::Command::Buffer::Impl::Execute(ExecutionState& a_ExecutionState)
     state = State::Pending;
     for (const auto& command : commands)
         command(a_ExecutionState);
-    if ((beginInfo.flags & UsageFlagBits::OneTimeSubmit) != 0)
+    if ((usageFlags & UsageFlagBits::OneTimeSubmit) != 0)
         Invalidate();
-    else state = State::Executable;
+    else {
+        executionState.Reset();
+        state = State::Executable;
+    }
 }

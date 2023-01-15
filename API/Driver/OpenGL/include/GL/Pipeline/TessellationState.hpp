@@ -4,6 +4,7 @@
 * @Last Modified by:   gpinchon
 * @Last Modified time: 2021-09-26 14:25:30
 */
+#pragma once
 
 #include <OCRA/Pipeline/TessellationState.hpp>
 

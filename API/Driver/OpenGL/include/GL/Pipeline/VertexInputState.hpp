@@ -31,7 +31,8 @@ struct Compile
     Compile(const Compile& a_Other);
     ~Compile();
     void operator()(Command::Buffer::ExecutionState&) const;
-    const Info info;
+    const uint32_t primitiveRestartIndex;
+    const std::vector<BindingDescription> bindingDescriptions;
     const Device::WeakHandle device;
     mutable uint32_t handle{ 0 };
 };

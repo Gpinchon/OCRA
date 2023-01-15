@@ -27,7 +27,6 @@ struct DrawElementsIndirectCommand {
 void ApplyPipelineStates(Buffer::ExecutionState& a_ExecutionState) {
     auto& pipelineState = a_ExecutionState.pipelineState.at(size_t(Pipeline::BindingPoint::Graphics));
     pipelineState.pipeline->Apply(a_ExecutionState);
-    a_ExecutionState.pushConstants.Bind();
     for (auto& binding : pipelineState.pushDescriptorSet)
         binding.Bind();
     if (pipelineState.descriptorSet != nullptr)
@@ -42,11 +41,13 @@ void Draw(
     const uint32_t a_FirstInstance)
 {
     a_CommandBuffer->PushCommand([
+        &pushConstants = a_CommandBuffer->pushConstants,
         count = a_VertexCount,
         instanceCount = a_InstanceCount,
         first = a_FirstVertex,
         baseInstance = a_FirstInstance
     ](Buffer::ExecutionState& a_ExecutionState) {
+        pushConstants.Bind();
         ApplyPipelineStates(a_ExecutionState);
         glDrawArraysInstancedBaseInstance(
             a_ExecutionState.primitiveTopology,
@@ -68,18 +69,19 @@ void DrawIndexed(
     command.baseVertex = a_VertexOffset;
     command.baseInstance = a_FirstInstance;
     a_CommandBuffer->PushCommand([
+        &pushConstants = a_CommandBuffer->pushConstants,
         command = command
     ] (Buffer::ExecutionState& a_ExecutionState) {
+        pushConstants.Bind();
         ApplyPipelineStates(a_ExecutionState);
         const auto& indexBufferBinding = a_ExecutionState.renderPass.indexBufferBinding;
         const auto& indexMemoryBinding = indexBufferBinding.buffer->memoryBinding;
-        const auto  indexMemoryOffset = BUFFER_OFFSET(indexBufferBinding.offset + indexMemoryBinding.offset);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexMemoryBinding.memory->handle);
         glDrawElementsInstancedBaseVertexBaseInstance(
             a_ExecutionState.primitiveTopology,
             command.count,
             indexBufferBinding.type,
-            indexMemoryOffset,
+            BUFFER_OFFSET(indexBufferBinding.offset),
             command.instanceCount,
             command.baseVertex,
             command.baseInstance);
@@ -95,8 +97,10 @@ void DrawIndirect(
 {
     const auto offset = BUFFER_OFFSET(a_Buffer->memoryBinding.offset + a_Offset);
     a_CommandBuffer->PushCommand([
+        &pushConstants = a_CommandBuffer->pushConstants,
         buffer = a_Buffer, offset, drawCount = a_DrawCount, stride = a_Stride
     ](Buffer::ExecutionState& a_ExecutionState) {
+        pushConstants.Bind();
         ApplyPipelineStates(a_ExecutionState);
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, buffer->memoryBinding.memory->handle);
         glMultiDrawArraysIndirect(
@@ -116,12 +120,12 @@ void DrawIndexedIndirect(
 {
     const auto offset = BUFFER_OFFSET(a_Buffer->memoryBinding.offset + a_Offset);
     a_CommandBuffer->PushCommand([
+        &pushConstants = a_CommandBuffer->pushConstants,
         buffer = a_Buffer, offset, drawCount = a_DrawCount, stride = a_Stride
     ](Buffer::ExecutionState& a_ExecutionState) {
+        pushConstants.Bind();
         ApplyPipelineStates(a_ExecutionState);
         const auto& indexBufferBinding = a_ExecutionState.renderPass.indexBufferBinding;
-        const auto& indexMemoryBinding = indexBufferBinding.buffer->memoryBinding;
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexMemoryBinding.memory->handle);
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, buffer->memoryBinding.memory->handle);
         glMultiDrawElementsIndirect(
             a_ExecutionState.primitiveTopology,
@@ -129,7 +133,6 @@ void DrawIndexedIndirect(
             offset,
             drawCount,
             stride);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
     });
 }

@@ -122,6 +122,7 @@ struct GraphicsPipelineTestApp : TestApp
             if (render && !window.IsClosing()) {
                 CreateFrameBuffer();
                 CreateGraphicsPipeline();
+                RecordDrawCommandBuffer();
             }
         };
         window.OnMaximize = window.OnResize;
@@ -143,28 +144,34 @@ struct GraphicsPipelineTestApp : TestApp
         auto uniformUpdateTime = lastTime;
         window.SetVSync(VSync);
         while (true) {
-            fpsCounter.StartFrame();
             window.PushEvents();
             if (window.IsClosing()) break;
             if (!render) continue;
+            
             const auto now = std::chrono::high_resolution_clock::now();
             const auto delta = std::chrono::duration<double, std::milli>(now - lastTime).count();
             lastTime = now;
-            swapChainImage = window.AcquireNextImage(std::chrono::nanoseconds(15000000), nullptr, imageAcquisitionFence);
-            Queue::Fence::WaitFor(device, imageAcquisitionFence, std::chrono::nanoseconds(15000000));
-            Queue::Fence::Reset(device, { imageAcquisitionFence });
-            RecordMainCommandBuffer(delta);
-            SubmitCommandBuffer(queue, mainCommandBuffer);
-            window.Present(queue);
-            fpsCounter.EndFrame();
+
             auto uniformUpdateDelta = std::chrono::duration<double, std::milli>(now - uniformUpdateTime).count();
             if (uniformUpdateDelta >= 16)
             {
                 uniformUpdateTime = now;
                 const float rotationAngle = uniformUpdateDelta * 0.0005;
                 mesh.SetProjectionMatrix(Mat4x4::Rotate(mesh.GetProjectionMatrix(), rotationAngle, Vec3(0.f, 1.f, 0.f)));
-                
+                UpdateMeshColor(uniformUpdateDelta);
+                mesh.Update();
+                if (firstLoop) RecordDrawCommandBuffer();
             }
+
+            fpsCounter.StartFrame();
+            swapChainImage = window.AcquireNextImage(std::chrono::nanoseconds(15000000), nullptr, imageAcquisitionFence);
+            Queue::Fence::WaitFor(device, imageAcquisitionFence, std::chrono::nanoseconds(15000000));
+            Queue::Fence::Reset(device, { imageAcquisitionFence });
+            RecordMainCommandBuffer();
+            SubmitCommandBuffer(queue, mainCommandBuffer);
+            window.Present(queue);
+            fpsCounter.EndFrame();
+            
             if (std::chrono::duration<double, std::milli>(now - printTime).count() >= 48) {
                 printTime = now;
                 fpsCounter.Print();
@@ -242,10 +249,11 @@ struct GraphicsPipelineTestApp : TestApp
             frameBuffer = FrameBuffer::Create(device, frameBufferInfo);
         }
     }
-    void RecordDrawCommandBuffer(const double a_Delta)
+    void RecordDrawCommandBuffer()
     {
         Command::Buffer::BeginInfo bufferBeginInfo{};
         bufferBeginInfo.flags = Command::Buffer::UsageFlagBits::None;
+        bufferBeginInfo.inheritanceInfo.emplace();
         Command::Buffer::Reset(drawCommandBuffer);
         Command::RenderPassBeginInfo renderPassBeginInfo{};
         renderPassBeginInfo.renderPass = renderPass;
@@ -253,8 +261,6 @@ struct GraphicsPipelineTestApp : TestApp
         renderPassBeginInfo.renderArea.offset = { 0, 0 };
         renderPassBeginInfo.renderArea.extent = window.GetExtent();
         renderPassBeginInfo.colorClearValues.push_back(ColorValue(0.9529f, 0.6235f, 0.0941f, 1.f));
-        mesh.Update();
-        UpdateMeshColor(a_Delta);
         Command::Buffer::Begin(drawCommandBuffer, bufferBeginInfo);
         Command::BeginRenderPass(drawCommandBuffer, renderPassBeginInfo, Command::SubPassContents::Inline);
         {
@@ -272,13 +278,8 @@ struct GraphicsPipelineTestApp : TestApp
         param.albedo = { HSVtoRGB(hue, 0.5f, 1.f), 1.f };
         mesh.GetMaterial().SetParameters(param);
     }
-    void RecordMainCommandBuffer(float a_Delta)
+    void RecordMainCommandBuffer()
     {
-        drawCommandDelta += a_Delta;
-        if (drawCommandDelta >= 31 || firstLoop) {
-            RecordDrawCommandBuffer(drawCommandDelta);
-            drawCommandDelta = 0;
-        }
         Command::Buffer::BeginInfo bufferBeginInfo{};
         bufferBeginInfo.flags = Command::Buffer::UsageFlagBits::None;
         Command::Buffer::Reset(mainCommandBuffer);
@@ -299,7 +300,6 @@ struct GraphicsPipelineTestApp : TestApp
         }
         Command::Buffer::End(mainCommandBuffer);
     }
-    double                   drawCommandDelta{ 0 };
     float                    hue{ 0 };
     bool                     render{ false };
     bool                     firstLoop{ true };

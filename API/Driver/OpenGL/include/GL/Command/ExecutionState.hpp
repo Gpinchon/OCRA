@@ -63,6 +63,16 @@ struct IndexBufferBinding : VertexInputBinding {
 
 struct RenderPass
 {
+    void Reset() {
+        renderPass.reset();
+        framebuffer.reset();
+        renderArea = {};
+        colorClearValues.clear();
+        depthClearValue = 0;
+        stencilClearValue = 0;
+        vertexInputBindings.clear();
+        indexBufferBinding = {};
+    }
     OCRA::RenderPass::Handle        renderPass;
     FrameBuffer::Handle             framebuffer;
     Rect2D                          renderArea;
@@ -92,8 +102,7 @@ struct PipelineState {
 };
 
 struct ExecutionState {
-    ExecutionState(const Device::Handle& a_Device)
-        : pushConstants(a_Device)
+    ExecutionState()
     {
         Reset();
     }
@@ -104,7 +113,7 @@ struct ExecutionState {
         once = false;
         subpassIndex = uint32_t(-1);
         primitiveTopology = GL_NONE;
-        renderPass = {};
+        renderPass.Reset();
         dynamicStates = {};
         for (auto& state : pipelineState)
             state.Reset();
@@ -117,7 +126,6 @@ struct ExecutionState {
     GLenum              primitiveTopology{ GL_NONE };
     RenderPass          renderPass{};
     DynamicStates       dynamicStates{};
-    OCRA::PushConstants pushConstants;
     std::array<PipelineState, size_t(Pipeline::BindingPoint::MaxValue)> pipelineState{};
     std::array<PipelineState, size_t(Pipeline::BindingPoint::MaxValue)> lastPipelineState{};
     
