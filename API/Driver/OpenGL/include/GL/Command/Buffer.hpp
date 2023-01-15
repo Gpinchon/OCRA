@@ -10,6 +10,7 @@
 #include <vector>
 #include <cassert>
 
+OCRA_DECLARE_WEAK_HANDLE(OCRA::Command::Buffer);
 OCRA_DECLARE_HANDLE(OCRA::Command::Buffer);
 
 namespace OCRA::Command::Buffer

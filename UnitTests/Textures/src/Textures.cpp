@@ -332,6 +332,7 @@ struct TexturesTestApp : TestApp
         textureUniform.Update();
         Command::Buffer::BeginInfo bufferBeginInfo{};
         bufferBeginInfo.flags = Command::Buffer::UsageFlagBits::None;
+        bufferBeginInfo.inheritanceInfo.emplace();
         Command::Buffer::Reset(drawCommandBuffer);
         Command::RenderPassBeginInfo renderPassBeginInfo{};
         renderPassBeginInfo.renderPass = renderPass;
