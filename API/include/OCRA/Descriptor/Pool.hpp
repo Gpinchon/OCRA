@@ -37,6 +37,7 @@ struct AllocateInfo
 /**
 * Creates a descriptor pool with specified size
 * Pools will always enable for modification after binding and freeing sets
+* In Vulkan, pools will always have the flags FREE_DESCRIPTOR_SET and UPDATE_AFTER_BIND
 */
 Handle Create(const Device::Handle& a_Device, const Info& a_Info, const AllocationCallback* a_Allocator = nullptr);
 /**
