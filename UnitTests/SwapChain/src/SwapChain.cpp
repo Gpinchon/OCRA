@@ -1,15 +1,7 @@
 #include <Common.hpp>
 #include <Window.hpp>
 
-#include <OCRA/Instance.hpp>
-#include <OCRA/Device.hpp>
-#include <OCRA/Surface.hpp>
-#include <OCRA/SwapChain.hpp>
-#include <OCRA/Command/Pool.hpp>
-#include <OCRA/Command/Buffer.hpp>
-#include <OCRA/Image/Image.hpp>
-#include <OCRA/Queue/Fence.hpp>
-#include <OCRA/Common/Vec3.hpp>
+#include <OCRA/OCRA.hpp>
 
 #include <Windows.h>
 
@@ -65,9 +57,6 @@ Vec3 HSVtoRGB(float fH, float fS, float fV) {
     fB += fM;
     return { fR, fG, fB };
 }
-
-#include <OCRA/Descriptor/Pool.hpp>
-#include <OCRA/Descriptor/SetLayout.hpp>
 
 struct SwapChainTestApp : TestApp
 {

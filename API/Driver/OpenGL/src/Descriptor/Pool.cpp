@@ -64,9 +64,10 @@ struct Impl
     MemoryPool<Set::Impl>                       sets;
     std::array<MemoryPool<Binding>, size_t(Type::MaxValue)> bindings;
 #ifdef _DEBUG
-    std::vector<Set::WeakHandle>                allocated;
+    std::vector<Set::WeakHandle>  allocated;
 #endif
 };
+
 Handle Create(
     const Device::Handle&       a_Device,
     const Info&                 a_Info,
@@ -74,9 +75,9 @@ Handle Create(
 {
     return Handle(new Impl(a_Device, a_Info));
 }
+
 Set::Handle AllocateSet(const Device::Handle& a_Device, const AllocateInfo& a_Info)
 {
-    sizeof(Binding);
     auto& setsPool = a_Info.pool->sets;
     auto set = std::shared_ptr<Set::Impl>(new(setsPool.allocate()) Set::Impl(), setsPool.deleter());
     for (auto& binding : a_Info.layout->bindings) {

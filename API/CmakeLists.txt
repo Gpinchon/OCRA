@@ -12,6 +12,7 @@ set_property(CACHE OCRA_API_IMPL PROPERTY STRINGS ${OCRA_API_IMPL_VALUES})
 add_compile_definitions(OCRA_API_IMPL=${OCRA_API_IMPL})
 
 set(OCRA_API_HEADER_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/OCRA.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Allocator.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Buffer.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Device.hpp
@@ -80,8 +81,6 @@ set(OCRA_API_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Primitive/Topology.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Shader/Module.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Shader/Stage.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/State/Clear.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/State/Draw.hpp
 )
 
 add_library(OCRA-API-Interface INTERFACE ${OCRA_API_HEADER_FILES})

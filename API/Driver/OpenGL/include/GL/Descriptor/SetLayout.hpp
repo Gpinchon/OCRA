@@ -3,7 +3,10 @@
 #include <OCRA/Handle.hpp>
 #include <OCRA/Descriptor/SetLayout.hpp>
 
+#include <GL/Descriptor/Binding.hpp>
+
 #include <algorithm>
+
 
 OCRA_DECLARE_HANDLE(OCRA::Device);
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);

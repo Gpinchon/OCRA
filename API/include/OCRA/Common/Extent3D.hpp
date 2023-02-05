@@ -18,5 +18,7 @@ struct Extent<3, T> {
 
     struct { T width, height, depth; };
 };
-typedef Extent<3, float> Extent3D;
+typedef Extent<3, float>    Extent3D;
+typedef Extent<2, int>      iExtent3D;
+typedef Extent<2, unsigned> uExtent3D;
 }
