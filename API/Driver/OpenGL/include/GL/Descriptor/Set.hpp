@@ -5,7 +5,7 @@
 
 #include <GL/Descriptor/Binding.hpp>
 
-#include <vector>
+#include <array>
 
 #ifdef _DEBUG
 #include <cassert>
@@ -19,41 +19,30 @@ namespace OCRA::Descriptor::Set
 struct Impl
 {
     Impl() = default;
-    Impl(const SetLayout::Handle& a_Layout)
-        : layout(a_Layout)
-    {
-        for (const auto& binding : a_Layout->bindings) {
-            PushData(binding.type, binding.binding);
-        }
-    }
-    template<typename... Args>
-    void PushData(Args&&... a_Args) {
-        bindings.push_back({ std::forward<Args>(a_Args)... });
-    }
     void Write(const WriteOperation& a_Write) {
 #ifdef _DEBUG
-        assert(a_Write.dstBinding < bindings.size());
+        assert(a_Write.dstBinding < bindingCount);
 #endif
         auto& dstBinding = bindings.at(a_Write.dstBinding);
-        dstBinding = a_Write;
+        *dstBinding = a_Write;
     }
     void Copy(const CopyOperation& a_Copy) {
 #ifdef _DEBUG
-        assert(a_Copy.dstBinding < bindings.size());
-        assert(a_Copy.srcBinding < a_Copy.srcSet->bindings.size());
+        assert(a_Copy.dstBinding < bindingCount);
+        assert(a_Copy.srcBinding < a_Copy.srcSet->bindingCount);
 #endif
         auto& dstBinding = bindings.at(a_Copy.dstBinding);
         dstBinding = a_Copy.srcSet->bindings.at(a_Copy.srcBinding);
     }
     void Bind() {
-        for (auto& binding : bindings)
-            binding.Bind();
+        for (uint16_t bindingIndex = 0; bindingIndex < bindingCount; bindingIndex++)
+            bindings.at(bindingIndex)->Bind();
     }
     void Unbind() {
-        for (auto& binding : bindings)
-            binding.Unbind();
+        for (uint16_t bindingIndex = 0; bindingIndex < bindingCount; bindingIndex++)
+            bindings.at(bindingIndex)->Unbind();
     }
-    SetLayout::Handle    layout;
-    std::vector<Binding> bindings;
+    uint16_t bindingCount = 0;
+    std::array<std::shared_ptr<Binding>, 256> bindings;
 };
 }

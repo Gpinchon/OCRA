@@ -15,12 +15,12 @@
 #include <cassert>
 #endif
 
-namespace OCRA::Descriptor::Set
+namespace OCRA::Descriptor
 {
 struct Storage {
     virtual ~Storage() = default;
     virtual void operator=(const Storage& a_Other) = 0;
-    virtual void operator=(const WriteOperation& a_Write) = 0;
+    virtual void operator=(const Set::WriteOperation& a_Write) = 0;
     virtual void Bind(uint32_t a_BindingIndex) = 0;
     virtual void Unbind(uint32_t a_BindingIndex) = 0;
 };
@@ -30,7 +30,7 @@ struct ImageStorage : Storage {
         auto& data = static_cast<const ImageStorage&>(a_Other);
         imageView = data.imageView;
     }
-    virtual void operator=(const WriteOperation& a_Write) override {
+    virtual void operator=(const Set::WriteOperation& a_Write) override {
         imageView = a_Write.imageInfo->imageView;
     }
     virtual void Bind(uint32_t a_BindingIndex) override {
@@ -51,7 +51,7 @@ struct SampledImage : ImageStorage {
         auto& data = static_cast<const SampledImage&>(a_Other);
         imageSampler = data.imageSampler;
     }
-    virtual void operator=(const WriteOperation& a_Write) override {
+    virtual void operator=(const Set::WriteOperation& a_Write) override {
         ImageStorage::operator=(a_Write);
         imageSampler = a_Write.imageInfo->sampler;
     }
@@ -84,7 +84,7 @@ struct BufferStorage : Storage {
         offset = data.offset;
         range  = data.range;
     }
-    virtual void operator=(const WriteOperation& a_Write) override {
+    virtual void operator=(const Set::WriteOperation& a_Write) override {
         buffer = a_Write.bufferInfo->buffer;
         offset = a_Write.bufferInfo->offset + buffer->memoryBinding.offset;
         range = a_Write.bufferInfo->range;
@@ -130,7 +130,7 @@ struct InputAttachment : Storage {
     virtual void operator=(const Storage& a_Other) override {
         auto& data = static_cast<const InputAttachment&>(a_Other);
     }
-    virtual void operator=(const WriteOperation& a_Write) override {}
+    virtual void operator=(const Set::WriteOperation& a_Write) override {}
     virtual void Bind(uint32_t a_BindingIndex) override {}
     virtual void Unbind(uint32_t a_BindingIndex) override {}
 };
@@ -138,7 +138,7 @@ struct InlineUniformBlock : Storage {
     virtual void operator=(const Storage& a_Other) override {
         auto& data = static_cast<const InlineUniformBlock&>(a_Other);
     }
-    virtual void operator=(const WriteOperation& a_Write) override {}
+    virtual void operator=(const Set::WriteOperation& a_Write) override {}
     virtual void Bind(uint32_t a_BindingIndex) override {}
     virtual void Unbind(uint32_t a_BindingIndex) override {}
 };
@@ -146,7 +146,7 @@ struct AccelerationStructure : Storage {
     virtual void operator=(const Storage& a_Other) override {
         auto& data = static_cast<const AccelerationStructure&>(a_Other);
     }
-    virtual void operator=(const WriteOperation& a_Write) override {}
+    virtual void operator=(const Set::WriteOperation& a_Write) override {}
     virtual void Bind(uint32_t a_BindingIndex) override {}
     virtual void Unbind(uint32_t a_BindingIndex) override {}
 };
@@ -154,7 +154,7 @@ struct MutableValve : Storage {
     virtual void operator=(const Storage& a_Other) override {
         auto& data = static_cast<const MutableValve&>(a_Other);
     }
-    virtual void operator=(const WriteOperation& a_Write) override {}
+    virtual void operator=(const Set::WriteOperation& a_Write) override {}
     virtual void Bind(uint32_t a_BindingIndex) override {}
     virtual void Unbind(uint32_t a_BindingIndex) override {}
 };
@@ -166,7 +166,7 @@ public:
     Binding(const Type& a_Type, uint32_t a_BindingIndex);
     Binding(Binding&& a_Other) noexcept;
     Binding(const Binding& a_Other) noexcept;
-    Binding(const WriteOperation& a_Write, uint32_t a_BindingIndex);
+    Binding(const Set::WriteOperation& a_Write, uint32_t a_BindingIndex);
     ~Binding();
 
     void Bind();
@@ -179,7 +179,7 @@ public:
         bindingIndex = a_Other.bindingIndex;
         *storage = *a_Other.storage;
     }
-    void operator=(const WriteOperation& a_Write) {
+    void operator=(const Set::WriteOperation& a_Write) {
 #ifdef _DEBUG
         assert(type == a_Write.type);
 #endif
@@ -272,7 +272,7 @@ inline Binding::Binding(const Binding& a_Other) noexcept
         *storage = *a_Other.storage;
 }
 
-inline Binding::Binding(const WriteOperation& a_Write, uint32_t a_BindingIndex)
+inline Binding::Binding(const Set::WriteOperation& a_Write, uint32_t a_BindingIndex)
     : Binding(a_Write.type, a_BindingIndex)
 {
     *storage = a_Write;

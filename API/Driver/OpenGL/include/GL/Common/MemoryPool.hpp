@@ -68,7 +68,7 @@ private:
     size_type               _max_size{ 0 };
     size_type               _cellNumUsed{ 0 };
     size_type               _cellNumFree{ max_size() };
-    alignas(value_type) std::byte* _memory{ new std::byte[_max_size * sizeof(value_type)]};
+    alignas(value_type) std::byte* _memory{ max_size() > 0 ? new std::byte[_max_size * sizeof(value_type)] : nullptr };
     std::byte* _next{ _memory };
 };
 
@@ -76,6 +76,7 @@ template<typename Type>
 constexpr MemoryPool<Type>::MemoryPool(size_type a_MaxSize) noexcept
     : _max_size(a_MaxSize)
 {
+    if (max_size() == 0) return;
     std::memset(_memory, 0, sizeof(sizeof(value_type) * _max_size));
     *reinterpret_cast<size_type*>(_next) = 0;
 }
@@ -91,6 +92,7 @@ constexpr MemoryPool<Type>::MemoryPool(MemoryPool&& a_Other) noexcept
 
 template<typename Type>
 inline MemoryPool<Type>::~MemoryPool() {
+    if (max_size() == 0) return;
     delete[] _memory;
     _next = nullptr;
 }

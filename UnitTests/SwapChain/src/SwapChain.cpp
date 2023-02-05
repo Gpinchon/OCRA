@@ -66,6 +66,9 @@ Vec3 HSVtoRGB(float fH, float fS, float fV) {
     return { fR, fG, fB };
 }
 
+#include <OCRA/Descriptor/Pool.hpp>
+#include <OCRA/Descriptor/SetLayout.hpp>
+
 struct SwapChainTestApp : TestApp
 {
     SwapChainTestApp()
@@ -83,6 +86,18 @@ struct SwapChainTestApp : TestApp
         imageAcquisitionFence = Queue::Fence::Create(device);
         commandPool = CreateCommandPool(device, queueFamily);
         commandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Primary);
+
+        Descriptor::Pool::Info poolInfo;
+        poolInfo.maxSets = 1024;
+        poolInfo.sizes.push_back({ Descriptor::Type::UniformBuffer, 1024 });
+        auto descriptorPool = Descriptor::Pool::Create(device, poolInfo);
+        Descriptor::SetLayout::Info layoutInfo;
+        layoutInfo.bindings.push_back({ 0, Descriptor::Type::UniformBuffer, 10 });
+        auto descriptorLayout = Descriptor::SetLayout::Create(device, layoutInfo);
+        Descriptor::Pool::AllocateInfo allocateInfo;
+        allocateInfo.layout = descriptorLayout;
+        allocateInfo.pool = descriptorPool;
+        auto descriptorSet = Descriptor::Pool::AllocateSet(device, allocateInfo);
     }
     void Loop()
     {

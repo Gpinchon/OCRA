@@ -83,7 +83,7 @@ struct RenderPass
     IndexBufferBinding              indexBufferBinding;
 };
 
-using PushDescriptorSet = std::vector<Descriptor::Set::Binding>;
+using PushDescriptorSet = std::vector<Descriptor::Binding>;
 
 struct PipelineState {
     PipelineState() {

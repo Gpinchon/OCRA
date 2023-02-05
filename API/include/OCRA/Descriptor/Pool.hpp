@@ -36,6 +36,7 @@ struct AllocateInfo
 };
 /**
 * Creates a descriptor pool with specified size
+* Pools will always enable for modification after binding and freeing sets
 */
 Handle Create(const Device::Handle& a_Device, const Info& a_Info, const AllocationCallback* a_Allocator = nullptr);
 /**
