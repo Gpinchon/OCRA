@@ -81,40 +81,10 @@ Vec3 HSVtoRGB(float fH, float fS, float fV) {
     return { fR, fG, fB };
 }
 
-//struct Vertex {
-//    Vec2 pos;
-//    Vec3 color;
-//    static auto GetBindingDescriptions() {
-//        std::vector<Pipeline::VertexInputState::BindingDescription> bindings(1);
-//        bindings.at(0).binding = 0;
-//        bindings.at(0).stride = sizeof(Vertex);
-//        bindings.at(0).inputRate = Pipeline::VertexInputState::BindingDescription::InputRate::Vertex;
-//        return bindings;
-//    }
-//    static auto GetAttributeDescription() {
-//        std::vector<Pipeline::VertexInputState::AttributeDescription> attribs(2);
-//        attribs.at(0).binding = 0;
-//        attribs.at(0).location = 0;
-//        attribs.at(0).format.size = 2;
-//        attribs.at(0).format.normalized = false;
-//        attribs.at(0).format.type = VertexType::Float32;
-//        attribs.at(0).offset = offsetof(Vertex, pos);
-//        attribs.at(1).binding = 0;
-//        attribs.at(1).location = 1;
-//        attribs.at(1).format.size = 3;
-//        attribs.at(1).format.normalized = true;
-//        attribs.at(1).format.type = VertexType::Float32;
-//        attribs.at(1).offset = offsetof(Vertex, color);
-//        return attribs;
-//    }
-//};
-
 struct GraphicsPipelineTestApp : TestApp
 {
     GraphicsPipelineTestApp()
         : TestApp("Test_GraphicsPipeline")
-        , physicalDevice(Instance::EnumeratePhysicalDevices(instance).front())
-        , device(CreateDevice(physicalDevice))
         , window(Window(instance, physicalDevice, device, name, 1280, 720))
     {
         window.OnResize = [this](const Window&, const uint32_t a_Width, const uint32_t a_Height) {
@@ -303,8 +273,6 @@ struct GraphicsPipelineTestApp : TestApp
     float                    hue{ 0 };
     bool                     render{ false };
     bool                     firstLoop{ true };
-    PhysicalDevice::Handle   physicalDevice;
-    Device::Handle           device;
     Window                   window;
     Image::Handle            swapChainImage;
     

@@ -62,8 +62,6 @@ struct SwapChainTestApp : TestApp
 {
     SwapChainTestApp()
         : TestApp("Test_SwapChain")
-        , physicalDevice(Instance::EnumeratePhysicalDevices(instance).front())
-        , device(CreateDevice(physicalDevice))
         , window(Window(instance, physicalDevice, device, name, 1280, 720))
     {
         window.OnResize = [this](const Window&, const uint32_t a_Width, const uint32_t a_Height) { render = a_Width > 0 && a_Height > 0; };
@@ -135,8 +133,6 @@ struct SwapChainTestApp : TestApp
         Command::Buffer::End(commandBuffer);
     }
     bool                    render{ false };
-    PhysicalDevice::Handle  physicalDevice;
-    Device::Handle          device;
     Window                  window;
     Queue::Handle           queue;
     Queue::Fence::Handle    imageAcquisitionFence;

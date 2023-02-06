@@ -3,10 +3,7 @@
  * @brief Unit test's common tools
  */
 
-#include <OCRA/Handle.hpp>
-#include <OCRA/Queue/Queue.hpp>
-#include <OCRA/Command/Pool.hpp>
-#include <OCRA/PhysicalDevice.hpp>
+#include <OCRA/OCRA.hpp>
 
 #include <OCRA/Common/Timer.hpp>
 
@@ -113,8 +110,12 @@ struct TestApp
     TestApp(const std::string& a_Name)
         : name(a_Name)
         , instance(CreateInstance(name))
+        , physicalDevice(Instance::EnumeratePhysicalDevices(instance).front())
+        , device(CreateDevice(physicalDevice))
     {}
-    std::string         name;
-    Instance::Handle    instance;
+    std::string             name;
+    Instance::Handle        instance;
+    PhysicalDevice::Handle  physicalDevice;
+    Device::Handle          device;
 };
 }
