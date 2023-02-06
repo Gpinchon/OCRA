@@ -1,0 +1,17 @@
+cmake_minimum_required(VERSION 3.19)
+cmake_policy(SET CMP0074 NEW)
+
+set(OCRA_TEST_COMMAND_BUFFER_SOURCE_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
+add_executable(OCRA-UnitTests-DescriptorSets
+  ${OCRA_TEST_COMMAND_BUFFER_SOURCE_FILES})
+target_include_directories(OCRA-UnitTests-DescriptorSets PRIVATE
+  "${CMAKE_CURRENT_SOURCE_DIR}/include")
+
+target_link_libraries(OCRA-UnitTests-DescriptorSets OCRA-UnitTests-Lib-Common OCRA::API::Interface OCRA::API::Implementation)
+
+if(MSVC_IDE)
+  # Run macro
+  GroupSources(src)
+  GroupSources(include)
+endif()
