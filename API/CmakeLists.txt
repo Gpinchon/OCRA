@@ -11,83 +11,102 @@ set(OCRA_API_IMPL_VALUES
 set_property(CACHE OCRA_API_IMPL PROPERTY STRINGS ${OCRA_API_IMPL_VALUES})
 add_compile_definitions(OCRA_API_IMPL=${OCRA_API_IMPL})
 
-set(OCRA_API_HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/OCRA.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Allocator.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Buffer.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Device.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/FrameBuffer.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Handle.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Instance.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Memory.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/PhysicalDevice.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/QueryPool.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/RenderPass.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Queue/Queue.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Queue/Fence.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Queue/Semaphore.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Common/Blend.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Common/Compare.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Common/Extent.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Common/Extent2D.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Common/Extent3D.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Common/IndexType.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Common/Logic.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Common/Offset3D.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Common/Rect2D.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Common/Rect3D.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Common/ScissorTest.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Common/SharingMode.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Common/Stencil.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Common/Timer.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Common/Vec.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Common/Vec2.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Common/Vec3.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Common/Vec4.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Common/Vec_Boolean.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Common/Vec_Functor.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Common/Vec_Interpolation.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Common/Vec_Math.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Common/VertexType.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Command/Buffer.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Command/Draw.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Command/MemoryBarrier.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Command/Pool.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Command/Query.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Command/Scissor.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Command/ViewPort.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Descriptor/Set.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Descriptor/SetLayout.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Descriptor/Pool.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Descriptor/Type.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Image/Descriptor.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Image/Filter.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Image/Format.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Image/Image.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Image/Sampler.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Image/Usage.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Image/View.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Pipeline/ColorBlendState.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Pipeline/DepthStencilState.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Pipeline/Graphics.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Pipeline/InputAssemblyState.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Pipeline/MultisampleState.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Pipeline/Pipeline.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Pipeline/RasterizationState.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Pipeline/ShaderPipelineState.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Pipeline/TessellationState.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Pipeline/VertexInputState.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Pipeline/ViewPortState.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Primitive/Topology.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Shader/Module.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Shader/Stage.hpp
+set(OCRA_API_HEADER_LIST
+  OCRA/Allocator.hpp
+  OCRA/Buffer.hpp
+  OCRA/Device.hpp
+  OCRA/FrameBuffer.hpp
+  OCRA/Handle.hpp
+  OCRA/Instance.hpp
+  OCRA/Memory.hpp
+  OCRA/PhysicalDevice.hpp
+  OCRA/QueryPool.hpp
+  OCRA/RenderPass.hpp
+  OCRA/Queue/Queue.hpp
+  OCRA/Queue/Fence.hpp
+  OCRA/Queue/Semaphore.hpp
+  OCRA/Common/Blend.hpp
+  OCRA/Common/Compare.hpp
+  OCRA/Common/Extent.hpp
+  OCRA/Common/Extent2D.hpp
+  OCRA/Common/Extent3D.hpp
+  OCRA/Common/IndexType.hpp
+  OCRA/Common/Logic.hpp
+  OCRA/Common/Offset3D.hpp
+  OCRA/Common/Rect2D.hpp
+  OCRA/Common/Rect3D.hpp
+  OCRA/Common/ScissorTest.hpp
+  OCRA/Common/SharingMode.hpp
+  OCRA/Common/Stencil.hpp
+  OCRA/Common/Timer.hpp
+  OCRA/Common/Vec.hpp
+  OCRA/Common/Vec2.hpp
+  OCRA/Common/Vec3.hpp
+  OCRA/Common/Vec4.hpp
+  OCRA/Common/Vec_Boolean.hpp
+  OCRA/Common/Vec_Functor.hpp
+  OCRA/Common/Vec_Interpolation.hpp
+  OCRA/Common/Vec_Math.hpp
+  OCRA/Common/VertexType.hpp
+  OCRA/Command/Buffer.hpp
+  OCRA/Command/Draw.hpp
+  OCRA/Command/MemoryBarrier.hpp
+  OCRA/Command/Pool.hpp
+  OCRA/Command/Query.hpp
+  OCRA/Command/Scissor.hpp
+  OCRA/Command/ViewPort.hpp
+  OCRA/Descriptor/Set.hpp
+  OCRA/Descriptor/SetLayout.hpp
+  OCRA/Descriptor/Pool.hpp
+  OCRA/Descriptor/Type.hpp
+  OCRA/Image/Descriptor.hpp
+  OCRA/Image/Filter.hpp
+  OCRA/Image/Format.hpp
+  OCRA/Image/Image.hpp
+  OCRA/Image/Sampler.hpp
+  OCRA/Image/Usage.hpp
+  OCRA/Image/View.hpp
+  OCRA/Pipeline/ColorBlendState.hpp
+  OCRA/Pipeline/DepthStencilState.hpp
+  OCRA/Pipeline/Graphics.hpp
+  OCRA/Pipeline/InputAssemblyState.hpp
+  OCRA/Pipeline/MultisampleState.hpp
+  OCRA/Pipeline/Pipeline.hpp
+  OCRA/Pipeline/RasterizationState.hpp
+  OCRA/Pipeline/ShaderPipelineState.hpp
+  OCRA/Pipeline/TessellationState.hpp
+  OCRA/Pipeline/VertexInputState.hpp
+  OCRA/Pipeline/ViewPortState.hpp
+  OCRA/Primitive/Topology.hpp
+  OCRA/Shader/Module.hpp
+  OCRA/Shader/Stage.hpp
 )
+
+set(INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/include)
+set(HEADER_PATH ${CMAKE_CURRENT_BINARY_DIR}/include/OCRA/OCRA.hpp)
+
+file(WRITE ${HEADER_PATH}
+"#pragma once
+/**
+* This file contains every includes
+*/
+
+")
+foreach(File ${OCRA_API_HEADER_LIST})
+  file(APPEND ${HEADER_PATH}
+  "#include<${File}>\n")
+endforeach()
+
+list(TRANSFORM OCRA_API_HEADER_LIST PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/include/" OUTPUT_VARIABLE OCRA_API_HEADER_FILES)
 
 add_library(OCRA-API-Interface INTERFACE ${OCRA_API_HEADER_FILES})
 add_library(OCRA::API::Interface ALIAS OCRA-API-Interface)
 set_target_properties(OCRA-API-Interface PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories(OCRA-API-Interface INTERFACE
-  "${CMAKE_CURRENT_SOURCE_DIR}/include")
+  "${CMAKE_CURRENT_SOURCE_DIR}/include"
+  "${INCLUDE_DIR}"
+)
+
 set_target_properties(
   OCRA-API-Interface
   PROPERTIES FOLDER "API"
