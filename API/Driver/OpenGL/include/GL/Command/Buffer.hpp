@@ -7,8 +7,7 @@
 #include <GL/PushConstants.hpp>
 
 #include <functional>
-#include <vector>
-#include <cassert>
+#include <memory_resource>
 
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Command::Buffer);
 OCRA_DECLARE_HANDLE(OCRA::Command::Buffer);
@@ -24,13 +23,11 @@ enum class Level {
 };
 struct Impl
 {
-    Impl(const Device::Handle& a_Device)
-        : level(Level::Unknown)
-        , pushConstants(a_Device)
-    {}
-    Impl(const Device::Handle& a_Device, const Level a_Level)
+    Impl(const Device::Handle& a_Device, const Level a_Level, std::pmr::memory_resource* a_MemoryResource)
         : level(a_Level)
         , pushConstants(a_Device)
+        , commands(a_MemoryResource)
+        , parentBuffers(a_MemoryResource)
     {}
     ~Impl() { Invalidate(); }
     void Reset();
@@ -49,10 +46,10 @@ struct Impl
     const Level level;
     State       state{ State::Initial };
     UsageFlags  usageFlags;
-    std::vector<Command>    commands;
-    std::vector<WeakHandle> parentBuffers;
     OCRA::PushConstants     pushConstants;
     ExecutionState          executionState;
+    std::pmr::vector<Command>    commands;
+    std::pmr::vector<WeakHandle> parentBuffers;
 };
 static inline void Execute(const std::vector<Handle>& a_CommandBuffers) {
     for (const auto& commandBuffer : a_CommandBuffers) {

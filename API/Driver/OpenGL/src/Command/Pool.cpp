@@ -28,19 +28,9 @@ struct Impl
         for (auto& allocated : allocated) assert(allocated.expired());
     }
 #endif
-    struct Deleter {
-        Deleter(std::pmr::polymorphic_allocator<Buffer::Impl>& a_Allocator) : allocator(a_Allocator) {}
-        void operator()(Buffer::Impl* a_Ptr) {
-            std::destroy_at(a_Ptr);
-            allocator.deallocate(a_Ptr, 1);
-        }
-        std::pmr::polymorphic_allocator<Buffer::Impl>& allocator;
-    };
-    std::pmr::unsynchronized_pool_resource          memoryResource;
-    std::pmr::polymorphic_allocator<Buffer::Impl>   allocator{ &memoryResource };
-
+    std::pmr::unsynchronized_pool_resource  memoryResource;
 #ifdef _DEBUG
-    std::vector<Buffer::WeakHandle>                 allocated;
+    std::vector<Buffer::WeakHandle>         allocated;
 #endif
 };
 Handle Create(
@@ -54,13 +44,13 @@ std::vector<Buffer::Handle> AllocateBuffer(const Device::Handle& a_Device, const
 {
     std::vector<Buffer::Handle> commandBuffers;
     commandBuffers.reserve(a_Info.count);
-    auto& allocator = a_Info.pool->allocator;
+    auto& memoryResource = a_Info.pool->memoryResource;
+    auto allocator = std::pmr::polymorphic_allocator<Buffer::Impl>(&memoryResource);
 #ifdef _DEBUG
     auto& allocated = a_Info.pool->allocated;
 #endif
     for (auto i = 0u; i < a_Info.count; ++i) {
-        auto bufferPtr = new(allocator.allocate(1)) Buffer::Impl(a_Device, Buffer::Level(a_Info.level));
-        auto buffer = std::shared_ptr<Buffer::Impl>(bufferPtr, Impl::Deleter(allocator));
+        auto buffer = std::allocate_shared<Buffer::Impl>(allocator, a_Device, Buffer::Level(a_Info.level), &memoryResource);
         commandBuffers.push_back(buffer);
 #ifdef _DEBUG
         allocated.push_back(buffer);
