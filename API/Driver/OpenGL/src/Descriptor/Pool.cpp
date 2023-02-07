@@ -38,11 +38,9 @@ struct Impl
         //If this assert fails, this pool was destroyed before the objects it allocated
         for (auto& allocated : allocated) assert(allocated.expired());
     }
-#endif
-    std::pmr::unsynchronized_pool_resource memory_resource;
-#ifdef _DEBUG
     std::vector<Set::WeakHandle>  allocated;
 #endif
+    std::pmr::unsynchronized_pool_resource memory_resource;
 };
 
 Handle Create(
