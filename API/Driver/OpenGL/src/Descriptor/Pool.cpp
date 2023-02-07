@@ -55,13 +55,17 @@ Handle Create(
 
 Set::Handle AllocateSet(const Device::Handle& a_Device, const AllocateInfo& a_Info)
 {
+    size_t bindingCount = 0;
+    const auto& bindings = a_Info.layout->bindings;
+    for (auto& binding : bindings) {
+        bindingCount += binding.count;
+    }
     auto& memoryResource = a_Info.pool->memory_resource;
-    auto set = std::allocate_shared<Set::Impl>(std::pmr::polymorphic_allocator<Set::Impl>(&memoryResource));
-    for (auto& binding : a_Info.layout->bindings) {
+    auto set = std::allocate_shared<Set::Impl>(std::pmr::polymorphic_allocator<Set::Impl>(&memoryResource), &memoryResource);
+    set->bindings.reserve(bindingCount);
+    for (auto& binding : bindings) {
         for (size_t bindingIndex = 0; bindingIndex < binding.count; ++bindingIndex) {
-            auto setBinding = std::allocate_shared<Binding>(std::pmr::polymorphic_allocator<Binding>(&memoryResource), binding.type, binding.binding + bindingIndex);
-            set->bindings.at(bindingIndex) = setBinding;
-            set->bindingCount++;
+            set->bindings.push_back(Binding(binding.type, binding.binding + bindingIndex));
         }
     }
 #ifdef _DEBUG
