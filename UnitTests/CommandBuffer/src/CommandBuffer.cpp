@@ -18,7 +18,7 @@
 #define CHUNK_SIZE 256
 #define SENTENCE0  std::string("Hello World !")
 #define SENTENCE1  std::string("All your base are belong to us")
-#define SWAP_NBR   1
+#define SWAP_NBR   101
 
 using namespace OCRA;
 
@@ -27,7 +27,7 @@ static inline void SubmitCommandBuffer(const Device::Handle& a_Device, const Que
 {
     auto fence = Queue::Fence::Create(a_Device);
     Queue::SubmitInfo submitInfo;
-    for (auto i = 0u; i < 1; ++i)
+    for (auto i = 0u; i < SWAP_NBR; ++i)
         submitInfo.commandBuffers.push_back(a_CommandBuffer);
     std::cout << "========== Command Buffer submit ==========\n";
     //test multithreaded submit
