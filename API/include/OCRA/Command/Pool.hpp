@@ -42,5 +42,4 @@ Handle Create(
     const Info&                 a_Info,
     const AllocationCallback*   a_Allocator = nullptr);
 std::vector<Buffer::Handle> AllocateBuffer(const Device::Handle& a_Device, const AllocateInfo& a_Info);
-const Info& GetInfo(const Handle& a_CommandPool);
 }
