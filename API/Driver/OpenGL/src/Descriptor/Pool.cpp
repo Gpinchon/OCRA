@@ -5,7 +5,6 @@
 #include <GL/Descriptor/SetLayout.hpp>
 #include <GL/Descriptor/Binding.hpp>
 
-#include <memory_resource>
 #include <vector>
 #include <array>
 #include <functional>

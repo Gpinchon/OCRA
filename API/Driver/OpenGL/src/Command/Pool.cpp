@@ -4,7 +4,6 @@
 #include <GL/Common/FixedSizeMemoryPool.hpp>
 
 #include <memory>
-#include <set>
 #include <memory_resource>
 
 namespace OCRA {
