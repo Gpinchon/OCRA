@@ -52,7 +52,7 @@ public:
         const auto newFrameTime = std::chrono::duration<double, std::milli>(now - startTime).count();
         meanFrameTime = (alpha * newFrameTime) + (1 - alpha) * meanFrameTime;
         fps = 1000.0 / meanFrameTime;
-        alpha = 1.0 / fps;
+        if (fps > 1) alpha = 1.0 / fps;
     }
     void Print() const {
         std::cout << "\rFPS : " << fps << std::flush;
