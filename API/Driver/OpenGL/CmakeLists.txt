@@ -108,6 +108,7 @@ set(OCRA_IMPL_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Commands/Buffer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Commands/CommandBuffer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Commands/Draw.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Commands/DescriptorSet.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Commands/RenderPass.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Descriptor/Set.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Descriptor/SetLayout.cpp
