@@ -81,9 +81,7 @@ struct DrawIndexedCommand : DrawBase {
         , firstIndex(a_FirstIndex)
         , baseVertex(a_VertexOffset)
         , baseInstance(a_FirstInstance)
-    {
-       
-    }
+    {}
     virtual void operator()(Buffer::ExecutionState& a_ExecutionState) {
         DrawBase::operator()(a_ExecutionState);
         const auto& indexBufferBinding = a_ExecutionState.renderPass.indexBufferBinding;

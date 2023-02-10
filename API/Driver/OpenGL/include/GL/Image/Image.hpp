@@ -9,7 +9,6 @@
 #include <OCRA/Handle.hpp>
 #include <OCRA/Image/Image.hpp>
 
-
 OCRA_DECLARE_HANDLE(OCRA::Device);
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
 OCRA_DECLARE_HANDLE(OCRA::Buffer);
@@ -33,4 +32,8 @@ struct Impl
 * @brief creates an empty image with no storage
 */
 Handle CreateEmpty(const Device::Handle& a_Device, const Info& a_Info);
+/**
+* @brief checks if the specified copy operation is valid for this image
+*/
+void CheckValidCopy(const Image::BufferCopy& a_Copy, const Image::Handle& a_Image);
 }
