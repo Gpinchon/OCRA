@@ -11,7 +11,7 @@ void BeginQuery(
     const QueryPool::Handle&        a_QueryPool,
     const uint32_t&                 a_QueryIndex)
 {
-    a_CommandBuffer->PushCommand([queryPool = a_QueryPool, queryIndex = a_QueryIndex](Buffer::ExecutionState& a_ExecutionState) {
+    a_CommandBuffer->PushCommand<GenericCommand>([queryPool = a_QueryPool, queryIndex = a_QueryIndex](Buffer::ExecutionState& a_ExecutionState) {
         queryPool->Begin(queryIndex);
     });
 }
@@ -20,7 +20,7 @@ void EndQuery(
     const QueryPool::Handle&        a_QueryPool,
     const uint32_t&                 a_QueryIndex)
 {
-    a_CommandBuffer->PushCommand([queryPool = a_QueryPool, queryIndex = a_QueryIndex](Buffer::ExecutionState& a_ExecutionState) {
+    a_CommandBuffer->PushCommand<GenericCommand>([queryPool = a_QueryPool, queryIndex = a_QueryIndex](Buffer::ExecutionState& a_ExecutionState) {
         queryPool->End(queryIndex);
     });
 }

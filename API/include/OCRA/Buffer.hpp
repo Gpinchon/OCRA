@@ -80,7 +80,7 @@ struct BufferCopyRegion
 * Update a buffer's contents from host memory
 * Size is limited to 65536
 */
-void Update(
+void UpdateBuffer(
     const Command::Buffer::Handle&  a_CommandBuffer,
     const OCRA::Buffer::Handle&     a_DstBuffer,
     const size_t&                   a_Offset,
@@ -91,7 +91,7 @@ void Update(
 * Update a buffer's contents from host memory
 * Size is limited to 65536
 */
-void Update(
+void UpdateBuffer(
     const Command::Buffer::Handle&  a_CommandBuffer,
     const OCRA::Buffer::Handle&     a_DstBuffer,
     const size_t&                   a_Offset,

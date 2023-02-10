@@ -2,9 +2,6 @@
 
 #include <OCRA/Handle.hpp>
 
-
-#include <vector>
-
 OCRA_DECLARE_HANDLE(OCRA::Device);
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
 OCRA_DECLARE_HANDLE(OCRA::Layout);
@@ -15,7 +12,7 @@ struct PushConstants {
     ~PushConstants();
     void Bind();
     void Unbind();
-    void Update(const size_t& a_Offset, const std::vector<std::byte>& a_Data);
+    void Update(const size_t& a_Offset, const size_t& a_Size, const std::byte* a_Data);
     const Device::WeakHandle device;
     const uint16_t  size;
     const uint16_t  offsetAlignment;

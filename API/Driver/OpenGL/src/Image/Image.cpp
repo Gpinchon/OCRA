@@ -390,7 +390,7 @@ void CopyBufferToImage(
     const std::vector<Image::BufferCopy>& a_Regions)
 {
     for (const auto& copy : a_Regions) CheckValidCopy(copy, a_DstImage);
-    a_CommandBuffer->PushCommand([
+    a_CommandBuffer->PushCommand<GenericCommand>([
         srcBuffer = a_SrcBuffer, dstImage = a_DstImage, regions = a_Regions
     ](Command::Buffer::ExecutionState&) {
         const auto& memoryBinding = srcBuffer->memoryBinding;
@@ -408,7 +408,7 @@ void CopyImageToBuffer(
     const std::vector<Image::BufferCopy>& a_Regions)
 {
     for (const auto& copy : a_Regions) CheckValidCopy(copy, a_SrcImage);
-    a_CommandBuffer->PushCommand([
+    a_CommandBuffer->PushCommand<GenericCommand>([
         dstBuffer = a_DstBuffer, srcImage = a_SrcImage, regions = a_Regions
     ](Command::Buffer::ExecutionState&) {
         const auto& memoryBinding = dstBuffer->memoryBinding;
@@ -425,7 +425,7 @@ void CopyImage(
     const Image::Handle&            a_DstImage,
     const std::vector<Image::Copy>  a_Regions)
 {
-    a_CommandBuffer->PushCommand([
+    a_CommandBuffer->PushCommand<GenericCommand>([
         srcImage = a_SrcImage, dstImage = a_DstImage, regions = a_Regions
     ](Command::Buffer::ExecutionState&) {
         for (const auto& copy : regions) {
@@ -441,7 +441,7 @@ void GenerateMipMap(
     const Command::Buffer::Handle& a_CommandBuffer,
     const Image::Handle& a_Image)
 {
-    a_CommandBuffer->PushCommand([image = a_Image](Command::Buffer::ExecutionState&) {
+    a_CommandBuffer->PushCommand<GenericCommand>([image = a_Image](Command::Buffer::ExecutionState&) {
         glGenerateTextureMipmap(image->handle);
     });
 }
@@ -454,7 +454,7 @@ void ClearColorImage(
     const std::vector<Image::Subresource::Range>& a_Ranges)
 {
     //for (const auto& range : a_Ranges) CheckValidCopy(copy, a_SrcImage);
-    a_CommandBuffer->PushCommand([
+    a_CommandBuffer->PushCommand<GenericCommand>([
         image = a_Image, clearColor = a_Color, ranges = a_Ranges
     ](Command::Buffer::ExecutionState&) {
         for (const auto& range : ranges)

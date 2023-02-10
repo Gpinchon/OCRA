@@ -32,7 +32,7 @@ void OCRA::Command::BindDescriptorSet(
     const Descriptor::Set::Handle&  a_DescriptorSet,
     const uint32_t                  a_DynamicOffset)
 {
-    a_CommandBuffer->PushCommand([
+    a_CommandBuffer->PushCommand<GenericCommand>([
         bindingPoint = uint8_t(a_BindingPoint),
         descriptorSet = a_DescriptorSet,
         dynamicOffset = a_DynamicOffset
@@ -49,7 +49,7 @@ void OCRA::Command::PushDescriptorSet(
     const Pipeline::Layout::Handle& a_Layout,
     const std::vector<Descriptor::Set::WriteOperation>& a_Writes)
 {
-    a_CommandBuffer->PushCommand([
+    a_CommandBuffer->PushCommand<GenericCommand>([
         bindingPoint = uint8_t(a_BindingPoint),
         layout = a_Layout,
         writes = a_Writes

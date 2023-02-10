@@ -50,7 +50,7 @@ void PipelineBarrier(
     const std::vector<BufferMemoryBarrier>& a_BufferMemoryBarriers,
     const std::vector<ImageMemoryBarrier>&  a_ImageMemoryBarriers)
 {
-    a_CommandBuffer->PushCommand(
+    a_CommandBuffer->PushCommand<GenericCommand>(
         [memoryBarriers = a_MemoryBarriers, bufferMemoryBarriers = a_BufferMemoryBarriers, imageMemoryBarriers = a_ImageMemoryBarriers](const Buffer::ExecutionState&) {
         for (const auto& memoryBarrier : memoryBarriers) {
             glMemoryBarrierEXT(GetGLBarrierAccessBits(memoryBarrier.dstAccessMask));

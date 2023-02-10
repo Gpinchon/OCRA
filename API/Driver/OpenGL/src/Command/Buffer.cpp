@@ -14,48 +14,6 @@
 #include <functional>
 #include <array>
 
-namespace OCRA::Command::Buffer
-{
-void Begin(const Handle& a_CommandBuffer, const BeginInfo& a_BeginInfo) {
-    a_CommandBuffer->Begin(a_BeginInfo);
-}
-void End(const Handle& a_CommandBuffer) {
-    a_CommandBuffer->End();
-}
-void Reset(const Handle& a_CommandBuffer) {
-    a_CommandBuffer->Reset();
-}
-}
-
-namespace OCRA::Command
-{
-void ExecuteCommandBuffer(
-    const Buffer::Handle& a_CommandBuffer,
-    const Buffer::Handle& a_SecondaryCommandBuffer)
-{
-    a_CommandBuffer->PushCommand([
-        commandBuffer = a_SecondaryCommandBuffer.get()
-    ](Buffer::ExecutionState& a_ExecutionState) {
-        commandBuffer->ExecuteSecondary(a_ExecutionState);
-    });
-}
-void PushConstants(
-    const Command::Buffer::Handle& a_CommandBuffer,
-    const Pipeline::Layout::Handle& a_PipelineLayout,
-    const uint8_t a_Offset,
-    const std::vector<std::byte>& a_Data)
-{
-    a_CommandBuffer->PushCommand([
-        &pushConstants = a_CommandBuffer->pushConstants,
-        pipelineLayout = a_PipelineLayout,
-        offset = size_t(a_Offset),
-        data = a_Data
-    ](Buffer::ExecutionState&) {
-        pushConstants.Update(offset, data);
-    });
-}
-}
-
 void OCRA::Command::Buffer::Impl::Reset()
 {
     assert(
@@ -139,4 +97,16 @@ void OCRA::Command::Buffer::Impl::Execute(ExecutionState& a_ExecutionState)
         executionState.Reset();
         state = State::Executable;
     }
+}
+
+void OCRA::Command::Buffer::Begin(const Handle& a_CommandBuffer, const BeginInfo& a_BeginInfo) {
+    a_CommandBuffer->Begin(a_BeginInfo);
+}
+
+void OCRA::Command::Buffer::End(const Handle& a_CommandBuffer) {
+    a_CommandBuffer->End();
+}
+
+void OCRA::Command::Buffer::Reset(const Handle& a_CommandBuffer) {
+    a_CommandBuffer->Reset();
 }

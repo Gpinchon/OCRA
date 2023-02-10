@@ -78,10 +78,10 @@ void PushConstants::Unbind()
     glBindBufferBase(GL_UNIFORM_BUFFER, OCRA_GL_SHADER_PUSHCONSTANT_BINDING, 0);
 }
 
-void PushConstants::Update(const size_t& a_Offset, const std::vector<std::byte>& a_Data) {
+void PushConstants::Update(const size_t& a_Offset, const size_t& a_Size, const std::byte* a_Data) {
     ++offset %= PushConstantMultiBuffering;
     const auto currentOffset = offset * offsetAlignment;
-    std::memcpy((char*)bufferPtr + currentOffset, a_Data.data(), a_Data.size());
+    std::memcpy((char*)bufferPtr + currentOffset, a_Data, a_Size);
     glFlushMappedNamedBufferRangeEXT(bufferHandle, currentOffset, size);
 }
 }
