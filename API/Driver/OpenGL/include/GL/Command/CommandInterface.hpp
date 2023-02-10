@@ -1,7 +1,6 @@
 #pragma once
 
 #include <functional>
-#include <cassert>
 
 namespace OCRA::Command::Buffer {
     struct ExecutionState;

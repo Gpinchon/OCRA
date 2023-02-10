@@ -17,7 +17,6 @@ OCRA_DECLARE_WEAK_HANDLE(OCRA::Command::Buffer);
 
 namespace OCRA::Command::Pool
 {
-constexpr auto MaxCommandBufferNbr = 4096;
 struct Impl
 {
     Impl(const Device::Handle& a_Device, const Info& a_Info)
@@ -31,6 +30,7 @@ struct Impl
 #endif
     std::pmr::unsynchronized_pool_resource  memoryResource;
 };
+
 Handle Create(
     const Device::Handle&       a_Device,
     const Info&                 a_Info,
@@ -38,6 +38,7 @@ Handle Create(
 {
     return Handle(new Impl(a_Device, a_Info));
 }
+
 std::vector<Buffer::Handle> AllocateBuffer(const Device::Handle& a_Device, const AllocateInfo& a_Info)
 {
     std::vector<Buffer::Handle> commandBuffers;
