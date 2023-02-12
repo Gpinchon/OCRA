@@ -199,7 +199,7 @@ void Impl::PresentNV(const Queue::Handle& a_Queue)
     a_Queue->PushCommand([this, extent] {
         const auto& image = images.at(backBufferIndex);
         auto sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
-        glClientWaitSync(sync, 0, 1000);
+        glClientWaitSync(sync, 0, GL_TIMEOUT_IGNORED);
         glDeleteSync(sync);
         WIN32_CHECK_ERROR(wglCopyImageSubDataNV(
             nullptr, image->handle, image->target, //use current context
