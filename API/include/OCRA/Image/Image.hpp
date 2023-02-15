@@ -120,7 +120,7 @@ void CopyImage(
     const Command::Buffer::Handle&  a_CommandBuffer,
     const Image::Handle&            a_SrcImage,
     const Image::Handle&            a_DstImage,
-    const std::vector<Image::Copy>  a_Regions);
+    const std::vector<Image::Copy>&  a_Regions);
 void GenerateMipMap(
     const Command::Buffer::Handle&  a_CommandBuffer,
     const Image::Handle&            a_Image);
