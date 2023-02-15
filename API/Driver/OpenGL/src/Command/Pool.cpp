@@ -21,14 +21,15 @@ struct Impl
 {
     Impl(const Device::Handle& a_Device, const Info& a_Info)
     {}
+    std::pmr::unsynchronized_pool_resource  memoryResource;
+
 #ifdef _DEBUG
     ~Impl() {
         //If this assert fails, this pool was destroyed before the objects it allocated
         for (auto& allocated : allocated) assert(allocated.expired());
     }
-    std::vector<Buffer::WeakHandle>         allocated;
+    std::pmr::vector<Buffer::WeakHandle>    allocated{ &memoryResource };
 #endif
-    std::pmr::unsynchronized_pool_resource  memoryResource;
 };
 
 Handle Create(
