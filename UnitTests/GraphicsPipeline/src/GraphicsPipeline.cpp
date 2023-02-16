@@ -4,29 +4,9 @@
 #include <PBRMaterial.hpp>
 #include <Window.hpp>
 
-#include <OCRA/Instance.hpp>
-#include <OCRA/Device.hpp>
-#include <OCRA/FrameBuffer.hpp>
-#include <OCRA/RenderPass.hpp>
-#include <OCRA/Surface.hpp>
-#include <OCRA/SwapChain.hpp>
-#include <OCRA/Command/Pool.hpp>
-#include <OCRA/Command/Buffer.hpp>
-#include <OCRA/Command/Draw.hpp>
-#include <OCRA/Command/Scissor.hpp>
-#include <OCRA/Command/ViewPort.hpp>
-#include <OCRA/Descriptor/Set.hpp>
-#include <OCRA/Pipeline/Layout.hpp>
-#include <OCRA/Queue/Fence.hpp>
-#include <OCRA/Common/Vec3.hpp>
-#include <OCRA/Common/Vec_Math.hpp>
-
-#include <OCRA/ShaderCompiler/Compiler.hpp>
-#include <OCRA/ShaderCompiler/Shader.hpp>
+#include <OCRA/OCRA.hpp>
 
 #include <Windows.h>
-
-#include <OCRA/Pipeline/Graphics.hpp>
 
 using namespace OCRA;
 constexpr auto VSync = false;
@@ -105,17 +85,29 @@ struct GraphicsPipelineTestApp : TestApp
         imageAcquisitionFence = Queue::Fence::Create(device);
         mainCommandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Primary);
         drawCommandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Secondary);
+        Queue::Semaphore::Info semaphoreInfo;
+        semaphoreInfo.type = Queue::Semaphore::Type::Binary;
+        drawSemaphore = Queue::Semaphore::Create(device, semaphoreInfo);
     }
     void Loop()
     {
-        FPSCounter fpsCounter(1);
+        FPSCounter fpsCounter;
         auto lastTime = std::chrono::high_resolution_clock::now();
         auto printTime = lastTime;
         auto uniformUpdateTime = lastTime;
         window.SetVSync(VSync);
         while (true) {
+            fpsCounter.StartFrame();
+
             window.PushEvents();
             if (window.IsClosing()) break;
+
+            swapChainImage = window.AcquireNextImage({}, nullptr, imageAcquisitionFence);
+            {
+                render = Queue::Fence::WaitFor(device, imageAcquisitionFence, std::chrono::nanoseconds(15000000));
+                Queue::Fence::Reset(device, { imageAcquisitionFence });
+            }
+
             if (!render) continue;
             
             const auto now = std::chrono::high_resolution_clock::now();
@@ -123,7 +115,7 @@ struct GraphicsPipelineTestApp : TestApp
             lastTime = now;
 
             auto uniformUpdateDelta = std::chrono::duration<double, std::milli>(now - uniformUpdateTime).count();
-            if (uniformUpdateDelta >= 16)
+            if (uniformUpdateDelta >= 15)
             {
                 uniformUpdateTime = now;
                 const float rotationAngle = uniformUpdateDelta * 0.0005;
@@ -132,14 +124,11 @@ struct GraphicsPipelineTestApp : TestApp
                 mesh.Update();
                 if (firstLoop) RecordDrawCommandBuffer();
             }
-
-            fpsCounter.StartFrame();
-            swapChainImage = window.AcquireNextImage(std::chrono::nanoseconds(15000000), nullptr, imageAcquisitionFence);
-            Queue::Fence::WaitFor(device, imageAcquisitionFence, std::chrono::nanoseconds(15000000));
-            Queue::Fence::Reset(device, { imageAcquisitionFence });
+            
+            
             RecordMainCommandBuffer();
-            SubmitCommandBuffer(queue, mainCommandBuffer);
-            window.Present(queue);
+            SubmitCommandBuffer(queue, mainCommandBuffer, nullptr, drawSemaphore);
+            window.Present(queue, drawSemaphore);
             fpsCounter.EndFrame();
             
             if (std::chrono::duration<double, std::milli>(now - printTime).count() >= 48) {
@@ -292,6 +281,7 @@ struct GraphicsPipelineTestApp : TestApp
     Command::Pool::Handle    commandPool;
     Command::Buffer::Handle  mainCommandBuffer;
     Command::Buffer::Handle  drawCommandBuffer;
+    Queue::Semaphore::Handle drawSemaphore; //To be signaled when drawing is done
     Queue::Fence::Handle     imageAcquisitionFence;
     Queue::Handle            queue;
 };

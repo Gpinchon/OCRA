@@ -7,7 +7,8 @@
 
 using namespace OCRA;
 
-#define SWAPCHAIN_IMAGE_NBR 2
+constexpr auto VSync = false;
+constexpr auto SWAPCHAIN_IMAGE_NBR = 2;
 
 Vec3 HSVtoRGB(float fH, float fS, float fV) {
     float fC = fV * fS; // Chroma
@@ -73,23 +74,29 @@ struct SwapChainTestApp : TestApp
         imageAcquisitionFence = Queue::Fence::Create(device);
         commandPool = CreateCommandPool(device, queueFamily);
         commandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Primary);
+        Queue::Semaphore::Info semaphoreInfo;
+        semaphoreInfo.type = Queue::Semaphore::Type::Binary;
+        drawWaitSemaphore = Queue::Semaphore::Create(device, semaphoreInfo);
+        drawSignalSemaphore = Queue::Semaphore::Create(device, semaphoreInfo);
     }
     void Loop()
     {
         FPSCounter fpsCounter;
         auto printTime = std::chrono::high_resolution_clock::now();
-        window.SetVSync(false);
+        window.SetVSync(VSync);
         while (true) {
             fpsCounter.StartFrame();
             window.PushEvents();
             if (window.IsClosing()) break;
             if (!render) continue;
-            const auto swapChainImage = window.AcquireNextImage(std::chrono::nanoseconds(15000000), nullptr, imageAcquisitionFence);
+            const auto swapChainImage = window.AcquireNextImage(std::chrono::nanoseconds(0), drawWaitSemaphore, imageAcquisitionFence);
             Queue::Fence::WaitFor(device, imageAcquisitionFence, std::chrono::nanoseconds(15000000));
+            auto fenceStatus = Queue::Fence::GetStatus(device, imageAcquisitionFence);
             Queue::Fence::Reset(device, { imageAcquisitionFence });
+            if (fenceStatus != Queue::Fence::Status::Signaled) continue; //we failed acquiring the next image
             RecordClearCommandBuffer(swapChainImage);
-            SubmitCommandBuffer(queue, commandBuffer);
-            window.Present(queue);
+            SubmitCommandBuffer(queue, commandBuffer, drawWaitSemaphore, drawSignalSemaphore);
+            window.Present(queue, drawSignalSemaphore);
             const auto now = std::chrono::high_resolution_clock::now();
             fpsCounter.EndFrame();
             if (std::chrono::duration<double, std::milli>(now - printTime).count() >= 48) {
@@ -120,12 +127,14 @@ struct SwapChainTestApp : TestApp
         }
         Command::Buffer::End(commandBuffer);
     }
-    bool                    render{ false };
-    Window                  window;
-    Queue::Handle           queue;
-    Queue::Fence::Handle    imageAcquisitionFence;
-    Command::Pool::Handle   commandPool;
-    Command::Buffer::Handle commandBuffer;
+    bool                     render{ false };
+    Window                   window;
+    Queue::Handle            queue;
+    Queue::Semaphore::Handle drawWaitSemaphore;
+    Queue::Semaphore::Handle drawSignalSemaphore;
+    Queue::Fence::Handle     imageAcquisitionFence;
+    Command::Pool::Handle    commandPool;
+    Command::Buffer::Handle  commandBuffer;
 };
 
 int main()

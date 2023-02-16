@@ -105,10 +105,16 @@ Command::Buffer::Handle CreateCommandBuffer(const Device::Handle& a_Device, cons
     return Command::Pool::AllocateBuffer(a_Device, commandBufferAllocateInfo).front();
 }
 
-void SubmitCommandBuffer(const Queue::Handle& a_Queue, const Command::Buffer::Handle& a_CommandBuffer)
+void OCRA::SubmitCommandBuffer(
+    const Queue::Handle& a_Queue,
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const Queue::Semaphore::Handle& a_WaitSemaphore,
+    const Queue::Semaphore::Handle& a_SignalSemaphore)
 {
     Queue::SubmitInfo submitInfo;
     submitInfo.commandBuffers.push_back(a_CommandBuffer);
+    if (a_WaitSemaphore)   submitInfo.waitSemaphores = { a_WaitSemaphore };
+    if (a_SignalSemaphore) submitInfo.signalSemaphores = { a_SignalSemaphore };
     Queue::Submit(a_Queue, { submitInfo });
 }
 

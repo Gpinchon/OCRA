@@ -121,8 +121,9 @@ void Window::Update()
     UpdateWindow(HWND(nativeHandle));
 }
 
-void Window::Present(const Queue::Handle& a_Queue)
+void Window::Present(const Queue::Handle& a_Queue, const Queue::Semaphore::Handle& a_WaitSemaphore)
 {
+    if (a_WaitSemaphore != nullptr) presentInfo.waitSemaphores = { a_WaitSemaphore };
     SwapChain::Present(a_Queue, presentInfo);
 }
 

@@ -58,7 +58,7 @@ public:
         std::cout << "\rFPS : " << fps << std::flush;
     }
     std::chrono::steady_clock::time_point startTime;
-    double alpha{ 0.0001 };
+    double alpha{ 1 / 60.0 };
     double meanFrameTime{ 0 };
     double fps{ 0 };
 };
@@ -78,7 +78,11 @@ Command::Pool::Handle CreateCommandPool(const Device::Handle& a_Device, const ui
 //Creates a command buffer from the specified command pool
 Command::Buffer::Handle CreateCommandBuffer(const Device::Handle& a_Device, const Command::Pool::Handle& a_CommandPool, const Command::Pool::AllocateInfo::Level& a_Level);
 //Submits a Command Buffer to the specified Queue
-void SubmitCommandBuffer(const Queue::Handle& a_Queue, const Command::Buffer::Handle& a_CommandBuffer);
+void SubmitCommandBuffer(
+    const Queue::Handle& a_Queue,
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const Queue::Semaphore::Handle& a_WaitSemaphore = nullptr,
+    const Queue::Semaphore::Handle& a_SignalSemaphore = nullptr);
 //Returns the index of a memory type with specified properties
 uint32_t FindProperMemoryType(const PhysicalDevice::Handle& a_PhysicalDevice, const PhysicalDevice::MemoryPropertyFlags& a_MemoryProperties);
 //allocate GPU memory with the specified properties

@@ -30,11 +30,13 @@ public:
     void PushEvents();
     void Show();
     void Update();
-    void Present(const Queue::Handle& a_Queue);
+    void Present(
+        const Queue::Handle& a_Queue,
+        const Queue::Semaphore::Handle& a_WaitSemaphore = nullptr);
     Image::Handle AcquireNextImage(
         const std::chrono::nanoseconds& a_Timeout,
-        const Queue::Semaphore::Handle& a_Semaphore = nullptr,
-        const Queue::Fence::Handle& a_Fence = nullptr);
+        const Queue::Semaphore::Handle& a_SignalSemaphore = nullptr,
+        const Queue::Fence::Handle& a_SignalFence = nullptr);
     
     auto IsClosing() const { return closing; }
     auto GetNativeHandle() const { return nativeHandle; }

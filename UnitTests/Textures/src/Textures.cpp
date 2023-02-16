@@ -2,28 +2,7 @@
 #include <Window.hpp>
 #include <UniformTexture.hpp>
 
-#include <OCRA/Command/Buffer.hpp>
-#include <OCRA/Command/Pool.hpp>
-#include <OCRA/Command/Draw.hpp>
-#include <OCRA/Common/Vec_Boolean.hpp>
-#include <OCRA/Common/Vec_Interpolation.hpp>
-#include <OCRA/Common/Vec_Math.hpp>
-#include <OCRA/Common/Vec2.hpp>
-#include <OCRA/Common/Vec3.hpp>
-#include <OCRA/Common/ViewPort.hpp>
-#include <OCRA/Device.hpp>
-#include <OCRA/FrameBuffer.hpp>
-#include <OCRA/Image/Image.hpp>
-#include <OCRA/Image/View.hpp>
-#include <OCRA/Instance.hpp>
-#include <OCRA/Memory.hpp>
-#include <OCRA/Pipeline/Graphics.hpp>
-#include <OCRA/Pipeline/Layout.hpp>
-#include <OCRA/Pipeline/VertexInputState.hpp>
-#include <OCRA/Queue/Fence.hpp>
-#include <OCRA/Shader/Module.hpp>
-#include <OCRA/Shader/Stage.hpp>
-#include <OCRA/Surface.hpp>
+#include <OCRA/OCRA.hpp>
 
 #include <OCRA/ShaderCompiler/Compiler.hpp>
 #include <OCRA/ShaderCompiler/Shader.hpp>
@@ -133,6 +112,7 @@ struct TexturesTestApp : TestApp
         commandPool = CreateCommandPool(device, queueFamily);
         mainCommandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Primary);
         drawCommandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Secondary);
+        drawSemaphore = Queue::Semaphore::Create(device, { Queue::Semaphore::Type::Binary, 0 });
         CreateRenderPass();
         CreateShaderStages();
     }
@@ -152,8 +132,8 @@ struct TexturesTestApp : TestApp
             Queue::Fence::Reset(device, { imageAcquisitionFence });
             textureUniform.Update();
             RecordMainCommandBuffer();
-            SubmitCommandBuffer(queue, mainCommandBuffer);
-            window.Present(queue);
+            SubmitCommandBuffer(queue, mainCommandBuffer, nullptr, drawSemaphore);
+            window.Present(queue, drawSemaphore);
             fpsCounter.EndFrame();
             if (std::chrono::duration<double, std::milli>(now - printTime).count() >= 48) {
                 printTime = now;
@@ -293,13 +273,6 @@ struct TexturesTestApp : TestApp
     }
     void RecordMainCommandBuffer()
     {
-        static float hue = 0;
-        static auto lastTime = std::chrono::high_resolution_clock::now();
-        const auto now = std::chrono::high_resolution_clock::now();
-        const auto delta = std::chrono::duration<double, std::milli>(now - lastTime).count();
-        lastTime = now;
-        hue += 0.05 * delta;
-        hue = hue > 360 ? 0 : hue;
         Command::Buffer::BeginInfo bufferBeginInfo;
         bufferBeginInfo.flags = Command::Buffer::UsageFlagBits::None;
         Command::Buffer::Reset(mainCommandBuffer);
@@ -357,6 +330,7 @@ struct TexturesTestApp : TestApp
     Window                  window;    
 
     Queue::Handle           queue;
+    Queue::Semaphore::Handle drawSemaphore;
     Queue::Fence::Handle    imageAcquisitionFence;
 
     FrameBuffer::Handle      frameBuffer;
