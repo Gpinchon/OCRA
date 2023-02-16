@@ -96,9 +96,8 @@ struct GraphicsPipelineTestApp : TestApp
         auto printTime = lastTime;
         auto uniformUpdateTime = lastTime;
         window.SetVSync(VSync);
+        fpsCounter.StartFrame();
         while (true) {
-            fpsCounter.StartFrame();
-
             window.PushEvents();
             if (window.IsClosing()) break;
 
@@ -128,6 +127,7 @@ struct GraphicsPipelineTestApp : TestApp
             SubmitCommandBuffer(queue, mainCommandBuffer, nullptr, drawSemaphore);
             window.Present(queue, drawSemaphore);
             fpsCounter.EndFrame();
+            fpsCounter.StartFrame();
             
             if (std::chrono::duration<double, std::milli>(now - printTime).count() >= 48) {
                 printTime = now;
