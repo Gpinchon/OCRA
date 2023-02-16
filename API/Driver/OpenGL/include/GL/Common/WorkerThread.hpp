@@ -61,6 +61,7 @@ public:
     {
         PushCommand([]{}, true);
     }
+
 private:
     std::mutex              _mtx;
     std::condition_variable _cv;
