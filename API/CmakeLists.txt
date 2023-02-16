@@ -70,6 +70,7 @@ set(OCRA_API_HEADER_LIST
   OCRA/Pipeline/DepthStencilState.hpp
   OCRA/Pipeline/Graphics.hpp
   OCRA/Pipeline/InputAssemblyState.hpp
+  OCRA/Pipeline/Layout.hpp
   OCRA/Pipeline/MultisampleState.hpp
   OCRA/Pipeline/Pipeline.hpp
   OCRA/Pipeline/RasterizationState.hpp
