@@ -1,6 +1,6 @@
 #pragma once
 
-#include <SwapChain.hpp>
+#include <OCRA/SwapChain.hpp>
 
 #include <GL-DX/Surface.hpp>
 #include <GL-DX/Win32/D3DContainerInterface.hpp>

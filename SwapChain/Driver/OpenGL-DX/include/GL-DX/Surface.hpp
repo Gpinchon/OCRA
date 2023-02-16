@@ -1,7 +1,7 @@
 #pragma once
 
 #include <OCRA/Handle.hpp>
-#include <Surface.hpp>
+#include <OCRA/Surface.hpp>
 #include <OCRA/Common/Extent2D.hpp>
 
 #include <functional>
