@@ -199,8 +199,8 @@ void Impl::Present(const Queue::Handle& a_Queue, const std::vector<Queue::Semaph
 
 void Impl::PresentNV(const Queue::Handle& a_Queue, const std::vector<Queue::Semaphore::Handle>& a_WaitSemaphores)
 {
-    a_Queue->PushCommand([this, semaphores = a_WaitSemaphores] {
-        for (const auto& semaphore : semaphores) {
+    a_Queue->PushCommand([this, a_WaitSemaphores] {
+        for (const auto& semaphore : a_WaitSemaphores) {
 #ifdef _DEBUG
             assert(semaphore->type == Queue::Semaphore::Type::Binary && "Cannot wait on Timeline Semaphores when presenting");
 #endif
@@ -226,8 +226,8 @@ void Impl::PresentNV(const Queue::Handle& a_Queue, const std::vector<Queue::Sema
 
 void Impl::PresentGL(const Queue::Handle& a_Queue, const std::vector<Queue::Semaphore::Handle>& a_WaitSemaphores)
 {
-    a_Queue->PushCommand([this, semaphores = a_WaitSemaphores] {
-        for (const auto& semaphore : semaphores) {
+    a_Queue->PushCommand([this, a_WaitSemaphores] {
+        for (const auto& semaphore : a_WaitSemaphores) {
 #ifdef _DEBUG
             assert(semaphore->type == Queue::Semaphore::Type::Binary && "Cannot wait on Timeline Semaphores when presenting");
 #endif
