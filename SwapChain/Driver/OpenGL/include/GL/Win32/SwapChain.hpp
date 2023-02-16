@@ -31,10 +31,10 @@ struct Impl : SwapChain::Impl
     //when retiring the SwapChain becomes "empty"
     //retired SwapChains loose ownership of their FB and get unusable
     void Retire();
-    void PresentNV(const Queue::Handle& a_Queue, const std::vector<Queue::Semaphore::Handle>& a_WaitSemaphores);
-    void PresentGL(const Queue::Handle& a_Queue, const std::vector<Queue::Semaphore::Handle>& a_WaitSemaphores);
+    void PresentNV(const Queue::Handle& a_Queue);
+    void PresentGL(const Queue::Handle& a_Queue);
     
-    virtual void Present(const Queue::Handle& a_Queue, const std::vector<Queue::Semaphore::Handle>& a_WaitSemaphores) override;
+    virtual void Present(const Queue::Handle& a_Queue) override;
     virtual Image::Handle AcquireNextImage(
         const std::chrono::nanoseconds& a_Timeout,
         const Queue::Semaphore::Handle& a_Semaphore,

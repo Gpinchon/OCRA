@@ -14,7 +14,7 @@ namespace OCRA::SwapChain
 {
 struct Impl
 {
-    virtual void Present(const Queue::Handle& a_Queue, const std::vector<Queue::Semaphore::Handle>& a_WaitSemaphores) = 0;
+    virtual void Present(const Queue::Handle& a_Queue) = 0;
     virtual Image::Handle AcquireNextImage(
         const std::chrono::nanoseconds& a_TimeoutNS,
         const Queue::Semaphore::Handle& a_Semaphore,

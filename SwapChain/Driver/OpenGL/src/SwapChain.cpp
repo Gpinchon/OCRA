@@ -32,8 +32,14 @@ Handle Create(const Device::Handle& a_Device, const Info& a_Info)
 
 void Present(const Queue::Handle& a_Queue, const PresentInfo& a_PresentInfo)
 {
+    for (const auto& semaphore : a_PresentInfo.waitSemaphores) {
+#ifdef _DEBUG
+        assert(semaphore->type == Queue::Semaphore::Type::Binary && "Cannot wait on Timeline Semaphores when presenting");
+#endif
+        std::static_pointer_cast<Queue::Semaphore::Binary>(semaphore)->Wait();
+    }
     for (const auto& swapChain : a_PresentInfo.swapChains)
-        swapChain->Present(a_Queue, a_PresentInfo.waitSemaphores);
+        swapChain->Present(a_Queue);
 }
 
 Image::Handle AcquireNextImage(

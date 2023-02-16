@@ -184,68 +184,56 @@ void Impl::Retire() {
     retired = true;
 }
 
-void Impl::Present(const Queue::Handle& a_Queue, const std::vector<Queue::Semaphore::Handle>& a_WaitSemaphores)
+void Impl::Present(const Queue::Handle& a_Queue)
 {
 #ifdef _DEBUG
     assert(!retired);
 #endif
     if (WGLEW_NV_copy_image) {
-        PresentNV(a_Queue, a_WaitSemaphores);
+        PresentNV(a_Queue);
     }
     else {
-        PresentGL(a_Queue, a_WaitSemaphores);
+        PresentGL(a_Queue);
     }
 }
 
-void Impl::PresentNV(const Queue::Handle& a_Queue, const std::vector<Queue::Semaphore::Handle>& a_WaitSemaphores)
+void Impl::PresentNV(const Queue::Handle& a_Queue)
 {
-    a_Queue->PushCommand([this, a_WaitSemaphores] {
-        for (const auto& semaphore : a_WaitSemaphores) {
-#ifdef _DEBUG
-            assert(semaphore->type == Queue::Semaphore::Type::Binary && "Cannot wait on Timeline Semaphores when presenting");
-#endif
-            std::static_pointer_cast<Queue::Semaphore::Binary>(semaphore)->Wait();
-        }
-        const auto& image = images.at(backBufferIndex);
-        const auto& extent = image->info.extent;
-        WIN32_CHECK_ERROR(wglCopyImageSubDataNV(
-            nullptr, image->handle, image->target, //use current context
-            0, 0, 0, 0,
-            HGLRC(hglrc), presentTexture->handle, presentTexture->target,
-            0, 0, 0, 0,
-            extent.width, extent.height, 1));
-    }, true);
     //Only Mailbox mode can stack several presentation requests
     if (presentMode != PresentMode::Mailbox) workerThread.Wait();
-    workerThread.PushCommand([this] {
+    workerThread.PushCommand([this, queue = a_Queue] {
+        queue->PushCommand([this] {
+            const auto& image = images.at(backBufferIndex);
+            const auto& extent = image->info.extent;
+            WIN32_CHECK_ERROR(wglCopyImageSubDataNV(
+                nullptr, image->handle, image->target, //use current context
+                0, 0, 0, 0,
+                HGLRC(hglrc), presentTexture->handle, presentTexture->target,
+                0, 0, 0, 0,
+                extent.width, extent.height, 1));
+        }, true);
         presentGeometry->Draw();
         WIN32_CHECK_ERROR(SwapBuffers(HDC(hdc)));
     }, false);
     backBufferIndex = (backBufferIndex + 1) % images.size();
 }
 
-void Impl::PresentGL(const Queue::Handle& a_Queue, const std::vector<Queue::Semaphore::Handle>& a_WaitSemaphores)
+void Impl::PresentGL(const Queue::Handle& a_Queue)
 {
-    a_Queue->PushCommand([this, a_WaitSemaphores] {
-        for (const auto& semaphore : a_WaitSemaphores) {
-#ifdef _DEBUG
-            assert(semaphore->type == Queue::Semaphore::Type::Binary && "Cannot wait on Timeline Semaphores when presenting");
-#endif
-            std::static_pointer_cast<Queue::Semaphore::Binary>(semaphore)->Wait();
-        }
-        const auto& image = images.at(backBufferIndex);
-        glBindTexture(image->target, image->handle);
-        glGetTexImage(
-            image->target,
-            0,
-            image->dataFormat,
-            image->dataType,
-            presentPixels->GetPtr());
-        glBindTexture(image->target, 0);
-    }, true);
     //Only Mailbox mode can stack several presentation requests
     if (presentMode != PresentMode::Mailbox) workerThread.Wait();
-    workerThread.PushCommand([this] {
+    workerThread.PushCommand([this, queue = a_Queue] {
+        queue->PushCommand([this] {
+            const auto& image = images.at(backBufferIndex);
+            glBindTexture(image->target, image->handle);
+            glGetTexImage(
+                image->target,
+                0,
+                image->dataFormat,
+                image->dataType,
+                presentPixels->GetPtr());
+            glBindTexture(image->target, 0);
+        }, true);
         const auto& image = images.at(backBufferIndex);
         const auto& extent = image->info.extent;
         presentPixels->Flush();
