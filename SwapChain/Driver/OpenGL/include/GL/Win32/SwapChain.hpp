@@ -29,14 +29,22 @@ struct Impl : SwapChain::Impl
     Impl(const Device::Handle& a_Device, const Info& a_Info);
     ~Impl();
     //when retiring the SwapChain becomes "empty"
-    virtual void Retire() override;
-    virtual void Present(const Queue::Handle& a_Queue) override;
-    void PresentNV(const Queue::Handle& a_Queue);
-    void PresentGL(const Queue::Handle& a_Queue);
+    //retired SwapChains loose ownership of their FB and get unusable
+    void Retire();
+    void PresentNV(const Queue::Handle& a_Queue, const std::vector<Queue::Semaphore::Handle>& a_WaitSemaphores);
+    void PresentGL(const Queue::Handle& a_Queue, const std::vector<Queue::Semaphore::Handle>& a_WaitSemaphores);
+    
+    virtual void Present(const Queue::Handle& a_Queue, const std::vector<Queue::Semaphore::Handle>& a_WaitSemaphores) override;
     virtual Image::Handle AcquireNextImage(
         const std::chrono::nanoseconds& a_Timeout,
         const Queue::Semaphore::Handle& a_Semaphore,
-        const Queue::Fence::Handle&     a_Fence) override;
+        const Queue::Fence::Handle& a_Fence) override;
+
+    const Device::WeakHandle    device;
+    const Surface::Handle       surface{ nullptr };
+    const PresentMode           presentMode;
+    bool                        retired{ false };
+
     WorkerThread                     workerThread;
     void*                            hglrc{ nullptr };
     void*                            hdc{ nullptr };

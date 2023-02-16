@@ -21,14 +21,8 @@
 
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
 
-//TODO : use WGL_NV_DX_interop & WGL_NV_DX_interop2
 namespace OCRA::SwapChain
 {
-Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
-    : info(a_Info)
-    , device(a_Device)
-{}
-
 Handle Create(const Device::Handle& a_Device, const Info& a_Info)
 {
 #ifdef _WIN32
@@ -38,14 +32,8 @@ Handle Create(const Device::Handle& a_Device, const Info& a_Info)
 
 void Present(const Queue::Handle& a_Queue, const PresentInfo& a_PresentInfo)
 {
-    for (const auto& semaphore : a_PresentInfo.waitSemaphores)
-    {
-        if (semaphore->type == Queue::Semaphore::Type::Binary)
-            std::static_pointer_cast<Queue::Semaphore::Binary>(semaphore)->Wait();
-        else throw std::runtime_error("Cannot wait on Timeline Semaphores when presenting");
-    }
     for (const auto& swapChain : a_PresentInfo.swapChains)
-        swapChain->Present(a_Queue);
+        swapChain->Present(a_Queue, a_PresentInfo.waitSemaphores);
 }
 
 Image::Handle AcquireNextImage(

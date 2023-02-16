@@ -23,6 +23,7 @@ namespace OCRA::SwapChain
 enum class PresentMode {
     Immediate, //No V-Sync
     Fifo,      //Yes V-Sync
+    Mailbox,   //Present requests are queued
     MaxValue
 };
 struct Info {
@@ -54,7 +55,10 @@ struct PresentInfo
 */
 void Present(const Queue::Handle& a_Queue, const PresentInfo& a_PresentInfo);
 /**
+* @brief in OGL it blocks for a certain time until the semaphore & fence can be signaled,
+* if it times out, a handle will be returned and the fence signaled later on.
 * @return : a handle to the current Back Buffer
+* In OGL, it ALWAYS returns a handle
 */
 Image::Handle AcquireNextImage(
     const Device::Handle& a_Device,

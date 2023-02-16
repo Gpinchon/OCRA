@@ -3,6 +3,7 @@
 #include <GL/Win32/PresentPixels.hpp>
 #include <GL/Win32/PresentShader.hpp>
 #include <GL/Win32/PresentTexture.hpp>
+#include <GL/Win32/PhysicalDevice.hpp>
 #include <GL/Surface.hpp>
 
 #include <GL/Win32/Error.hpp>
@@ -46,6 +47,7 @@ void GLAPIENTRY MessageCallback(
 static inline auto CreateImages(const Device::Handle& a_Device, const Info& a_Info)
 {
     std::vector<Image::Handle> images;
+    images.reserve(a_Info.imageCount);
     auto win32SwapChain = std::static_pointer_cast<SwapChain::Win32::Impl>(a_Info.oldSwapchain);
     for (auto i = 0u; i < a_Info.imageCount; ++i)
     {
@@ -75,18 +77,19 @@ static inline auto CreateImages(const Device::Handle& a_Device, const Info& a_In
 }
 
 Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
-    : SwapChain::Impl(a_Device, a_Info)
+    : device(a_Device)
+    , surface(a_Info.surface)
+    , presentMode(a_Info.presentMode)
     , images(CreateImages(a_Device, a_Info))
 {
-    const auto pixelSize = GetPixelSize(info.imageFormat);
-    if (info.oldSwapchain != nullptr && !info.oldSwapchain->retired) {
-        auto win32SwapChain = std::static_pointer_cast<SwapChain::Win32::Impl>(info.oldSwapchain);
+    const auto pixelSize = GetPixelSize(a_Info.imageFormat);
+    auto win32SwapChain = std::static_pointer_cast<SwapChain::Win32::Impl>(a_Info.oldSwapchain);
+    if (win32SwapChain != nullptr && !win32SwapChain->retired) {
         win32SwapChain->workerThread.Wait();
         hdc = win32SwapChain->hdc;
         hglrc = win32SwapChain->hglrc;
         presentShader.swap(win32SwapChain->presentShader);
-        info.oldSwapchain->Retire();
-        info.oldSwapchain.reset();
+        win32SwapChain->Retire();
     }
     else {
         hdc = GetDC(HWND(a_Info.surface->nativeWindow));
@@ -109,9 +112,9 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
         WIN32_CHECK_ERROR(SetPixelFormat(HDC(hdc), pixelFormat, nullptr));
         hglrc = OpenGL::Win32::CreateContext(hdc);
     }
-    workerThread.PushCommand([this, pixelSize] {
+    workerThread.PushCommand([this, &a_Info, pixelSize] {
         WIN32_CHECK_ERROR(wglMakeCurrent(HDC(hdc), HGLRC(hglrc)));
-        if (info.presentMode == PresentMode::Immediate) {
+        if (a_Info.presentMode == PresentMode::Immediate) {
             WIN32_CHECK_ERROR(wglSwapIntervalEXT(0));
         }
         else WIN32_CHECK_ERROR(wglSwapIntervalEXT(1));
@@ -137,7 +140,7 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
                 std::cerr << "SwapChain : WGL_NV_copy_image unavailable, using slower path\n";
                 warningPrinted = true;
             }
-            const auto transferBufferSize = info.imageExtent.width * info.imageExtent.height * pixelSize / 8;
+            const auto transferBufferSize = a_Info.imageExtent.width * a_Info.imageExtent.height * pixelSize / 8;
             presentPixels.reset(new PresentPixels(transferBufferSize));
             presentPixels->Bind();
         }
@@ -147,7 +150,7 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
         glBindSampler(0, presentTexture->samplerHandle);
     }, true);
 #ifdef _DEBUG
-    assert(info.surface != nullptr);
+    assert(surface != nullptr);
 #endif
 }
 
@@ -162,13 +165,12 @@ Impl::~Impl()
         wglMakeCurrent(nullptr, nullptr);
     }, true);
     if (hdc != nullptr)
-        ReleaseDC(HWND(info.surface->nativeWindow), HDC(hdc));
+        ReleaseDC(HWND(surface->nativeWindow), HDC(hdc));
     if (hglrc != nullptr)
         wglDeleteContext(HGLRC(hglrc));
 }
 
 void Impl::Retire() {
-    SwapChain::Impl::Retire();
     workerThread.PushCommand([this] {
         presentShader.reset();
         presentTexture.reset();
@@ -179,28 +181,33 @@ void Impl::Retire() {
     images.clear();
     hdc = nullptr;
     hglrc = nullptr;
+    retired = true;
 }
 
-void Impl::Present(const Queue::Handle& a_Queue)
+void Impl::Present(const Queue::Handle& a_Queue, const std::vector<Queue::Semaphore::Handle>& a_WaitSemaphores)
 {
+#ifdef _DEBUG
     assert(!retired);
+#endif
     if (WGLEW_NV_copy_image) {
-        PresentNV(a_Queue);
+        PresentNV(a_Queue, a_WaitSemaphores);
     }
     else {
-        PresentGL(a_Queue);
+        PresentGL(a_Queue, a_WaitSemaphores);
     }
 }
 
-void Impl::PresentNV(const Queue::Handle& a_Queue)
+void Impl::PresentNV(const Queue::Handle& a_Queue, const std::vector<Queue::Semaphore::Handle>& a_WaitSemaphores)
 {
-    const auto& image = images.at(backBufferIndex);
-    const auto extent = image->info.extent;
-    a_Queue->PushCommand([this, extent] {
+    a_Queue->PushCommand([this, semaphores = a_WaitSemaphores] {
+        for (const auto& semaphore : semaphores) {
+#ifdef _DEBUG
+            assert(semaphore->type == Queue::Semaphore::Type::Binary && "Cannot wait on Timeline Semaphores when presenting");
+#endif
+            std::static_pointer_cast<Queue::Semaphore::Binary>(semaphore)->Wait();
+        }
         const auto& image = images.at(backBufferIndex);
-        auto sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
-        glClientWaitSync(sync, 0, GL_TIMEOUT_IGNORED);
-        glDeleteSync(sync);
+        const auto& extent = image->info.extent;
         WIN32_CHECK_ERROR(wglCopyImageSubDataNV(
             nullptr, image->handle, image->target, //use current context
             0, 0, 0, 0,
@@ -208,18 +215,24 @@ void Impl::PresentNV(const Queue::Handle& a_Queue)
             0, 0, 0, 0,
             extent.width, extent.height, 1));
     }, true);
-    workerThread.PushCommand([this, extent] {
+    //Only Mailbox mode can stack several presentation requests
+    if (presentMode != PresentMode::Mailbox) workerThread.Wait();
+    workerThread.PushCommand([this] {
         presentGeometry->Draw();
         WIN32_CHECK_ERROR(SwapBuffers(HDC(hdc)));
-    }, info.presentMode != PresentMode::Immediate);
-    backBufferIndex = (backBufferIndex + 1) % info.imageCount;
+    }, false);
+    backBufferIndex = (backBufferIndex + 1) % images.size();
 }
 
-void Impl::PresentGL(const Queue::Handle& a_Queue)
+void Impl::PresentGL(const Queue::Handle& a_Queue, const std::vector<Queue::Semaphore::Handle>& a_WaitSemaphores)
 {
-    const auto& image = images.at(backBufferIndex);
-    const auto extent = image->info.extent;
-    a_Queue->PushCommand([this, extent] {
+    a_Queue->PushCommand([this, semaphores = a_WaitSemaphores] {
+        for (const auto& semaphore : semaphores) {
+#ifdef _DEBUG
+            assert(semaphore->type == Queue::Semaphore::Type::Binary && "Cannot wait on Timeline Semaphores when presenting");
+#endif
+            std::static_pointer_cast<Queue::Semaphore::Binary>(semaphore)->Wait();
+        }
         const auto& image = images.at(backBufferIndex);
         glBindTexture(image->target, image->handle);
         glGetTexImage(
@@ -230,7 +243,11 @@ void Impl::PresentGL(const Queue::Handle& a_Queue)
             presentPixels->GetPtr());
         glBindTexture(image->target, 0);
     }, true);
-    workerThread.PushCommand([this, extent] {
+    //Only Mailbox mode can stack several presentation requests
+    if (presentMode != PresentMode::Mailbox) workerThread.Wait();
+    workerThread.PushCommand([this] {
+        const auto& image = images.at(backBufferIndex);
+        const auto& extent = image->info.extent;
         presentPixels->Flush();
         glTexSubImage2D(
             presentTexture->target, 0,
@@ -238,24 +255,24 @@ void Impl::PresentGL(const Queue::Handle& a_Queue)
             presentTexture->dataFormat, presentTexture->dataType, BUFFER_OFFSET(presentPixels->offset));
         presentGeometry->Draw();
         WIN32_CHECK_ERROR(SwapBuffers(HDC(hdc)));
-    }, info.presentMode != PresentMode::Immediate);
-    backBufferIndex = (backBufferIndex + 1) % info.imageCount;
+    }, false);
+    backBufferIndex = (backBufferIndex + 1) % images.size();
 }
 
-//TODO: implement a timeout
 Image::Handle Impl::AcquireNextImage(
     const std::chrono::nanoseconds& a_Timeout,
     const Queue::Semaphore::Handle& a_Semaphore,
     const Queue::Fence::Handle& a_Fence)
 {
-    workerThread.Wait();
-    //We do not need to synchronize with the GPU for real here
-    if (a_Semaphore != nullptr) {
-        if (a_Semaphore->type == Queue::Semaphore::Type::Binary)
-            std::static_pointer_cast<Queue::Semaphore::Binary>(a_Semaphore)->SignalNoSync();
-        else throw std::runtime_error("Cannot wait on Timeline Semaphores when presenting");
-    }
-    if (a_Fence != nullptr) a_Fence->SignalNoSync();
+    workerThread.PushCommand([semaphore = a_Semaphore, fence = a_Fence] {
+        //We do not need to synchronize with the GPU for real here
+        if (semaphore != nullptr) {
+            if (semaphore->type == Queue::Semaphore::Type::Binary)
+                std::static_pointer_cast<Queue::Semaphore::Binary>(semaphore)->SignalNoSync();
+            else throw std::runtime_error("Cannot wait on Timeline Semaphores when presenting");
+        }
+        if (fence != nullptr) fence->SignalNoSync();
+    }, false);
     return images.at(backBufferIndex);
 }
 }
