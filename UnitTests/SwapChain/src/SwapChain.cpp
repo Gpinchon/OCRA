@@ -88,17 +88,19 @@ struct SwapChainTestApp : TestApp
             fpsCounter.StartFrame();
             window.PushEvents();
             if (window.IsClosing()) break;
-            if (!render) continue;
+
             const auto swapChainImage = window.AcquireNextImage(std::chrono::nanoseconds(0), drawWaitSemaphore, imageAcquisitionFence);
-            Queue::Fence::WaitFor(device, imageAcquisitionFence, std::chrono::nanoseconds(15000000));
-            auto fenceStatus = Queue::Fence::GetStatus(device, imageAcquisitionFence);
+            render = Queue::Fence::WaitFor(device, imageAcquisitionFence, std::chrono::nanoseconds(15000000));
             Queue::Fence::Reset(device, { imageAcquisitionFence });
-            if (fenceStatus != Queue::Fence::Status::Signaled) continue; //we failed acquiring the next image
+
+            if (!render) continue;
+            
             RecordClearCommandBuffer(swapChainImage);
             SubmitCommandBuffer(queue, commandBuffer, drawWaitSemaphore, drawSignalSemaphore);
             window.Present(queue, drawSignalSemaphore);
-            const auto now = std::chrono::high_resolution_clock::now();
+            
             fpsCounter.EndFrame();
+            const auto now = std::chrono::high_resolution_clock::now();
             if (std::chrono::duration<double, std::milli>(now - printTime).count() >= 48) {
                 printTime = now;
                 fpsCounter.Print();

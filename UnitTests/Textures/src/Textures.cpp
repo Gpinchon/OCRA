@@ -125,16 +125,19 @@ struct TexturesTestApp : TestApp
             fpsCounter.StartFrame();
             window.PushEvents();
             if (window.IsClosing()) break;
-            if (!render) continue;
-            const auto now = std::chrono::high_resolution_clock::now();
+
             swapChainImage = window.AcquireNextImage(std::chrono::nanoseconds(15000000), nullptr, imageAcquisitionFence);
-            Queue::Fence::WaitFor(device, imageAcquisitionFence, std::chrono::nanoseconds(15000000));
+            render = Queue::Fence::WaitFor(device, imageAcquisitionFence, std::chrono::nanoseconds(15000000));
             Queue::Fence::Reset(device, { imageAcquisitionFence });
+            if (!render) continue;
+
             textureUniform.Update();
             RecordMainCommandBuffer();
             SubmitCommandBuffer(queue, mainCommandBuffer, nullptr, drawSemaphore);
             window.Present(queue, drawSemaphore);
             fpsCounter.EndFrame();
+
+            const auto now = std::chrono::high_resolution_clock::now();
             if (std::chrono::duration<double, std::milli>(now - printTime).count() >= 48) {
                 printTime = now;
                 fpsCounter.Print();
