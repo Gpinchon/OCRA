@@ -84,13 +84,13 @@ struct SwapChainTestApp : TestApp
         FPSCounter fpsCounter;
         auto printTime = std::chrono::high_resolution_clock::now();
         window.SetVSync(VSync);
+        fpsCounter.StartFrame();
         while (true) {
-            fpsCounter.StartFrame();
             window.PushEvents();
             if (window.IsClosing()) break;
 
             const auto swapChainImage = window.AcquireNextImage(std::chrono::nanoseconds(0), drawWaitSemaphore, imageAcquisitionFence);
-            render = Queue::Fence::WaitFor(device, imageAcquisitionFence, std::chrono::nanoseconds(15000000));
+            render = Queue::Fence::WaitFor(device, imageAcquisitionFence, Queue::Fence::IgnoreTimeout);
             Queue::Fence::Reset(device, { imageAcquisitionFence });
 
             if (!render) continue;
@@ -100,6 +100,7 @@ struct SwapChainTestApp : TestApp
             window.Present(queue, drawSignalSemaphore);
             
             fpsCounter.EndFrame();
+            fpsCounter.StartFrame();
             const auto now = std::chrono::high_resolution_clock::now();
             if (std::chrono::duration<double, std::milli>(now - printTime).count() >= 48) {
                 printTime = now;
