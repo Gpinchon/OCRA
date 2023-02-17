@@ -2,6 +2,7 @@
 //  Command buffer commands
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <GL/Common/Assert.hpp>
 #include <GL/Command/Buffer.hpp>
 
 namespace OCRA::Command
@@ -28,9 +29,7 @@ struct PushConstantCommand : CommandI {
         , offset(a_Offset)
         , size(a_Size)
     {
-#ifdef _DEBUG
-        assert(size < 256);
-#endif
+        OCRA_ASSERT(size < 256);
         std::copy(a_Data, a_Data + size, data.data());
     }
     virtual void operator()(Buffer::ExecutionState&) {

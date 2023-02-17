@@ -8,10 +8,6 @@
 
 #include <GL/Common/IndexType.hpp>
 
-#ifdef _DEBUG
-#include <cassert>
-#endif
-
 namespace OCRA::Command {
 struct UpdateBufferCommand : CommandI {
     UpdateBufferCommand(

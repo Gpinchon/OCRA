@@ -1,11 +1,12 @@
 #pragma once
 
+#include <OCRA/Common/Extent2D.hpp>
 #include <OCRA/SwapChain.hpp>
 
-#include <GL-DX/Win32/DXGIFormat.hpp>
-
-#include <OCRA/Common/Extent2D.hpp>
 #include <GL/Win32/Error.hpp>
+#include <GL/Surface.hpp>
+
+#include <GL-DX/Win32/DXGIFormat.hpp>
 
 #include <dxgi1_3.h>
 
@@ -82,7 +83,7 @@ struct D3DContainerInterface
     {
         DXGI_SWAP_CHAIN_DESC desc{};
         swapChain->GetDesc(&desc);
-        assert(desc.BufferCount == 1);
+        OCRA_ASSERT(desc.BufferCount == 1);
         T* buffer = nullptr;
         WIN32_CHECK_ERROR(S_OK == swapChain->GetBuffer(0, IID_PPV_ARGS(&buffer)));
         WIN32_CHECK_ERROR(buffer != nullptr);

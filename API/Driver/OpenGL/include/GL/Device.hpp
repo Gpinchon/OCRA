@@ -3,12 +3,12 @@
 #include <OCRA/Handle.hpp>
 #include <OCRA/Device.hpp>
 
+#include <GL/Common/Assert.hpp>
 #include <GL/PhysicalDevice.hpp>
 
 #include <functional>
 #include <map>
 #include <vector>
-#include <cassert>
 
 OCRA_DECLARE_WEAK_HANDLE(OCRA::PhysicalDevice);
 OCRA_DECLARE_HANDLE(OCRA::PhysicalDevice);
@@ -27,8 +27,8 @@ struct Impl
         const Command& a_Command,
         const bool a_Synchronous)
     {
-        assert(a_FamilyIndex == 0);
-        assert(a_QueueIndex == 0);
+        OCRA_ASSERT(a_FamilyIndex == 0);
+        OCRA_ASSERT(a_QueueIndex == 0);
         physicalDevice.lock()->PushCommand(a_Command, a_Synchronous);
     }
     //Push a command directly to PhysicalDevice

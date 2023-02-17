@@ -7,6 +7,7 @@
 #include <GL/SwapChain.hpp>
 #include <GL/Surface.hpp>
 
+#include <GL/Common/Assert.hpp>
 #include <GL/Queue/Fence.hpp>
 #include <GL/Queue/Semaphore.hpp>
 #include <GL/Queue/Queue.hpp>
@@ -15,9 +16,6 @@
 #include <GL/Image/Image.hpp>
 #include <GL/Image/Format.hpp>
 #include <GL/glew.h>
-
-#include <cassert>
-#include <stdexcept>
 
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
 
@@ -33,9 +31,7 @@ Handle Create(const Device::Handle& a_Device, const Info& a_Info)
 void Present(const Queue::Handle& a_Queue, const PresentInfo& a_PresentInfo)
 {
     for (const auto& semaphore : a_PresentInfo.waitSemaphores) {
-#ifdef _DEBUG
-        assert(semaphore->type == Queue::Semaphore::Type::Binary && "Cannot wait on Timeline Semaphores when presenting");
-#endif
+        OCRA_ASSERT(semaphore->type == Queue::Semaphore::Type::Binary && "Cannot wait on Timeline Semaphores when presenting");
         std::static_pointer_cast<Queue::Semaphore::Binary>(semaphore)->Wait();
     }
     for (const auto& swapChain : a_PresentInfo.swapChains)

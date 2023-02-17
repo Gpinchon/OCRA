@@ -54,6 +54,7 @@ set(OCRA_IMPL_HEADER_FILES
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Command/Buffer.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Command/CommandInterface.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Command/ExecutionState.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/Assert.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/Blend.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/Compare.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/FixedSizeMemoryPool.hpp

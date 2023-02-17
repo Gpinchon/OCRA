@@ -1,6 +1,7 @@
 #include <GL-DX/Win32/SwapChain.hpp>
 
 #include <GL/Win32/Error.hpp>
+#include <GL/Common/Assert.hpp>
 #include <GL/Device.hpp>
 #include <GL/Image/Image.hpp>
 #include <GL/Queue/Queue.hpp>
@@ -13,7 +14,7 @@
 #ifdef OCRA_SWAPCHAIN_USE_D3D11
 #include <GL-DX/Win32/D3D11Container.hpp>
 #else
-#include <GL/Win32/D3D10Container.hpp>
+#include <GL-DX/Win32/D3D10Container.hpp>
 #endif //USE_D3D11
 
 #include <GL-DX/Win32/WGLDXMapping.hpp>
@@ -70,7 +71,7 @@ void Impl::Retire() {
 
 void Impl::Present(const Queue::Handle& a_Queue)
 {
-    assert(!retired);
+    OCRA_ASSERT(!retired);
     const auto extent = d3dContainer->GetExtent();
     a_Queue->PushCommand([this, extent]{
         wglDXTextureMapping->Lock();

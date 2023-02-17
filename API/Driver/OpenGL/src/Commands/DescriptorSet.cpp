@@ -2,6 +2,7 @@
 //  Buffer commands
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <GL/Common/Assert.hpp>
 #include <GL/Command/Buffer.hpp>
 #include <GL/Command/ExecutionState.hpp>
 #include <GL/Pipeline/Pipeline.hpp>
@@ -40,9 +41,7 @@ struct PushDescriptorSetCommand : CommandI {
         , bindingPoint(uint8_t(a_BindingPoint))
         , writeCount(a_WriteCount)
     {
-#ifdef _DEBUG
-        assert(writeCount <= 256);
-#endif
+        OCRA_ASSERT(writeCount <= 256);
         std::copy(a_Writes, a_Writes + a_WriteCount, writes.data());
     }
     virtual void operator()(Buffer::ExecutionState& a_ExecutionState) {

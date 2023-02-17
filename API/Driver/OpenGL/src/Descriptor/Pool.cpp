@@ -6,10 +6,6 @@
 
 #include <memory_resource>
 
-#ifdef _DEBUG
-#include <vector>
-#endif
-
 OCRA_DECLARE_HANDLE(OCRA::Descriptor::Set);
 #ifdef _DEBUG
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Descriptor::Set);

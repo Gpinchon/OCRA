@@ -4,9 +4,6 @@
 
 #include <GL/glew.h>
 
-#include <algorithm>
-#include <cassert>
-
 namespace OCRA::Pipeline::Layout
 {
 Impl::Impl(const Info& a_Info)

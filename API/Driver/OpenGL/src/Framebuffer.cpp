@@ -1,11 +1,10 @@
 #include <OCRA/FrameBuffer.hpp>
 
+#include <GL/Common/Assert.hpp>
 #include <GL/Device.hpp>
 #include <GL/FrameBuffer.hpp>
 #include <GL/Image/View.hpp>
 #include <GL/glew.h>
-
-#include <cassert>
 
 namespace OCRA::FrameBuffer {
 static inline auto CreateFrameBuffer(const Device::Handle& a_Device, const Info& a_Info)
@@ -25,7 +24,7 @@ static inline auto CreateFrameBuffer(const Device::Handle& a_Device, const Info&
                 imageView->handle,
                 0);
         }
-        assert(glCheckNamedFramebufferStatusEXT(handle, GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+        OCRA_ASSERT(glCheckNamedFramebufferStatusEXT(handle, GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }, true);
     return handle;

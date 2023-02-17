@@ -7,13 +7,13 @@
 #include <OCRA/Handle.hpp>
 #include <OCRA/Shader/Stage.hpp>
 
+#include <GL/Common/Assert.hpp>
 #include <GL/Shader/Stage.hpp>
 #include <GL/Device.hpp>
 
 #include <GL/glew.h>
 
 #include <stdexcept>
-#include <cassert>
 
 namespace OCRA::Shader::Stage {
 static inline auto GetGLStageBits(const StageFlags& a_Stage)
@@ -91,7 +91,7 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
     constantValue.reserve(info.specializationInfo.mapEntries.size());
     for (const auto& entry : info.specializationInfo.mapEntries) {
         uint32_t value{ 0 };
-        assert(entry.size <= sizeof(value));
+        OCRA_ASSERT(entry.size <= sizeof(value));
         auto data = &info.specializationInfo.data.at(entry.offset);
         std::memcpy(&value, data, entry.size);
         constantValue.push_back(value);
@@ -100,7 +100,7 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
     a_Device->PushCommand([this, moduleInfo = Module::GetInfo(info.module), constantIndex, constantValue] {
         const auto shader = glCreateShader(stage);
         glProgramParameteri(handle, GL_PROGRAM_SEPARABLE, GL_TRUE);
-        assert(GLEW_ARB_gl_spirv);
+        OCRA_ASSERT(GLEW_ARB_gl_spirv);
         glShaderBinary(1, &shader, GL_SHADER_BINARY_FORMAT_SPIR_V, moduleInfo.code.data(), sizeof(moduleInfo.code.front()) * moduleInfo.code.size());
         glSpecializeShader(shader, info.entryPoint.c_str(), constantIndex.size(), constantIndex.data(), constantValue.data());
         if (CheckShaderCompilation(shader)) //compilation is successful

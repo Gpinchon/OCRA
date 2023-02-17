@@ -4,10 +4,11 @@
 #include <GL/Win32/PresentShader.hpp>
 #include <GL/Win32/PresentTexture.hpp>
 #include <GL/Win32/PhysicalDevice.hpp>
-#include <GL/Surface.hpp>
-
 #include <GL/Win32/Error.hpp>
 #include <GL/Win32/OpenGL.hpp>
+
+#include <GL/Surface.hpp>
+#include <GL/Common/Assert.hpp>
 #include <GL/Device.hpp>
 #include <GL/Image/Format.hpp>
 #include <GL/Image/Image.hpp>
@@ -149,9 +150,7 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
         glActiveTexture(GL_TEXTURE0);
         glBindSampler(0, presentTexture->samplerHandle);
     }, true);
-#ifdef _DEBUG
-    assert(surface != nullptr);
-#endif
+    OCRA_ASSERT(surface != nullptr);
 }
 
 Impl::~Impl()
@@ -186,9 +185,7 @@ void Impl::Retire() {
 
 void Impl::Present(const Queue::Handle& a_Queue)
 {
-#ifdef _DEBUG
-    assert(!retired);
-#endif
+    OCRA_ASSERT(!retired);
     if (WGLEW_NV_copy_image) {
         PresentNV(a_Queue);
     }

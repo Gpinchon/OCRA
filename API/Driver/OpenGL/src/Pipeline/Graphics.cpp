@@ -7,6 +7,7 @@
 #include <OCRA/Pipeline/Pipeline.hpp>
 #include <OCRA/Pipeline/Graphics.hpp>
 
+#include <GL/Common/Assert.hpp>
 #include <GL/Pipeline/Pipeline.hpp>
 #include <GL/Pipeline/ColorBlendState.hpp>
 #include <GL/Pipeline/DepthStencilState.hpp>
@@ -18,8 +19,6 @@
 #include <GL/Pipeline/ViewPortState.hpp>
 #include <GL/Pipeline/VertexInputState.hpp>
 #include <GL/RenderPass.hpp>
-
-#include <cassert>
 
 namespace OCRA::Pipeline::Graphics {
 struct Impl : Pipeline::Impl {
@@ -54,9 +53,7 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
 {}
 
 void Impl::Apply(Command::Buffer::ExecutionState& a_ExecutionState) const {
-#ifdef _DEBUG
-    assert(renderPass == a_ExecutionState.renderPass.renderPass);
-#endif
+    OCRA_ASSERT(renderPass == a_ExecutionState.renderPass.renderPass);
     if (a_ExecutionState.subpassIndex != subPass) {
         a_ExecutionState.subpassIndex = subPass;
         a_ExecutionState.renderPass.renderPass->BeginSubPass(a_ExecutionState);

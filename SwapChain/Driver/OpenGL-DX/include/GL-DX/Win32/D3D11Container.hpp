@@ -9,8 +9,6 @@
 
 #include <d3d11.h>
 
-#include <cassert>
-
 namespace OCRA::SwapChain::Win32
 {
 struct D3DContainer : D3DContainerInterface

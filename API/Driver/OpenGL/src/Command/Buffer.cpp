@@ -8,6 +8,7 @@
 #include <OCRA/Command/Buffer.hpp>
 #include <OCRA/Queue/Queue.hpp>
 
+#include <GL/Common/Assert.hpp>
 #include <GL/Command/Buffer.hpp>
 #include <GL/Command/ExecutionState.hpp>
 
@@ -16,7 +17,7 @@
 
 void OCRA::Command::Buffer::Impl::Reset()
 {
-    assert(
+    OCRA_ASSERT(
         state == State::Initial    ||
         state == State::Recording  ||
         state == State::Executable ||
@@ -36,7 +37,7 @@ void OCRA::Command::Buffer::Impl::Reset()
 
 void OCRA::Command::Buffer::Impl::Invalidate()
 {
-    assert(
+    OCRA_ASSERT(
         state == State::Recording  ||
         state == State::Executable ||
         state == State::Pending
@@ -48,7 +49,7 @@ void OCRA::Command::Buffer::Impl::Invalidate()
 
 void OCRA::Command::Buffer::Impl::Begin(const Buffer::BeginInfo& a_BeginInfo)
 {
-    assert(state == State::Initial);
+    OCRA_ASSERT(state == State::Initial);
     state = State::Recording;
     usageFlags = a_BeginInfo.flags;
     if (level == Level::Secondary) {
@@ -64,19 +65,19 @@ void OCRA::Command::Buffer::Impl::Begin(const Buffer::BeginInfo& a_BeginInfo)
 
 void OCRA::Command::Buffer::Impl::End()
 {
-    assert(state == State::Recording);
+    OCRA_ASSERT(state == State::Recording);
     state = State::Executable;
 }
 
 void OCRA::Command::Buffer::Impl::ExecutePrimary()
 {
-    assert(level == Level::Primary);
+    OCRA_ASSERT(level == Level::Primary);
     Execute(executionState);
 }
 
 void OCRA::Command::Buffer::Impl::ExecuteSecondary(ExecutionState& a_PrimaryExecutionState)
 {
-    assert(level == Level::Secondary);
+    OCRA_ASSERT(level == Level::Secondary);
     if ((usageFlags & UsageFlagBits::RenderPassContinue) != 0) {
         executionState.renderPass = a_PrimaryExecutionState.renderPass;
         executionState.renderPass.indexBufferBinding = {};
@@ -87,7 +88,7 @@ void OCRA::Command::Buffer::Impl::ExecuteSecondary(ExecutionState& a_PrimaryExec
 
 void OCRA::Command::Buffer::Impl::Execute(ExecutionState& a_ExecutionState)
 {
-    assert(state == State::Executable);
+    OCRA_ASSERT(state == State::Executable);
     state = State::Pending;
     for (const auto& command : commands)
         command(a_ExecutionState);

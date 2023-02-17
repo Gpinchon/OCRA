@@ -14,7 +14,6 @@
 #include <GL/Image/Format.hpp>
 #include <GL/glew.h>
 
-#include <cassert>
 #include <stdexcept>
 
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
@@ -37,9 +36,8 @@ void Present(const Queue::Handle& a_Queue, const PresentInfo& a_PresentInfo)
 {
     for (const auto& semaphore : a_PresentInfo.waitSemaphores)
     {
-        if (semaphore->type == Queue::Semaphore::Type::Binary)
-            std::static_pointer_cast<Queue::Semaphore::Binary>(semaphore)->Wait();
-        else throw std::runtime_error("Cannot wait on Timeline Semaphores when presenting");
+        OCRA_ASSERT(semaphore->type == Queue::Semaphore::Type::Binary && "Cannot wait on Timeline Semaphores when presenting");
+        std::static_pointer_cast<Queue::Semaphore::Binary>(semaphore)->Wait();
     }
     for (const auto& swapChain : a_PresentInfo.swapChains)
         swapChain->Present(a_Queue);

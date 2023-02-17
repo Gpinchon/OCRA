@@ -1,9 +1,9 @@
 #include <OCRA/Queue/Semaphore.hpp>
 
+#include <GL/Common/Assert.hpp>
 #include <GL/Queue/Semaphore.hpp>
 
 #include <stdexcept>
-#include <assert.h>
 
 namespace OCRA {
 struct AllocationCallback;
@@ -26,7 +26,7 @@ void Signal(
     const Handle& a_Semaphore,
     const uint64_t& a_Value)
 {
-    assert(a_Semaphore->type == Type::Timeline);
+    OCRA_ASSERT(a_Semaphore->type == Type::Timeline);
     std::static_pointer_cast<Timeline>(a_Semaphore)->SignalClient(a_Value);
 }
 void Signal(
@@ -43,7 +43,7 @@ bool Wait(
     const uint64_t& a_Value,
     const std::chrono::nanoseconds& a_TimeoutNS)
 {
-    assert(a_Semaphore->type == Type::Timeline);
+    OCRA_ASSERT(a_Semaphore->type == Type::Timeline);
     return std::static_pointer_cast<Timeline>(a_Semaphore)->WaitClient(a_TimeoutNS, a_Value);
 }
 bool Wait(
@@ -66,7 +66,7 @@ uint64_t GetCounterValue(
     const Device::Handle& a_Device,
     const Handle& a_Semaphore)
 {
-    assert(a_Semaphore->type == Type::Timeline);
+    OCRA_ASSERT(a_Semaphore->type == Type::Timeline);
     return std::static_pointer_cast<Timeline>(a_Semaphore)->Count();
 }
 }

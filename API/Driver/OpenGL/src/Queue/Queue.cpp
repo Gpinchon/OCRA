@@ -14,35 +14,29 @@ OCRA_DECLARE_HANDLE(OCRA::Queue);
 
 namespace OCRA::Queue
 {
-static inline void Execute(
-    const Handle& a_Queue,
-    const std::vector<SubmitInfo>& a_SubmitInfos,
-    const Fence::Handle& a_Fence)
+static inline void Execute(const SubmitInfo& a_SubmitInfo)
 {
-    for (const auto& submitInfo : a_SubmitInfos) {
-        for (auto semaphoreIndex = 0u; semaphoreIndex < submitInfo.waitSemaphores.size(); ++semaphoreIndex)
-        {
-            auto& semaphore = submitInfo.waitSemaphores.at(semaphoreIndex);
-            if (semaphore->type == Semaphore::Type::Binary)
-                std::static_pointer_cast<Semaphore::Binary>(semaphore)->Wait();
-            else {
-                auto& semaphoreValue = submitInfo.timelineSemaphoreValues.waitSemaphoreValues.at(semaphoreIndex);
-                std::static_pointer_cast<Semaphore::Timeline>(semaphore)->WaitDevice(semaphoreValue);
-            }
-        }
-        OCRA::Command::Buffer::Execute(submitInfo.commandBuffers);
-        for (auto semaphoreIndex = 0u; semaphoreIndex < submitInfo.signalSemaphores.size(); ++semaphoreIndex)
-        {
-            auto& semaphore = submitInfo.signalSemaphores.at(semaphoreIndex);
-            if (semaphore->type == Semaphore::Type::Binary)
-                std::static_pointer_cast<Semaphore::Binary>(semaphore)->Signal();
-            else {
-                auto& semaphoreValue = submitInfo.timelineSemaphoreValues.signalSemaphoreValues.at(semaphoreIndex);
-                std::static_pointer_cast<Semaphore::Timeline>(semaphore)->SignalDevice(semaphoreValue);
-            }
+    for (auto semaphoreIndex = 0u; semaphoreIndex < a_SubmitInfo.waitSemaphores.size(); ++semaphoreIndex)
+    {
+        auto& semaphore = a_SubmitInfo.waitSemaphores.at(semaphoreIndex);
+        if (semaphore->type == Semaphore::Type::Binary)
+            std::static_pointer_cast<Semaphore::Binary>(semaphore)->Wait();
+        else {
+            auto& semaphoreValue = a_SubmitInfo.timelineSemaphoreValues.waitSemaphoreValues.at(semaphoreIndex);
+            std::static_pointer_cast<Semaphore::Timeline>(semaphore)->WaitDevice(semaphoreValue);
         }
     }
-    if (a_Fence != nullptr) a_Fence->Signal();
+    OCRA::Command::Buffer::Execute(a_SubmitInfo.commandBuffers);
+    for (auto semaphoreIndex = 0u; semaphoreIndex < a_SubmitInfo.signalSemaphores.size(); ++semaphoreIndex)
+    {
+        auto& semaphore = a_SubmitInfo.signalSemaphores.at(semaphoreIndex);
+        if (semaphore->type == Semaphore::Type::Binary)
+            std::static_pointer_cast<Semaphore::Binary>(semaphore)->Signal();
+        else {
+            auto& semaphoreValue = a_SubmitInfo.timelineSemaphoreValues.signalSemaphoreValues.at(semaphoreIndex);
+            std::static_pointer_cast<Semaphore::Timeline>(semaphore)->SignalDevice(semaphoreValue);
+        }
+    }
 }
 
 void Submit(
@@ -50,8 +44,11 @@ void Submit(
     const std::vector<SubmitInfo>& a_SubmitInfos,
     const Fence::Handle& a_Fence)
 {
-    a_Queue->PushCommand([queue = a_Queue, submitInfos = a_SubmitInfos, fence = a_Fence] {
-        Execute(queue, submitInfos, fence);
+    a_Queue->PushCommand([submitInfos = a_SubmitInfos, fence = a_Fence] {
+        for (const auto& submitInfo : submitInfos) {
+            Execute(submitInfo);
+        }
+        if (fence != nullptr) fence->Signal();
     }, false);
 }
 void WaitIdle(const Handle& a_Queue)

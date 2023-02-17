@@ -3,6 +3,7 @@
 #include <OCRA/Handle.hpp>
 #include <OCRA/Command/Buffer.hpp>
 
+#include <GL/Common/Assert.hpp>
 #include <GL/Command/CommandInterface.hpp>
 #include <GL/Command/ExecutionState.hpp>
 #include <GL/PushConstants.hpp>
@@ -73,7 +74,7 @@ struct Impl
     template<typename C, typename... Args>
     inline void PushCommand(Args&&... a_Args)
     {
-        assert(state == State::Recording);
+        OCRA_ASSERT(state == State::Recording);
         auto commandStorage = memoryResource->allocate(sizeof(C), alignof(C));
         auto command = new(commandStorage) C(std::forward<Args>(a_Args)...);
         commands.push_back({ command, memoryResource });

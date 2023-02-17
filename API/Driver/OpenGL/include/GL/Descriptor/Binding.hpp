@@ -3,6 +3,7 @@
 #include <OCRA/Descriptor/Set.hpp>
 #include <OCRA/Descriptor/Type.hpp>
 
+#include <GL/Common/Assert.hpp>
 #include <GL/Descriptor/SetLayout.hpp>
 #include <GL/Buffer.hpp>
 #include <GL/Memory.hpp>
@@ -10,10 +11,6 @@
 #include <GL/Image/Sampler.hpp>
 
 #include <GL/glew.h>
-
-#ifdef _DEBUG
-#include <cassert>
-#endif
 
 namespace OCRA::Descriptor
 {
@@ -173,16 +170,12 @@ public:
     void Unbind();
 
     void operator=(const Binding& a_Other) {
-#ifdef _DEBUG
-        assert(type == a_Other.type);
-#endif
+        OCRA_ASSERT(type == a_Other.type);
         bindingIndex = a_Other.bindingIndex;
         *storage = *a_Other.storage;
     }
     void operator=(const Set::WriteOperation& a_Write) {
-#ifdef _DEBUG
-        assert(type == a_Write.type);
-#endif
+        OCRA_ASSERT(type == a_Write.type);
         *storage = a_Write;
     }
 

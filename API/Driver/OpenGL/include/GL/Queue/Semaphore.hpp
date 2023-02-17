@@ -1,10 +1,10 @@
 #include <OCRA/Handle.hpp>
 #include <OCRA/Queue/Semaphore.hpp>
 
+#include <GL/Common/Assert.hpp>
 #include <GL/glew.h>
 
 #include <mutex>
-#include <assert.h>
 
 OCRA_DECLARE_HANDLE(OCRA::Queue::Semaphore);
 
@@ -54,7 +54,7 @@ struct Timeline : Impl {
     }
     void SignalDevice(const uint64_t& a_Value) {
         mutex.lock();
-        assert(a_Value > count);
+        OCRA_ASSERT(a_Value > count);
         const auto sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
         glClientWaitSync(sync, 0, GL_TIMEOUT_IGNORED);
         glDeleteSync(sync);
@@ -64,7 +64,7 @@ struct Timeline : Impl {
     }
     void SignalClient(const uint64_t& a_Value) {
         mutex.lock();
-        assert(a_Value > count);
+        OCRA_ASSERT(a_Value > count);
         count = a_Value;
         mutex.unlock();
         cv.notify_all();

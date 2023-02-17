@@ -8,11 +8,7 @@
 #include <OCRA/Handle.hpp>
 #include <OCRA/Image/Image.hpp>
 
-#include <cassert>
-#include <functional>
-#include <stdexcept>
-#include <vector>
-
+#include <GL/Common/Assert.hpp>
 #include <GL/Buffer.hpp>
 #include <GL/Image/Image.hpp>
 #include <GL/Image/Format.hpp>
@@ -21,13 +17,17 @@
 #include <GL/Common/BufferOffset.hpp>
 #include <GL/glew.h>
 
+#include <functional>
+#include <stdexcept>
+#include <vector>
+
 namespace OCRA::Image {
 void CheckValidCopy(const Image::BufferCopy& a_Copy, const Image::Handle& a_Image)
 {
-    assert(a_Copy.imageOffset.x + a_Copy.imageExtent.width <= a_Image->info.extent.width);
-    assert(a_Copy.imageOffset.y + a_Copy.imageExtent.height <= a_Image->info.extent.height);
-    assert(a_Copy.imageOffset.z + a_Copy.imageExtent.depth <= a_Image->info.extent.depth);
-    assert(a_Copy.imageSubresource.level <= a_Image->info.mipLevels);
+    OCRA_ASSERT(a_Copy.imageOffset.x + a_Copy.imageExtent.width <= a_Image->info.extent.width);
+    OCRA_ASSERT(a_Copy.imageOffset.y + a_Copy.imageExtent.height <= a_Image->info.extent.height);
+    OCRA_ASSERT(a_Copy.imageOffset.z + a_Copy.imageExtent.depth <= a_Image->info.extent.depth);
+    OCRA_ASSERT(a_Copy.imageSubresource.level <= a_Image->info.mipLevels);
 }
 static inline auto CreateTexture(const Device::Handle& a_Device)
 {

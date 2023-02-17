@@ -6,7 +6,6 @@
 #include <GL/Common/WorkerThread.hpp>
 
 #include <functional>
-#include <cassert>
 
 OCRA_DECLARE_HANDLE(OCRA::Instance);
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Instance);

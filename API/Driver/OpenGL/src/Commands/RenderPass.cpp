@@ -4,12 +4,9 @@
 
 #include <GL/Command/Buffer.hpp>
 
+#include <GL/Common/Assert.hpp>
 #include <GL/RenderPass.hpp>
 #include <GL/FrameBuffer.hpp>
-
-#ifdef _DEBUG
-#include <cassert>
-#endif
 
 namespace OCRA::Command {
 struct BeginRenderPassCommand : CommandI {
@@ -19,9 +16,7 @@ struct BeginRenderPassCommand : CommandI {
         : beginInfo(a_BeginInfo)
         , subPassContent(a_SubPassContents)
     {
-#ifdef _DEBUG
-        assert(beginInfo.framebuffer->info.renderPass == beginInfo.renderPass); //check if FB & RP are compatible
-#endif
+        OCRA_ASSERT(beginInfo.framebuffer->info.renderPass == beginInfo.renderPass); //check if FB & RP are compatible
     }
     virtual void operator()(Buffer::ExecutionState& a_ExecutionState) {
         a_ExecutionState.renderPass.renderPass = beginInfo.renderPass;

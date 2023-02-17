@@ -3,8 +3,7 @@
 #include <OCRA/Handle.hpp>
 #include <OCRA/Buffer.hpp>
 
-
-#include <cassert>
+#include <GL/Common/Assert.hpp>
 
 OCRA_DECLARE_HANDLE(OCRA::Device);
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
@@ -22,7 +21,7 @@ struct Impl {
         : device(a_Device)
         , info(a_Info)
     {
-        assert(info.usage != UsageFlagBits::None);
+        OCRA_ASSERT(info.usage != UsageFlagBits::None);
     }
     const Device::WeakHandle    device;
     const Info                  info;
