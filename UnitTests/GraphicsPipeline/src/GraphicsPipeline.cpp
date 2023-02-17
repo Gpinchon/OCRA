@@ -102,7 +102,7 @@ struct GraphicsPipelineTestApp : TestApp
             if (window.IsClosing()) break;
 
             swapChainImage = window.AcquireNextImage({}, nullptr, imageAcquisitionFence);
-            render = Queue::Fence::WaitFor(device, imageAcquisitionFence, std::chrono::nanoseconds(15000000));
+            render = Queue::Fence::WaitFor(device, imageAcquisitionFence, Queue::Fence::IgnoreTimeout);
             Queue::Fence::Reset(device, { imageAcquisitionFence });
 
             if (!render) continue;
