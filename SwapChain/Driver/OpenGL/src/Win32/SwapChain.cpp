@@ -12,9 +12,9 @@
 #include <GL/Device.hpp>
 #include <GL/Image/Format.hpp>
 #include <GL/Image/Image.hpp>
-#include <GL/Queue/Queue.hpp>
-#include <GL/Queue/Semaphore.hpp>
-#include <GL/Queue/Fence.hpp>
+#include <GL/Queue.hpp>
+#include <GL/Semaphore.hpp>
+#include <GL/Fence.hpp>
 #include <GL/Common/BufferOffset.hpp>
 
 #include <GL/glew.h>
@@ -246,14 +246,14 @@ void Impl::PresentGL(const Queue::Handle& a_Queue)
 
 Image::Handle Impl::AcquireNextImage(
     const std::chrono::nanoseconds& a_Timeout,
-    const Queue::Semaphore::Handle& a_Semaphore,
-    const Queue::Fence::Handle& a_Fence)
+    const Semaphore::Handle& a_Semaphore,
+    const Fence::Handle& a_Fence)
 {
     workerThread.PushCommand([semaphore = a_Semaphore, fence = a_Fence] {
         //We do not need to synchronize with the GPU for real here
         if (semaphore != nullptr) {
-            if (semaphore->type == Queue::Semaphore::Type::Binary)
-                std::static_pointer_cast<Queue::Semaphore::Binary>(semaphore)->SignalNoSync();
+            if (semaphore->type == Semaphore::Type::Binary)
+                std::static_pointer_cast<Semaphore::Binary>(semaphore)->SignalNoSync();
             else throw std::runtime_error("Cannot wait on Timeline Semaphores when presenting");
         }
         if (fence != nullptr) fence->SignalNoSync();

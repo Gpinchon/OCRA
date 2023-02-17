@@ -1,14 +1,13 @@
 #include <OCRA/Handle.hpp>
-#include <OCRA/Queue/Semaphore.hpp>
+#include <OCRA/Semaphore.hpp>
 
-#include <GL/Common/Assert.hpp>
 #include <GL/glew.h>
 
 #include <mutex>
 
-OCRA_DECLARE_HANDLE(OCRA::Queue::Semaphore);
+OCRA_DECLARE_HANDLE(OCRA::Semaphore);
 
-namespace OCRA::Queue::Semaphore {
+namespace OCRA::Semaphore {
 struct Impl {
     Impl(const Type& a_Type)
         : type(a_Type)
@@ -29,20 +28,26 @@ struct Binary : Impl {
         auto lock = std::unique_lock<std::mutex>(mutex);
         cv.wait(lock, [this] { return count > 0; });
         --count;
+        lock.unlock();
+        //inform everyone this semaphore is unsignaled
+        cv.notify_all();
     }
     void Signal() {
-        mutex.lock();
+        auto lock = std::unique_lock<std::mutex>(mutex);
+        //wait for semaphore to enter unsignaled state
+        cv.wait(lock, [this] { return count == 0; });
         const auto sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
         glClientWaitSync(sync, 0, GL_TIMEOUT_IGNORED);
         glDeleteSync(sync);
         ++count;
-        mutex.unlock();
+        lock.unlock();
         cv.notify_all();
     }
     void SignalNoSync() {
-        mutex.lock();
+        auto lock = std::unique_lock<std::mutex>(mutex);
+        cv.wait(lock, [this] { return count == 0; });
         ++count;
-        mutex.unlock();
+        lock.unlock();
         cv.notify_all();
     }
 };
@@ -54,7 +59,6 @@ struct Timeline : Impl {
     }
     void SignalDevice(const uint64_t& a_Value) {
         mutex.lock();
-        OCRA_ASSERT(a_Value > count);
         const auto sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
         glClientWaitSync(sync, 0, GL_TIMEOUT_IGNORED);
         glDeleteSync(sync);
@@ -64,19 +68,18 @@ struct Timeline : Impl {
     }
     void SignalClient(const uint64_t& a_Value) {
         mutex.lock();
-        OCRA_ASSERT(a_Value > count);
         count = a_Value;
         mutex.unlock();
         cv.notify_all();
     }
     void WaitDevice(const uint64_t& a_Value) {
         auto lock = std::unique_lock<std::mutex>(mutex);
-        cv.wait(lock, [this, waitValue = a_Value] { return count >= waitValue; });
+        cv.wait(lock, [this, a_Value] { return count >= a_Value; });
     }
     bool WaitClient(const std::chrono::nanoseconds& a_TimeoutNS, const uint64_t& a_Value) {
         auto lock = std::unique_lock<std::mutex>(mutex);
         return cv.wait_for(lock, a_TimeoutNS,
-            [this, waitValue = a_Value] { return count >= waitValue; });;
+            [this, a_Value] { return count >= a_Value; });;
     }
 };
 }

@@ -1,9 +1,9 @@
 #include <OCRA/Instance.hpp>
 #include <OCRA/PhysicalDevice.hpp>
 #include <OCRA/Device.hpp>
-#include <OCRA/Queue/Queue.hpp>
+#include <OCRA/Queue.hpp>
 #include <OCRA/Queue/Fence.hpp>
-#include <OCRA/Queue/Semaphore.hpp>
+#include <OCRA/Semaphore.hpp>
 #include <OCRA/Command/Pool.hpp>
 #include <OCRA/Command/Buffer.hpp>
 #include <OCRA/Memory.hpp>
@@ -25,7 +25,7 @@ using namespace OCRA;
 #ifdef FENCE_VERSION
 static inline void SubmitCommandBuffer(const Device::Handle& a_Device, const Queue::Handle& a_Queue, const Command::Buffer::Handle& a_CommandBuffer)
 {
-    auto fence = Queue::Fence::Create(a_Device);
+    auto fence = Fence::Create(a_Device);
     Queue::SubmitInfo submitInfo;
     for (auto i = 0u; i < SWAP_NBR; ++i)
         submitInfo.commandBuffers.push_back(a_CommandBuffer);
@@ -38,14 +38,14 @@ static inline void SubmitCommandBuffer(const Device::Handle& a_Device, const Que
     //make sure GPU is done
     {
         VerboseTimer bufferCopiesTimer("Buffer Copies");
-        Queue::Fence::WaitFor(a_Device, fence, std::chrono::nanoseconds(15000000));
+        Fence::WaitFor(a_Device, fence, std::chrono::nanoseconds(15000000));
     }
     //test for function time itself
     {
         auto timer = Timer();
         int waitNbr = 100000;
         for (auto i = 0; i < waitNbr; ++i)
-            Queue::Fence::WaitFor(a_Device, fence, std::chrono::nanoseconds(15000000));
+            Fence::WaitFor(a_Device, fence, std::chrono::nanoseconds(15000000));
         std::cout << "Already signaled Fence mean wait time : " << timer.Elapsed().count() / double(waitNbr) << " nanoseconds\n";
     }
     std::cout << "===========================================\n";
@@ -54,10 +54,10 @@ static inline void SubmitCommandBuffer(const Device::Handle& a_Device, const Que
 #else //FENCE_VERSION
 static inline void SubmitCommandBuffer(const Device::Handle& a_Device, const Queue::Handle& a_Queue, const Command::Buffer::Handle& a_CommandBuffer)
 {
-    Queue::Semaphore::Info semaphoreInfo;
-    semaphoreInfo.type = Queue::Semaphore::Type::Timeline;
+    Semaphore::Info semaphoreInfo;
+    semaphoreInfo.type = Semaphore::Type::Timeline;
     semaphoreInfo.initialValue = 0;
-    Queue::Semaphore::Handle semaphore = Queue::Semaphore::Create(a_Device, semaphoreInfo);
+    Semaphore::Handle semaphore = Semaphore::Create(a_Device, semaphoreInfo);
     Queue::TimelineSemaphoreSubmitInfo timelineValues;
     timelineValues.waitSemaphoreValues.push_back(1);
     timelineValues.signalSemaphoreValues.push_back(2);
@@ -73,11 +73,11 @@ static inline void SubmitCommandBuffer(const Device::Handle& a_Device, const Que
         VerboseTimer("Queue Submission");
         Queue::Submit(a_Queue, { submitInfo });
     });
-    Queue::Semaphore::Signal(a_Device, semaphore, 1);
+    Semaphore::Signal(a_Device, semaphore, 1);
     //make sure GPU is done
     {
         VerboseTimer bufferCopiesTimer("Buffer Copies");
-        Queue::Semaphore::Wait(a_Device, { semaphore }, { 2 }, std::chrono::nanoseconds(15000000));
+        Semaphore::Wait(a_Device, { semaphore }, { 2 }, std::chrono::nanoseconds(15000000));
     }
     std::cout << "===========================================\n";
     std::cout << "\n";

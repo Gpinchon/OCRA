@@ -2,7 +2,7 @@
 #include <OCRA/Instance.hpp>
 #include <OCRA/PhysicalDevice.hpp>
 #include <OCRA/Device.hpp>
-#include <OCRA/Queue/Queue.hpp>
+#include <OCRA/Queue.hpp>
 #include <OCRA/Command/Pool.hpp>
 #include <OCRA/Memory.hpp>
 #include <OCRA/Descriptor/Pool.hpp>
@@ -108,8 +108,8 @@ Command::Buffer::Handle CreateCommandBuffer(const Device::Handle& a_Device, cons
 void OCRA::SubmitCommandBuffer(
     const Queue::Handle& a_Queue,
     const Command::Buffer::Handle& a_CommandBuffer,
-    const Queue::Semaphore::Handle& a_WaitSemaphore,
-    const Queue::Semaphore::Handle& a_SignalSemaphore)
+    const Semaphore::Handle& a_WaitSemaphore,
+    const Semaphore::Handle& a_SignalSemaphore)
 {
     Queue::SubmitInfo submitInfo;
     submitInfo.commandBuffers.push_back(a_CommandBuffer);

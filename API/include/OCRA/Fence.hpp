@@ -5,14 +5,14 @@
 #include <vector>
 #include <chrono>
 
-OCRA_DECLARE_HANDLE(OCRA::Queue::Fence);
+OCRA_DECLARE_HANDLE(OCRA::Fence);
 OCRA_DECLARE_HANDLE(OCRA::Device);
 
 namespace OCRA {
 struct AllocationCallback;
 }
 
-namespace OCRA::Queue::Fence {
+namespace OCRA::Fence {
 //Use this to ignore timeout and wait indefinitely
 static constexpr auto IgnoreTimeout = (std::chrono::nanoseconds::max)();
 enum class Status {

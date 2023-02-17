@@ -1,7 +1,7 @@
-#include <OCRA/Queue/Semaphore.hpp>
+#include <OCRA/Semaphore.hpp>
 
 #include <GL/Common/Assert.hpp>
-#include <GL/Queue/Semaphore.hpp>
+#include <GL/Semaphore.hpp>
 
 #include <stdexcept>
 
@@ -9,7 +9,7 @@ namespace OCRA {
 struct AllocationCallback;
 }
 
-namespace OCRA::Queue::Semaphore {
+namespace OCRA::Semaphore {
 Handle Create(
     const Device::Handle& a_Device,
     const Info& a_Info,

@@ -14,8 +14,8 @@ OCRA_DECLARE_HANDLE(OCRA::Device);
 OCRA_DECLARE_HANDLE(OCRA::SwapChain);
 OCRA_DECLARE_HANDLE(OCRA::Surface);
 OCRA_DECLARE_HANDLE(OCRA::Queue);
-OCRA_DECLARE_HANDLE(OCRA::Queue::Semaphore);
-OCRA_DECLARE_HANDLE(OCRA::Queue::Fence);
+OCRA_DECLARE_HANDLE(OCRA::Semaphore);
+OCRA_DECLARE_HANDLE(OCRA::Fence);
 OCRA_DECLARE_HANDLE(OCRA::Image);
 
 namespace OCRA::SwapChain
@@ -47,8 +47,8 @@ struct Info {
 Handle Create(const Device::Handle& a_Device, const Info& a_Info);
 struct PresentInfo
 {
-    std::vector<Queue::Semaphore::Handle>   waitSemaphores;
-    std::vector<SwapChain::Handle>          swapChains;
+    std::vector<Semaphore::Handle>  waitSemaphores;
+    std::vector<SwapChain::Handle>  swapChains;
 };
 /**
 * Presents the current Back Buffer to the Surface
@@ -64,6 +64,6 @@ Image::Handle AcquireNextImage(
     const Device::Handle& a_Device,
     const Handle& a_SwapChain,
     const std::chrono::nanoseconds& a_Timeout,
-    const Queue::Semaphore::Handle& a_Semaphore,
-    const Queue::Fence::Handle& a_Fence);
+    const Semaphore::Handle& a_Semaphore,
+    const Fence::Handle& a_Fence);
 }

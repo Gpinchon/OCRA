@@ -1,10 +1,10 @@
 #include <OCRA/Handle.hpp>
-#include <OCRA/Queue/Semaphore.hpp>
+#include <OCRA/Semaphore.hpp>
 
 #include <GL/Device.hpp>
-#include <GL/Queue/Queue.hpp>
-#include <GL/Queue/Fence.hpp>
-#include <GL/Queue/Semaphore.hpp>
+#include <GL/Queue.hpp>
+#include <GL/Fence.hpp>
+#include <GL/Semaphore.hpp>
 #include <GL/Command/Buffer.hpp>
 
 #include <vector>

@@ -6,7 +6,7 @@
 */
 
 #include <OCRA/Command/Buffer.hpp>
-#include <OCRA/Queue/Queue.hpp>
+#include <OCRA/Queue.hpp>
 
 #include <GL/Common/Assert.hpp>
 #include <GL/Command/Buffer.hpp>

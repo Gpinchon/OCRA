@@ -1,8 +1,8 @@
 #include <OCRA/Allocator.hpp>
 
-#include <GL/Queue/Fence.hpp>
+#include <GL/Fence.hpp>
 
-namespace OCRA::Queue::Fence {
+namespace OCRA::Fence {
 Handle Create(
     const Device::Handle& a_Device,
     const AllocationCallback* a_Allocator)

@@ -71,13 +71,13 @@ struct SwapChainTestApp : TestApp
         window.OnMinimize = [this](const Window&, const uint32_t, const uint32_t) { render = false; };
         const auto queueFamily = FindQueueFamily(physicalDevice, PhysicalDevice::QueueFlagsBits::Graphics);
         queue = Device::GetQueue(device, queueFamily, 0); //Get first available queue
-        imageAcquisitionFence = Queue::Fence::Create(device);
+        imageAcquisitionFence = Fence::Create(device);
         commandPool = CreateCommandPool(device, queueFamily);
         commandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Primary);
-        Queue::Semaphore::Info semaphoreInfo;
-        semaphoreInfo.type = Queue::Semaphore::Type::Binary;
-        drawWaitSemaphore = Queue::Semaphore::Create(device, semaphoreInfo);
-        drawSignalSemaphore = Queue::Semaphore::Create(device, semaphoreInfo);
+        Semaphore::Info semaphoreInfo;
+        semaphoreInfo.type = Semaphore::Type::Binary;
+        drawWaitSemaphore = Semaphore::Create(device, semaphoreInfo);
+        drawSignalSemaphore = Semaphore::Create(device, semaphoreInfo);
     }
     void Loop()
     {
@@ -90,8 +90,8 @@ struct SwapChainTestApp : TestApp
             if (window.IsClosing()) break;
 
             const auto swapChainImage = window.AcquireNextImage(std::chrono::nanoseconds(0), drawWaitSemaphore, imageAcquisitionFence);
-            render = Queue::Fence::WaitFor(device, imageAcquisitionFence, Queue::Fence::IgnoreTimeout);
-            Queue::Fence::Reset(device, { imageAcquisitionFence });
+            render = Fence::WaitFor(device, imageAcquisitionFence, Fence::IgnoreTimeout);
+            Fence::Reset(device, { imageAcquisitionFence });
 
             if (!render) continue;
             
@@ -133,9 +133,9 @@ struct SwapChainTestApp : TestApp
     bool                     render{ false };
     Window                   window;
     Queue::Handle            queue;
-    Queue::Semaphore::Handle drawWaitSemaphore;
-    Queue::Semaphore::Handle drawSignalSemaphore;
-    Queue::Fence::Handle     imageAcquisitionFence;
+    Semaphore::Handle drawWaitSemaphore;
+    Semaphore::Handle drawSignalSemaphore;
+    Fence::Handle     imageAcquisitionFence;
     Command::Pool::Handle    commandPool;
     Command::Buffer::Handle  commandBuffer;
 };

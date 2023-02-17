@@ -45,12 +45,15 @@ set(OCRA_IMPL_INCLUDE_DIR
 set(OCRA_IMPL_HEADER_FILES
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Buffer.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Device.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Fence.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Memory.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Instance.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/ObjectPool.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/PhysicalDevice.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/PushConstants.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Queue.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/RenderPass.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Semaphore.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Command/Buffer.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Command/CommandInterface.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Command/ExecutionState.hpp
@@ -71,9 +74,6 @@ set(OCRA_IMPL_HEADER_FILES
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Image/Image.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Image/Sampler.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Image/View.hpp
-  ${OCRA_IMPL_INCLUDE_DIR}/GL/Queue/Fence.hpp
-  ${OCRA_IMPL_INCLUDE_DIR}/GL/Queue/Queue.hpp
-  ${OCRA_IMPL_INCLUDE_DIR}/GL/Queue/Semaphore.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Pipeline/Layout.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Pipeline/ColorBlendState.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Pipeline/DepthStencilState.hpp
@@ -90,16 +90,16 @@ set(OCRA_IMPL_HEADER_FILES
 set(OCRA_IMPL_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Buffer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Device.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Fence.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/FrameBuffer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Instance.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Memory.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/PushConstants.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/RenderPass.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/PhysicalDevice.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Queue.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/QueryPool.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Queue/Fence.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Queue/Queue.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Queue/Semaphore.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Semaphore.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Buffer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/MemoryBarrier.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Pool.cpp

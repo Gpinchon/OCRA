@@ -37,8 +37,8 @@ struct Impl : SwapChain::Impl
     virtual void Present(const Queue::Handle& a_Queue) override;
     virtual Image::Handle AcquireNextImage(
         const std::chrono::nanoseconds& a_Timeout,
-        const Queue::Semaphore::Handle& a_Semaphore,
-        const Queue::Fence::Handle& a_Fence) override;
+        const Semaphore::Handle& a_Semaphore,
+        const Fence::Handle& a_Fence) override;
 
     const Device::WeakHandle    device;
     const Surface::Handle       surface{ nullptr };

@@ -17,9 +17,9 @@ struct AllocationCallback;
 }
 
 OCRA_DECLARE_HANDLE(OCRA::Device);
-OCRA_DECLARE_HANDLE(OCRA::Queue::Semaphore);
+OCRA_DECLARE_HANDLE(OCRA::Semaphore);
 
-namespace OCRA::Queue::Semaphore {
+namespace OCRA::Semaphore {
 //Use this to ignore timeout and wait indefinitely
 static constexpr auto IgnoreTimeout = (std::chrono::nanoseconds::max)();
 enum class Type {

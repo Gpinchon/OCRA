@@ -81,8 +81,8 @@ Command::Buffer::Handle CreateCommandBuffer(const Device::Handle& a_Device, cons
 void SubmitCommandBuffer(
     const Queue::Handle& a_Queue,
     const Command::Buffer::Handle& a_CommandBuffer,
-    const Queue::Semaphore::Handle& a_WaitSemaphore = nullptr,
-    const Queue::Semaphore::Handle& a_SignalSemaphore = nullptr);
+    const Semaphore::Handle& a_WaitSemaphore = nullptr,
+    const Semaphore::Handle& a_SignalSemaphore = nullptr);
 //Returns the index of a memory type with specified properties
 uint32_t FindProperMemoryType(const PhysicalDevice::Handle& a_PhysicalDevice, const PhysicalDevice::MemoryPropertyFlags& a_MemoryProperties);
 //allocate GPU memory with the specified properties

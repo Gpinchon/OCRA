@@ -14,8 +14,8 @@ OCRA_DECLARE_HANDLE(OCRA::Device);
 OCRA_DECLARE_HANDLE(OCRA::Surface);
 OCRA_DECLARE_HANDLE(OCRA::SwapChain);
 OCRA_DECLARE_HANDLE(OCRA::Queue);
-OCRA_DECLARE_HANDLE(OCRA::Queue::Fence);
-OCRA_DECLARE_HANDLE(OCRA::Queue::Semaphore);
+OCRA_DECLARE_HANDLE(OCRA::Fence);
+OCRA_DECLARE_HANDLE(OCRA::Semaphore);
 
 namespace OCRA {
 class Window
@@ -32,11 +32,11 @@ public:
     void Update();
     void Present(
         const Queue::Handle& a_Queue,
-        const Queue::Semaphore::Handle& a_WaitSemaphore = nullptr);
+        const Semaphore::Handle& a_WaitSemaphore = nullptr);
     Image::Handle AcquireNextImage(
         const std::chrono::nanoseconds& a_Timeout,
-        const Queue::Semaphore::Handle& a_SignalSemaphore = nullptr,
-        const Queue::Fence::Handle& a_SignalFence = nullptr);
+        const Semaphore::Handle& a_SignalSemaphore = nullptr,
+        const Fence::Handle& a_SignalFence = nullptr);
     
     auto IsClosing() const { return closing; }
     auto GetNativeHandle() const { return nativeHandle; }

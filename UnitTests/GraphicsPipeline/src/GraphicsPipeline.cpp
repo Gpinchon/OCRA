@@ -82,12 +82,12 @@ struct GraphicsPipelineTestApp : TestApp
         queue = Device::GetQueue(device, queueFamily, 0); //Get first available queue
         commandPool = CreateCommandPool(device, queueFamily);
         renderPass = CreateRenderPass();
-        imageAcquisitionFence = Queue::Fence::Create(device);
+        imageAcquisitionFence = Fence::Create(device);
         mainCommandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Primary);
         drawCommandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Secondary);
-        Queue::Semaphore::Info semaphoreInfo;
-        semaphoreInfo.type = Queue::Semaphore::Type::Binary;
-        drawSemaphore = Queue::Semaphore::Create(device, semaphoreInfo);
+        Semaphore::Info semaphoreInfo;
+        semaphoreInfo.type = Semaphore::Type::Binary;
+        drawSemaphore = Semaphore::Create(device, semaphoreInfo);
     }
     void Loop()
     {
@@ -102,8 +102,8 @@ struct GraphicsPipelineTestApp : TestApp
             if (window.IsClosing()) break;
 
             swapChainImage = window.AcquireNextImage({}, nullptr, imageAcquisitionFence);
-            render = Queue::Fence::WaitFor(device, imageAcquisitionFence, Queue::Fence::IgnoreTimeout);
-            Queue::Fence::Reset(device, { imageAcquisitionFence });
+            render = Fence::WaitFor(device, imageAcquisitionFence, Fence::IgnoreTimeout);
+            Fence::Reset(device, { imageAcquisitionFence });
 
             if (!render) continue;
             
@@ -279,8 +279,8 @@ struct GraphicsPipelineTestApp : TestApp
     Command::Pool::Handle    commandPool;
     Command::Buffer::Handle  mainCommandBuffer;
     Command::Buffer::Handle  drawCommandBuffer;
-    Queue::Semaphore::Handle drawSemaphore; //To be signaled when drawing is done
-    Queue::Fence::Handle     imageAcquisitionFence;
+    Semaphore::Handle drawSemaphore; //To be signaled when drawing is done
+    Fence::Handle     imageAcquisitionFence;
     Queue::Handle            queue;
 };
 

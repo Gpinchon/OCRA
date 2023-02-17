@@ -5,9 +5,9 @@
 #include <GL-DX/SwapChain.hpp>
 #include <GL-DX/Surface.hpp>
 
-#include <GL/Queue/Fence.hpp>
-#include <GL/Queue/Semaphore.hpp>
-#include <GL/Queue/Queue.hpp>
+#include <GL/Fence.hpp>
+#include <GL/Semaphore.hpp>
+#include <GL/Queue.hpp>
 #include <GL/PhysicalDevice.hpp>
 #include <GL/Device.hpp>
 #include <GL/Image/Image.hpp>
@@ -36,8 +36,8 @@ void Present(const Queue::Handle& a_Queue, const PresentInfo& a_PresentInfo)
 {
     for (const auto& semaphore : a_PresentInfo.waitSemaphores)
     {
-        OCRA_ASSERT(semaphore->type == Queue::Semaphore::Type::Binary && "Cannot wait on Timeline Semaphores when presenting");
-        std::static_pointer_cast<Queue::Semaphore::Binary>(semaphore)->Wait();
+        OCRA_ASSERT(semaphore->type == Semaphore::Type::Binary && "Cannot wait on Timeline Semaphores when presenting");
+        std::static_pointer_cast<Semaphore::Binary>(semaphore)->Wait();
     }
     for (const auto& swapChain : a_PresentInfo.swapChains)
         swapChain->Present(a_Queue);
@@ -47,8 +47,8 @@ Image::Handle AcquireNextImage(
     const Device::Handle&           a_Device,
     const Handle&                   a_SwapChain,
     const std::chrono::nanoseconds& a_Timeout,
-    const Queue::Semaphore::Handle& a_Semaphore,
-    const Queue::Fence::Handle&     a_Fence)
+    const Semaphore::Handle& a_Semaphore,
+    const Fence::Handle&     a_Fence)
 {
     return a_SwapChain->AcquireNextImage(a_Timeout, a_Semaphore, a_Fence);
 }

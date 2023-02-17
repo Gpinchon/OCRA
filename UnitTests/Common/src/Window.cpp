@@ -121,7 +121,7 @@ void Window::Update()
     UpdateWindow(HWND(nativeHandle));
 }
 
-void Window::Present(const Queue::Handle& a_Queue, const Queue::Semaphore::Handle& a_WaitSemaphore)
+void Window::Present(const Queue::Handle& a_Queue, const Semaphore::Handle& a_WaitSemaphore)
 {
     if (a_WaitSemaphore != nullptr) presentInfo.waitSemaphores = { a_WaitSemaphore };
     SwapChain::Present(a_Queue, presentInfo);
@@ -129,8 +129,8 @@ void Window::Present(const Queue::Handle& a_Queue, const Queue::Semaphore::Handl
 
 Image::Handle Window::AcquireNextImage(
     const std::chrono::nanoseconds& a_Timeout,
-    const Queue::Semaphore::Handle& a_Semaphore,
-    const Queue::Fence::Handle& a_Fence)
+    const Semaphore::Handle& a_Semaphore,
+    const Fence::Handle& a_Fence)
 {
     return SwapChain::AcquireNextImage(device, swapChain, a_Timeout, a_Semaphore, a_Fence);
 }

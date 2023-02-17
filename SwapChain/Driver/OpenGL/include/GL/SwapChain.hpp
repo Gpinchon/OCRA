@@ -8,7 +8,7 @@
 OCRA_DECLARE_HANDLE(OCRA::Device);
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Queue);
-OCRA_DECLARE_WEAK_HANDLE(OCRA::Queue::Semaphore);
+OCRA_DECLARE_WEAK_HANDLE(OCRA::Semaphore);
 
 namespace OCRA::SwapChain
 {
@@ -17,8 +17,8 @@ struct Impl
     virtual void Present(const Queue::Handle& a_Queue) = 0;
     virtual Image::Handle AcquireNextImage(
         const std::chrono::nanoseconds& a_TimeoutNS,
-        const Queue::Semaphore::Handle& a_Semaphore,
-        const Queue::Fence::Handle&     a_Fence) = 0;
+        const Semaphore::Handle& a_Semaphore,
+        const Fence::Handle&     a_Fence) = 0;
     
 };
 }

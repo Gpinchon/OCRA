@@ -1,6 +1,6 @@
 #pragma once
 
-#include <OCRA/Queue/Fence.hpp>
+#include <OCRA/Fence.hpp>
 #include <OCRA/Common/Timer.hpp>
 
 #include <GL/Device.hpp>
@@ -11,7 +11,7 @@
 
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
 
-namespace OCRA::Queue::Fence {
+namespace OCRA::Fence {
 struct Impl {
     Impl(const Device::Handle& a_Device) : device(a_Device) {}
     inline auto GetStatus() {

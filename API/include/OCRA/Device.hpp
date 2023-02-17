@@ -8,7 +8,7 @@
 
 #include <OCRA/Handle.hpp>
 #include <OCRA/PhysicalDevice.hpp>
-#include <OCRA/Queue/Queue.hpp>
+#include <OCRA/Queue.hpp>
 
 #include <vector>
 #include <string>

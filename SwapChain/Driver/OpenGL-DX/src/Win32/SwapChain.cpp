@@ -93,13 +93,13 @@ void Impl::Present(const Queue::Handle& a_Queue)
 //TODO: implement a timeout
 Image::Handle Impl::AcquireNextImage(
     const std::chrono::nanoseconds& a_Timeout,
-    const Queue::Semaphore::Handle& a_Semaphore,
-    const Queue::Fence::Handle& a_Fence)
+    const Semaphore::Handle& a_Semaphore,
+    const Fence::Handle& a_Fence)
 {
     //We do not need to synchronize with the GPU for real here
     if (a_Semaphore != nullptr) {
-        if (a_Semaphore->type == Queue::Semaphore::Type::Binary)
-            std::static_pointer_cast<Queue::Semaphore::Binary>(a_Semaphore)->SignalNoSync();
+        if (a_Semaphore->type == Semaphore::Type::Binary)
+            std::static_pointer_cast<Semaphore::Binary>(a_Semaphore)->SignalNoSync();
         else throw std::runtime_error("Cannot wait on Timeline Semaphores when presenting");
     }
     if (a_Fence != nullptr) a_Fence->SignalNoSync();

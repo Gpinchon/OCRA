@@ -2,7 +2,7 @@
 #include <OCRA/PhysicalDevice.hpp>
 
 #include <GL/Device.hpp>
-#include <GL/Queue/Queue.hpp>
+#include <GL/Queue.hpp>
 
 namespace OCRA::Device
 {

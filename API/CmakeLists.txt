@@ -15,16 +15,16 @@ set(OCRA_API_HEADER_LIST
   OCRA/Allocator.hpp
   OCRA/Buffer.hpp
   OCRA/Device.hpp
+  OCRA/Fence.hpp
   OCRA/FrameBuffer.hpp
   OCRA/Handle.hpp
   OCRA/Instance.hpp
   OCRA/Memory.hpp
   OCRA/PhysicalDevice.hpp
   OCRA/QueryPool.hpp
+  OCRA/Queue.hpp
   OCRA/RenderPass.hpp
-  OCRA/Queue/Queue.hpp
-  OCRA/Queue/Fence.hpp
-  OCRA/Queue/Semaphore.hpp
+  OCRA/Semaphore.hpp
   OCRA/Common/Blend.hpp
   OCRA/Common/Compare.hpp
   OCRA/Common/Extent.hpp

@@ -108,11 +108,11 @@ struct TexturesTestApp : TestApp
         window.OnMinimize = [this](const Window&, const uint32_t, const uint32_t) { render = false; };
         const auto queueFamily = FindQueueFamily(physicalDevice, PhysicalDevice::QueueFlagsBits::Graphics);
         queue = Device::GetQueue(device, queueFamily, 0); //Get first available queue
-        imageAcquisitionFence = Queue::Fence::Create(device);
+        imageAcquisitionFence = Fence::Create(device);
         commandPool = CreateCommandPool(device, queueFamily);
         mainCommandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Primary);
         drawCommandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Secondary);
-        drawSemaphore = Queue::Semaphore::Create(device, { Queue::Semaphore::Type::Binary, 0 });
+        drawSemaphore = Semaphore::Create(device, { Semaphore::Type::Binary, 0 });
         CreateRenderPass();
         CreateShaderStages();
     }
@@ -127,8 +127,8 @@ struct TexturesTestApp : TestApp
             if (window.IsClosing()) break;
 
             swapChainImage = window.AcquireNextImage(std::chrono::nanoseconds(15000000), nullptr, imageAcquisitionFence);
-            render = Queue::Fence::WaitFor(device, imageAcquisitionFence, std::chrono::nanoseconds(15000000));
-            Queue::Fence::Reset(device, { imageAcquisitionFence });
+            render = Fence::WaitFor(device, imageAcquisitionFence, std::chrono::nanoseconds(15000000));
+            Fence::Reset(device, { imageAcquisitionFence });
             if (!render) continue;
 
             textureUniform.Update();
@@ -333,8 +333,8 @@ struct TexturesTestApp : TestApp
     Window                  window;    
 
     Queue::Handle           queue;
-    Queue::Semaphore::Handle drawSemaphore;
-    Queue::Fence::Handle    imageAcquisitionFence;
+    Semaphore::Handle drawSemaphore;
+    Fence::Handle    imageAcquisitionFence;
 
     FrameBuffer::Handle      frameBuffer;
     Image::Handle            frameBufferImage;

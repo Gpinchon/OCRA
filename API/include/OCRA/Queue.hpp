@@ -11,8 +11,8 @@
 #include <vector>
 
 OCRA_DECLARE_HANDLE(OCRA::Queue);
-OCRA_DECLARE_HANDLE(OCRA::Queue::Semaphore);
-OCRA_DECLARE_HANDLE(OCRA::Queue::Fence);
+OCRA_DECLARE_HANDLE(OCRA::Semaphore);
+OCRA_DECLARE_HANDLE(OCRA::Fence);
 OCRA_DECLARE_HANDLE(OCRA::Command::Buffer);
 
 namespace OCRA::Queue
