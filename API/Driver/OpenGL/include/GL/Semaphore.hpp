@@ -5,52 +5,33 @@
 
 #include <mutex>
 
-OCRA_DECLARE_HANDLE(OCRA::Semaphore);
-
 namespace OCRA::Semaphore {
 struct Impl {
     Impl(const Type& a_Type)
         : type(a_Type)
     {}
-    int64_t Count() {
-        std::unique_lock<std::mutex> lock(mutex);
-        return count;
-    }
     const Type type;
-    int64_t count{ 0 };
-    std::mutex mutex;
-    std::condition_variable cv;
+    
 };
+/**
+* @brief Binary semaphores are simpler as they're
+* not meant to be called directly by the user
+*/
 struct Binary : Impl {
     Binary() : Impl(Type::Binary) {}
     ~Binary() {}
     void Wait() {
-        auto lock = std::unique_lock<std::mutex>(mutex);
-        cv.wait(lock, [this] { return count > 0; });
-        --count;
-        lock.unlock();
-        //inform everyone this semaphore is unsignaled
-        cv.notify_all();
+        OCRA_ASSERT(glIsSync(sync) && "Semaphore not signaled");
+        glWaitSync(sync, 0, GL_TIMEOUT_IGNORED);
+        glDeleteSync(sync);
     }
     void Signal() {
-        auto lock = std::unique_lock<std::mutex>(mutex);
-        //wait for semaphore to enter unsignaled state
-        cv.wait(lock, [this] { return count == 0; });
-        const auto sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
-        glClientWaitSync(sync, 0, GL_TIMEOUT_IGNORED);
-        glDeleteSync(sync);
-        ++count;
-        lock.unlock();
-        cv.notify_all();
+        OCRA_ASSERT(!glIsSync(sync) && "Semaphore not unsignaled");
+        sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
     }
-    void SignalNoSync() {
-        auto lock = std::unique_lock<std::mutex>(mutex);
-        cv.wait(lock, [this] { return count == 0; });
-        ++count;
-        lock.unlock();
-        cv.notify_all();
-    }
+    GLsync sync = nullptr; //glIsSync when signaled
 };
+
 struct Timeline : Impl {
     Timeline(const uint64_t& a_InitialValue)
         : Impl(Type::Timeline)
@@ -81,5 +62,12 @@ struct Timeline : Impl {
         return cv.wait_for(lock, a_TimeoutNS,
             [this, a_Value] { return count >= a_Value; });;
     }
+    auto GetCount() {
+        std::unique_lock lock(mutex);
+        return count;
+    }
+    int64_t count{ 0 };
+    std::mutex mutex;
+    std::condition_variable cv;
 };
 }

@@ -249,12 +249,11 @@ Image::Handle Impl::AcquireNextImage(
     const Semaphore::Handle& a_Semaphore,
     const Fence::Handle& a_Fence)
 {
-    workerThread.PushCommand([semaphore = a_Semaphore, fence = a_Fence] {
+    device.lock()->PushCommand([semaphore = a_Semaphore, fence = a_Fence] {
         //We do not need to synchronize with the GPU for real here
         if (semaphore != nullptr) {
-            if (semaphore->type == Semaphore::Type::Binary)
-                std::static_pointer_cast<Semaphore::Binary>(semaphore)->SignalNoSync();
-            else throw std::runtime_error("Cannot wait on Timeline Semaphores when presenting");
+            OCRA_ASSERT(semaphore->type == Semaphore::Type::Binary && "Cannot wait on Timeline Semaphores when requesting next image");
+            std::static_pointer_cast<Semaphore::Binary>(semaphore)->Signal();
         }
         if (fence != nullptr) fence->SignalNoSync();
     }, false);

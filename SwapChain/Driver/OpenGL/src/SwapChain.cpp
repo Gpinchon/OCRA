@@ -30,10 +30,12 @@ Handle Create(const Device::Handle& a_Device, const Info& a_Info)
 
 void Present(const Queue::Handle& a_Queue, const PresentInfo& a_PresentInfo)
 {
-    for (const auto& semaphore : a_PresentInfo.waitSemaphores) {
-        OCRA_ASSERT(semaphore->type == Semaphore::Type::Binary && "Cannot wait on Timeline Semaphores when presenting");
-        std::static_pointer_cast<Semaphore::Binary>(semaphore)->Wait();
-    }
+    a_Queue->PushCommand([a_PresentInfo]{
+        for (const auto& semaphore : a_PresentInfo.waitSemaphores) {
+            OCRA_ASSERT(semaphore->type == Semaphore::Type::Binary && "Cannot wait on Timeline Semaphores when presenting");
+            std::static_pointer_cast<Semaphore::Binary>(semaphore)->Wait();
+        }
+    }, false);
     for (const auto& swapChain : a_PresentInfo.swapChains)
         swapChain->Present(a_Queue);
 }

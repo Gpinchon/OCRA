@@ -67,6 +67,6 @@ uint64_t GetCounterValue(
     const Handle& a_Semaphore)
 {
     OCRA_ASSERT(a_Semaphore->type == Type::Timeline);
-    return std::static_pointer_cast<Timeline>(a_Semaphore)->Count();
+    return std::static_pointer_cast<Timeline>(a_Semaphore)->GetCount();
 }
 }
