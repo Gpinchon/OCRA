@@ -207,18 +207,18 @@ struct Features {
 };
 using QueueFlags = std::bitset<5>;
 namespace QueueFlagsBits {
-static QueueFlags None = 0b00000;
-static QueueFlags Graphics = 0b10000;
-static QueueFlags Compute = 0b01000;
-static QueueFlags Transfer = 0b00100;
+static QueueFlags None          = 0b00000;
+static QueueFlags Graphics      = 0b10000;
+static QueueFlags Compute       = 0b01000;
+static QueueFlags Transfer      = 0b00100;
 static QueueFlags SparseBinding = 0b00010;
-static QueueFlags Protected = 0b00001;// VK_VERSION_1_1
+static QueueFlags Protected     = 0b00001;// VK_VERSION_1_1
 }
 struct QueueFamilyProperties {
-    QueueFlags  queueFlags{ QueueFlagsBits::None };
-    uint32_t    queueCount{ 0 };
-    uint32_t    timestampValidBits{ 0 };
-    Extent3D    minImageTransferGranularity{};
+    QueueFlags queueFlags{ QueueFlagsBits::None };
+    uint32_t   queueCount{ 0 };
+    uint32_t   timestampValidBits{ 0 };
+    Extent3D   minImageTransferGranularity{};
 };
 const std::vector<QueueFamilyProperties> GetQueueFamilyProperties(const Handle& a_PhysicalDevice);
 
@@ -250,8 +250,8 @@ struct MemoryProperties {
     std::vector<MemoryType> memoryTypes;
     std::vector<MemoryHeap> memoryHeaps;
 };
-const MemoryProperties& GetMemoryProperties(const Handle& a_PhysicalDevice);
 
-const Properties& GetProperties(const Handle& a_PhysicalDevice);
-const Features& GetFeatures(const Handle& a_PhysicalDevice);
+const MemoryProperties GetMemoryProperties(const Handle& a_PhysicalDevice);
+const Properties GetProperties(const Handle& a_PhysicalDevice);
+const Features GetFeatures(const Handle& a_PhysicalDevice);
 }

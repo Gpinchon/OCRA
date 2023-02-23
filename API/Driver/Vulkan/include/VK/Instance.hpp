@@ -3,17 +3,15 @@
 
 #include <vulkan/vulkan.hpp>
 
-#include <vector>
-
-OCRA_DECLARE_HANDLE(OCRA::PhysicalDevice);
-
 namespace OCRA::Instance
 {
 struct Impl {
     Impl(const Info& a_Info);
     ~Impl();
+    operator VkInstance() {
+        return instance;
+    }
     const VkInstance instance;
-    const std::vector<PhysicalDevice::Handle> physicalDevices;
     const Info info;
 };
 }
