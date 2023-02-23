@@ -5,11 +5,6 @@
 
 #include <vulkan/vulkan.hpp>
 
-#include <stdexcept>
-#include <iostream>
-#include <sstream>
-#include <unordered_map>
-
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Instance);
 
 namespace OCRA::PhysicalDevice
@@ -335,4 +330,14 @@ const std::vector<QueueFamilyProperties> GetQueueFamilyProperties(const Handle& 
     return queueProperties;
 }
 
+uint32_t FindQueueFamily(const PhysicalDevice::Handle& a_PhysicalDevice, const PhysicalDevice::QueueFlags& a_QueueFlags)
+{
+    auto& queueProperties = GetQueueFamilyProperties(a_PhysicalDevice);
+    for (auto familyIndex = 0u; familyIndex < queueProperties.size(); ++familyIndex) {
+        //check if a_QueueFlags is a subsent of queueFlags
+        if ((queueProperties.at(familyIndex).queueFlags & a_QueueFlags) == a_QueueFlags)
+            return familyIndex;
+    }
+    return std::numeric_limits<uint32_t>::infinity();
+}
 }

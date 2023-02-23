@@ -254,4 +254,6 @@ struct MemoryProperties {
 const MemoryProperties GetMemoryProperties(const Handle& a_PhysicalDevice);
 const Properties GetProperties(const Handle& a_PhysicalDevice);
 const Features GetFeatures(const Handle& a_PhysicalDevice);
+//try finding a queue with all the specified flags, returns 'infinity' if none was found
+uint32_t FindQueueFamily(const Handle& a_PhysicalDevice, const QueueFlags& a_QueueFlags);
 }

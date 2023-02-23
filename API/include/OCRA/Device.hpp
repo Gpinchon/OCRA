@@ -22,7 +22,6 @@ struct AllocationCallback;
 namespace OCRA::Device {
 struct Info {
     std::vector<Queue::Info>    queueInfos;
-    std::vector<std::string>    enabledExtensionNames;
     PhysicalDevice::Features    enabledFeatures;
 };
 /**
