@@ -334,7 +334,7 @@ uint32_t FindQueueFamily(const PhysicalDevice::Handle& a_PhysicalDevice, const P
 {
     auto& queueProperties = GetQueueFamilyProperties(a_PhysicalDevice);
     for (auto familyIndex = 0u; familyIndex < queueProperties.size(); ++familyIndex) {
-        //check if a_QueueFlags is a subsent of queueFlags
+        //check if a_QueueFlags is a subset of queueFlags
         if ((queueProperties.at(familyIndex).queueFlags & a_QueueFlags) == a_QueueFlags)
             return familyIndex;
     }
