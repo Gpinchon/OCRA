@@ -114,7 +114,9 @@ set_target_properties(
 )
 
 if (OCRA_API_IMPL STREQUAL "OpenGL")
-add_subdirectory(Driver/OpenGL)
+  add_subdirectory(Driver/OpenGL)
+elseif (OCRA_API_IMPL STREQUAL "Vulkan")
+  add_subdirectory(Driver/Vulkan)
 endif (OCRA_API_IMPL STREQUAL "OpenGL")
 
 if(MSVC_IDE)

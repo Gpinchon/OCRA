@@ -1,0 +1,43 @@
+cmake_minimum_required(VERSION 3.19)
+cmake_policy(SET CMP0074 NEW)
+project(OCRA-API-Implementation LANGUAGES CXX)
+
+if (NOT OCRA_API_IMPL STREQUAL "Vulkan")
+  message(FATAL_ERROR "OCRA_API_IMPL MUST be Vulkan, currently : ${OCRA_API_IMPL}")
+endif()
+
+find_package(Vulkan REQUIRED)
+
+set(OCRA_IMPL_SWAPCHAIN_HEADER_FILES
+)
+
+set(OCRA_IMPL_SWAPCHAIN_SOURCE_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/SwapChain.cpp
+)
+
+if (WIN32)
+  set(OCRA_IMPL_SWAPCHAIN_HEADER_FILES ${OCRA_IMPL_SWAPCHAIN_HEADER_FILES}
+  )
+  set(OCRA_IMPL_SWAPCHAIN_SOURCE_FILES ${OCRA_IMPL_SWAPCHAIN_SOURCE_FILES}
+  )
+endif(WIN32)
+
+add_library(OCRA-SwapChain-Implementation ${OCRA_IMPL_SWAPCHAIN_SOURCE_FILES} ${OCRA_IMPL_SWAPCHAIN_HEADER_FILES})
+add_library(OCRA::SwapChain::Implementation ALIAS OCRA-SwapChain-Implementation)
+target_include_directories(OCRA-SwapChain-Implementation PRIVATE
+  "${CMAKE_CURRENT_SOURCE_DIR}/include"
+  ${OCRA_IMPL_INCLUDE_DIR}
+)
+set_target_properties(
+  OCRA-SwapChain-Implementation
+  PROPERTIES FOLDER "SwapChain"
+)
+
+target_link_libraries(OCRA-SwapChain-Implementation PUBLIC OCRA-API-Implementation OCRA-SwapChain-Interface Vulkan::Vulkan)
+
+if (MSVC_IDE)
+  set(CMAKE_DEBUG_POSTFIX "d")
+  # Run macro
+  GroupSources(src)
+  GroupSources(include)
+endif ()

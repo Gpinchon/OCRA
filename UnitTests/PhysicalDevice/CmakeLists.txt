@@ -9,7 +9,7 @@ add_executable(OCRA-UnitTests-PhysicalDevice
 target_include_directories(OCRA-UnitTests-PhysicalDevice PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-target_link_libraries(OCRA-UnitTests-PhysicalDevice OCRA-UnitTests-Lib-Common OCRA::API::Interface OCRA::API::Implementation)
+target_link_libraries(OCRA-UnitTests-PhysicalDevice OCRA::API::Interface OCRA::API::Implementation)
 
 if(MSVC_IDE)
   # Run macro

@@ -1,8 +1,6 @@
 #include <OCRA/Instance.hpp>
 #include <OCRA/PhysicalDevice.hpp>
 
-#include <Common.hpp>
-
 #include <iostream>
 
 using namespace OCRA;
@@ -20,7 +18,10 @@ int main()
         }
         //if we did not crash yet, assume this test is successful
     }
-    const auto instance = CreateInstance("Test_PhysicalDevice");
+    Instance::Info instanceInfo;
+    instanceInfo.applicationInfo.name = "Test_PhysicalDevice";
+    instanceInfo.applicationInfo.applicationVersion = 1;
+    const auto instance = Instance::Create(instanceInfo);
     std::cout << "===== Physical Devices ====\n";
     for (const auto& physicalDevice : Instance::EnumeratePhysicalDevices(instance))
     {
