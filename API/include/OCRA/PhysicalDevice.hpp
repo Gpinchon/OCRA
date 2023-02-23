@@ -238,9 +238,9 @@ struct MemoryType {
 };
 using MemoryHeapFlags = std::bitset<2>;
 namespace MemoryHeapFlagBits {
-static MemoryHeapFlags None             = 0b000000;
-static MemoryHeapFlags DeviceLocal      = 0b100000;
-static MemoryHeapFlags MultiInstance    = 0b010000; //allows for memory mapping
+static MemoryHeapFlags None             = 0b00;
+static MemoryHeapFlags DeviceLocal      = 0b10;
+static MemoryHeapFlags MultiInstance    = 0b01; //allows for memory mapping
 };
 struct MemoryHeap {
     size_t          size{ 0 };
