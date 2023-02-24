@@ -41,5 +41,5 @@ Handle Create(
     const Device::Handle&       a_Device,
     const Info&                 a_Info,
     const AllocationCallback*   a_Allocator = nullptr);
-std::vector<Buffer::Handle> AllocateBuffer(const Device::Handle& a_Device, const AllocateInfo& a_Info);
+std::vector<Buffer::Handle> AllocateBuffer(const AllocateInfo& a_Info);
 }

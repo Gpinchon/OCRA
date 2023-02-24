@@ -36,28 +36,22 @@ Handle Create(
     const AllocationCallback* a_Allocator = nullptr);
 
 void Signal(
-    const Device::Handle& a_Device,
     const Handle& a_Semaphore,
     const uint64_t& a_Value);
 
 void Signal(
-    const Device::Handle& a_Device,
     const std::vector<Handle>& a_Semaphores,
     const std::vector<uint64_t>& a_Values);
 
 bool Wait(
-    const Device::Handle& a_Device,
     const Handle& a_Semaphore,
     const uint64_t& a_Value,
-    const std::chrono::nanoseconds& a_TimeoutNS);
+    const std::chrono::nanoseconds& a_TimeoutNS = IgnoreTimeout);
 
 bool Wait(
-    const Device::Handle& a_Device,
     const std::vector<Handle>& a_Semaphores,
     const std::vector<uint64_t>& a_Values,
-    const std::chrono::nanoseconds& a_TimeoutNS);
+    const std::chrono::nanoseconds& a_TimeoutNS = IgnoreTimeout);
 
-uint64_t GetCounterValue(
-    const Device::Handle& a_Device,
-    const Handle& a_Semaphore);
+uint64_t GetCounterValue(const Handle& a_Semaphore);
 }

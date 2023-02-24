@@ -2,14 +2,17 @@
 
 #include <vulkan/vulkan.hpp>
 
-namespace OCRA::Device {
-struct Info;
-struct Impl {
-    Impl(const VkPhysicalDevice& a_PhysicalDevice, const Info& a_Info);
+namespace OCRA::Device
+{
+struct Impl
+{
+    Impl(const VkDevice& a_Device)
+        : device(a_Device)
+    {}
     ~Impl() {
         vkDestroyDevice(device, nullptr);
     }
-    operator VkDevice() const {
+    operator auto&() const {
         return device;
     }
     const VkDevice device;

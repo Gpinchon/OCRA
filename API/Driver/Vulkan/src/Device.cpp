@@ -5,24 +5,16 @@
 #include <OCRA/Device.hpp>
 
 namespace OCRA::Device {
-auto CreateDevice(const VkPhysicalDevice& a_PhysicalDevice, const Info& a_Info) {
-    VkDeviceCreateInfo info{ VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO };
-    //info.pEnabledFeatures = a_Info.enabledFeatures;
-    VkDevice device{};
-    vkCreateDevice(a_PhysicalDevice, &info, nullptr, &device);
-    return device;
-}
-
-Impl::Impl(const VkPhysicalDevice& a_PhysicalDevice, const Info& a_Info)
-    : device(CreateDevice(a_PhysicalDevice, a_Info))
-{}
-
 Handle Create(
     const PhysicalDevice::Handle& a_PhysicalDevice,
     const Info& a_Info,
     const AllocationCallback* a_Allocator)
 {
-    return std::make_shared<Impl>(*a_PhysicalDevice, a_Info);
+    VkDeviceCreateInfo info{ VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO };
+    //info.pEnabledFeatures = a_Info.enabledFeatures;
+    VkDevice device{};
+    vkCreateDevice(*a_PhysicalDevice, &info, nullptr, &device);
+    return std::make_shared<Impl>(device);
 }
 
 Queue::Handle GetQueue(

@@ -2,13 +2,19 @@
 
 #include <vulkan/vulkan.hpp>
 
-namespace OCRA::Command::Buffer {
-struct Impl {
-    Impl();
+namespace OCRA::Command::Buffer
+{
+struct Impl
+{
+    Impl(const VkDevice& a_Device, const VkCommandPool& a_CommandPool, const VkCommandBuffer& a_CommandBuffer)
+        : device(a_Device)
+        , commandPool(a_CommandPool)
+        , commandBuffer(a_CommandBuffer)
+    {}
     ~Impl() {
         vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
     }
-    operator VkCommandBuffer() const {
+    operator auto&() const {
         return commandBuffer;
     }
     const VkDevice        device;

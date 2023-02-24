@@ -4,13 +4,16 @@
 
 namespace OCRA::Semaphore
 {
-struct Info;
-struct Impl {
-    Impl(const VkDevice& a_Device, const Info& a_Info);
+struct Impl
+{
+    Impl(const VkDevice& a_Device, const VkSemaphore& a_Semaphore)
+        : device(a_Device)
+        , semaphore(a_Semaphore)
+    {}
     ~Impl() {
         vkDestroySemaphore(device, semaphore, nullptr);
     }
-    operator VkSemaphore() const {
+    operator auto&() const {
         return semaphore;
     }
     const VkDevice    device;

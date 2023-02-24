@@ -4,12 +4,12 @@
 
 namespace OCRA::PhysicalDevice
 {
-//PhysicalDevice::Impl is just a hidden VkPhysicalDevice
-struct Impl {
+struct Impl
+{
     Impl(const VkPhysicalDevice& a_PhysicalDevice)
         : physicalDevice(a_PhysicalDevice)
     {}
-    operator VkPhysicalDevice() {
+    operator auto&() {
         return physicalDevice;
     }
     VkPhysicalDevice physicalDevice;

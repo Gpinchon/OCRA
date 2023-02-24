@@ -7,7 +7,10 @@
 
 namespace OCRA::Instance
 {
-static inline auto CreateInstance(const Info& a_Info) {
+Handle Create(
+    const Info& a_Info,
+    const AllocationCallback* a_Allocator)
+{
     VkInstance instance = nullptr;
     VkInstanceCreateInfo info{ VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO };
     VkApplicationInfo appInfo{ VK_STRUCTURE_TYPE_APPLICATION_INFO };
@@ -17,19 +20,7 @@ static inline auto CreateInstance(const Info& a_Info) {
     appInfo.pEngineName = a_Info.applicationInfo.engineName.c_str();
     info.pApplicationInfo = &appInfo;
     vkCreateInstance(&info, nullptr, &instance);
-    return instance;
-}
-
-Impl::Impl(const Info& a_Info)
-    : instance(CreateInstance(a_Info))
-    , info(a_Info)
-{}
-
-Handle Create(
-    const Info& a_Info,
-    const AllocationCallback* a_Allocator)
-{
-    return std::make_shared<Impl>(a_Info);
+    return std::make_shared<Impl>(instance);
 }
 
 const std::string GetType(const Handle& a_Instance)
@@ -47,10 +38,5 @@ const std::vector<PhysicalDevice::Handle> EnumeratePhysicalDevices(const Instanc
     for (auto i = 0u; i < devicesCount; ++i)
         ocPhysicalDevices.at(i) = std::make_shared<PhysicalDevice::Impl>(vkPhysicaldevices.at(i));
     return ocPhysicalDevices;
-}
-
-const Info& GetInfo(const Instance::Handle& a_Instance)
-{
-    return a_Instance->info;
 }
 }

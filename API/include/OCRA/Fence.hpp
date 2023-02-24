@@ -21,6 +21,7 @@ enum class Status {
 
 Handle Create(
     const Device::Handle& a_Device,
+    const Status& a_DefaultStatus = Status::Unsignaled,
     const AllocationCallback* a_Allocator = nullptr);
 
 /**
@@ -29,7 +30,6 @@ Handle Create(
  * @return false if timeout was reached
  */
 bool WaitFor(
-    const Device::Handle& a_Device,
     const std::vector<Handle>& a_Fences,
     bool a_WaitAll,
     const std::chrono::nanoseconds& a_TimeoutNS);
@@ -39,21 +39,16 @@ bool WaitFor(
  * @return false if timeout was reached
  */
 bool WaitFor(
-    const Device::Handle& a_Device,
     const Handle& a_Fences,
     const std::chrono::nanoseconds& a_TimeoutNS);
 
 /**
 * @brief resets the fences status to Unsignaled
 */
-void Reset(
-    const Device::Handle& a_Device,
-    const std::vector<Handle>& a_Fences);
+void Reset(const std::vector<Handle>& a_Fences);
 
 /**
 * @return the current status of the fence
 */
-Status GetStatus(
-    const Device::Handle& a_Device,
-    const Handle& a_Fence);
+Status GetStatus(const Handle& a_Fence);
 }

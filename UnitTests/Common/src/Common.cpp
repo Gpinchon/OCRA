@@ -23,10 +23,10 @@ Instance::Handle CreateInstance(const std::string& a_Name)
     instance = Instance::Create(instanceInfo);
     std::cout << "==== Instance ====\n";
     std::cout << "  Type           : " << Instance::GetType(instance) << "\n";
-    std::cout << "  App Name       : " << Instance::GetInfo(instance).applicationInfo.name << "\n";
-    std::cout << "  App Version    : " << Instance::GetInfo(instance).applicationInfo.applicationVersion << "\n";
-    std::cout << "  Engine Name    : " << Instance::GetInfo(instance).applicationInfo.engineName << "\n";
-    std::cout << "  Engine Version : " << Instance::GetInfo(instance).applicationInfo.engineVersion << "\n";
+    std::cout << "  App Name       : " << instanceInfo.applicationInfo.name << "\n";
+    std::cout << "  App Version    : " << instanceInfo.applicationInfo.applicationVersion << "\n";
+    std::cout << "  Engine Name    : " << instanceInfo.applicationInfo.engineName << "\n";
+    std::cout << "  Engine Version : " << instanceInfo.applicationInfo.engineVersion << "\n";
     std::cout << "==================\n";
     std::cout << "\n";
     return instance;
@@ -96,13 +96,13 @@ Command::Pool::Handle CreateCommandPool(const Device::Handle& a_Device, const ui
     return Command::Pool::Create(a_Device, commandPoolInfo);
 }
 
-Command::Buffer::Handle CreateCommandBuffer(const Device::Handle& a_Device, const Command::Pool::Handle& a_CommandPool, const Command::Pool::AllocateInfo::Level& a_Level)
+Command::Buffer::Handle CreateCommandBuffer(const Command::Pool::Handle& a_CommandPool, const Command::Pool::AllocateInfo::Level& a_Level)
 {
     Command::Pool::AllocateInfo commandBufferAllocateInfo;
     commandBufferAllocateInfo.pool = a_CommandPool;
     commandBufferAllocateInfo.count = 1;
     commandBufferAllocateInfo.level = a_Level;
-    return Command::Pool::AllocateBuffer(a_Device, commandBufferAllocateInfo).front();
+    return Command::Pool::AllocateBuffer(commandBufferAllocateInfo).front();
 }
 
 void OCRA::SubmitCommandBuffer(

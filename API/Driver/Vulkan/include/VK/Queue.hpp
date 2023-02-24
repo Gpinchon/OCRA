@@ -2,12 +2,14 @@
 
 #include <vulkan/vulkan.hpp>
 
-namespace OCRA::Queue {
-struct Impl {
+namespace OCRA::Queue
+{
+struct Impl
+{
     Impl(const VkQueue& a_Queue)
         : queue(a_Queue)
     {}
-    operator VkQueue() const {
+    operator auto&() const {
         return queue;
     }
     const VkQueue queue;

@@ -2,13 +2,18 @@
 
 #include <vulkan/vulkan.hpp>
 
-namespace OCRA::Fence {
-struct Impl {
-    Impl(const VkDevice& a_Device);
+namespace OCRA::Fence
+{
+struct Impl
+{
+    Impl(const VkDevice& a_Device, const VkFence& a_Fence)
+        : device(a_Device)
+        , fence(a_Fence)
+    {}
     ~Impl() {
         vkDestroyFence(device, fence, nullptr);
     }
-    operator VkFence() const {
+    operator auto&() const {
         return fence;
     }
     const VkDevice device;

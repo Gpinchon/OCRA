@@ -76,7 +76,7 @@ uint32_t FindQueueFamily(const PhysicalDevice::Handle& a_PhysicalDevice, const P
 //Create a command pool from the queuefamily
 Command::Pool::Handle CreateCommandPool(const Device::Handle& a_Device, const uint32_t& a_QueueFamily);
 //Creates a command buffer from the specified command pool
-Command::Buffer::Handle CreateCommandBuffer(const Device::Handle& a_Device, const Command::Pool::Handle& a_CommandPool, const Command::Pool::AllocateInfo::Level& a_Level);
+Command::Buffer::Handle CreateCommandBuffer(const Command::Pool::Handle& a_CommandPool, const Command::Pool::AllocateInfo::Level& a_Level);
 //Submits a Command Buffer to the specified Queue
 void SubmitCommandBuffer(
     const Queue::Handle& a_Queue,

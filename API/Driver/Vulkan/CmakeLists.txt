@@ -30,15 +30,19 @@ set(OCRA_IMPL_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Device.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Fence.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Instance.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Memory.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/PhysicalDevice.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Queue.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Semaphore.hpp
 )
 
 set(OCRA_IMPL_SOURCE_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/CommandBuffer.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/CommandPool.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Device.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Fence.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Instance.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Memory.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/PhysicalDevice.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Queue.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Semaphore.cpp
