@@ -29,10 +29,10 @@ namespace BlendColorMaskFlagBits {
 }
 using CommandBufferUsageFlags = std::bitset<3>;
 namespace CommandBufferUsageFlagBits {
-static CommandBufferUsageFlags None = 0b000;
-static CommandBufferUsageFlags OneTimeSubmit = 0b100;
-static CommandBufferUsageFlags RenderPassContinue = 0b010;
-static CommandBufferUsageFlags SimultaneousUse = 0b001;
+    static CommandBufferUsageFlags None = 0b000;
+    static CommandBufferUsageFlags OneTimeSubmit = 0b100;
+    static CommandBufferUsageFlags RenderPassContinue = 0b010;
+    static CommandBufferUsageFlags SimultaneousUse = 0b001;
 };
 using CreateBufferFlags = std::bitset<5>;
 namespace CreateBufferFlagBits {
@@ -45,10 +45,10 @@ namespace CreateBufferFlagBits {
 }
 using CreateCommandPoolFlags = std::bitset<3>;
 namespace CreateCommandPoolFlagBits {
-static CreateCommandPoolFlags None      = 0b000;
-static CreateCommandPoolFlags Transient = 0b100;
-static CreateCommandPoolFlags Reset     = 0b010; //enables command buffers to be reset to their initial state
-static CreateCommandPoolFlags Protected = 0b001;
+    static CreateCommandPoolFlags None      = 0b000;
+    static CreateCommandPoolFlags Transient = 0b100;
+    static CreateCommandPoolFlags Reset     = 0b010; //enables command buffers to be reset to their initial state
+    static CreateCommandPoolFlags Protected = 0b001;
 }
 using ImageUsageFlags = std::bitset<8>;
 namespace ImageUsageFlagBits {
@@ -101,6 +101,21 @@ namespace PipelineStageFlagBits {
     //VK 1.3
     constexpr PipelineStageFlags None                         = 0b00000000000000000000000000000000;
 }
+using QueryPipelineStatisticFlags = std::bitset<11>;
+namespace QueryPipelineStatisticFlagBits {
+    static QueryPipelineStatisticFlags None = 0b00000000000;
+    static QueryPipelineStatisticFlags InputAssemblyVertices = 0b10000000000;
+    static QueryPipelineStatisticFlags InputAssemblyPrimitives = 0b01000000000;
+    static QueryPipelineStatisticFlags VertexShaderInvocations = 0b00100000000;
+    static QueryPipelineStatisticFlags GeometryShaderInvocations = 0b00010000000;
+    static QueryPipelineStatisticFlags GeometryShaderPrimitives = 0b00001000000;
+    static QueryPipelineStatisticFlags ClippingInvocations = 0b00000100000;
+    static QueryPipelineStatisticFlags ClippingPrimitives = 0b00000010000;
+    static QueryPipelineStatisticFlags FragmentShaderInvocations = 0b00000001000;
+    static QueryPipelineStatisticFlags TessellationControlShaderPatches = 0b00000000100;
+    static QueryPipelineStatisticFlags TessellationEvaluationShaderInvocations = 0b00000000010;
+    static QueryPipelineStatisticFlags ComputeShaderInvocations = 0b00000000001;
+}
 using QueueFlags = std::bitset<5>;
 namespace QueueFlagsBits {
     static QueueFlags None          = 0b00000;
@@ -109,6 +124,14 @@ namespace QueueFlagsBits {
     static QueueFlags Transfer      = 0b00100;
     static QueueFlags SparseBinding = 0b00010;
     static QueueFlags Protected     = 0b00001;// VK_VERSION_1_1
+}
+using QueryResultFlags = std::bitset<4>;
+namespace QueryResultFlagBits {
+    static QueryResultFlags None = 0b0000;
+    static QueryResultFlags Result64Bits = 0b1000; //result stored in 64 bits
+    static QueryResultFlags Wait = 0b0100; //wait for the query result to be available
+    static QueryResultFlags WithAvailability = 0b0010; //the availability status will accompany the results
+    static QueryResultFlags Partial = 0b0001; //specifies that partial result is acceptable
 }
 using ShaderStageFlags = std::bitset<6>;
 namespace ShaderStageFlagBits {

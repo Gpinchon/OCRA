@@ -302,6 +302,13 @@ enum class PrimitiveTopology {
     PatchList = 10,
     MaxValue
 };
+enum class QueryType {
+    Unknown = -1,
+    Occlusion,
+    PipelineStatistics,
+    TimeStamp,
+    MaxValue
+};
 enum class SampleCount {
     Count1 = 1,
     Count2 = 2,

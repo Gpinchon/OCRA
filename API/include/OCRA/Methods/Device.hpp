@@ -72,6 +72,10 @@ Pipeline::Layout::Handle CreatePipelineLayout(
     const CreatePipelineLayoutInfo& a_Info,
     const AllocationCallback* a_Allocator = nullptr);
 
+Handle CreateQueryPool(
+    const Device::Handle& a_Device,
+    const CreateQueryPoolInfo& a_Info);
+
 RenderPass::Handle CreateRenderPass(
     const Handle& a_Device,
     const CreateRenderPassInfo& a_Info);

@@ -359,6 +359,12 @@ struct QueueSubmitInfo
     std::vector<Semaphore::Handle> signalSemaphores;
 };
 
+struct CreateQueryPoolInfo {
+    QueryType                   type{ QueryType::Unknown };
+    uint32_t                    count{ 0 };
+    QueryPipelineStatisticFlags pipelineStatistics;
+};
+
 struct ShaderSpecializationMapEntry {
     uint32_t    constantID;
     uint32_t    offset;
