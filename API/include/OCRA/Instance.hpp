@@ -1,28 +1,19 @@
 #pragma once
 
-#include <OCRA/Handle.hpp>
-#include <OCRA/Common/Application.hpp>
-#include <OCRA/PhysicalDevice.hpp>
+#include <OCRA/Handles.hpp>
+#include <OCRA/Structs.hpp>
 
 #include <vector>
 
-OCRA_DECLARE_HANDLE(OCRA::Instance);
-
-namespace OCRA {
-struct AllocationCallback;
+namespace OCRA
+{
+Instance::Handle CreateInstance(
+    const CreateInstanceInfo& a_Info,
+    const AllocationCallback* a_Allocator = nullptr);
 }
 
 namespace OCRA::Instance
 {
-struct Info
-{
-    Application::Info applicationInfo;
-};
-
-Handle Create(
-    const Info& a_Info,
-    const AllocationCallback* a_Allocator = nullptr);
-
 /**
  * @brief Returns the type of Instance ("OpenGL", "DirectX" or "Vulkan")
  */

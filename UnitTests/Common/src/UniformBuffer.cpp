@@ -25,9 +25,9 @@ void UniformBuffer::Update() {
         Memory::MappedRange range;
         range.length = data.size();
         range.memory = memory;
-        auto ptr = Memory::Map(GetDevice(), range);
+        auto ptr = Memory::Map(range);
         std::memcpy(ptr, data.data(), data.size());
-        Memory::Unmap(GetDevice(), memory);
+        Memory::Unmap(memory);
         dirtyData = false;
     }
 }

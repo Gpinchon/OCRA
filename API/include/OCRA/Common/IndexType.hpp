@@ -10,13 +10,6 @@
 
 namespace OCRA
 {
-enum class IndexType {
-    None,
-    Uint8,
-    Uint16,
-    Uint32,
-    MaxValue
-};
 static inline auto GetIndexTypeSize(const IndexType& a_IndexType){
     switch (a_IndexType) {
     case IndexType::Uint8 :

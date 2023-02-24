@@ -6,31 +6,92 @@
 */
 #pragma once
 
-#include <OCRA/Handle.hpp>
-#include <OCRA/PhysicalDevice.hpp>
-#include <OCRA/Queue.hpp>
+#include <OCRA/Structs.hpp>
 
-#include <vector>
-#include <string>
-
-OCRA_DECLARE_HANDLE(OCRA::Device);
-
-namespace OCRA {
-struct AllocationCallback;
-}
-
-namespace OCRA::Device {
-struct Info {
-    std::vector<Queue::Info>    queueInfos;
-    PhysicalDevice::Features    enabledFeatures;
-};
+namespace OCRA::Device
+{
 /**
-* @brief creates a logical device that'll use the specified physical device
+* @brief Creates an empty buffer, unuseable without binding Memory to it
 */
-Handle Create(
-    const PhysicalDevice::Handle& a_PhysicalDevice,
-    const Info& a_Info,
+Buffer::Handle CreateBuffer(
+    const Handle& a_Device,
+    const CreateBufferInfo& a_Info,
     const AllocationCallback* a_Allocator = nullptr);
+
+Command::Pool::Handle CreateCommandPool(
+    const Device::Handle& a_Device,
+    const CreateCommandPoolInfo& a_Info,
+    const AllocationCallback* a_Allocator = nullptr);
+
+/**
+* Creates a descriptor pool with specified size
+* Pools will always enable for modification after binding and freeing sets
+* In Vulkan, pools will always have the flags FREE_DESCRIPTOR_SET and UPDATE_AFTER_BIND
+*/
+Handle CreateDescriptorPool(
+    const Device::Handle& a_Device,
+    const CreateDescriptorPoolInfo& a_Info,
+    const AllocationCallback* a_Allocator = nullptr);
+
+Handle CreateDescriptorSetLayout(
+    const Device::Handle& a_Device,
+    const CreateDescriptorSetLayoutInfo& a_Info,
+    const AllocationCallback* a_Allocator = nullptr);
+
+/**
+* @brief Creates a Fence with the specified default status (optional)
+*/
+Fence::Handle CreateFence(
+    const Handle& a_Device,
+    const FenceStatus& a_DefaultStatus = FenceStatus::Unsignaled,
+    const AllocationCallback* a_Allocator = nullptr);
+
+/**
+ * Creates a framebuffer with the specified attachments.
+ * In case of no attachments, an empty FB with size CreateFrameBufferInfo::extent will be created.
+ */
+FrameBuffer::Handle CreateFrameBuffer(
+    const Handle& a_Device,
+    const CreateFrameBufferInfo& a_Info,
+    const AllocationCallback* a_Allocator = nullptr);
+
+Image::Handle CreateImage(
+    const Device::Handle& a_Device,
+    const CreateImageInfo& a_Info);
+
+Image::View::Handle CreateImageView(
+    const Device::Handle& a_Device,
+    const CreateImageViewInfo& a_Info);
+
+Pipeline::Handle CreatePipelineGraphics(
+    const Device::Handle& a_Device,
+    const CreatePipelineGraphicsInfo& a_Info);
+
+Pipeline::Layout::Handle CreatePipelineLayout(
+    const Device::Handle& a_Device,
+    const CreatePipelineLayoutInfo& a_Info,
+    const AllocationCallback* a_Allocator = nullptr);
+
+RenderPass::Handle CreateRenderPass(
+    const Handle& a_Device,
+    const CreateRenderPassInfo& a_Info);
+
+Image::Sampler::Handle CreateSampler(
+    const Device::Handle& a_Device,
+    const CreateSamplerInfo& a_Info);
+
+Semaphore::Handle CreateSemaphore(
+    const Device::Handle& a_Device,
+    const CreateSemaphoreInfo& a_Info,
+    const AllocationCallback* a_Allocator = nullptr);
+
+Shader::Module::Handle CreateShaderModule(
+    const Device::Handle& a_Device,
+    const CreateShaderModuleInfo& a_Info);
+
+Shader::Stage::Handle CreateShaderStage(
+    const Device::Handle& a_Device,
+    const CreateShaderStageInfo& a_Info);
 
 /**
 * @brief on OpenGL, there is only one queue
@@ -41,6 +102,13 @@ Queue::Handle GetQueue(
     const Handle& a_Device,
     uint32_t a_FamilyIndex,
     uint32_t a_QueueIndex);
+
+/**
+* @brief Allocates a buffer on device's memory
+*/
+Memory::Handle AllocateMemory(
+    const Handle& a_Device,
+    const AllocateMemoryInfo& a_Info);
 /**
 * Wait for the device to finish commands execution
 * In OGL, this will push an empty synchronized command

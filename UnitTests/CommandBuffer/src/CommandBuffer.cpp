@@ -1,13 +1,4 @@
-#include <OCRA/Instance.hpp>
-#include <OCRA/PhysicalDevice.hpp>
-#include <OCRA/Device.hpp>
-#include <OCRA/Queue.hpp>
-#include <OCRA/Queue/Fence.hpp>
-#include <OCRA/Semaphore.hpp>
-#include <OCRA/Command/Pool.hpp>
-#include <OCRA/Command/Buffer.hpp>
-#include <OCRA/Memory.hpp>
-#include <OCRA/Buffer.hpp>
+#include <OCRA/OCRA.hpp>
 
 #include <Common.hpp>
 
@@ -38,14 +29,14 @@ static inline void SubmitCommandBuffer(const Device::Handle& a_Device, const Que
     //make sure GPU is done
     {
         VerboseTimer bufferCopiesTimer("Buffer Copies");
-        Fence::WaitFor(a_Device, fence, std::chrono::nanoseconds(15000000));
+        Fence::WaitFor(fence, std::chrono::nanoseconds(15000000));
     }
     //test for function time itself
     {
         auto timer = Timer();
         int waitNbr = 100000;
         for (auto i = 0; i < waitNbr; ++i)
-            Fence::WaitFor(a_Device, fence, std::chrono::nanoseconds(15000000));
+            Fence::WaitFor(fence, std::chrono::nanoseconds(15000000));
         std::cout << "Already signaled Fence mean wait time : " << timer.Elapsed().count() / double(waitNbr) << " nanoseconds\n";
     }
     std::cout << "===========================================\n";
@@ -108,11 +99,11 @@ int main()
     const auto instance = CreateInstance("Test_CommandBuffer");
     const auto physicalDevice = Instance::EnumeratePhysicalDevices(instance).front();
     const auto device = CreateDevice(physicalDevice);
-    const auto queueFamily = FindQueueFamily(physicalDevice, PhysicalDevice::QueueFlagsBits::Transfer);
+    const auto queueFamily = PhysicalDevice::FindQueueFamily(physicalDevice, Queue::FlagsBits::Transfer);
     const auto queue = Device::GetQueue(device, queueFamily, 0); //Get first available queue
-    const auto memory = AllocateMemory(physicalDevice, device, CHUNK_SIZE * 3, PhysicalDevice::MemoryPropertyFlagBits::HostVisible | PhysicalDevice::MemoryPropertyFlagBits::HostCached);
+    const auto memory = AllocateMemory(physicalDevice, device, CHUNK_SIZE * 3, Memory::PropertyFlagBits::HostVisible | Memory::PropertyFlagBits::HostCached);
     const auto commandPool = CreateCommandPool(device, queueFamily);
-    const auto commandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Primary);
+    const auto commandBuffer = CreateCommandBuffer(commandPool, Command::Pool::AllocateInfo::Level::Primary);
 
     //create test buffers
     Buffer::Info bufferInfo;
@@ -121,18 +112,18 @@ int main()
     const auto buffer0 = Buffer::Create(device, bufferInfo);
     const auto buffer1 = Buffer::Create(device, bufferInfo);
     const auto bufferT = Buffer::Create(device, bufferInfo);
-    Buffer::BindMemory(device, buffer0, memory, CHUNK_SIZE * 0);
-    Buffer::BindMemory(device, buffer1, memory, CHUNK_SIZE * 1);
-    Buffer::BindMemory(device, bufferT, memory, CHUNK_SIZE * 2);
+    Buffer::BindMemory(buffer0, memory, CHUNK_SIZE * 0);
+    Buffer::BindMemory(buffer1, memory, CHUNK_SIZE * 1);
+    Buffer::BindMemory(bufferT, memory, CHUNK_SIZE * 2);
     //write some value to the buffer0
     {
         Memory::MappedRange mappedRange;
         mappedRange.memory = memory;
         mappedRange.offset = CHUNK_SIZE * 0;
         mappedRange.length = CHUNK_SIZE;
-        auto bufferPtr = Memory::Map(device, mappedRange);
+        auto bufferPtr = Memory::Map(mappedRange);
         memcpy(bufferPtr, SENTENCE0.c_str(), SENTENCE0.size());
-        Memory::Unmap(device, memory);
+        Memory::Unmap(memory);
     }
     //write some value to the buffer1
     {
@@ -140,9 +131,9 @@ int main()
         mappedRange.memory = memory;
         mappedRange.offset = CHUNK_SIZE * 1;
         mappedRange.length = CHUNK_SIZE;
-        auto bufferPtr = Memory::Map(device, mappedRange);
+        auto bufferPtr = Memory::Map(mappedRange);
         memcpy(bufferPtr, SENTENCE1.c_str(), SENTENCE1.size());
-        Memory::Unmap(device, memory);
+        Memory::Unmap(memory);
     }
     RecordSwapCommandBuffer(commandBuffer, buffer0, buffer1, bufferT);
     SubmitCommandBuffer(device, queue, commandBuffer);
@@ -159,20 +150,20 @@ int main()
         mappedRange.memory = memory;
         mappedRange.offset = CHUNK_SIZE * 0;
         mappedRange.length = CHUNK_SIZE;
-        std::string buffer0String = (char*)Memory::Map(device, mappedRange);
+        std::string buffer0String = (char*)Memory::Map(mappedRange);
         success += buffer0String == SENTENCE1 ? 0 : 1;
         std::cout << "  Buffer 0 value : " << buffer0String << "\n";
-        Memory::Unmap(device, memory);
+        Memory::Unmap(memory);
     }
     {
         Memory::MappedRange mappedRange;
         mappedRange.memory = memory;
         mappedRange.offset = CHUNK_SIZE * 1;
         mappedRange.length = CHUNK_SIZE;
-        std::string buffer1String = (char*)Memory::Map(device, mappedRange);
+        std::string buffer1String = (char*)Memory::Map(mappedRange);
         success += buffer1String == SENTENCE0 ? 0 : 1;
         std::cout << "  Buffer 1 value : " << buffer1String << "\n";
-        Memory::Unmap(device, memory);
+        Memory::Unmap(memory);
     }
     std::cout << "    " << (success == 0 ? "***** Great success ! *****" : "XXXXX Failure will not be tolerated. XXXXX") << "\n";
     std::cout << "===========================================\n";

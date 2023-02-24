@@ -80,7 +80,7 @@ public:
 
 private:
     Memory::Handle AllocateMemory(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device);
-    void FillMemory(const Device::Handle& a_Device, const void* a_Data);
+    void FillMemory(const void* a_Data);
     Buffer::Handle CreateBuffer(const Device::Handle& a_Device);
     const size_t offset{ 0 };
     const size_t size{ 0 };

@@ -84,9 +84,9 @@ void SubmitCommandBuffer(
     const Semaphore::Handle& a_WaitSemaphore = nullptr,
     const Semaphore::Handle& a_SignalSemaphore = nullptr);
 //Returns the index of a memory type with specified properties
-uint32_t FindProperMemoryType(const PhysicalDevice::Handle& a_PhysicalDevice, const PhysicalDevice::MemoryPropertyFlags& a_MemoryProperties);
+uint32_t FindProperMemoryType(const PhysicalDevice::Handle& a_PhysicalDevice, const Memory::PropertyFlags& a_MemoryProperties);
 //allocate GPU memory with the specified properties
-Memory::Handle AllocateMemory(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const uint64_t& a_Size, const PhysicalDevice::MemoryPropertyFlags& a_MemoryProperties);
+Memory::Handle AllocateMemory(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const uint64_t& a_Size, const Memory::PropertyFlags& a_MemoryProperties);
 //creates a Descriptor Pool with the specified max sets
 Descriptor::Pool::Handle CreateDescriptorPool(const Device::Handle& a_Device, const size_t& a_MaxSets);
 

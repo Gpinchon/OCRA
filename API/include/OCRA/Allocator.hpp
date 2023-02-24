@@ -35,7 +35,7 @@ template<typename T, AllocationScope Scope>
 struct Allocator {
     typedef size_t size_type;
     typedef T value_type;
-    typedef T* pointer ;
+    typedef T* pointer;
     inline Allocator(const AllocationCallback& a_AllocationCallback) : cb(a_AllocationCallback) {}
     inline pointer allocate(size_type a_Count) {
         return reinterpret_cast<pointer>(cb.allocationFunc(cb.userData, sizeof(value_type) * a_Count, alignof(value_type), Scope));

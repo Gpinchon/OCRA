@@ -10,17 +10,17 @@ Memory::Handle VertexBuffer::AllocateMemory(const PhysicalDevice::Handle& a_Phys
     return OCRA::AllocateMemory(
         a_PhysicalDevice, a_Device,
         GetSize(),
-        PhysicalDevice::MemoryPropertyFlagBits::HostVisible);
+        Memory::PropertyFlagBits::HostVisible);
 }
-void VertexBuffer::FillMemory(const Device::Handle& a_Device, const void* a_Data)
+void VertexBuffer::FillMemory(const void* a_Data)
 {
     Memory::MappedRange range;
     range.memory = memory;
     range.length = GetSize();
     range.offset = GetOffset();
-    auto bufferPtr = Memory::Map(a_Device, range);
+    auto bufferPtr = Memory::Map(range);
     std::memcpy(bufferPtr, a_Data, GetSize());
-    Memory::Unmap(a_Device, memory);
+    Memory::Unmap(memory);
 }
 Buffer::Handle VertexBuffer::CreateBuffer(const Device::Handle& a_Device)
 {
@@ -28,7 +28,7 @@ Buffer::Handle VertexBuffer::CreateBuffer(const Device::Handle& a_Device)
     info.size = GetSize();
     info.usage = Buffer::UsageFlagBits::VertexBuffer;
     auto buffer = Buffer::Create(a_Device, info);
-    Buffer::BindMemory(a_Device, buffer, memory, GetOffset());
+    Buffer::BindMemory(buffer, memory, GetOffset());
     return buffer;
 }
 }

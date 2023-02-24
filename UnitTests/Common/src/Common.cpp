@@ -60,11 +60,11 @@ void PrintQueueInfos(const PhysicalDevice::Handle& a_PhysicalDevice)
         std::cout << "  Index         : " << familyIndex << "\n";
         std::cout << "  Count         : " << queueFamily.queueCount << "\n";
         std::cout << " == Capabilities ==\n";
-        std::cout << "  Graphics      : " << ((queueFamily.queueFlags & PhysicalDevice::QueueFlagsBits::Graphics) != 0) << "\n";
-        std::cout << "  Compute       : " << ((queueFamily.queueFlags & PhysicalDevice::QueueFlagsBits::Compute) != 0) << "\n";
-        std::cout << "  Protected     : " << ((queueFamily.queueFlags & PhysicalDevice::QueueFlagsBits::Protected) != 0) << "\n";
-        std::cout << "  SparseBinding : " << ((queueFamily.queueFlags & PhysicalDevice::QueueFlagsBits::SparseBinding) != 0) << "\n";
-        std::cout << "  Transfer      : " << ((queueFamily.queueFlags & PhysicalDevice::QueueFlagsBits::Transfer) != 0) << "\n";
+        std::cout << "  Graphics      : " << ((queueFamily.queueFlags & Queue::FlagsBits::Graphics) != 0) << "\n";
+        std::cout << "  Compute       : " << ((queueFamily.queueFlags & Queue::FlagsBits::Compute) != 0) << "\n";
+        std::cout << "  Protected     : " << ((queueFamily.queueFlags & Queue::FlagsBits::Protected) != 0) << "\n";
+        std::cout << "  SparseBinding : " << ((queueFamily.queueFlags & Queue::FlagsBits::SparseBinding) != 0) << "\n";
+        std::cout << "  Transfer      : " << ((queueFamily.queueFlags & Queue::FlagsBits::Transfer) != 0) << "\n";
         std::cout << " ==================\n";
         ++familyIndex;
     }
@@ -74,7 +74,7 @@ void PrintQueueInfos(const PhysicalDevice::Handle& a_PhysicalDevice)
 
 Device::Handle CreateDevice(const PhysicalDevice::Handle& a_PhysicalDevice)
 {
-    Device::Info deviceInfo;
+    Device::CreateInfo deviceInfo;
     deviceInfo.queueInfos = GetQueueInfos(a_PhysicalDevice);
     return Device::Create(a_PhysicalDevice, deviceInfo);
 }
@@ -118,7 +118,7 @@ void OCRA::SubmitCommandBuffer(
     Queue::Submit(a_Queue, { submitInfo });
 }
 
-uint32_t FindProperMemoryType(const PhysicalDevice::Handle& a_PhysicalDevice, const PhysicalDevice::MemoryPropertyFlags& a_MemoryProperties)
+uint32_t FindProperMemoryType(const PhysicalDevice::Handle& a_PhysicalDevice, const Memory::PropertyFlags& a_MemoryProperties)
 {
     auto& memoryProperties = PhysicalDevice::GetMemoryProperties(a_PhysicalDevice);
     for (auto memoryTypeIndex = 0u; memoryTypeIndex < memoryProperties.memoryTypes.size(); ++memoryTypeIndex) {
@@ -134,17 +134,17 @@ uint32_t FindProperMemoryType(const PhysicalDevice::Handle& a_PhysicalDevice, co
     return (std::numeric_limits<uint32_t>::max)();
 }
 
-Memory::Handle AllocateMemory(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const uint64_t& a_Size, const PhysicalDevice::MemoryPropertyFlags& a_MemoryProperties)
+Memory::Handle AllocateMemory(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const uint64_t& a_Size, const Memory::PropertyFlags& a_MemoryProperties)
 {
-    Memory::Info memoryInfo;
+    Memory::AllocateInfo memoryInfo;
     memoryInfo.memoryTypeIndex = FindProperMemoryType(a_PhysicalDevice, a_MemoryProperties);
     memoryInfo.size = a_Size;
-    return Memory::Allocate(a_Device, memoryInfo);
+    return  Device::AllocateMemory(a_Device, memoryInfo);
 }
 
 Descriptor::Pool::Handle CreateDescriptorPool(const Device::Handle& a_Device, const size_t& a_MaxSets)
 {
-    Descriptor::Pool::Info poolInfo{};
+    Descriptor::Pool::CreateInfo poolInfo{};
     poolInfo.maxSets = a_MaxSets;
     poolInfo.sizes = {};
     return Descriptor::Pool::Create(a_Device, poolInfo);

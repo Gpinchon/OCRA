@@ -6,35 +6,14 @@
 */
 #pragma once
 
-#include <OCRA/Handle.hpp>
-#include <OCRA/Pipeline/StageFlags.hpp>
+#include <OCRA/Handles.hpp>
 
 #include <vector>
 #include <chrono>
 
-namespace OCRA {
-struct AllocationCallback;
-}
-
-OCRA_DECLARE_HANDLE(OCRA::Device);
-OCRA_DECLARE_HANDLE(OCRA::Semaphore);
-
 namespace OCRA::Semaphore {
 //Use this to ignore timeout and wait indefinitely
 static constexpr auto IgnoreTimeout = (std::chrono::nanoseconds::max)();
-enum class Type {
-    Unknown = -1, Binary, Timeline
-};
-struct Info {
-    Type type{ Type::Unknown };
-    uint64_t initialValue;
-};
-
-Handle Create(
-    const Device::Handle& a_Device,
-    const Info& a_Info,
-    const AllocationCallback* a_Allocator = nullptr);
-
 void Signal(
     const Handle& a_Semaphore,
     const uint64_t& a_Value);

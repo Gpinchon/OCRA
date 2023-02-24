@@ -14,73 +14,36 @@ add_compile_definitions(OCRA_API_IMPL=${OCRA_API_IMPL})
 set(OCRA_API_HEADER_LIST
   OCRA/Allocator.hpp
   OCRA/Buffer.hpp
+  OCRA/CommandBuffer.hpp
+  OCRA/CommandPool.hpp
+  OCRA/Commands.hpp
   OCRA/Device.hpp
+  OCRA/Enums.hpp
+  OCRA/Extent.hpp
   OCRA/Fence.hpp
-  OCRA/FrameBuffer.hpp
+  OCRA/Flags.hpp
   OCRA/Handle.hpp
+  OCRA/Handles.hpp
+  OCRA/Image.hpp
   OCRA/Instance.hpp
   OCRA/Memory.hpp
   OCRA/PhysicalDevice.hpp
   OCRA/QueryPool.hpp
   OCRA/Queue.hpp
-  OCRA/RenderPass.hpp
   OCRA/Semaphore.hpp
-  OCRA/Common/Blend.hpp
-  OCRA/Common/Compare.hpp
-  OCRA/Common/Extent.hpp
-  OCRA/Common/Extent2D.hpp
-  OCRA/Common/Extent3D.hpp
+  OCRA/Structs.hpp
+  OCRA/Vec.hpp
+  OCRA/Vec_Boolean.hpp
+  OCRA/Vec_Functor.hpp
+  OCRA/Vec_Interpolation.hpp
+  OCRA/Vec_Math.hpp
   OCRA/Common/IndexType.hpp
-  OCRA/Common/Logic.hpp
-  OCRA/Common/Offset3D.hpp
-  OCRA/Common/Rect2D.hpp
-  OCRA/Common/Rect3D.hpp
-  OCRA/Common/ScissorTest.hpp
-  OCRA/Common/SharingMode.hpp
-  OCRA/Common/Stencil.hpp
   OCRA/Common/Timer.hpp
-  OCRA/Common/Vec.hpp
-  OCRA/Common/Vec2.hpp
-  OCRA/Common/Vec3.hpp
-  OCRA/Common/Vec4.hpp
-  OCRA/Common/Vec_Boolean.hpp
-  OCRA/Common/Vec_Functor.hpp
-  OCRA/Common/Vec_Interpolation.hpp
-  OCRA/Common/Vec_Math.hpp
-  OCRA/Common/VertexType.hpp
-  OCRA/Command/Buffer.hpp
-  OCRA/Command/Draw.hpp
+  
   OCRA/Command/MemoryBarrier.hpp
-  OCRA/Command/Pool.hpp
-  OCRA/Command/Query.hpp
-  OCRA/Command/Scissor.hpp
-  OCRA/Command/ViewPort.hpp
-  OCRA/Descriptor/Set.hpp
-  OCRA/Descriptor/SetLayout.hpp
   OCRA/Descriptor/Pool.hpp
-  OCRA/Descriptor/Type.hpp
-  OCRA/Image/Descriptor.hpp
-  OCRA/Image/Filter.hpp
-  OCRA/Image/Format.hpp
-  OCRA/Image/Image.hpp
-  OCRA/Image/Sampler.hpp
-  OCRA/Image/Usage.hpp
-  OCRA/Image/View.hpp
-  OCRA/Pipeline/ColorBlendState.hpp
-  OCRA/Pipeline/DepthStencilState.hpp
-  OCRA/Pipeline/Graphics.hpp
-  OCRA/Pipeline/InputAssemblyState.hpp
-  OCRA/Pipeline/Layout.hpp
-  OCRA/Pipeline/MultisampleState.hpp
-  OCRA/Pipeline/Pipeline.hpp
-  OCRA/Pipeline/RasterizationState.hpp
-  OCRA/Pipeline/ShaderPipelineState.hpp
-  OCRA/Pipeline/TessellationState.hpp
-  OCRA/Pipeline/VertexInputState.hpp
-  OCRA/Pipeline/ViewPortState.hpp
-  OCRA/Primitive/Topology.hpp
-  OCRA/Shader/Module.hpp
-  OCRA/Shader/Stage.hpp
+  OCRA/Descriptor/Set.hpp
+  
 )
 
 set(INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/include)
@@ -100,7 +63,7 @@ endforeach()
 
 list(TRANSFORM OCRA_API_HEADER_LIST PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/include/" OUTPUT_VARIABLE OCRA_API_HEADER_FILES)
 
-add_library(OCRA-API-Interface INTERFACE ${OCRA_API_HEADER_FILES})
+add_library(OCRA-API-Interface INTERFACE ${OCRA_API_HEADER_FILES} ${HEADER_PATH})
 add_library(OCRA::API::Interface ALIAS OCRA-API-Interface)
 set_target_properties(OCRA-API-Interface PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories(OCRA-API-Interface INTERFACE
