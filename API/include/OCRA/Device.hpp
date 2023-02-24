@@ -28,12 +28,12 @@ Command::Pool::Handle CreateCommandPool(
 * Pools will always enable for modification after binding and freeing sets
 * In Vulkan, pools will always have the flags FREE_DESCRIPTOR_SET and UPDATE_AFTER_BIND
 */
-Handle CreateDescriptorPool(
+Descriptor::Pool::Handle CreateDescriptorPool(
     const Device::Handle& a_Device,
     const CreateDescriptorPoolInfo& a_Info,
     const AllocationCallback* a_Allocator = nullptr);
 
-Handle CreateDescriptorSetLayout(
+Descriptor::SetLayout::Handle CreateDescriptorSetLayout(
     const Device::Handle& a_Device,
     const CreateDescriptorSetLayoutInfo& a_Info,
     const AllocationCallback* a_Allocator = nullptr);

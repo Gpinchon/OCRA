@@ -10,11 +10,11 @@ Memory::Handle VertexBuffer::AllocateMemory(const PhysicalDevice::Handle& a_Phys
     return OCRA::AllocateMemory(
         a_PhysicalDevice, a_Device,
         GetSize(),
-        Memory::PropertyFlagBits::HostVisible);
+        MemoryPropertyFlagBits::HostVisible);
 }
 void VertexBuffer::FillMemory(const void* a_Data)
 {
-    Memory::MappedRange range;
+    MemoryMappedRange range;
     range.memory = memory;
     range.length = GetSize();
     range.offset = GetOffset();
@@ -24,10 +24,10 @@ void VertexBuffer::FillMemory(const void* a_Data)
 }
 Buffer::Handle VertexBuffer::CreateBuffer(const Device::Handle& a_Device)
 {
-    Buffer::Info info;
+    CreateBufferInfo info;
     info.size = GetSize();
-    info.usage = Buffer::UsageFlagBits::VertexBuffer;
-    auto buffer = Buffer::Create(a_Device, info);
+    info.usage = BufferUsageFlagBits::VertexBuffer;
+    auto buffer = Device::CreateBuffer(a_Device, info);
     Buffer::BindMemory(buffer, memory, GetOffset());
     return buffer;
 }

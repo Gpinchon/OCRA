@@ -3,9 +3,7 @@
 #include <Texture.hpp>
 #include <Uniform.hpp>
 
-#include <OCRA/Handle.hpp>
-
-OCRA_DECLARE_HANDLE(OCRA::Device);
+#include <OCRA/OCRA.hpp>
 
 namespace OCRA {
 class UniformTexture : public Uniform {
@@ -23,7 +21,7 @@ public:
     auto& GetTexture() const { return texture; }
     virtual void Update() override;
 private:
-    static Descriptor::SetLayout::Binding CreateSetLayoutBinding(const uint32_t a_Binding);
+    static DescriptorSetLayoutBinding CreateSetLayoutBinding(const uint32_t a_Binding);
     bool    dirty{ true };
     Texture texture{};
 };

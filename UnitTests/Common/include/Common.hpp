@@ -15,14 +15,6 @@
 #include <numeric>
 #include <algorithm>
 
-OCRA_DECLARE_HANDLE(OCRA::Instance);
-OCRA_DECLARE_HANDLE(OCRA::PhysicalDevice);
-OCRA_DECLARE_HANDLE(OCRA::Device);
-OCRA_DECLARE_HANDLE(OCRA::Memory);
-OCRA_DECLARE_HANDLE(OCRA::Command::Pool);
-OCRA_DECLARE_HANDLE(OCRA::Command::Buffer);
-OCRA_DECLARE_HANDLE(OCRA::Descriptor::Pool);
-
 namespace OCRA::PhysicalDevice
 {
 using QueueFlags = std::bitset<5>;
@@ -68,7 +60,7 @@ Instance::Handle CreateInstance(const std::string& a_Name);
 //Create a device with all available queues
 Device::Handle CreateDevice(const PhysicalDevice::Handle& a_PhysicalDevice);
 //Get queues from Physical Device
-std::vector<Queue::Info> GetQueueInfos(const PhysicalDevice::Handle& a_PhysicalDevice);
+std::vector<QueueInfo> GetQueueInfos(const PhysicalDevice::Handle& a_PhysicalDevice);
 //Prints queues informations to the console
 void PrintQueueInfos(const PhysicalDevice::Handle& a_PhysicalDevice);
 //Find suitable queue for the specified flags
@@ -76,7 +68,7 @@ uint32_t FindQueueFamily(const PhysicalDevice::Handle& a_PhysicalDevice, const P
 //Create a command pool from the queuefamily
 Command::Pool::Handle CreateCommandPool(const Device::Handle& a_Device, const uint32_t& a_QueueFamily);
 //Creates a command buffer from the specified command pool
-Command::Buffer::Handle CreateCommandBuffer(const Command::Pool::Handle& a_CommandPool, const Command::Pool::AllocateInfo::Level& a_Level);
+Command::Buffer::Handle CreateCommandBuffer(const Command::Pool::Handle& a_CommandPool, const CommandBufferLevel& a_Level);
 //Submits a Command Buffer to the specified Queue
 void SubmitCommandBuffer(
     const Queue::Handle& a_Queue,
@@ -84,9 +76,9 @@ void SubmitCommandBuffer(
     const Semaphore::Handle& a_WaitSemaphore = nullptr,
     const Semaphore::Handle& a_SignalSemaphore = nullptr);
 //Returns the index of a memory type with specified properties
-uint32_t FindProperMemoryType(const PhysicalDevice::Handle& a_PhysicalDevice, const Memory::PropertyFlags& a_MemoryProperties);
+uint32_t FindProperMemoryType(const PhysicalDevice::Handle& a_PhysicalDevice, const MemoryPropertyFlags& a_MemoryProperties);
 //allocate GPU memory with the specified properties
-Memory::Handle AllocateMemory(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const uint64_t& a_Size, const Memory::PropertyFlags& a_MemoryProperties);
+Memory::Handle AllocateMemory(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const uint64_t& a_Size, const MemoryPropertyFlags& a_MemoryProperties);
 //creates a Descriptor Pool with the specified max sets
 Descriptor::Pool::Handle CreateDescriptorPool(const Device::Handle& a_Device, const size_t& a_MaxSets);
 

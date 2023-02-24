@@ -1,14 +1,9 @@
 #pragma once
 
-#include <OCRA/Handle.hpp>
-#include <OCRA/Pipeline/StageFlags.hpp>
+#include <OCRA/Structs.hpp>
 
 #include <vector>
 #include <bitset>
-
-OCRA_DECLARE_HANDLE(OCRA::Command::Buffer);
-OCRA_DECLARE_HANDLE(OCRA::Buffer);
-OCRA_DECLARE_HANDLE(OCRA::Image);
 
 namespace OCRA::Command {
 using DependencyFlags = std::bitset<3>;
@@ -58,8 +53,8 @@ struct ImageMemoryBarrier : MemoryBarrier {
 };
 void PipelineBarrier(
     const Buffer::Handle& a_CommandBuffer,
-    const Pipeline::StageFlags& srcStageMask,
-    const Pipeline::StageFlags& dstStageMask,
+    const PipelineStageFlags& srcStageMask,
+    const PipelineStageFlags& dstStageMask,
     const DependencyFlags& dependencyFlags,
     const std::vector<MemoryBarrier>&       a_MemoryBarriers,
     const std::vector<BufferMemoryBarrier>& a_BufferMemoryBarriers,

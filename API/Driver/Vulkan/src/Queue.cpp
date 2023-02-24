@@ -1,15 +1,15 @@
-#include <OCRA/Queue.hpp>
-
 #include <VK/Queue.hpp>
 #include <VK/Fence.hpp>
 #include <VK/CommandBuffer.hpp>
 #include <VK/Semaphore.hpp>
 
+#include <OCRA/Structs.hpp>
+
 namespace OCRA::Queue
 {
 void Submit(
     const Handle& a_Queue,
-    const std::vector<SubmitInfo>& a_SubmitInfos,
+    const std::vector<QueueSubmitInfo>& a_SubmitInfos,
     const Fence::Handle& a_Fence)
 {
     std::vector<VkSubmitInfo> submitInfos;

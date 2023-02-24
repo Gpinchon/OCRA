@@ -3,12 +3,12 @@
 #include <VK/Instance.hpp>
 #include <VK/PhysicalDevice.hpp>
 
-#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan.h>
 
-namespace OCRA::Instance
+namespace OCRA
 {
-Handle Create(
-    const Info& a_Info,
+Instance::Handle CreateInstance(
+    const CreateInstanceInfo& a_Info,
     const AllocationCallback* a_Allocator)
 {
     VkInstance instance = nullptr;
@@ -20,9 +20,12 @@ Handle Create(
     appInfo.pEngineName = a_Info.applicationInfo.engineName.c_str();
     info.pApplicationInfo = &appInfo;
     vkCreateInstance(&info, nullptr, &instance);
-    return std::make_shared<Impl>(instance);
+    return std::make_shared<Instance::Impl>(instance);
+}
 }
 
+namespace OCRA::Instance
+{
 const std::string GetType(const Handle& a_Instance)
 {
     return "Vulkan";

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan.h>
 
 namespace OCRA::Semaphore
 {
@@ -13,7 +13,7 @@ struct Impl
     ~Impl() {
         vkDestroySemaphore(device, semaphore, nullptr);
     }
-    operator auto&() const {
+    operator auto& () const {
         return semaphore;
     }
     const VkDevice    device;

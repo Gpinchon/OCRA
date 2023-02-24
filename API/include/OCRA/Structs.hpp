@@ -289,10 +289,7 @@ struct VertexAttributeDescription {
 struct VertexBindingDescription {
     uint32_t binding{ 0 }; //index inside the BindVertexBuffers Command
     uint32_t stride{ 0 }; //byte stride
-    enum class InputRate {
-        Vertex, //use vertex attribute
-        Instance //use instance index
-    } inputRate{ InputRate::Vertex }; //is the data divided by vertex or by instance ?
+    VertexInputRate inputRate{ VertexInputRate::Vertex }; //is the data divided by vertex or by instance ?
 };
 struct VertexInputState {
     uint32_t primitiveRestartIndex{ 0 };

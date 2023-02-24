@@ -1,22 +1,27 @@
 #include <VK/Device.hpp>
 #include <VK/Fence.hpp>
 
-#include <OCRA/Fence.hpp>
+#include <OCRA/Structs.hpp>
 
-namespace OCRA::Fence
+#include <chrono>
+
+namespace OCRA::Device
 {
-Handle Create(
+Fence::Handle CreateFence(
     const Device::Handle& a_Device,
-    const Status& a_DefaultStatus,
+    const FenceStatus& a_DefaultStatus,
     const AllocationCallback* a_Allocator)
 {
     VkFence fence{};
     VkFenceCreateInfo info{ VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };
-    info.flags = a_DefaultStatus == Status::Signaled ? VK_FENCE_CREATE_SIGNALED_BIT : 0;
+    info.flags = a_DefaultStatus == FenceStatus::Signaled ? VK_FENCE_CREATE_SIGNALED_BIT : 0;
     vkCreateFence(*a_Device, &info, nullptr, &fence);
-    return std::make_shared<Impl>(*a_Device, fence);
+    return std::make_shared<Fence::Impl>(*a_Device, fence);
+}
 }
 
+namespace OCRA::Fence
+{
 bool WaitFor(
     const std::vector<Handle>& a_Fences,
     bool a_WaitAll,
@@ -48,10 +53,10 @@ void Reset(const std::vector<Handle>& a_Fences)
     vkResetFences(device, vkFences.size(), vkFences.data());
 }
 
-Status GetStatus(const Handle& a_Fence)
+FenceStatus GetStatus(const Handle& a_Fence)
 {
     const auto& fence = *a_Fence;
-    return vkGetFenceStatus(fence.device, fence) == VK_SUCCESS ? Status::Signaled : Status::Unsignaled;
+    return vkGetFenceStatus(fence.device, fence) == VK_SUCCESS ? FenceStatus::Signaled : FenceStatus::Unsignaled;
 }
 
 }

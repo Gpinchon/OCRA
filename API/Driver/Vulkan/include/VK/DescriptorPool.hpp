@@ -4,22 +4,22 @@
 
 #include <memory_resource>
 
-namespace OCRA::Command::Pool
+namespace OCRA::Descriptor::Pool
 {
 struct Impl
 {
-    Impl(const VkDevice& a_Device, const VkCommandPool& a_Pool)
+    Impl(const VkDevice& a_Device, const VkDescriptorPool& a_Pool)
         : device(a_Device)
         , pool(a_Pool)
     {}
     ~Impl() {
-        vkDestroyCommandPool(device, pool, nullptr);
+        vkDestroyDescriptorPool(device, pool, nullptr);
     }
     operator auto& () const {
         return pool;
     }
-    const VkDevice      device;
-    const VkCommandPool pool;
+    const VkDevice         device;
+    const VkDescriptorPool pool;
     std::pmr::unsynchronized_pool_resource memoryResource;
 };
 }

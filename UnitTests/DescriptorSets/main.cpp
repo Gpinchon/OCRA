@@ -18,14 +18,14 @@ void DescriptorTest(const PhysicalDevice::Handle& a_PhysicalDevice, const Device
     double ReCreatingTimer = 0;
     double UpdatingTimer = 0;
 
-    Descriptor::Pool::Info poolInfo;
+    Descriptor::Pool::CreateInfo poolInfo;
     poolInfo.maxSets = DESCRIPTOR_COUNT;
     poolInfo.sizes.push_back({ Descriptor::Type::UniformBuffer, DESCRIPTOR_COUNT });
     auto descriptorPool = Descriptor::Pool::Create(a_Device, poolInfo);
     Descriptor::SetLayout::Info layoutInfo;
     layoutInfo.bindings.push_back({ 0, Descriptor::Type::UniformBuffer, 1 });
     auto descriptorLayout = Descriptor::SetLayout::Create(a_Device, layoutInfo);
-    Descriptor::Pool::AllocateInfo allocateInfo;
+    Descriptor::Pool::AllocateSetInfo allocateInfo;
     allocateInfo.layout = descriptorLayout;
     allocateInfo.pool = descriptorPool;
 
@@ -35,7 +35,7 @@ void DescriptorTest(const PhysicalDevice::Handle& a_PhysicalDevice, const Device
         {
             Timer timer;
             for (int i = 0; i < DESCRIPTOR_COUNT; ++i) {
-                descriptorSets.at(i) = Descriptor::Pool::AllocateSet(a_Device, allocateInfo);
+                descriptorSets.at(i) = Descriptor::Pool::AllocateSet(allocateInfo);
             }
             CreatingTimer += timer.Elapsed().count() / double(TEST_COUNT);
         }
@@ -49,7 +49,7 @@ void DescriptorTest(const PhysicalDevice::Handle& a_PhysicalDevice, const Device
         {
             Timer timer;
             for (const auto& i : a_IterationIndice) {
-                if (i % 3 == 0) descriptorSets.at(i) = Descriptor::Pool::AllocateSet(a_Device, allocateInfo);
+                if (i % 3 == 0) descriptorSets.at(i) = Descriptor::Pool::AllocateSet(allocateInfo);
             }
             ReCreatingTimer += timer.Elapsed().count() / double(TEST_COUNT);
         }
@@ -57,9 +57,9 @@ void DescriptorTest(const PhysicalDevice::Handle& a_PhysicalDevice, const Device
             Buffer::Info bufferInfo;
             bufferInfo.usage = Buffer::UsageFlagBits::UniformBuffer;
             bufferInfo.size = 1024;
-            auto memory = AllocateMemory(a_PhysicalDevice, a_Device, 1024, PhysicalDevice::MemoryPropertyFlagBits::DeviceLocal);
+            auto memory = AllocateMemory(a_PhysicalDevice, a_Device, 1024, Memory::PropertyFlagBits::DeviceLocal);
             auto buffer = Buffer::Create(a_Device, bufferInfo);
-            Buffer::BindMemory(a_Device, buffer, memory, 0);
+            Buffer::BindMemory(buffer, memory, 0);
             std::vector<Descriptor::Set::WriteOperation> writeOperations(DESCRIPTOR_COUNT);
             for (const auto& i : a_IterationIndice) {
                 Descriptor::Set::BufferInfo bufferInfo;
@@ -69,7 +69,7 @@ void DescriptorTest(const PhysicalDevice::Handle& a_PhysicalDevice, const Device
                 writeOperations.at(i).bufferInfo = bufferInfo;
             }
             Timer timer;
-            Descriptor::Set::Update(a_Device, writeOperations, {});
+            Descriptor::Set::Update(writeOperations, {});
             UpdatingTimer += timer.Elapsed().count() / double(TEST_COUNT);
         }
     }

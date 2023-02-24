@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan.h>
 
 namespace OCRA::Device
 {
@@ -12,7 +12,7 @@ struct Impl
     ~Impl() {
         vkDestroyDevice(device, nullptr);
     }
-    operator auto&() const {
+    operator auto& () const {
         return device;
     }
     const VkDevice device;

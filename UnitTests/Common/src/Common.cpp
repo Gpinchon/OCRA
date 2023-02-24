@@ -1,11 +1,5 @@
 #include <Common.hpp>
-#include <OCRA/Instance.hpp>
-#include <OCRA/PhysicalDevice.hpp>
-#include <OCRA/Device.hpp>
-#include <OCRA/Queue.hpp>
-#include <OCRA/Command/Pool.hpp>
-#include <OCRA/Memory.hpp>
-#include <OCRA/Descriptor/Pool.hpp>
+#include <OCRA/OCRA.hpp>
 
 #include <iostream>
 #include <vector>
@@ -17,10 +11,10 @@ namespace OCRA
 Instance::Handle CreateInstance(const std::string& a_Name)
 {
     Instance::Handle instance;
-    Instance::Info instanceInfo;
+    CreateInstanceInfo instanceInfo;
     instanceInfo.applicationInfo.name = a_Name;
     instanceInfo.applicationInfo.applicationVersion = 1;
-    instance = Instance::Create(instanceInfo);
+    instance = CreateInstance(instanceInfo);
     std::cout << "==== Instance ====\n";
     std::cout << "  Type           : " << Instance::GetType(instance) << "\n";
     std::cout << "  App Name       : " << instanceInfo.applicationInfo.name << "\n";
@@ -32,14 +26,14 @@ Instance::Handle CreateInstance(const std::string& a_Name)
     return instance;
 }
 
-std::vector<Queue::Info> GetQueueInfos(const PhysicalDevice::Handle& a_PhysicalDevice)
+std::vector<QueueInfo> GetQueueInfos(const PhysicalDevice::Handle& a_PhysicalDevice)
 {
-    std::vector<Queue::Info> queueInfos;
+    std::vector<QueueInfo> queueInfos;
     auto& queueFamilies = PhysicalDevice::GetQueueFamilyProperties(a_PhysicalDevice);
     uint32_t familyIndex = 0;
     for (auto& queueFamily : queueFamilies)
     {
-        Queue::Info queueInfo;
+        QueueInfo queueInfo;
         queueInfo.queueCount = queueFamily.queueCount;
         queueInfo.queueFamilyIndex = familyIndex;
         queueInfo.queuePriorities.resize(queueFamily.queueCount, 1.f);
@@ -60,11 +54,11 @@ void PrintQueueInfos(const PhysicalDevice::Handle& a_PhysicalDevice)
         std::cout << "  Index         : " << familyIndex << "\n";
         std::cout << "  Count         : " << queueFamily.queueCount << "\n";
         std::cout << " == Capabilities ==\n";
-        std::cout << "  Graphics      : " << ((queueFamily.queueFlags & Queue::FlagsBits::Graphics) != 0) << "\n";
-        std::cout << "  Compute       : " << ((queueFamily.queueFlags & Queue::FlagsBits::Compute) != 0) << "\n";
-        std::cout << "  Protected     : " << ((queueFamily.queueFlags & Queue::FlagsBits::Protected) != 0) << "\n";
-        std::cout << "  SparseBinding : " << ((queueFamily.queueFlags & Queue::FlagsBits::SparseBinding) != 0) << "\n";
-        std::cout << "  Transfer      : " << ((queueFamily.queueFlags & Queue::FlagsBits::Transfer) != 0) << "\n";
+        std::cout << "  Graphics      : " << ((queueFamily.queueFlags & QueueFlagsBits::Graphics) != 0) << "\n";
+        std::cout << "  Compute       : " << ((queueFamily.queueFlags & QueueFlagsBits::Compute) != 0) << "\n";
+        std::cout << "  Protected     : " << ((queueFamily.queueFlags & QueueFlagsBits::Protected) != 0) << "\n";
+        std::cout << "  SparseBinding : " << ((queueFamily.queueFlags & QueueFlagsBits::SparseBinding) != 0) << "\n";
+        std::cout << "  Transfer      : " << ((queueFamily.queueFlags & QueueFlagsBits::Transfer) != 0) << "\n";
         std::cout << " ==================\n";
         ++familyIndex;
     }
@@ -74,9 +68,9 @@ void PrintQueueInfos(const PhysicalDevice::Handle& a_PhysicalDevice)
 
 Device::Handle CreateDevice(const PhysicalDevice::Handle& a_PhysicalDevice)
 {
-    Device::CreateInfo deviceInfo;
+    CreateDeviceInfo deviceInfo;
     deviceInfo.queueInfos = GetQueueInfos(a_PhysicalDevice);
-    return Device::Create(a_PhysicalDevice, deviceInfo);
+    return CreateDevice(a_PhysicalDevice, deviceInfo);
 }
 
 uint32_t FindQueueFamily(const PhysicalDevice::Handle& a_PhysicalDevice, const PhysicalDevice::QueueFlags& a_QueueProperties)
@@ -91,18 +85,18 @@ uint32_t FindQueueFamily(const PhysicalDevice::Handle& a_PhysicalDevice, const P
 
 Command::Pool::Handle CreateCommandPool(const Device::Handle& a_Device, const uint32_t& a_QueueFamily)
 {
-    Command::Pool::Info commandPoolInfo;
+    CreateCommandPoolInfo commandPoolInfo;
     commandPoolInfo.queueFamilyIndex = a_QueueFamily;
-    return Command::Pool::Create(a_Device, commandPoolInfo);
+    return CreateCommandPool(a_Device, commandPoolInfo);
 }
 
-Command::Buffer::Handle CreateCommandBuffer(const Command::Pool::Handle& a_CommandPool, const Command::Pool::AllocateInfo::Level& a_Level)
+Command::Buffer::Handle CreateCommandBuffer(const Command::Pool::Handle& a_CommandPool, const CommandBufferLevel& a_Level)
 {
-    Command::Pool::AllocateInfo commandBufferAllocateInfo;
+    AllocateCommandBufferInfo commandBufferAllocateInfo;
     commandBufferAllocateInfo.pool = a_CommandPool;
     commandBufferAllocateInfo.count = 1;
     commandBufferAllocateInfo.level = a_Level;
-    return Command::Pool::AllocateBuffer(commandBufferAllocateInfo).front();
+    return Command::Pool::AllocateCommandBuffer(commandBufferAllocateInfo).front();
 }
 
 void OCRA::SubmitCommandBuffer(
@@ -111,14 +105,14 @@ void OCRA::SubmitCommandBuffer(
     const Semaphore::Handle& a_WaitSemaphore,
     const Semaphore::Handle& a_SignalSemaphore)
 {
-    Queue::SubmitInfo submitInfo;
+    QueueSubmitInfo submitInfo;
     submitInfo.commandBuffers.push_back(a_CommandBuffer);
     if (a_WaitSemaphore)   submitInfo.waitSemaphores = { a_WaitSemaphore };
     if (a_SignalSemaphore) submitInfo.signalSemaphores = { a_SignalSemaphore };
     Queue::Submit(a_Queue, { submitInfo });
 }
 
-uint32_t FindProperMemoryType(const PhysicalDevice::Handle& a_PhysicalDevice, const Memory::PropertyFlags& a_MemoryProperties)
+uint32_t FindProperMemoryType(const PhysicalDevice::Handle& a_PhysicalDevice, const MemoryPropertyFlags& a_MemoryProperties)
 {
     auto& memoryProperties = PhysicalDevice::GetMemoryProperties(a_PhysicalDevice);
     for (auto memoryTypeIndex = 0u; memoryTypeIndex < memoryProperties.memoryTypes.size(); ++memoryTypeIndex) {
@@ -134,19 +128,19 @@ uint32_t FindProperMemoryType(const PhysicalDevice::Handle& a_PhysicalDevice, co
     return (std::numeric_limits<uint32_t>::max)();
 }
 
-Memory::Handle AllocateMemory(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const uint64_t& a_Size, const Memory::PropertyFlags& a_MemoryProperties)
+Memory::Handle AllocateMemory(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const uint64_t& a_Size, const MemoryPropertyFlags& a_MemoryProperties)
 {
-    Memory::AllocateInfo memoryInfo;
+    AllocateMemoryInfo memoryInfo;
     memoryInfo.memoryTypeIndex = FindProperMemoryType(a_PhysicalDevice, a_MemoryProperties);
     memoryInfo.size = a_Size;
-    return  Device::AllocateMemory(a_Device, memoryInfo);
+    return AllocateMemory(a_Device, memoryInfo);
 }
 
 Descriptor::Pool::Handle CreateDescriptorPool(const Device::Handle& a_Device, const size_t& a_MaxSets)
 {
-    Descriptor::Pool::CreateInfo poolInfo{};
+    CreateDescriptorPoolInfo poolInfo{};
     poolInfo.maxSets = a_MaxSets;
     poolInfo.sizes = {};
-    return Descriptor::Pool::Create(a_Device, poolInfo);
+    return CreateDescriptorPool(a_Device, poolInfo);
 }
 }

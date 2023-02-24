@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan.h>
 
 namespace OCRA::Fence
 {
@@ -13,7 +13,7 @@ struct Impl
     ~Impl() {
         vkDestroyFence(device, fence, nullptr);
     }
-    operator auto&() const {
+    operator auto& () const {
         return fence;
     }
     const VkDevice device;

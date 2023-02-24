@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan.h>
 
 namespace OCRA::Command::Buffer
 {
@@ -14,7 +14,7 @@ struct Impl
     ~Impl() {
         vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
     }
-    operator auto&() const {
+    operator auto& () const {
         return commandBuffer;
     }
     const VkDevice        device;

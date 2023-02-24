@@ -1,5 +1,4 @@
-#include <OCRA/Instance.hpp>
-#include <OCRA/PhysicalDevice.hpp>
+#include <OCRA/OCRA.hpp>
 
 #include <iostream>
 
@@ -11,17 +10,17 @@ int main()
     {
         std::vector<Instance::Handle> instances;
         for (auto i = 0u; i < 2; ++i) {
-            Instance::Info instanceInfo;
+            CreateInstanceInfo instanceInfo;
             instanceInfo.applicationInfo.name = "Test_PhysicalDevice_Instance_" + std::to_string(i);
             instanceInfo.applicationInfo.applicationVersion = 1;
-            instances.push_back(Instance::Create(instanceInfo));
+            instances.push_back(CreateInstance(instanceInfo));
         }
         //if we did not crash yet, assume this test is successful
     }
-    Instance::Info instanceInfo;
+    CreateInstanceInfo instanceInfo;
     instanceInfo.applicationInfo.name = "Test_PhysicalDevice";
     instanceInfo.applicationInfo.applicationVersion = 1;
-    const auto instance = Instance::Create(instanceInfo);
+    const auto instance = CreateInstance(instanceInfo);
     std::cout << "===== Physical Devices ====\n";
     for (const auto& physicalDevice : Instance::EnumeratePhysicalDevices(instance))
     {

@@ -38,11 +38,11 @@ public:
     }
 
 private:
-    inline static Descriptor::SetLayout::Binding CreateSetLayoutBinding(const uint32_t a_Binding) {
-        Descriptor::SetLayout::Binding binding;
+    inline static DescriptorSetLayoutBinding CreateSetLayoutBinding(const uint32_t a_Binding) {
+        DescriptorSetLayoutBinding binding;
         binding.binding = a_Binding;
         binding.count = 1;
-        binding.type = Descriptor::Type::UniformBuffer;
+        binding.type = DescriptorType::UniformBuffer;
         return binding;
     }
     bool dirtyDescriptorSet{ true };

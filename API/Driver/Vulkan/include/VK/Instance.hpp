@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan.h>
 
 namespace OCRA::Instance
 {
@@ -12,7 +12,7 @@ struct Impl
     ~Impl() {
         vkDestroyInstance(instance, nullptr);
     }
-    operator auto&() const {
+    operator auto& () const {
         return instance;
     }
     const VkInstance instance;

@@ -364,6 +364,11 @@ enum class Swizzle {
     R, G, B, A,
     MaxValue
 };
+enum class VertexInputRate {
+    Vertex,   //use vertex attribute
+    Instance, //use instance index
+    MaxValue
+};
 enum class VertexType {
     None,
     Float32,

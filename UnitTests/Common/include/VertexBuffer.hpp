@@ -1,14 +1,6 @@
 #pragma once
 
-#include <OCRA/Common/Vec3.hpp>
-#include <OCRA/Common/Vec2.hpp>
-#include <OCRA/Handle.hpp>
-#include <OCRA/Pipeline/VertexInputState.hpp>
-
-OCRA_DECLARE_HANDLE(OCRA::PhysicalDevice);
-OCRA_DECLARE_HANDLE(OCRA::Device);
-OCRA_DECLARE_HANDLE(OCRA::Memory);
-OCRA_DECLARE_HANDLE(OCRA::Buffer);
+#include <OCRA/OCRA.hpp>
 
 namespace OCRA {
 struct DefaultVertex {
@@ -16,14 +8,14 @@ struct DefaultVertex {
     Vec3 color;
     Vec2 uv;
     static auto GetBindingDescriptions() {
-        std::vector<Pipeline::VertexInputState::BindingDescription> bindings(1);
+        std::vector<VertexBindingDescription> bindings(1);
         bindings.at(0).binding = 0;
         bindings.at(0).stride = sizeof(DefaultVertex);
-        bindings.at(0).inputRate = Pipeline::VertexInputState::BindingDescription::InputRate::Vertex;
+        bindings.at(0).inputRate = VertexInputRate::Vertex;
         return bindings;
     }
     static auto GetAttributeDescription() {
-        std::vector<Pipeline::VertexInputState::AttributeDescription> attribs(3);
+        std::vector<VertexAttributeDescription> attribs(3);
         attribs.at(0).binding = 0;
         attribs.at(0).location = 0;
         attribs.at(0).format.size = decltype(pos)::length();
@@ -87,7 +79,7 @@ private:
     const size_t vertexSize{ 0 };
     const Memory::Handle memory;
     const Buffer::Handle buffer;
-    const std::vector<Pipeline::VertexInputState::BindingDescription>   bindings;
-    const std::vector<Pipeline::VertexInputState::AttributeDescription> attribs;
+    const std::vector<VertexBindingDescription>   bindings;
+    const std::vector<VertexAttributeDescription> attribs;
 };
 }

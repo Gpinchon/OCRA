@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan.h>
 
 namespace OCRA::Memory
 {
@@ -12,6 +12,9 @@ struct Impl
     {}
     ~Impl() {
         vkFreeMemory(device, memory, nullptr);
+    }
+    operator auto& () const {
+        return memory;
     }
     const VkDevice       device;
     const VkDeviceMemory memory;

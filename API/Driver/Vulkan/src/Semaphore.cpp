@@ -1,24 +1,29 @@
 #include <VK/Semaphore.hpp>
 #include <VK/Device.hpp>
 
-#include <OCRA/Semaphore.hpp>
+#include <OCRA/Structs.hpp>
 
-namespace OCRA::Semaphore {
-Handle Create(
+#include <chrono>
+
+namespace OCRA::Device
+{
+Semaphore::Handle CreateSemaphore(
     const Device::Handle& a_Device,
-    const Info& a_Info,
+    const CreateSemaphoreInfo& a_Info,
     const AllocationCallback* a_Allocator)
 {
     VkSemaphore semaphore{};
     VkSemaphoreCreateInfo info{ VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
     VkSemaphoreTypeCreateInfo semaphoreType{ VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO };
-    semaphoreType.semaphoreType = a_Info.type == Type::Binary ? VK_SEMAPHORE_TYPE_BINARY : VK_SEMAPHORE_TYPE_TIMELINE;
+    semaphoreType.semaphoreType = a_Info.type == SemaphoreType::Binary ? VK_SEMAPHORE_TYPE_BINARY : VK_SEMAPHORE_TYPE_TIMELINE;
     semaphoreType.initialValue = a_Info.initialValue;
     info.pNext = &semaphoreType;
     vkCreateSemaphore(*a_Device, &info, nullptr, &semaphore);
-    return std::make_shared<Impl>(*a_Device, semaphore);
+    return std::make_shared<Semaphore::Impl>(*a_Device, semaphore);
+}
 }
 
+namespace OCRA::Semaphore {
 void Signal(
     const Handle& a_Semaphore,
     const uint64_t& a_Value)

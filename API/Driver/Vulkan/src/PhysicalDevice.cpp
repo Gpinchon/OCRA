@@ -1,18 +1,14 @@
-#include <OCRA/PhysicalDevice.hpp>
-
 #include <VK/PhysicalDevice.hpp>
 #include <VK/Instance.hpp>
 
-#include <vulkan/vulkan.hpp>
-
-OCRA_DECLARE_WEAK_HANDLE(OCRA::Instance);
+#include <OCRA/Structs.hpp>
 
 namespace OCRA::PhysicalDevice
 {
 static inline auto GetLimits(const VkPhysicalDeviceLimits& a_vkLimits)
 {
-    Limits limits{};
-    memset(&limits, 0, sizeof(Limits));
+    PhysicalDeviceLimits limits{};
+    memset(&limits, 0, sizeof(limits));
     limits.maxImageDimension1D    = a_vkLimits.maxImageDimension1D;
     limits.maxImageDimension2D    = a_vkLimits.maxImageDimension2D;
     limits.maxImageDimension3D    = a_vkLimits.maxImageDimension3D;
@@ -149,7 +145,7 @@ static inline auto GetLimits(const VkPhysicalDeviceLimits& a_vkLimits)
 }
 
 static inline auto GetSparseProperties(const VkPhysicalDeviceSparseProperties& a_SparseProperties) {
-    SparseProperties sparseProperties{};
+    PhysicalDeviceSparseProperties sparseProperties{};
     sparseProperties.residencyAlignedMipSize = a_SparseProperties.residencyAlignedMipSize;
     sparseProperties.residencyNonResidentStrict = a_SparseProperties.residencyNonResidentStrict;
     sparseProperties.residencyStandard2DBlockShape = a_SparseProperties.residencyStandard2DBlockShape;
@@ -176,36 +172,36 @@ const MemoryProperties GetMemoryProperties(const Handle& a_PhysicalDevice)
         const auto& mt = p.memoryTypes[i];
         auto& omt = memoryProperties.memoryTypes.at(i);
         omt.heapIndex = mt.heapIndex;
-        omt.propertyFlags |= mt.propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT ? MemoryPropertyFlagBits::DeviceLocal : MemoryPropertyFlagBits::None;
-        omt.propertyFlags |= mt.propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT ? MemoryPropertyFlagBits::HostVisible : MemoryPropertyFlagBits::None;
-        omt.propertyFlags |= mt.propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT ? MemoryPropertyFlagBits::HostCoherent : MemoryPropertyFlagBits::None;
-        omt.propertyFlags |= mt.propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT ? MemoryPropertyFlagBits::LazilyAllocated : MemoryPropertyFlagBits::None;
-        omt.propertyFlags |= mt.propertyFlags & VK_MEMORY_PROPERTY_PROTECTED_BIT ? MemoryPropertyFlagBits::Protected : MemoryPropertyFlagBits::None;
+        omt.propertyFlags |= mt.propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT  ? MemoryPropertyFlagBits::DeviceLocal     : MemoryPropertyFlagBits::None;
+        omt.propertyFlags |= mt.propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT  ? MemoryPropertyFlagBits::HostVisible     : MemoryPropertyFlagBits::None;
+        omt.propertyFlags |= mt.propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT ? MemoryPropertyFlagBits::HostCoherent    : MemoryPropertyFlagBits::None;
+        omt.propertyFlags |= mt.propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT   ? MemoryPropertyFlagBits::LazilyAllocated : MemoryPropertyFlagBits::None;
+        omt.propertyFlags |= mt.propertyFlags & VK_MEMORY_PROPERTY_PROTECTED_BIT     ? MemoryPropertyFlagBits::Protected       : MemoryPropertyFlagBits::None;
     }
     return memoryProperties;
 }
 
-const Properties GetProperties(const Handle& a_PhysicalDevice)
+const PhysicalDeviceProperties GetProperties(const Handle& a_PhysicalDevice)
 {
-    Properties properties;
+    PhysicalDeviceProperties properties;
     VkPhysicalDeviceProperties vkProperties{};
     vkGetPhysicalDeviceProperties(*a_PhysicalDevice, &vkProperties);
     switch (vkProperties.deviceType)
     {
     case VK_PHYSICAL_DEVICE_TYPE_OTHER:
-        properties.deviceType = Type::Other;
+        properties.deviceType = PhysicalDeviceType::Other;
         break;
     case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:
-        properties.deviceType = Type::IntegratedGpu;
+        properties.deviceType = PhysicalDeviceType::IntegratedGpu;
         break;
     case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
-        properties.deviceType = Type::DiscreteGpu;
+        properties.deviceType = PhysicalDeviceType::DiscreteGpu;
         break;
     case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU:
-        properties.deviceType = Type::VirtualGpu;
+        properties.deviceType = PhysicalDeviceType::VirtualGpu;
         break;
     case VK_PHYSICAL_DEVICE_TYPE_CPU:
-        properties.deviceType = Type::Cpu;
+        properties.deviceType = PhysicalDeviceType::Cpu;
         break;
     }
     switch (vkProperties.vendorID)
@@ -242,11 +238,11 @@ const Properties GetProperties(const Handle& a_PhysicalDevice)
     return properties;
 }
 
-const Features GetFeatures(const Handle& a_PhysicalDevice)
+const PhysicalDeviceFeatures GetFeatures(const Handle& a_PhysicalDevice)
 {
     VkPhysicalDeviceFeatures vkFeatures{};
     vkGetPhysicalDeviceFeatures(*a_PhysicalDevice, &vkFeatures);
-    Features features;
+    PhysicalDeviceFeatures features;
     features.robustBufferAccess = vkFeatures.robustBufferAccess;
     features.fullDrawIndexUint32 = vkFeatures.fullDrawIndexUint32;
     features.imageCubeArray = vkFeatures.imageCubeArray;
@@ -321,16 +317,16 @@ const std::vector<QueueFamilyProperties> GetQueueFamilyProperties(const Handle& 
             qp.minImageTransferGranularity.width,
             qp.minImageTransferGranularity.height,
             qp.minImageTransferGranularity.depth);
-        oqp.queueFlags |= qp.queueFlags & VK_QUEUE_GRAPHICS_BIT ? QueueFlagsBits::Graphics : QueueFlagsBits::None;
-        oqp.queueFlags |= qp.queueFlags & VK_QUEUE_COMPUTE_BIT ? QueueFlagsBits::Compute : QueueFlagsBits::None;
-        oqp.queueFlags |= qp.queueFlags & VK_QUEUE_TRANSFER_BIT ? QueueFlagsBits::Transfer : QueueFlagsBits::None;
+        oqp.queueFlags |= qp.queueFlags & VK_QUEUE_GRAPHICS_BIT       ? QueueFlagsBits::Graphics      : QueueFlagsBits::None;
+        oqp.queueFlags |= qp.queueFlags & VK_QUEUE_COMPUTE_BIT        ? QueueFlagsBits::Compute       : QueueFlagsBits::None;
+        oqp.queueFlags |= qp.queueFlags & VK_QUEUE_TRANSFER_BIT       ? QueueFlagsBits::Transfer      : QueueFlagsBits::None;
         oqp.queueFlags |= qp.queueFlags & VK_QUEUE_SPARSE_BINDING_BIT ? QueueFlagsBits::SparseBinding : QueueFlagsBits::None;
-        oqp.queueFlags |= qp.queueFlags & VK_QUEUE_PROTECTED_BIT ? QueueFlagsBits::Protected : QueueFlagsBits::None;
+        oqp.queueFlags |= qp.queueFlags & VK_QUEUE_PROTECTED_BIT      ? QueueFlagsBits::Protected     : QueueFlagsBits::None;
     }
     return queueProperties;
 }
 
-uint32_t FindQueueFamily(const PhysicalDevice::Handle& a_PhysicalDevice, const PhysicalDevice::QueueFlags& a_QueueFlags)
+uint32_t FindQueueFamily(const PhysicalDevice::Handle& a_PhysicalDevice, const QueueFlags& a_QueueFlags)
 {
     auto& queueProperties = GetQueueFamilyProperties(a_PhysicalDevice);
     for (auto familyIndex = 0u; familyIndex < queueProperties.size(); ++familyIndex) {

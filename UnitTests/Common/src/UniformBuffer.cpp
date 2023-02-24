@@ -1,28 +1,27 @@
 #include <UniformBuffer.hpp>
 
-#include <OCRA/Descriptor/Set.hpp>
-#include <OCRA/Memory.hpp>
+#include <OCRA/OCRA.hpp>
 
 namespace OCRA {
 void UniformBuffer::Update() {
     if (dirtyDescriptorSet) {
-        Descriptor::Set::BufferInfo info;
+        DescriptorSetBufferInfo info;
         info.buffer = buffer;
         info.offset = 0;
         info.range = data.size();
-        std::vector<Descriptor::Set::WriteOperation> writeOperations(1);
-        Descriptor::Set::BufferInfo bufferInfo;
+        std::vector<DescriptorSetWrite> writeOperations(1);
+        DescriptorSetBufferInfo bufferInfo;
         bufferInfo.buffer = buffer;
         bufferInfo.offset = 0;
         bufferInfo.range = data.size();
         writeOperations.front().bufferInfo = bufferInfo;
         writeOperations.front().dstBinding = GetDescriptorSetLayoutBindings().front().binding;
-        writeOperations.front().type = Descriptor::Type::UniformBuffer;
+        writeOperations.front().type = DescriptorType::UniformBuffer;
         SetWriteOperations(writeOperations);
         dirtyDescriptorSet = false;
     }
     if (dirtyData) {
-        Memory::MappedRange range;
+        MemoryMappedRange range;
         range.length = data.size();
         range.memory = memory;
         auto ptr = Memory::Map(range);
