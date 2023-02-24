@@ -31,9 +31,11 @@ set_target_properties(
 )
 
 if (OCRA_SWAPCHAIN_IMPL STREQUAL "OpenGL")
-add_subdirectory(Driver/OpenGL)
+  add_subdirectory(Driver/OpenGL)
 elseif (OCRA_SWAPCHAIN_IMPL STREQUAL "OpenGL-DX")
-add_subdirectory(Driver/OpenGL-DX)
+  add_subdirectory(Driver/OpenGL-DX)
+elseif (OCRA_SWAPCHAIN_IMPL STREQUAL "Vulkan")
+  add_subdirectory(Driver/Vulkan)
 endif (OCRA_SWAPCHAIN_IMPL STREQUAL "OpenGL")
 
 if(MSVC_IDE)
