@@ -11,9 +11,8 @@ namespace OCRA::Instance
 {
 struct Impl
 {
-    Impl(const Info& a_Info);
+    Impl();
     const uint32_t  id;
-    const Info      info;
     std::vector<PhysicalDevice::Handle> physicalDevices;
     static constexpr auto type{ "OpenGL" };
 };

@@ -2,6 +2,7 @@
 
 #include <GL/PhysicalDevice.hpp>
 #include <GL/Instance.hpp>
+
 #include <GL/glew.h>
 
 #include <stdexcept>
@@ -31,8 +32,8 @@ static inline auto GetInteger(const GLenum& a_State, const GLuint& a_Index)
 
 static inline auto GetPhysicalDeviceLimitsGL()
 {
-    Limits limits{};
-    memset(&limits, 0, sizeof(Limits));
+    PhysicalDeviceLimits limits{};
+    memset(&limits, 0, sizeof(limits));
     limits.maxImageDimension1D = GetInteger(GL_MAX_TEXTURE_SIZE);
     limits.maxImageDimension2D = GetInteger(GL_MAX_RECTANGLE_TEXTURE_SIZE);
     limits.maxImageDimension3D = GetInteger(GL_MAX_3D_TEXTURE_SIZE);
@@ -185,21 +186,21 @@ static inline auto GetPhysicalDeviceLimitsGL()
 
 static inline auto GetPhysicalDevicePropertiesGL()
 {
-    Properties properties;
+    PhysicalDeviceProperties properties;
     properties.apiVersion = GetInteger(GL_MAJOR_VERSION) * 100 + GetInteger(GL_MINOR_VERSION) * 10;
     //properties.driverVersion = (char*)glGetString(GL_VERSION);
     properties.vendorName = (char*)glGetString(GL_VENDOR);
     properties.deviceName = (char*)glGetString(GL_RENDERER);
-    properties.deviceType = Type::Other;
+    properties.deviceType = PhysicalDeviceType::Other;
     //properties.pipelineCacheUUID = 0;
     properties.limits = GetPhysicalDeviceLimitsGL();
     //properties.sparseProperties = 0;
     return properties;
 }
 
-static inline auto GetPhysicalDeviceFeaturesGL(const Properties& a_Properties)
+static inline auto GetPhysicalDeviceFeaturesGL(const PhysicalDeviceProperties& a_Properties)
 {
-    Features features;
+    PhysicalDeviceFeatures features;
     features.robustBufferAccess = GLEW_ARB_robust_buffer_access_behavior;
     features.fullDrawIndexUint32 = a_Properties.limits.maxDrawIndexedIndexValue == (std::numeric_limits<uint32_t>::max)();
     features.imageCubeArray = GLEW_ARB_texture_cube_map_array;
@@ -358,15 +359,15 @@ void Impl::GetProperties()
     }, true);
 }
 
-const MemoryProperties& GetMemoryProperties(const Handle& a_PhysicalDevice)
+const MemoryProperties GetMemoryProperties(const Handle& a_PhysicalDevice)
 {
     return a_PhysicalDevice->memoryProperties;
 }
-const Properties& GetProperties(const Handle& a_PhysicalDevice)
+const PhysicalDeviceProperties GetProperties(const Handle& a_PhysicalDevice)
 {
     return a_PhysicalDevice->properties;
 }
-const Features& GetFeatures(const Handle& a_PhysicalDevice)
+const PhysicalDeviceFeatures GetFeatures(const Handle& a_PhysicalDevice)
 {
     return a_PhysicalDevice->features;
 }

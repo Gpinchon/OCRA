@@ -19,7 +19,7 @@ namespace OCRA::Device
 using Command = std::function<void()>;
 struct Impl
 {
-    Impl(const PhysicalDevice::Handle& a_PhysicalDevice, const Info& a_Info);
+    Impl(const PhysicalDevice::Handle& a_PhysicalDevice);
     //Push a command to a specific queue
     inline void PushCommand(
         const uint32_t& a_FamilyIndex,
@@ -38,7 +38,6 @@ struct Impl
     {
         physicalDevice.lock()->PushCommand(a_Command, a_Synchronous);
     }
-    const Info info;
     const PhysicalDevice::WeakHandle physicalDevice;
     std::map<uint32_t, std::vector<Queue::Handle>> queueFamilies;
 };

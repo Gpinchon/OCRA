@@ -37,9 +37,9 @@ struct Impl
     }
     void GetProperties();
     const Instance::WeakHandle instance;
-    Queue                 queue;
-    Properties            properties;
-    Features              features;
-    MemoryProperties      memoryProperties;
+    Queue                    queue;
+    PhysicalDeviceProperties properties;
+    PhysicalDeviceFeatures   features;
+    MemoryProperties         memoryProperties;
 };
 }
