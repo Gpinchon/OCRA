@@ -1,7 +1,5 @@
 #include <Window.hpp>
 
-#include <OCRA/Device.hpp>
-#include <OCRA/Surface.hpp>
 #include <OCRA/SwapChain.hpp>
 
 #include <iostream>
@@ -92,10 +90,10 @@ Window::Window(const Instance::Handle& a_Instance, const PhysicalDevice::Handle&
     }
     SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)this);
     nativeHandle = hwnd;
-    Surface::Win32::Info info{};
+    CreateSurfaceInfo info{};
     info.hinstance = GetModuleHandle(0);
     info.hwnd = hwnd;
-    surface = Surface::Win32::Create(a_Instance, info);
+    surface = Instance::CreateSurface(a_Instance, info);
 }
 
 Window::~Window()
@@ -150,17 +148,17 @@ void Window::SetVSync(bool a_VSync)
 void Window::ResizeCallback(const uint32_t a_Width, const uint32_t a_Height)
 {
     if (IsClosing()) return;
-    SwapChain::Info info{};
+    CreateSwapChainInfo info{};
     info.oldSwapchain = swapChain;
-    info.presentMode = vSync ? SwapChain::PresentMode::Fifo : SwapChain::PresentMode::Immediate;
-    info.imageColorSpace = Image::ColorSpace::sRGB;
-    info.imageFormat = Image::Format::Uint8_Normalized_RGBA;
+    info.presentMode = vSync ? SwapChainPresentMode::Fifo : SwapChainPresentMode::Immediate;
+    info.imageColorSpace = ColorSpace::sRGB;
+    info.imageFormat = Format::Uint8_Normalized_RGBA;
     info.imageCount = GetSwapChainImageNbr();
     info.surface = surface;
     info.imageExtent.width = a_Width;
     info.imageExtent.height = a_Height;
     if (a_Width > 0 && a_Height > 0)
-        swapChain = SwapChain::Create(device, info);
+        swapChain = CreateSwapChain(device, info);
     extent = { a_Width, a_Height };
     presentInfo.swapChains = { swapChain };
 }

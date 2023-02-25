@@ -1,6 +1,4 @@
-#include <OCRA/Instance.hpp>
-#include <OCRA/PhysicalDevice.hpp>
-#include <OCRA/Device.hpp>
+#include <OCRA/OCRA.hpp>
 
 #include <Common.hpp>
 

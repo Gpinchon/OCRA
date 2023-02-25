@@ -1,7 +1,7 @@
-#include <OCRA/Instance.hpp>
-
 #include <VK/Instance.hpp>
 #include <VK/PhysicalDevice.hpp>
+
+#include <OCRA/Core.hpp>
 
 #include <vulkan/vulkan.h>
 

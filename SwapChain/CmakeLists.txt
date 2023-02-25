@@ -15,16 +15,42 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS_RELEASE "-Ox")
 
-set(OCRA_SWAPCHAIN_HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/SwapChain.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/Surface.hpp
+set(OCRA_SWAPCHAIN_HEADER_LIST
+  OCRA/SwapChain/Core.hpp
+  OCRA/SwapChain/Enums.hpp
+  OCRA/SwapChain/Handles.hpp
+  OCRA/SwapChain/Structs.hpp
+  OCRA/SwapChain/Methods/Device.hpp
+  OCRA/SwapChain/Methods/Instance.hpp
+  OCRA/SwapChain/Methods/SwapChain.hpp
 )
 
-add_library(OCRA-SwapChain-Interface INTERFACE ${OCRA_SWAPCHAIN_HEADER_FILES})
+set(INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/include)
+set(HEADER_PATH ${CMAKE_CURRENT_BINARY_DIR}/include/OCRA/SwapChain.hpp)
+
+file(WRITE ${HEADER_PATH}
+"#pragma once
+/**
+* This file contains every includes
+*/
+
+")
+foreach(File ${OCRA_SWAPCHAIN_HEADER_LIST})
+  file(APPEND ${HEADER_PATH}
+  "#include<${File}>\n")
+endforeach()
+
+list(TRANSFORM OCRA_SWAPCHAIN_HEADER_LIST
+  PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/include/"
+  OUTPUT_VARIABLE OCRA_SWAPCHAIN_HEADER_FILES)
+
+add_library(OCRA-SwapChain-Interface INTERFACE ${OCRA_SWAPCHAIN_HEADER_FILES} ${HEADER_PATH})
 add_library(OCRA::SwapChain::Interface ALIAS OCRA-SwapChain-Interface)
 set_target_properties(OCRA-SwapChain-Interface PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories(OCRA-SwapChain-Interface INTERFACE
-  "${CMAKE_CURRENT_SOURCE_DIR}/include")
+  "${CMAKE_CURRENT_SOURCE_DIR}/include"
+  "${INCLUDE_DIR}")
+
 set_target_properties(
   OCRA-SwapChain-Interface
   PROPERTIES FOLDER "SwapChain"

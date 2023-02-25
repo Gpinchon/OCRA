@@ -1,8 +1,6 @@
 #pragma once
 
-#include <OCRA/Handle.hpp>
-#include <OCRA/Memory.hpp>
-#include <OCRA/Structs.hpp>
+#include <OCRA/Core.hpp>
 
 #include <vector>
 

@@ -1,21 +1,11 @@
 #pragma once
 
-#include <OCRA/SwapChain.hpp>
-#include <OCRA/Common/Rect2D.hpp>
-#include <OCRA/Handle.hpp>
+#include <OCRA/Core.hpp>
+#include <OCRA/SwapChain/Core.hpp>
 
 #include <chrono>
 #include <functional>
 #include <string>
-
-OCRA_DECLARE_HANDLE(OCRA::Instance);
-OCRA_DECLARE_HANDLE(OCRA::PhysicalDevice);
-OCRA_DECLARE_HANDLE(OCRA::Device);
-OCRA_DECLARE_HANDLE(OCRA::Surface);
-OCRA_DECLARE_HANDLE(OCRA::SwapChain);
-OCRA_DECLARE_HANDLE(OCRA::Queue);
-OCRA_DECLARE_HANDLE(OCRA::Fence);
-OCRA_DECLARE_HANDLE(OCRA::Semaphore);
 
 namespace OCRA {
 class Window
@@ -60,15 +50,15 @@ public:
     std::function<void(const Window&)> OnClose;
     std::function<void(const Window&)> OnPaint;
 private:
-    const void*             nativeHandle;
-    bool                    created{ false };
-    bool                    closing{ false };
-    bool                    vSync{ true };
-    Device::Handle          device;
-    Surface::Handle         surface;
-    SwapChain::Handle       swapChain;
-    SwapChain::PresentInfo  presentInfo;
-    uint32_t                swapChainImageNbr{ 3 };
-    uExtent2D               extent;
+    const void*           nativeHandle;
+    bool                  created{ false };
+    bool                  closing{ false };
+    bool                  vSync{ true };
+    Device::Handle        device;
+    Surface::Handle       surface;
+    SwapChain::Handle     swapChain;
+    SwapChainPresentInfo  presentInfo;
+    uint32_t              swapChainImageNbr{ 3 };
+    uExtent2D             extent;
 };
 }
