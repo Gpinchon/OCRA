@@ -1,5 +1,4 @@
-#include <OCRA/Handle.hpp>
-#include <OCRA/Semaphore.hpp>
+#include <OCRA/Core.hpp>
 
 #include <GL/glew.h>
 
@@ -7,10 +6,10 @@
 
 namespace OCRA::Semaphore {
 struct Impl {
-    Impl(const Type& a_Type)
+    Impl(const SemaphoreType& a_Type)
         : type(a_Type)
     {}
-    const Type type;
+    const SemaphoreType type;
     
 };
 /**
@@ -18,7 +17,7 @@ struct Impl {
 * not meant to be called directly by the user
 */
 struct Binary : Impl {
-    Binary() : Impl(Type::Binary) {}
+    Binary() : Impl(SemaphoreType::Binary) {}
     ~Binary() {}
     void Wait() {
         OCRA_ASSERT(glIsSync(sync) && "Semaphore not signaled");
@@ -34,7 +33,7 @@ struct Binary : Impl {
 
 struct Timeline : Impl {
     Timeline(const uint64_t& a_InitialValue)
-        : Impl(Type::Timeline)
+        : Impl(SemaphoreType::Timeline)
     {
         count = a_InitialValue;
     }

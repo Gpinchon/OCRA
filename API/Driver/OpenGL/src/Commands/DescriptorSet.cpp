@@ -11,7 +11,7 @@
 namespace OCRA::Command{
 struct BindDescriptorSetCommand : CommandI {
     BindDescriptorSetCommand(
-        const Pipeline::BindingPoint&   a_BindingPoint,
+        const PipelineBindingPoint&     a_BindingPoint,
         const Pipeline::Layout::Handle& a_Layout,
         const Descriptor::Set::Handle&  a_DescriptorSet,
         const uint32_t                  a_DynamicOffset)
@@ -33,10 +33,10 @@ struct BindDescriptorSetCommand : CommandI {
 
 struct PushDescriptorSetCommand : CommandI {
     PushDescriptorSetCommand(
-        const Pipeline::BindingPoint& a_BindingPoint,
+        const PipelineBindingPoint& a_BindingPoint,
         const Pipeline::Layout::Handle& a_Layout,
         const size_t& a_WriteCount,
-        const Descriptor::Set::WriteOperation* a_Writes)
+        const DescriptorSetWrite* a_Writes)
         : layout(a_Layout)
         , bindingPoint(uint8_t(a_BindingPoint))
         , writeCount(a_WriteCount)
@@ -54,12 +54,12 @@ struct PushDescriptorSetCommand : CommandI {
     const Pipeline::Layout::Handle layout;
     const uint8_t  bindingPoint;
     const uint16_t writeCount;
-    std::array<Descriptor::Set::WriteOperation, 256> writes;
+    std::array<DescriptorSetWrite, 256> writes;
 };
 
 void BindDescriptorSet(
     const Command::Buffer::Handle&  a_CommandBuffer,
-    const Pipeline::BindingPoint&   a_BindingPoint,
+    const PipelineBindingPoint&   a_BindingPoint,
     const Pipeline::Layout::Handle& a_Layout,
     const Descriptor::Set::Handle&  a_DescriptorSet,
     const uint32_t                  a_DynamicOffset)
@@ -73,9 +73,9 @@ void BindDescriptorSet(
 
 void PushDescriptorSet(
     const Command::Buffer::Handle&  a_CommandBuffer,
-    const Pipeline::BindingPoint&   a_BindingPoint,
+    const PipelineBindingPoint&   a_BindingPoint,
     const Pipeline::Layout::Handle& a_Layout,
-    const std::vector<Descriptor::Set::WriteOperation>& a_Writes)
+    const std::vector<DescriptorSetWrite>& a_Writes)
 {
     a_CommandBuffer->PushCommand<PushDescriptorSetCommand>(
         a_BindingPoint,

@@ -1,14 +1,10 @@
 #pragma once
 
-#include <OCRA/Handle.hpp>
-#include <OCRA/Buffer.hpp>
+#include <OCRA/Core.hpp>
 
 #include <GL/Common/Assert.hpp>
 
-OCRA_DECLARE_HANDLE(OCRA::Device);
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
-OCRA_DECLARE_HANDLE(OCRA::Buffer);
-OCRA_DECLARE_HANDLE(OCRA::Memory);
 
 namespace OCRA::Buffer
 {
@@ -17,14 +13,14 @@ struct MemoryBinding {
     size_t          offset{ 0 };
 };
 struct Impl {
-    Impl(const Device::Handle& a_Device, const Info& a_Info)
+    Impl(const Device::Handle& a_Device, const CreateBufferInfo& a_Info)
         : device(a_Device)
         , info(a_Info)
     {
-        OCRA_ASSERT(info.usage != UsageFlagBits::None);
+        OCRA_ASSERT(info.usage != BufferUsageFlagBits::None);
     }
     const Device::WeakHandle    device;
-    const Info                  info;
+    const CreateBufferInfo      info;
     MemoryBinding               memoryBinding;
 };
 }

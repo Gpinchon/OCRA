@@ -2,10 +2,13 @@
 
 OCRA_DECLARE_HANDLE(OCRA::Descriptor::SetLayout);
 
-namespace OCRA::Descriptor::SetLayout
+namespace OCRA::Device
 {
-Handle Create(const Device::Handle& a_Device, const Info& a_Info, const AllocationCallback* a_Allocator)
+Descriptor::SetLayout::Handle CreateDescriptorSetLayout(
+    const Device::Handle& a_Device,
+    const CreateDescriptorSetLayoutInfo& a_Info,
+    const AllocationCallback* a_Allocator)
 {
-    return Handle(new Impl(a_Device, a_Info));
+    return std::make_shared<Descriptor::SetLayout::Impl>(a_Device, a_Info);
 }
 }

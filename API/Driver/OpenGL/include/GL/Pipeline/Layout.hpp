@@ -1,8 +1,6 @@
 #pragma once
 
-#include <OCRA/Pipeline/Layout.hpp>
-#include <OCRA/Descriptor/Set.hpp>
-#include <OCRA/Descriptor/Type.hpp>
+#include <OCRA/Core.hpp>
 
 #include <array>
 
@@ -13,7 +11,7 @@ namespace OCRA::Pipeline::Layout
 class Impl
 {
 public:
-    Impl(const Info& a_Info);
+    Impl(const CreatePipelineLayoutInfo& a_Info);
     bool IsCompatibleWith(const Handle& a_Layout);
 
     auto GetType(uint32_t a_BindingIndex) const {
@@ -31,7 +29,7 @@ public:
 
 private:
     struct Binding {
-        Descriptor::Type type;
+        DescriptorType type;
         uint32_t offset;
         uint32_t dynamicOffset;
         uint32_t descriptorCount;

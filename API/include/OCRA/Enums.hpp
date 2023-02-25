@@ -39,7 +39,10 @@ enum class ColorSpace {
     MaxValue
 };
 enum class CommandBufferLevel {
-    Unknown = -1, Primary, Secondary, MaxValue
+    Unknown = -1,
+    Primary,
+    Secondary,
+    MaxValue
 };
 enum class CompareOp {
     Unknown = -1,

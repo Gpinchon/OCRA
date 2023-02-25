@@ -6,22 +6,19 @@
 */
 #pragma once
 
-#include <OCRA/Handle.hpp>
-#include <OCRA/Image/Image.hpp>
+#include <OCRA/Core.hpp>
 
-OCRA_DECLARE_HANDLE(OCRA::Device);
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
-OCRA_DECLARE_HANDLE(OCRA::Buffer);
 
 namespace OCRA::Image {
 struct Impl
 {
-    Impl(const Device::Handle& a_Device, const Info& a_Info, const uint32_t a_Target);
+    Impl(const Device::Handle& a_Device, const CreateImageInfo& a_Info, const uint32_t a_Target);
     ~Impl();
-    virtual void Download(const Image::BufferCopy& a_Copy, const size_t& a_MemoryOffset) = 0;
-    virtual void Upload(const Image::BufferCopy& a_Copy, const size_t& a_MemoryOffset) = 0;
+    virtual void Download(const ImageBufferCopy& a_Copy, const size_t& a_MemoryOffset) = 0;
+    virtual void Upload(const ImageBufferCopy& a_Copy, const size_t& a_MemoryOffset) = 0;
     const Device::WeakHandle device;
-    const Info info;
+    const CreateImageInfo info;
     const uint32_t internalFormat;
     const uint32_t dataType;
     const uint32_t dataFormat;
@@ -31,9 +28,9 @@ struct Impl
 /**
 * @brief creates an empty image with no storage
 */
-Handle CreateEmpty(const Device::Handle& a_Device, const Info& a_Info);
+Handle CreateEmpty(const Device::Handle& a_Device, const CreateImageInfo& a_Info);
 /**
 * @brief checks if the specified copy operation is valid for this image
 */
-void CheckValidCopy(const Image::BufferCopy& a_Copy, const Image::Handle& a_Image);
+void CheckValidCopy(const ImageBufferCopy& a_Copy, const Image::Handle& a_Image);
 }

@@ -1,10 +1,8 @@
-#include <OCRA/Common/Rect2D.hpp>
+#include <OCRA/Core.hpp>
 
 #include <GL/Command/Buffer.hpp>
 
 #include <vector>
-
-OCRA_DECLARE_HANDLE(OCRA::Command::Buffer);
 
 namespace OCRA::Command
 {

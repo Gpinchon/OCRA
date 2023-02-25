@@ -1,4 +1,4 @@
-#include <OCRA/Command/MemoryBarrier.hpp>
+#include <OCRA/Core.hpp>
 
 #include <GL/Command/Buffer.hpp>
 
@@ -43,8 +43,8 @@ static inline auto GetGLBarrierAccessBits(const AccessFlags& a_AccessFlags)
 }
 void PipelineBarrier(
     const Buffer::Handle& a_CommandBuffer,
-    const Pipeline::StageFlags& srcStageMask,
-    const Pipeline::StageFlags& dstStageMask,
+    const PipelineStageFlags& srcStageMask,
+    const PipelineStageFlags& dstStageMask,
     const DependencyFlags& dependencyFlags,
     const std::vector<MemoryBarrier>&       a_MemoryBarriers,
     const std::vector<BufferMemoryBarrier>& a_BufferMemoryBarriers,

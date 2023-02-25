@@ -2,7 +2,7 @@
 //  Drawing commands
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <OCRA/Command/Buffer.hpp>
+#include <OCRA/Core.hpp>
 
 #include <GL/Command/ExecutionState.hpp>
 #include <GL/Command/Buffer.hpp>
@@ -16,7 +16,7 @@
 namespace OCRA::Command
 {
 void ApplyPipelineStates(Buffer::ExecutionState& a_ExecutionState) {
-    auto& pipelineState = a_ExecutionState.pipelineState.at(size_t(Pipeline::BindingPoint::Graphics));
+    auto& pipelineState = a_ExecutionState.pipelineState.at(size_t(PipelineBindingPoint::Graphics));
     pipelineState.pipeline->Apply(a_ExecutionState);
     for (auto& binding : pipelineState.pushDescriptorSet)
         binding.Bind();

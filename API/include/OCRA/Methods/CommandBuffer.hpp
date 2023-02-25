@@ -16,7 +16,7 @@ namespace OCRA::Command::Buffer
 {
 //Begin Command Buffer recording, switching it to Recording state
 void Begin(const Handle& a_CommandBuffer,
-           const BeginCommandBufferInfo& a_BeginInfo);
+           const CommandBufferBeginInfo& a_BeginInfo);
 //End Command Buffer recording, switching it to Executable state
 void End(const Handle& a_CommandBuffer);
 //Reset Command Buffer to Initial state

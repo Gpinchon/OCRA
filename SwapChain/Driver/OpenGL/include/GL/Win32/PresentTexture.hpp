@@ -1,9 +1,6 @@
 #pragma once
 
-#include <OCRA/Handle.hpp>
-#include <OCRA/Common/Extent3D.hpp>
-
-OCRA_DECLARE_HANDLE(OCRA::Image);
+#include <OCRA/Core.hpp>
 
 namespace OCRA::SwapChain::Win32 {
     struct PresentTexture {

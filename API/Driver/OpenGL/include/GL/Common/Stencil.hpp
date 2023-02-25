@@ -6,39 +6,43 @@
 */
 #pragma once
 
-#include <OCRA/Common/Stencil.hpp>
+#include <OCRA/Enums.hpp>
 
 #include <GL/Common/Compare.hpp>
 #include <GL/glew.h>
 
 #include <stdexcept>
 
-namespace OCRA::Stencil {
-static inline auto GetGLOperation(const Operation& a_Operation) {
+namespace OCRA {
+static inline auto GetGLOperation(const StencilOp& a_Operation) {
     switch (a_Operation)
     {
-    case Operation::Keep:
+    case StencilOp::Keep:
         return GL_KEEP;
-    case Operation::Zero:
+    case StencilOp::Zero:
         return GL_ZERO;
-    case Operation::Replace:
+    case StencilOp::Replace:
         return GL_REPLACE;
-    case Operation::IncrementAndClamp:
+    case StencilOp::IncrementAndClamp:
         return GL_INCR;
-    case Operation::DecrementAndClamp:
+    case StencilOp::DecrementAndClamp:
         return GL_DECR;
-    case Operation::Invert:
+    case StencilOp::Invert:
         return GL_INVERT;
-    case Operation::IncrementAndWrap:
+    case StencilOp::IncrementAndWrap:
         return GL_INCR_WRAP;
-    case Operation::DecrementAndWrap:
+    case StencilOp::DecrementAndWrap:
         return GL_DECR_WRAP;
     default:
         throw std::runtime_error("Unknown Stencil Operation");
     }
 }
+}
+
+namespace OCRA::Stencil {
+
 struct GLOpState {
-    GLOpState(const OpState& a_OpState = {})
+    GLOpState(const StencilOpState& a_OpState = {})
     : failOp(GetGLOperation(a_OpState.failOp))
     , passOp(GetGLOperation(a_OpState.passOp))
     , depthFailOp(GetGLOperation(a_OpState.depthFailOp))

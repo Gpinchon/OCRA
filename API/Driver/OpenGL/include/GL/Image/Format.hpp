@@ -6,13 +6,13 @@
 */
 #pragma once
 
-#include <OCRA/Image/Format.hpp>
+#include <OCRA/Enums.hpp>
 
 #include <stdexcept>
 
 #include <GL/glew.h>
 
-namespace OCRA::Image {
+namespace OCRA {
 inline auto IsCompressedFormat(const Format& format)
 {
     return format == Format::S3TC_DXT5_RGBA

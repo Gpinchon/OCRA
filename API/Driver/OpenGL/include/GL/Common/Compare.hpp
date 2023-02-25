@@ -6,32 +6,32 @@
 */
 #pragma once
 
-#include <OCRA/Common/Compare.hpp>
+#include <OCRA/Enums.hpp>
 
 #include <GL/glew.h>
 
 #include <stdexcept>
 
-namespace OCRA::Compare {
-static inline auto GetGLOperation(const Operation& a_Operation)
+namespace OCRA {
+static inline auto GetGLOperation(const CompareOp& a_Operation)
 {
     switch (a_Operation)
     {
-    case Operation::Never:
+    case CompareOp::Never:
         return GL_NEVER;
-    case Operation::Less:
+    case CompareOp::Less:
         return GL_LESS;
-    case Operation::Equal:
+    case CompareOp::Equal:
         return GL_EQUAL;
-    case Operation::LessOrEqual:
+    case CompareOp::LessOrEqual:
         return GL_LEQUAL;
-    case Operation::Greater:
+    case CompareOp::Greater:
         return GL_GREATER;
-    case Operation::NotEqual:
+    case CompareOp::NotEqual:
         return GL_NOTEQUAL;
-    case Operation::GreaterOrEqual:
+    case CompareOp::GreaterOrEqual:
         return GL_GEQUAL;
-    case Operation::Always:
+    case CompareOp::Always:
         return GL_ALWAYS;
     default:
         throw std::runtime_error("Unknown Compare Operation");

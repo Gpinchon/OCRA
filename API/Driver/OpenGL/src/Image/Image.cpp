@@ -4,9 +4,7 @@
 * @Last Modified by:   gpinchon
 * @Last Modified time: 2021-10-07 18:55:03
 */
-#include <OCRA/Buffer.hpp>
-#include <OCRA/Handle.hpp>
-#include <OCRA/Image/Image.hpp>
+#include <OCRA/Core.hpp>
 
 #include <GL/Common/Assert.hpp>
 #include <GL/Buffer.hpp>
@@ -22,7 +20,7 @@
 #include <vector>
 
 namespace OCRA::Image {
-void CheckValidCopy(const Image::BufferCopy& a_Copy, const Image::Handle& a_Image)
+void CheckValidCopy(const ImageBufferCopy& a_Copy, const Image::Handle& a_Image)
 {
     OCRA_ASSERT(a_Copy.imageOffset.x + a_Copy.imageExtent.width <= a_Image->info.extent.width);
     OCRA_ASSERT(a_Copy.imageOffset.y + a_Copy.imageExtent.height <= a_Image->info.extent.height);
@@ -37,7 +35,7 @@ static inline auto CreateTexture(const Device::Handle& a_Device)
     }, true);
     return handle;
 }
-Impl::Impl(const Device::Handle& a_Device, const Info& a_Info, const uint32_t a_Target)
+Impl::Impl(const Device::Handle& a_Device, const CreateImageInfo& a_Info, const uint32_t a_Target)
     : device(a_Device)
     , info(a_Info)
     , internalFormat(GetGLSizedFormat(a_Info.format))
@@ -54,10 +52,10 @@ Impl::~Impl() {
 
 template<bool Compressed>
 struct Texture : Impl {
-    Texture(const Device::Handle& a_Device, const Info& a_Info, const GLenum& a_Target)
+    Texture(const Device::Handle& a_Device, const CreateImageInfo& a_Info, const GLenum& a_Target)
         : Impl(a_Device, a_Info, a_Target)
     {}
-    virtual void Download(const Image::BufferCopy& a_Copy, const size_t& a_MemoryOffset) override;
+    virtual void Download(const ImageBufferCopy& a_Copy, const size_t& a_MemoryOffset) override;
     inline void Bind() const {
         glBindTexture(target, handle); //initialize texture object
     }
@@ -67,7 +65,7 @@ struct Texture : Impl {
 };
 
 //compressed
-void Texture<true>::Download(const Image::BufferCopy& a_Copy, const size_t& a_MemoryOffset) {
+void Texture<true>::Download(const ImageBufferCopy& a_Copy, const size_t& a_MemoryOffset) {
     glGetCompressedTextureSubImage(
         handle,
         a_Copy.imageSubresource.level,
@@ -82,7 +80,7 @@ void Texture<true>::Download(const Image::BufferCopy& a_Copy, const size_t& a_Me
 }
 
 //uncompressed
-void Texture<false>::Download(const Image::BufferCopy& a_Copy, const size_t& a_MemoryOffset) {
+void Texture<false>::Download(const ImageBufferCopy& a_Copy, const size_t& a_MemoryOffset) {
     glGetTextureSubImage(
         handle,
         a_Copy.imageSubresource.level,
@@ -101,10 +99,10 @@ void Texture<false>::Download(const Image::BufferCopy& a_Copy, const size_t& a_M
 template <bool Compressed>
 struct Texture1D : Texture<Compressed>
 {
-    Texture1D(const Device::Handle& a_Device, const Info& a_Info)
+    Texture1D(const Device::Handle& a_Device, const CreateImageInfo& a_Info)
         : Texture<Compressed>(a_Device, a_Info, GL_TEXTURE_1D)
     {
-        if (info.samples == Samples::Samples1) {
+        if (info.samples == SampleCount::Count1) {
             device.lock()->PushCommand([this] {
                 Bind(); //initialize texture object
                 glTexStorage1D(
@@ -117,13 +115,13 @@ struct Texture1D : Texture<Compressed>
         }
         else throw std::runtime_error("Cannot create multisampled 1D textures");
     }
-    Texture1D(const Device::Handle& a_Device, const Info& a_Info, bool a_Empty)
+    Texture1D(const Device::Handle& a_Device, const CreateImageInfo& a_Info, bool a_Empty)
         : Texture<Compressed>(a_Device, a_Info, GL_TEXTURE_1D) {}
-    virtual void Upload(const Image::BufferCopy& a_Copy, const size_t& a_MemoryOffset) override;
+    virtual void Upload(const ImageBufferCopy& a_Copy, const size_t& a_MemoryOffset) override;
 };
 
 //compressed
-void Texture1D<true>::Upload(const Image::BufferCopy& a_Copy, const size_t& a_MemoryOffset)
+void Texture1D<true>::Upload(const ImageBufferCopy& a_Copy, const size_t& a_MemoryOffset)
 {
     Bind();//initialize texture object
     glCompressedTexSubImage1D(
@@ -138,7 +136,7 @@ void Texture1D<true>::Upload(const Image::BufferCopy& a_Copy, const size_t& a_Me
 }
 
 //uncompressed
-void Texture1D<false>::Upload(const Image::BufferCopy& a_Copy, const size_t& a_MemoryOffset)
+void Texture1D<false>::Upload(const ImageBufferCopy& a_Copy, const size_t& a_MemoryOffset)
 {
     Bind();//initialize texture object
     glTexSubImage1D(
@@ -155,12 +153,12 @@ void Texture1D<false>::Upload(const Image::BufferCopy& a_Copy, const size_t& a_M
 template <bool Compressed>
 struct Texture2D : Texture<Compressed>
 {
-    Texture2D(const Device::Handle& a_Device, const Info& a_Info)
-    : Texture<Compressed>(a_Device, a_Info, a_Info.samples == Samples::Samples1 ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE)
+    Texture2D(const Device::Handle& a_Device, const CreateImageInfo& a_Info)
+    : Texture<Compressed>(a_Device, a_Info, a_Info.samples == SampleCount::Count1 ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE)
     {
         device.lock()->PushCommand([this] {
             Bind();//initialize texture object
-            if (info.samples == Samples::Samples1)
+            if (info.samples == SampleCount::Count1)
                 glTexStorage2D(
                     target,
                     info.mipLevels,
@@ -177,13 +175,13 @@ struct Texture2D : Texture<Compressed>
             Unbind();
         }, true);
     }
-    Texture2D(const Device::Handle& a_Device, const Info& a_Info, bool a_Empty)
-    : Texture<Compressed>(a_Device, a_Info, a_Info.samples == Samples::Samples1 ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE) {}
-    virtual void Upload(const Image::BufferCopy& a_Copy, const size_t& a_MemoryOffset) override;
+    Texture2D(const Device::Handle& a_Device, const CreateImageInfo& a_Info, bool a_Empty)
+    : Texture<Compressed>(a_Device, a_Info, a_Info.samples == SampleCount::Count1 ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE) {}
+    virtual void Upload(const ImageBufferCopy& a_Copy, const size_t& a_MemoryOffset) override;
 };
 
 //compressed
-void Texture2D<true>::Upload(const Image::BufferCopy& a_Copy, const size_t& a_MemoryOffset)
+void Texture2D<true>::Upload(const ImageBufferCopy& a_Copy, const size_t& a_MemoryOffset)
 {
     Bind();//initialize texture object
     glCompressedTexSubImage2D(
@@ -200,7 +198,7 @@ void Texture2D<true>::Upload(const Image::BufferCopy& a_Copy, const size_t& a_Me
 }
 
 //uncompressed
-void Texture2D<false>::Upload(const Image::BufferCopy& a_Copy, const size_t& a_MemoryOffset)
+void Texture2D<false>::Upload(const ImageBufferCopy& a_Copy, const size_t& a_MemoryOffset)
 {
     Bind();//initialize texture object
     glTexSubImage2D(
@@ -219,12 +217,12 @@ void Texture2D<false>::Upload(const Image::BufferCopy& a_Copy, const size_t& a_M
 template <bool Compressed>
 struct Texture3D : Texture<Compressed>
 {
-    Texture3D(const Device::Handle& a_Device, const Info& a_Info)
-    : Texture<Compressed>(a_Device, a_Info, a_Info.samples == Samples::Samples1 ? GL_TEXTURE_2D_ARRAY : GL_TEXTURE_2D_MULTISAMPLE_ARRAY)
+    Texture3D(const Device::Handle& a_Device, const CreateImageInfo& a_Info)
+    : Texture<Compressed>(a_Device, a_Info, a_Info.samples == SampleCount::Count1 ? GL_TEXTURE_2D_ARRAY : GL_TEXTURE_2D_MULTISAMPLE_ARRAY)
     {
         device.lock()->PushCommand([this] {
             Bind();//initialize texture object
-            if (info.samples == Samples::Samples1)
+            if (info.samples == SampleCount::Count1)
                 glTexStorage3D(
                     target,
                     info.mipLevels,
@@ -243,13 +241,13 @@ struct Texture3D : Texture<Compressed>
             Unbind();
         }, true);
     }
-    Texture3D(const Device::Handle& a_Device, const Info& a_Info, bool a_Empty)
-    : Texture<Compressed>(a_Device, a_Info, a_Info.samples == Samples::Samples1 ? GL_TEXTURE_2D_ARRAY : GL_TEXTURE_2D_MULTISAMPLE_ARRAY) {}
-    virtual void Upload(const Image::BufferCopy& a_Copy, const size_t& a_MemoryOffset) override;
+    Texture3D(const Device::Handle& a_Device, const CreateImageInfo& a_Info, bool a_Empty)
+    : Texture<Compressed>(a_Device, a_Info, a_Info.samples == SampleCount::Count1 ? GL_TEXTURE_2D_ARRAY : GL_TEXTURE_2D_MULTISAMPLE_ARRAY) {}
+    virtual void Upload(const ImageBufferCopy& a_Copy, const size_t& a_MemoryOffset) override;
 };
 
 //compressed
-void Texture3D<true>::Upload(const Image::BufferCopy& a_Copy, const size_t& a_MemoryOffset)
+void Texture3D<true>::Upload(const ImageBufferCopy& a_Copy, const size_t& a_MemoryOffset)
 {
     Bind();//initialize texture object
     glCompressedTexSubImage3D(
@@ -268,7 +266,7 @@ void Texture3D<true>::Upload(const Image::BufferCopy& a_Copy, const size_t& a_Me
 }
 
 //uncompressed
-void Texture3D<false>::Upload(const Image::BufferCopy& a_Copy, const size_t& a_MemoryOffset)
+void Texture3D<false>::Upload(const ImageBufferCopy& a_Copy, const size_t& a_MemoryOffset)
 {
     Bind();//initialize texture object
     glTexSubImage3D(
@@ -286,44 +284,21 @@ void Texture3D<false>::Upload(const Image::BufferCopy& a_Copy, const size_t& a_M
     Unbind();
 }
 
-Handle Create(const Device::Handle& a_Device, const Info& a_Info)
+Handle CreateEmpty(const Device::Handle& a_Device, const CreateImageInfo& a_Info)
 {
     Impl* impl;
     const auto isCompressed = IsCompressedFormat(a_Info.format);
     switch (a_Info.type)
     {
-    case Image::Type::Image1D:
-        if (isCompressed) impl = new Texture1D<true>(a_Device, a_Info);
-        else impl = new Texture1D<false>(a_Device, a_Info);
-        break;
-    case Image::Type::Image2D:
-        if (isCompressed) impl = new Texture2D<true>(a_Device, a_Info);
-        else impl = new Texture2D<false>(a_Device, a_Info);
-        break;
-    case Image::Type::Image3D:
-        if (isCompressed) impl = new Texture3D<true>(a_Device, a_Info);
-        else impl = new Texture3D<false>(a_Device, a_Info);
-        break;
-    default: throw std::runtime_error("Unknown Image Type");
-    }
-    return Handle(impl);
-}
-
-Handle CreateEmpty(const Device::Handle& a_Device, const Info& a_Info)
-{
-    Impl* impl;
-    const auto isCompressed = IsCompressedFormat(a_Info.format);
-    switch (a_Info.type)
-    {
-    case Image::Type::Image1D:
+    case ImageType::Image1D:
         if (isCompressed) impl = new Texture1D<true>(a_Device, a_Info);
         else impl = new Texture1D<false>(a_Device, a_Info, true);
         break;
-    case Image::Type::Image2D:
+    case ImageType::Image2D:
         if (isCompressed) impl = new Texture2D<true>(a_Device, a_Info);
         else impl = new Texture2D<false>(a_Device, a_Info, true);
         break;
-    case Image::Type::Image3D:
+    case ImageType::Image3D:
         if (isCompressed) impl = new Texture3D<true>(a_Device, a_Info);
         else impl = new Texture3D<false>(a_Device, a_Info, true);
         break;
@@ -331,16 +306,12 @@ Handle CreateEmpty(const Device::Handle& a_Device, const Info& a_Info)
     }
     return Handle(impl);
 }
-const Info& GetInfo(const Device::Handle& a_Device, const Handle& a_Handle)
-{
-    return a_Handle->info;
-}
 
 void CopyBufferToImage(
     const Device::Handle& a_Device,
     const OCRA::Buffer::Handle& a_SrcBuffer,
     const Image::Handle& a_DstImage,
-    const std::vector<Image::BufferCopy>& a_Regions)
+    const std::vector<ImageBufferCopy>& a_Regions)
 {
     for (const auto& copy : a_Regions) CheckValidCopy(copy, a_DstImage);
     a_Device->PushCommand([
@@ -357,7 +328,7 @@ void CopyImageToBuffer(
     const Device::Handle& a_Device,
     const OCRA::Buffer::Handle& a_DstBuffer,
     const Image::Handle& a_SrcImage,
-    const std::vector<Image::BufferCopy>& a_Regions)
+    const std::vector<ImageBufferCopy>& a_Regions)
 {
     for (const auto& copy : a_Regions) CheckValidCopy(copy, a_SrcImage);
     a_Device->PushCommand([
@@ -377,5 +348,32 @@ void GenerateMipMap(
     a_Device->PushCommand([image=a_Image] {
         glGenerateTextureMipmap(image->handle);
     }, false);
+}
+}
+
+namespace OCRA::Device {
+Image::Handle CreateImage(
+    const Device::Handle& a_Device,
+    const CreateImageInfo& a_Info)
+{
+    Image::Impl* impl;
+    const auto isCompressed = IsCompressedFormat(a_Info.format);
+    switch (a_Info.type)
+    {
+    case ImageType::Image1D:
+        if (isCompressed) impl = new Image::Texture1D<true>(a_Device, a_Info);
+        else impl = new Image::Texture1D<false>(a_Device, a_Info);
+        break;
+    case ImageType::Image2D:
+        if (isCompressed) impl = new Image::Texture2D<true>(a_Device, a_Info);
+        else impl = new Image::Texture2D<false>(a_Device, a_Info);
+        break;
+    case ImageType::Image3D:
+        if (isCompressed) impl = new Image::Texture3D<true>(a_Device, a_Info);
+        else impl = new Image::Texture3D<false>(a_Device, a_Info);
+        break;
+    default: throw std::runtime_error("Unknown Image Type");
+    }
+    return Image::Handle(impl);
 }
 }

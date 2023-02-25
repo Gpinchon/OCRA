@@ -1,12 +1,12 @@
-#include <OCRA/Descriptor/Set.hpp>
+#include <OCRA/Core.hpp>
 
 #include <GL/Descriptor/Set.hpp>
 
 namespace OCRA::Descriptor::Set {
 void Update(
     const Device::Handle& a_Device,
-    const std::vector<WriteOperation>&  a_Writes,
-    const std::vector<CopyOperation>&   a_Copies)
+    const std::vector<DescriptorSetWrite>&  a_Writes,
+    const std::vector<DescriptorSetCopy>&   a_Copies)
 {
     for (const auto& writeOperation : a_Writes) {
         writeOperation.dstSet->Write(writeOperation);

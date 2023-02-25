@@ -6,19 +6,17 @@
 */
 #pragma once
 
-#include <OCRA/Handle.hpp>
-#include <OCRA/Image/View.hpp>
-
+#include <OCRA/Core.hpp>
 
 OCRA_DECLARE_HANDLE(OCRA::Device);
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
 
 namespace OCRA::Image::View {
 struct Impl {
-    Impl(const Device::Handle& a_Device, const Info& a_Info);
+    Impl(const Device::Handle& a_Device, const CreateImageViewInfo& a_Info);
     ~Impl();
-    const Device::WeakHandle device;
-    const Info info;
+    const Device::WeakHandle  device;
+    const CreateImageViewInfo info;
     const uint32_t target;
     const uint32_t format;
     const uint32_t handle;

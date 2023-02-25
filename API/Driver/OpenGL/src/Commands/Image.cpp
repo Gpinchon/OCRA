@@ -10,7 +10,7 @@ struct CopyImageCommand : CommandI {
         const Image::Handle& a_SrcImage,
         const Image::Handle& a_DstImage,
         const size_t& a_Count,
-        const Image::Copy* a_Regions)
+        const ImageCopy* a_Regions)
         : srcImage(a_SrcImage)
         , dstImage(a_DstImage)
         , regions(a_Regions, a_Regions + a_Count, a_MemoryResource)
@@ -25,7 +25,7 @@ struct CopyImageCommand : CommandI {
     }
     const Image::Handle srcImage;
     const Image::Handle dstImage;
-    const std::pmr::vector<Image::Copy> regions;
+    const std::pmr::vector<ImageCopy> regions;
 };
 
 struct GenerateMipMapCommand : CommandI {
@@ -44,7 +44,7 @@ struct ClearColorImageCommand : CommandI {
         const Image::Handle& a_Image,
         const ColorValue&    a_Color,
         const size_t&        a_Count,
-        const Image::Subresource::Range* a_Ranges)
+        const ImageSubresourceRange* a_Ranges)
         : image(a_Image)
         , color(a_Color)
         , ranges(a_Ranges, a_Ranges + a_Count, a_MemoryResource)
@@ -63,14 +63,14 @@ struct ClearColorImageCommand : CommandI {
     }
     const Image::Handle image;
     const ColorValue    color;
-    const std::pmr::vector<Image::Subresource::Range> ranges;
+    const std::pmr::vector<ImageSubresourceRange> ranges;
 };
 
 void CopyBufferToImage(
     const Command::Buffer::Handle& a_CommandBuffer,
     const OCRA::Buffer::Handle&    a_SrcBuffer,
     const Image::Handle&           a_DstImage,
-    const std::vector<Image::BufferCopy>& a_Regions)
+    const std::vector<ImageBufferCopy>& a_Regions)
 {
     for (const auto& copy : a_Regions) CheckValidCopy(copy, a_DstImage);
     a_CommandBuffer->PushCommand<GenericCommand>([
@@ -87,7 +87,7 @@ void CopyImageToBuffer(
     const Command::Buffer::Handle& a_CommandBuffer,
     const OCRA::Buffer::Handle&    a_DstBuffer,
     const Image::Handle&           a_SrcImage,
-    const std::vector<Image::BufferCopy>& a_Regions)
+    const std::vector<ImageBufferCopy>& a_Regions)
 {
     for (const auto& copy : a_Regions) CheckValidCopy(copy, a_SrcImage);
     a_CommandBuffer->PushCommand<GenericCommand>([
@@ -105,7 +105,7 @@ void CopyImage(
     const Command::Buffer::Handle&  a_CommandBuffer,
     const Image::Handle&            a_SrcImage,
     const Image::Handle&            a_DstImage,
-    const std::vector<Image::Copy>&  a_Regions)
+    const std::vector<ImageCopy>&  a_Regions)
 {
     a_CommandBuffer->PushCommand<CopyImageCommand>(
         a_CommandBuffer->memoryResource,
@@ -123,9 +123,9 @@ void GenerateMipMap(
 void ClearColorImage(
     const Command::Buffer::Handle& a_CommandBuffer,
     const Image::Handle&           a_Image,
-    const Image::Layout&           a_ImageLayout,
+    const ImageLayout&             a_ImageLayout,
     const ColorValue&              a_Color,
-    const std::vector<Image::Subresource::Range>& a_Ranges)
+    const std::vector<ImageSubresourceRange>& a_Ranges)
 {
     a_CommandBuffer->PushCommand<ClearColorImageCommand>(
         a_CommandBuffer->memoryResource, a_Image, a_Color,

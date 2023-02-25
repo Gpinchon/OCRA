@@ -2,8 +2,7 @@
 
 #include <GL/SwapChain.hpp>
 
-#include <OCRA/Common/Extent3D.hpp>
-#include <OCRA/Common/Vec2.hpp>
+#include <OCRA/Structs.hpp>
 
 #include <GL/Common/WorkerThread.hpp>
 
@@ -26,7 +25,7 @@ namespace OCRA::SwapChain::Win32
 {
 struct Impl : SwapChain::Impl
 {
-    Impl(const Device::Handle& a_Device, const Info& a_Info);
+    Impl(const Device::Handle& a_Device, const CreateSwapChainInfo& a_Info);
     ~Impl();
     //when retiring the SwapChain becomes "empty"
     //retired SwapChains loose ownership of their FB and get unusable
@@ -42,7 +41,7 @@ struct Impl : SwapChain::Impl
 
     const Device::WeakHandle    device;
     const Surface::Handle       surface{ nullptr };
-    const PresentMode           presentMode;
+    const SwapChainPresentMode  presentMode;
     bool                        retired{ false };
 
     WorkerThread                     workerThread;

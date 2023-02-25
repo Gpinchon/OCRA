@@ -1,16 +1,11 @@
 #pragma once
 
-#include <OCRA/Handle.hpp>
-#include <OCRA/Surface.hpp>
-#include <OCRA/Common/Extent2D.hpp>
+#include <OCRA/Handles.hpp>
+#include <OCRA/SwapChain/Handles.hpp>
 
-
-#include <functional>
 #include <string>
-#include <vector>
 
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Instance);
-OCRA_DECLARE_HANDLE(OCRA::Instance);
 
 namespace OCRA::Surface
 {

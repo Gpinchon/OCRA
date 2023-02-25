@@ -99,8 +99,8 @@ void Impl::GetResult(
         }
     }, true);
 }
-PipelineStatistics::PipelineStatistics(const Device::Handle& a_Device, const Info& a_Info)
-    : Impl(a_Device, a_Info.count * a_Info.pipelineStatistics.count(), GetPipelineQueryTargets(a_Info.pipelineStatistics), Type::PipelineStatistics)
+PipelineStatistics::PipelineStatistics(const Device::Handle& a_Device, const CreateQueryPoolInfo& a_Info)
+    : Impl(a_Device, a_Info.count * a_Info.pipelineStatistics.count(), GetPipelineQueryTargets(a_Info.pipelineStatistics), QueryType::PipelineStatistics)
     , pipelineStatisticsCount(a_Info.pipelineStatistics.count())
 {}
 void PipelineStatistics::GetResult(

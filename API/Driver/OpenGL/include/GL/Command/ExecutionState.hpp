@@ -1,16 +1,6 @@
 #pragma once
 
-#include <OCRA/Handle.hpp>
-#include <OCRA/Common/ClearValue.hpp>
-#include <OCRA/Common/Compare.hpp>
-#include <OCRA/Common/DepthBounds.hpp>
-#include <OCRA/Common/Stencil.hpp>
-#include <OCRA/Common/Rect2D.hpp>
-#include <OCRA/Common/Vec4.hpp>
-
-#include <OCRA/Common/ViewPort.hpp>
-#include <OCRA/FrameBuffer.hpp>
-#include <OCRA/RenderPass.hpp>
+#include <OCRA/Structs.hpp>
 
 #include <GL/Common/Stencil.hpp>
 #include <GL/Descriptor/Binding.hpp>
@@ -126,8 +116,8 @@ struct ExecutionState {
     GLenum              primitiveTopology{ GL_NONE };
     RenderPass          renderPass{};
     DynamicStates       dynamicStates{};
-    std::array<PipelineState, size_t(Pipeline::BindingPoint::MaxValue)> pipelineState{};
-    std::array<PipelineState, size_t(Pipeline::BindingPoint::MaxValue)> lastPipelineState{};
+    std::array<PipelineState, size_t(PipelineBindingPoint::MaxValue)> pipelineState{};
+    std::array<PipelineState, size_t(PipelineBindingPoint::MaxValue)> lastPipelineState{};
     
 };
 }

@@ -1,9 +1,11 @@
 #include <GL/Device.hpp>
 #include <GL/Queue.hpp>
 
-#include <OCRA/PhysicalDevice.hpp>
+#include <OCRA/Core.hpp>
 
-OCRA::Device::Handle OCRA::PhysicalDevice::CreateDevice(
+namespace OCRA::PhysicalDevice
+{
+Device::Handle CreateDevice(
     const PhysicalDevice::Handle& a_PhysicalDevice,
     const CreateDeviceInfo& a_Info,
     const AllocationCallback* a_Allocator)
@@ -16,6 +18,8 @@ OCRA::Device::Handle OCRA::PhysicalDevice::CreateDevice(
     }
     return device;
 }
+}
+
 
 namespace OCRA::Device
 {

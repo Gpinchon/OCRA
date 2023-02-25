@@ -1,7 +1,6 @@
 #pragma once
 
-#include <OCRA/Handle.hpp>
-#include <OCRA/Device.hpp>
+#include <OCRA/Handles.hpp>
 
 #include <GL/Common/Assert.hpp>
 #include <GL/PhysicalDevice.hpp>
@@ -11,8 +10,6 @@
 #include <vector>
 
 OCRA_DECLARE_WEAK_HANDLE(OCRA::PhysicalDevice);
-OCRA_DECLARE_HANDLE(OCRA::PhysicalDevice);
-OCRA_DECLARE_HANDLE(OCRA::Queue);
 
 namespace OCRA::Device
 {

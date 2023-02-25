@@ -153,7 +153,7 @@ void BindIndexBuffer(
 //Begin Render Pass recording
 void BeginRenderPass(
     const Command::Buffer::Handle& a_CommandBuffer,
-    const BeginRenderPassInfo& a_BeginInfo,
+    const RenderPassBeginInfo& a_BeginInfo,
     const SubPassContents& a_SubPassContents);
 
 void NextSubPass(

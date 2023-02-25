@@ -4,17 +4,23 @@
 
 #include <GL/glew.h>
 
+namespace OCRA::Device {
+Image::Sampler::Handle CreateSampler(const Device::Handle& a_Device, const CreateSamplerInfo& a_Info) {
+    return std::make_shared<Image::Sampler::Impl>(a_Device, a_Info);
+}
+}
+
 namespace OCRA::Image::Sampler {
-static inline auto GetGLAddressMode(const AddressMode& a_AddressMode) {
+static inline auto GetGLAddressMode(const SamplerAddressMode& a_AddressMode) {
     switch (a_AddressMode)
     {
-    case OCRA::Image::Sampler::AddressMode::Repeat:
+    case SamplerAddressMode::Repeat:
         return GL_REPEAT;
-    case OCRA::Image::Sampler::AddressMode::MirroredRepeat:
+    case SamplerAddressMode::MirroredRepeat:
         return GL_MIRRORED_REPEAT;
-    case OCRA::Image::Sampler::AddressMode::ClampToEdge:
+    case SamplerAddressMode::ClampToEdge:
         return GL_CLAMP_TO_EDGE;
-    case OCRA::Image::Sampler::AddressMode::ClampToBorder:
+    case SamplerAddressMode::ClampToBorder:
         return GL_CLAMP_TO_BORDER;
     default:
         throw std::runtime_error("Unknown Address Mode");
@@ -24,9 +30,9 @@ static inline auto GetGLAddressMode(const AddressMode& a_AddressMode) {
 static inline auto GetGLMagFilter(const Filter& a_Filter) {
     switch (a_Filter)
     {
-    case OCRA::Image::Filter::Nearest:
+    case Filter::Nearest:
         return GL_NEAREST;
-    case OCRA::Image::Filter::Linear:
+    case Filter::Linear:
         return GL_LINEAR;
     default:
         throw std::runtime_error("Unknown Filter Mode");
@@ -36,16 +42,16 @@ static inline auto GetGLMagFilter(const Filter& a_Filter) {
 static inline auto GetGLMinFilter(const Filter& a_Filter, const Filter& a_MipmapMode) {
     switch (a_Filter)
     {
-    case OCRA::Image::Filter::Nearest:
+    case Filter::Nearest:
         return (a_MipmapMode == Filter::Nearest) ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST_MIPMAP_LINEAR;
-    case OCRA::Image::Filter::Linear:
+    case Filter::Linear:
         return (a_MipmapMode == Filter::Nearest) ? GL_LINEAR_MIPMAP_NEAREST : GL_LINEAR_MIPMAP_LINEAR;;
     default:
         throw std::runtime_error("Unknown Filter Mode");
     }
 }
 
-static inline auto CreateImageSampler(const Device::Handle& a_Device, const Info& a_Info)
+static inline auto CreateImageSampler(const Device::Handle& a_Device, const CreateSamplerInfo& a_Info)
 {
     uint32_t handle{ 0 };
     a_Device->PushCommand([&handle, &a_Info] {
@@ -65,7 +71,7 @@ static inline auto CreateImageSampler(const Device::Handle& a_Device, const Info
     }, true);
     return handle;
 }
-Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
+Impl::Impl(const Device::Handle& a_Device, const CreateSamplerInfo& a_Info)
     : device(a_Device)
     , handle(CreateImageSampler(a_Device, a_Info))
     , info(a_Info)
@@ -76,8 +82,4 @@ Impl::~Impl()
         glDeleteSamplers(1, &handle);
     }, false);
 }
-Handle Create(const Device::Handle& a_Device, const Info& a_Info) {
-    return Handle(new Impl(a_Device, a_Info));
-}
-
 }

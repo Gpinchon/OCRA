@@ -1,7 +1,6 @@
 #pragma once
 
-#include <OCRA/Handle.hpp>
-#include <OCRA/QueryPool.hpp>
+#include <OCRA/Core.hpp>
 
 #include <GL/glew.h>
 
@@ -14,7 +13,7 @@ namespace OCRA::QueryPool
 {
 struct Impl
 {
-    Impl(const Device::Handle& a_Device, const uint32_t& a_Count, const std::vector<GLenum>& a_Targets, const Type& a_Type);
+    Impl(const Device::Handle& a_Device, const uint32_t& a_Count, const std::vector<GLenum>& a_Targets, const QueryType& a_Type);
     ~Impl();
     virtual void Begin(const uint32_t& a_Index) {
         glBeginQuery(handles.at(a_Index), targets.at(a_Index));
@@ -29,14 +28,14 @@ struct Impl
         void* const a_Data,
         const size_t& a_Stride,
         const QueryResultFlags& a_Flags);
-    const Type type;
+    const QueryType type;
     const Device::WeakHandle device;
     const std::vector<GLuint> handles;
     const std::vector<GLenum> targets;
 };
 struct PipelineStatistics : Impl
 {
-    PipelineStatistics(const Device::Handle& a_Device, const Info& a_Info);
+    PipelineStatistics(const Device::Handle& a_Device, const CreateQueryPoolInfo& a_Info);
     virtual void Begin(const uint32_t& a_Index) override {
         const auto handlesIndex = a_Index * pipelineStatisticsCount;
         for (auto targetIndex = 0; targetIndex < pipelineStatisticsCount; ++targetIndex) {

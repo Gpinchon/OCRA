@@ -1,4 +1,4 @@
-#include <OCRA/Descriptor/Pool.hpp>
+#include <OCRA/Core.hpp>
 
 #include <GL/Descriptor/Set.hpp>
 #include <GL/Descriptor/SetLayout.hpp>
@@ -11,13 +11,20 @@ OCRA_DECLARE_HANDLE(OCRA::Descriptor::Set);
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Descriptor::Set);
 #endif
 
-namespace OCRA {
-struct AllocationCallback;
+namespace OCRA::Device
+{
+Descriptor::Pool::Handle Create(
+    const Device::Handle& a_Device,
+    const CreateDescriptorPoolInfo& a_Info,
+    const AllocationCallback* a_Allocator)
+{
+    return std::make_shared<Descriptor::Pool::Impl>(a_Device, a_Info);
+}
 }
 
 namespace OCRA::Descriptor::Pool
 {
-auto GetTypeCount(const Info& a_Info, const Type& a_Type) {
+auto GetTypeCount(const CreateDescriptorPoolInfo& a_Info, const DescriptorType& a_Type) {
     size_t count = 0;
     for (const auto& size : a_Info.sizes) {
         count += size.type == a_Type ? size.count : 0;
@@ -27,7 +34,7 @@ auto GetTypeCount(const Info& a_Info, const Type& a_Type) {
 
 struct Impl
 {
-    Impl(const Device::Handle& a_Device, const Info& a_Info)
+    Impl(const Device::Handle& a_Device, const CreateDescriptorPoolInfo& a_Info)
     {}
     std::pmr::unsynchronized_pool_resource  memory_resource;
 
@@ -40,15 +47,7 @@ struct Impl
 #endif
 };
 
-Handle Create(
-    const Device::Handle&       a_Device,
-    const Info&                 a_Info,
-    const AllocationCallback*   a_Allocator)
-{
-    return Handle(new Impl(a_Device, a_Info));
-}
-
-Set::Handle AllocateSet(const Device::Handle& a_Device, const AllocateInfo& a_Info)
+Set::Handle AllocateSet(const Device::Handle& a_Device, const AllocateDescriptorSetInfo& a_Info)
 {
     size_t bindingCount = 0;
     const auto& bindings = a_Info.layout->bindings;

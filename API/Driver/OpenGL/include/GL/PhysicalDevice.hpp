@@ -1,7 +1,6 @@
 #pragma once
 
-#include <OCRA/Handle.hpp>
-#include <OCRA/PhysicalDevice.hpp>
+#include <OCRA/Core.hpp>
 
 #include <GL/Common/WorkerThread.hpp>
 

@@ -6,11 +6,11 @@
 */
 #pragma once
 
-#include <OCRA/Common/Component.hpp>
+#include <OCRA/Core.hpp>
 
 #include <GL/glew.h>
 
-namespace OCRA::Component {
+namespace OCRA {
 inline GLenum GetGLSwizzle(const Swizzle& a_Swizzle, const GLenum& a_SwizzleComponent) {
     switch (a_Swizzle)
     {
@@ -40,7 +40,7 @@ inline GLenum GetGLSwizzle(const Swizzle& a_Swizzle, const GLenum& a_SwizzleComp
 }
 struct GLSwizzleMask
 {
-    GLSwizzleMask(const Mapping& a_Mapping)
+    GLSwizzleMask(const ComponentMapping& a_Mapping)
         : r(GetGLSwizzle(a_Mapping.r, GL_TEXTURE_SWIZZLE_R))
         , g(GetGLSwizzle(a_Mapping.g, GL_TEXTURE_SWIZZLE_G))
         , b(GetGLSwizzle(a_Mapping.b, GL_TEXTURE_SWIZZLE_B))

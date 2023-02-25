@@ -1,7 +1,6 @@
 #pragma once
 
 #include <OCRA/Handle.hpp>
-#include <OCRA/Command/Buffer.hpp>
 
 #include <GL/Common/Assert.hpp>
 #include <GL/Command/CommandInterface.hpp>
@@ -13,6 +12,18 @@
 
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Command::Buffer);
 OCRA_DECLARE_HANDLE(OCRA::Command::Buffer);
+
+namespace OCRA
+{
+enum class CommandBufferState {
+    Initial,
+    Recording,
+    Executable,
+    Pending,
+    Invalid,
+    MaxValue
+};
+}
 
 namespace OCRA::Command::Buffer
 {
@@ -48,16 +59,9 @@ struct CommandStorage
     const size_t alignment;
 };
 
-enum class State {
-    Initial, Recording, Executable, Pending, Invalid
-};
-enum class Level {
-    Unknown = -1, Primary, Secondary
-};
-
 struct Impl
 {
-    Impl(const Device::Handle& a_Device, const Level a_Level, std::pmr::memory_resource* a_MemoryResource)
+    Impl(const Device::Handle& a_Device, const CommandBufferLevel a_Level, std::pmr::memory_resource* a_MemoryResource)
         : level(a_Level)
         , pushConstants(a_Device)
         , memoryResource(a_MemoryResource)
@@ -65,7 +69,7 @@ struct Impl
     ~Impl() { Invalidate(); }
     void Reset();
     void Invalidate();
-    void Begin(const Buffer::BeginInfo& a_BeginInfo);
+    void Begin(const CommandBufferBeginInfo& a_BeginInfo);
     void End();
     void ExecutePrimary();
     void ExecuteSecondary(ExecutionState& a_PrimaryExecutionState);
@@ -74,14 +78,14 @@ struct Impl
     template<typename C, typename... Args>
     inline void PushCommand(Args&&... a_Args)
     {
-        OCRA_ASSERT(state == State::Recording);
+        OCRA_ASSERT(state == CommandBufferState::Recording);
         auto commandStorage = memoryResource->allocate(sizeof(C), alignof(C));
         auto command = new(commandStorage) C(std::forward<Args>(a_Args)...);
         commands.push_back({ command, memoryResource });
     }
-    const Level level;
-    State       state{ State::Initial };
-    UsageFlags  usageFlags;
+    const CommandBufferLevel level;
+    CommandBufferState      state{ CommandBufferState::Initial };
+    CommandBufferUsageFlags usageFlags;
     OCRA::PushConstants     pushConstants;
     ExecutionState          executionState;
     std::pmr::memory_resource*   memoryResource; //the command pool's memory resource

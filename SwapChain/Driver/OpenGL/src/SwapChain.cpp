@@ -1,5 +1,4 @@
 #include <OCRA/SwapChain.hpp>
-#include <OCRA/Image/Image.hpp>
 
 #ifdef _WIN32
 #include <GL/Win32/SwapChain.hpp>
@@ -19,20 +18,25 @@
 
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
 
-namespace OCRA::SwapChain
+namespace OCRA::Device
 {
-Handle Create(const Device::Handle& a_Device, const Info& a_Info)
+SwapChain::Handle CreateSwapChain(const Device::Handle& a_Device, const CreateSwapChainInfo& a_Info)
 {
 #ifdef _WIN32
-    return Handle(new SwapChain::Win32::Impl(a_Device, a_Info));
+    return std::make_shared<SwapChain::Win32::Impl>(a_Device, a_Info);
 #endif //_WIN32
 }
 
-void Present(const Queue::Handle& a_Queue, const PresentInfo& a_PresentInfo)
+}
+
+namespace OCRA::SwapChain
+{
+
+void Present(const Queue::Handle& a_Queue, const SwapChainPresentInfo& a_PresentInfo)
 {
     a_Queue->PushCommand([a_PresentInfo]{
         for (const auto& semaphore : a_PresentInfo.waitSemaphores) {
-            OCRA_ASSERT(semaphore->type == Semaphore::Type::Binary && "Cannot wait on Timeline Semaphores when presenting");
+            OCRA_ASSERT(semaphore->type == SemaphoreType::Binary && "Cannot wait on Timeline Semaphores when presenting");
             std::static_pointer_cast<Semaphore::Binary>(semaphore)->Wait();
         }
     }, false);

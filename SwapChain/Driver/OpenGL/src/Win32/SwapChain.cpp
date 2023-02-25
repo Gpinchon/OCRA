@@ -1,3 +1,5 @@
+#include <OCRA/OCRA.hpp>
+
 #include <GL/Win32/SwapChain.hpp>
 #include <GL/Win32/PresentGeometry.hpp>
 #include <GL/Win32/PresentPixels.hpp>
@@ -45,7 +47,7 @@ void GLAPIENTRY MessageCallback(
         throw std::runtime_error(ss.str());
     }
 }
-static inline auto CreateImages(const Device::Handle& a_Device, const Info& a_Info)
+static inline auto CreateImages(const Device::Handle& a_Device, const CreateSwapChainInfo& a_Info)
 {
     std::vector<Image::Handle> images;
     images.reserve(a_Info.imageCount);
@@ -62,28 +64,28 @@ static inline auto CreateImages(const Device::Handle& a_Device, const Info& a_In
             if (canRecycle) image = win32SwapChain->images.at(i);
         }
         if (image == nullptr) {
-            Image::Info imageInfo{};
-            imageInfo.type = Image::Type::Image2D;
+            CreateImageInfo imageInfo{};
+            imageInfo.type = ImageType::Image2D;
             imageInfo.extent.width = a_Info.imageExtent.width;
             imageInfo.extent.height = a_Info.imageExtent.height;
             imageInfo.extent.depth = 1;
             imageInfo.mipLevels = 1;
             imageInfo.arrayLayers = a_Info.imageArrayLayers;
             imageInfo.format = a_Info.imageFormat;
-            image = Image::Create(a_Device, imageInfo);
+            image = CreateImage(a_Device, imageInfo);
         }
         images.push_back(image);
     }
     return images;
 }
 
-Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
+Impl::Impl(const Device::Handle& a_Device, const CreateSwapChainInfo& a_Info)
     : device(a_Device)
     , surface(a_Info.surface)
     , presentMode(a_Info.presentMode)
     , images(CreateImages(a_Device, a_Info))
 {
-    const auto pixelSize = GetPixelSize(a_Info.imageFormat);
+    const auto pixelSize = Image::GetPixelSize(a_Info.imageFormat);
     auto win32SwapChain = std::static_pointer_cast<SwapChain::Win32::Impl>(a_Info.oldSwapchain);
     if (win32SwapChain != nullptr && !win32SwapChain->retired) {
         win32SwapChain->workerThread.Wait();
@@ -115,7 +117,7 @@ Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
     }
     workerThread.PushCommand([this, &a_Info, pixelSize] {
         WIN32_CHECK_ERROR(wglMakeCurrent(HDC(hdc), HGLRC(hglrc)));
-        if (a_Info.presentMode == PresentMode::Immediate) {
+        if (a_Info.presentMode == SwapChainPresentMode::Immediate) {
             WIN32_CHECK_ERROR(wglSwapIntervalEXT(0));
         }
         else WIN32_CHECK_ERROR(wglSwapIntervalEXT(1));
@@ -197,7 +199,7 @@ void Impl::Present(const Queue::Handle& a_Queue)
 void Impl::PresentNV(const Queue::Handle& a_Queue)
 {
     //Only Mailbox mode can stack several presentation requests
-    if (presentMode != PresentMode::Mailbox) workerThread.Wait();
+    if (presentMode != SwapChainPresentMode::Mailbox) workerThread.Wait();
     workerThread.PushCommand([this, queue = a_Queue] {
         queue->PushCommand([this] {
             const auto& image = images.at(backBufferIndex);
@@ -218,7 +220,7 @@ void Impl::PresentNV(const Queue::Handle& a_Queue)
 void Impl::PresentGL(const Queue::Handle& a_Queue)
 {
     //Only Mailbox mode can stack several presentation requests
-    if (presentMode != PresentMode::Mailbox) workerThread.Wait();
+    if (presentMode != SwapChainPresentMode::Mailbox) workerThread.Wait();
     workerThread.PushCommand([this, queue = a_Queue] {
         queue->PushCommand([this] {
             const auto& image = images.at(backBufferIndex);
@@ -252,7 +254,7 @@ Image::Handle Impl::AcquireNextImage(
     device.lock()->PushCommand([semaphore = a_Semaphore, fence = a_Fence] {
         //We do not need to synchronize with the GPU for real here
         if (semaphore != nullptr) {
-            OCRA_ASSERT(semaphore->type == Semaphore::Type::Binary && "Cannot wait on Timeline Semaphores when requesting next image");
+            OCRA_ASSERT(semaphore->type == SemaphoreType::Binary && "Cannot wait on Timeline Semaphores when requesting next image");
             std::static_pointer_cast<Semaphore::Binary>(semaphore)->Signal();
         }
         if (fence != nullptr) fence->SignalNoSync();

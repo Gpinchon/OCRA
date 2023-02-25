@@ -18,7 +18,7 @@ static inline auto CheckShaderCompilation(GLuint a_Shader)
             auto infoLog = new char[length];
             glGetShaderInfoLog(a_Shader, length, nullptr, infoLog);
             std::string logString(infoLog, infoLog + length);
-            delete infoLog;
+            delete[] infoLog;
             throw std::runtime_error(logString);
         }
         else throw std::runtime_error("Unknown Error");

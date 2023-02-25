@@ -1,7 +1,6 @@
 #pragma once
 
-#include <OCRA/Descriptor/Set.hpp>
-#include <OCRA/Descriptor/Type.hpp>
+#include <OCRA/Core.hpp>
 
 #include <GL/Common/Assert.hpp>
 #include <GL/Descriptor/SetLayout.hpp>
@@ -17,7 +16,7 @@ namespace OCRA::Descriptor
 struct Storage {
     virtual ~Storage() = default;
     virtual void operator=(const Storage& a_Other) = 0;
-    virtual void operator=(const Set::WriteOperation& a_Write) = 0;
+    virtual void operator=(const DescriptorSetWrite& a_Write) = 0;
     virtual void Bind(uint32_t a_BindingIndex) = 0;
     virtual void Unbind(uint32_t a_BindingIndex) = 0;
 };
@@ -27,7 +26,7 @@ struct ImageStorage : Storage {
         auto& data = static_cast<const ImageStorage&>(a_Other);
         imageView = data.imageView;
     }
-    virtual void operator=(const Set::WriteOperation& a_Write) override {
+    virtual void operator=(const DescriptorSetWrite& a_Write) override {
         imageView = a_Write.imageInfo->imageView;
     }
     virtual void Bind(uint32_t a_BindingIndex) override {
@@ -48,7 +47,7 @@ struct SampledImage : ImageStorage {
         auto& data = static_cast<const SampledImage&>(a_Other);
         imageSampler = data.imageSampler;
     }
-    virtual void operator=(const Set::WriteOperation& a_Write) override {
+    virtual void operator=(const DescriptorSetWrite& a_Write) override {
         ImageStorage::operator=(a_Write);
         imageSampler = a_Write.imageInfo->sampler;
     }
@@ -81,7 +80,7 @@ struct BufferStorage : Storage {
         offset = data.offset;
         range  = data.range;
     }
-    virtual void operator=(const Set::WriteOperation& a_Write) override {
+    virtual void operator=(const DescriptorSetWrite& a_Write) override {
         buffer = a_Write.bufferInfo->buffer;
         offset = a_Write.bufferInfo->offset + buffer->memoryBinding.offset;
         range = a_Write.bufferInfo->range;
@@ -127,7 +126,7 @@ struct InputAttachment : Storage {
     virtual void operator=(const Storage& a_Other) override {
         auto& data = static_cast<const InputAttachment&>(a_Other);
     }
-    virtual void operator=(const Set::WriteOperation& a_Write) override {}
+    virtual void operator=(const DescriptorSetWrite& a_Write) override {}
     virtual void Bind(uint32_t a_BindingIndex) override {}
     virtual void Unbind(uint32_t a_BindingIndex) override {}
 };
@@ -135,7 +134,7 @@ struct InlineUniformBlock : Storage {
     virtual void operator=(const Storage& a_Other) override {
         auto& data = static_cast<const InlineUniformBlock&>(a_Other);
     }
-    virtual void operator=(const Set::WriteOperation& a_Write) override {}
+    virtual void operator=(const DescriptorSetWrite& a_Write) override {}
     virtual void Bind(uint32_t a_BindingIndex) override {}
     virtual void Unbind(uint32_t a_BindingIndex) override {}
 };
@@ -143,7 +142,7 @@ struct AccelerationStructure : Storage {
     virtual void operator=(const Storage& a_Other) override {
         auto& data = static_cast<const AccelerationStructure&>(a_Other);
     }
-    virtual void operator=(const Set::WriteOperation& a_Write) override {}
+    virtual void operator=(const DescriptorSetWrite& a_Write) override {}
     virtual void Bind(uint32_t a_BindingIndex) override {}
     virtual void Unbind(uint32_t a_BindingIndex) override {}
 };
@@ -151,7 +150,7 @@ struct MutableValve : Storage {
     virtual void operator=(const Storage& a_Other) override {
         auto& data = static_cast<const MutableValve&>(a_Other);
     }
-    virtual void operator=(const Set::WriteOperation& a_Write) override {}
+    virtual void operator=(const DescriptorSetWrite& a_Write) override {}
     virtual void Bind(uint32_t a_BindingIndex) override {}
     virtual void Unbind(uint32_t a_BindingIndex) override {}
 };
@@ -160,10 +159,10 @@ class Binding
 {
 public:
     Binding() = default;
-    Binding(const Type& a_Type, uint32_t a_BindingIndex);
+    Binding(const DescriptorType& a_Type, uint32_t a_BindingIndex);
     Binding(Binding&& a_Other) noexcept;
     Binding(const Binding& a_Other) noexcept;
-    Binding(const Set::WriteOperation& a_Write, uint32_t a_BindingIndex);
+    Binding(const DescriptorSetWrite& a_Write, uint32_t a_BindingIndex);
     ~Binding();
 
     void Bind();
@@ -174,15 +173,15 @@ public:
         bindingIndex = a_Other.bindingIndex;
         *storage = *a_Other.storage;
     }
-    void operator=(const Set::WriteOperation& a_Write) {
+    void operator=(const DescriptorSetWrite& a_Write) {
         OCRA_ASSERT(type == a_Write.type);
         *storage = a_Write;
     }
 
-    Type        type{ Type::Unknown };
-    uint32_t    bindingIndex{ uint32_t(-1) };
+    DescriptorType type{ DescriptorType::Unknown };
+    uint32_t       bindingIndex{ uint32_t(-1) };
     //this is a "fake" pointer to avoid heap allocation and allow for virtuals
-    Storage*    storage{ nullptr };
+    Storage*       storage{ nullptr };
 
 private:
     //use union as storage because we get aligned memory
@@ -206,46 +205,46 @@ private:
     } _memory{};
 };
 
-inline Binding::Binding(const Type& a_Type, uint32_t a_BindingIndex)
+inline Binding::Binding(const DescriptorType& a_Type, uint32_t a_BindingIndex)
     : type(a_Type)
     , bindingIndex(a_BindingIndex)
 {
     switch (type)
     {
-    case Type::SampledImage:
+    case DescriptorType::SampledImage:
         storage = new(&_memory.sampledImage) SampledImage;
         break;
-    case Type::StorageImage:
+    case DescriptorType::StorageImage:
         storage = new(&_memory.storageImage) StorageImage;
         break;
-    case Type::UniformTexelBuffer:
+    case DescriptorType::UniformTexelBuffer:
         storage = new(&_memory.uniformTexelBuffer) UniformTexelBuffer;
         break;
-    case Type::StorageTexelBuffer:
+    case DescriptorType::StorageTexelBuffer:
         storage = new(&_memory.storageTexelBuffer) StorageTexelBuffer;
         break;
-    case Type::UniformBuffer:
+    case DescriptorType::UniformBuffer:
         storage = new(&_memory.uniformBuffer) UniformBuffer;
         break;
-    case Type::StorageBuffer:
+    case DescriptorType::StorageBuffer:
         storage = new(&_memory.storageBuffer) StorageBuffer;
         break;
-    case Type::UniformBufferDynamic:
+    case DescriptorType::UniformBufferDynamic:
         storage = new(&_memory.uniformBufferDynamic) UniformBufferDynamic;
         break;
-    case Type::StorageBufferDynamic:
+    case DescriptorType::StorageBufferDynamic:
         storage = new(&_memory.storageBufferDynamic) StorageBufferDynamic;
         break;
-    case Type::InputAttachment:
+    case DescriptorType::InputAttachment:
         storage = new(&_memory.inputAttachment) InputAttachment;
         break;
-    case Type::InlineUniformBlock:
+    case DescriptorType::InlineUniformBlock:
         storage = new(&_memory.inlineUniformBlock) InlineUniformBlock;
         break;
-    case Type::AccelerationStructure:
+    case DescriptorType::AccelerationStructure:
         storage = new(&_memory.accelerationStructure) AccelerationStructure;
         break;
-    case Type::MutableValve:
+    case DescriptorType::MutableValve:
         storage = new(&_memory.mutableValve) MutableValve;
         break;
     }
@@ -265,7 +264,7 @@ inline Binding::Binding(const Binding& a_Other) noexcept
         *storage = *a_Other.storage;
 }
 
-inline Binding::Binding(const Set::WriteOperation& a_Write, uint32_t a_BindingIndex)
+inline Binding::Binding(const DescriptorSetWrite& a_Write, uint32_t a_BindingIndex)
     : Binding(a_Write.type, a_BindingIndex)
 {
     *storage = a_Write;

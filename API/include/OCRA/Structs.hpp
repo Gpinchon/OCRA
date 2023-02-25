@@ -577,12 +577,12 @@ struct PhysicalDeviceFeatures {
     bool    inheritedQueries{ false };
 };
 
-struct BeginCommandBufferInfo
+struct CommandBufferBeginInfo
 {
     CommandBufferUsageFlags flags{ CommandBufferUsageFlagBits::None };
     std::optional<CommandBufferInheritanceInfo> inheritanceInfo; //must be valid if this command buffer is secondary
 };
-struct BeginRenderPassInfo
+struct RenderPassBeginInfo
 {
     RenderPass::Handle      renderPass{ 0 };
     FrameBuffer::Handle     framebuffer{ 0 };
