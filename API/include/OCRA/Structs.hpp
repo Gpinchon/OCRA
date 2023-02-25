@@ -365,6 +365,23 @@ struct CreateQueryPoolInfo {
     QueryPipelineStatisticFlags pipelineStatistics;
 };
 
+struct MemoryBarrier {
+    AccessFlags srcAccessMask{ AccessFlagBits::None };
+    AccessFlags dstAccessMask{ AccessFlagBits::None };
+};
+struct BufferMemoryBarrier : MemoryBarrier {
+    uint32_t    srcQueueFamilyIndex{ 0 };
+    uint32_t    dstQueueFamilyIndex{ 0 };
+    OCRA::Buffer::Handle buffer;
+    uint64_t    offset{ 0 };
+    uint64_t    size{ 0 };
+};
+struct ImageMemoryBarrier : MemoryBarrier {
+    uint32_t    srcQueueFamilyIndex{ 0 };
+    uint32_t    dstQueueFamilyIndex{ 0 };
+    Image::Handle image;
+};
+
 struct ShaderSpecializationMapEntry {
     uint32_t    constantID;
     uint32_t    offset;

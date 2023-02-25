@@ -4,6 +4,28 @@
 
 namespace OCRA
 {
+using AccessFlags = std::bitset<17>;
+namespace AccessFlagBits {
+    constexpr AccessFlags IndirectCommandRead           = 0b10000000000000000;
+    constexpr AccessFlags IndexRead                     = 0b01000000000000000;
+    constexpr AccessFlags VertexAttributeRead           = 0b00100000000000000;
+    constexpr AccessFlags UniformRead                   = 0b00010000000000000;
+    constexpr AccessFlags InputAttachmentRead           = 0b00001000000000000;
+    constexpr AccessFlags ShaderRead                    = 0b00000100000000000;
+    constexpr AccessFlags ShaderWrite                   = 0b00000010000000000;
+    constexpr AccessFlags ColorAttachmentRead           = 0b00000001000000000;
+    constexpr AccessFlags ColorAttachmentWrite          = 0b00000000100000000;
+    constexpr AccessFlags DepthStencilAttachmentRead    = 0b00000000010000000;
+    constexpr AccessFlags DepthStencilAttachmentWrite   = 0b00000000001000000;
+    constexpr AccessFlags TransferRead                  = 0b00000000000100000;
+    constexpr AccessFlags TransferWrite                 = 0b00000000000010000;
+    constexpr AccessFlags HostRead                      = 0b00000000000001000;
+    constexpr AccessFlags HostWrite                     = 0b00000000000000100;
+    constexpr AccessFlags MemoryRead                    = 0b00000000000000010;
+    constexpr AccessFlags MemoryWrite                   = 0b00000000000000001;
+    //VK_VERSION_1_3
+    constexpr AccessFlags None                          = 0b00000000000000000;
+}
 using BufferUsageFlags = std::bitset<10>;
 namespace BufferUsageFlagBits {
     static BufferUsageFlags None                 = 0b0000000000;
@@ -49,6 +71,13 @@ namespace CreateCommandPoolFlagBits {
     static CreateCommandPoolFlags Transient = 0b100;
     static CreateCommandPoolFlags Reset     = 0b010; //enables command buffers to be reset to their initial state
     static CreateCommandPoolFlags Protected = 0b001;
+}
+using DependencyFlags = std::bitset<3>;
+namespace DependencyFlagBits {
+    constexpr DependencyFlags ByRegion    = 0b001;
+    constexpr DependencyFlags ViewLocal   = 0b010;
+    constexpr DependencyFlags DeviceGroup = 0b100;
+    constexpr DependencyFlags None        = 0b000;
 }
 using ImageUsageFlags = std::bitset<8>;
 namespace ImageUsageFlagBits {

@@ -162,4 +162,13 @@ void NextSubPass(
 
 //End Render Pass recording
 void EndRenderPass(const Command::Buffer::Handle& a_CommandBuffer);
+
+void PipelineBarrier(
+    const Buffer::Handle& a_CommandBuffer,
+    const PipelineStageFlags& srcStageMask,
+    const PipelineStageFlags& dstStageMask,
+    const DependencyFlags& dependencyFlags,
+    const std::vector<MemoryBarrier>& a_MemoryBarriers,
+    const std::vector<BufferMemoryBarrier>& a_BufferMemoryBarriers,
+    const std::vector<ImageMemoryBarrier>& a_ImageMemoryBarriers);
 }

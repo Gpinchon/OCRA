@@ -13,24 +13,12 @@ add_compile_definitions(OCRA_API_IMPL=${OCRA_API_IMPL})
 
 set(OCRA_API_HEADER_LIST
   OCRA/Allocator.hpp
-  OCRA/Buffer.hpp
-  OCRA/CommandBuffer.hpp
-  OCRA/CommandPool.hpp
   OCRA/Commands.hpp
-  OCRA/Device.hpp
   OCRA/Enums.hpp
   OCRA/Extent.hpp
-  OCRA/Fence.hpp
   OCRA/Flags.hpp
   OCRA/Handle.hpp
   OCRA/Handles.hpp
-  OCRA/Image.hpp
-  OCRA/Instance.hpp
-  OCRA/Memory.hpp
-  OCRA/PhysicalDevice.hpp
-  OCRA/QueryPool.hpp
-  OCRA/Queue.hpp
-  OCRA/Semaphore.hpp
   OCRA/Structs.hpp
   OCRA/Vec.hpp
   OCRA/Vec_Boolean.hpp
@@ -39,11 +27,20 @@ set(OCRA_API_HEADER_LIST
   OCRA/Vec_Math.hpp
   OCRA/Common/IndexType.hpp
   OCRA/Common/Timer.hpp
-  
-  OCRA/Command/MemoryBarrier.hpp
-  OCRA/Descriptor/Pool.hpp
-  OCRA/Descriptor/Set.hpp
-  
+  OCRA/Methods/Buffer.hpp
+  OCRA/Methods/CommandBuffer.hpp
+  OCRA/Methods/CommandPool.hpp
+  OCRA/Methods/DescriptorPool.hpp
+  OCRA/Methods/DescriptorSet.hpp
+  OCRA/Methods/Device.hpp
+  OCRA/Methods/Fence.hpp
+  OCRA/Methods/Image.hpp
+  OCRA/Methods/Instance.hpp
+  OCRA/Methods/Memory.hpp
+  OCRA/Methods/PhysicalDevice.hpp
+  OCRA/Methods/Queue.hpp
+  OCRA/Methods/QueryPool.hpp
+  OCRA/Methods/Semaphore.hpp
 )
 
 set(INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/include)
