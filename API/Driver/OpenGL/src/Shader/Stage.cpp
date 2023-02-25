@@ -104,7 +104,7 @@ Impl::Impl(const Device::Handle& a_Device, const CreateShaderStageInfo& a_Info)
         constantValue.push_back(value);
         constantIndex.push_back(entry.constantID);
     }
-    a_Device->PushCommand([this, a_Info, constantIndex, constantValue] {
+    a_Device->PushCommand([this, a_Info, &constantIndex = constantIndex, &constantValue = constantIndex] {
         const auto shader = glCreateShader(stage);
         glProgramParameteri(handle, GL_PROGRAM_SEPARABLE, GL_TRUE);
         OCRA_ASSERT(GLEW_ARB_gl_spirv);
