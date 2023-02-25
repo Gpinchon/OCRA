@@ -6,19 +6,15 @@
 */
 #pragma once
 
-#include <OCRA/Handle.hpp>
-#include <OCRA/Shader/Stage.hpp>
+#include <OCRA/Core.hpp>
 
-
-OCRA_DECLARE_HANDLE(OCRA::Device);
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
 
 namespace OCRA::Shader::Stage {
 struct Impl {
-    Impl(const Device::Handle& a_Device, const Info& a_Info);
+    Impl(const Device::Handle& a_Device, const CreateShaderStageInfo& a_Info);
     ~Impl();
     const Device::WeakHandle device;
-    const Info info;
     const uint32_t handle;
     const uint32_t stage;
     const uint32_t stageBits;

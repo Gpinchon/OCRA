@@ -4,10 +4,10 @@
 * @Last Modified by:   gpinchon
 * @Last Modified time: 2021-10-04 20:35:26
 */
-#include <OCRA/Handle.hpp>
-#include <OCRA/Shader/Stage.hpp>
+#include <OCRA/Core.hpp>
 
 #include <GL/Common/Assert.hpp>
+#include <GL/Shader/Module.hpp>
 #include <GL/Shader/Stage.hpp>
 #include <GL/Device.hpp>
 
@@ -15,38 +15,46 @@
 
 #include <stdexcept>
 
+namespace OCRA::Device
+{
+Shader::Stage::Handle CreateShaderStage(const Device::Handle& a_Device, const CreateShaderStageInfo& a_Info)
+{
+    return std::make_shared<Shader::Stage::Impl>(a_Device, a_Info);
+}
+}
+
 namespace OCRA::Shader::Stage {
-static inline auto GetGLStageBits(const StageFlags& a_Stage)
+static inline auto GetGLStageBits(const ShaderStageFlags& a_Stage)
 {
     uint32_t shaderStages = 0;
-    if ((a_Stage & StageFlagBits::Vertex) != 0)
+    if ((a_Stage & ShaderStageFlagBits::Vertex) != 0)
         shaderStages |= GL_VERTEX_SHADER_BIT;
-    if ((a_Stage & StageFlagBits::Geometry) != 0)
+    if ((a_Stage & ShaderStageFlagBits::Geometry) != 0)
         shaderStages |= GL_GEOMETRY_SHADER_BIT;
-    if ((a_Stage & StageFlagBits::Fragment) != 0)
+    if ((a_Stage & ShaderStageFlagBits::Fragment) != 0)
         shaderStages |= GL_FRAGMENT_SHADER_BIT;
-    if ((a_Stage & StageFlagBits::Compute) != 0)
+    if ((a_Stage & ShaderStageFlagBits::Compute) != 0)
         shaderStages |= GL_COMPUTE_SHADER_BIT;
-    if ((a_Stage & StageFlagBits::TessControl) != 0)
+    if ((a_Stage & ShaderStageFlagBits::TessControl) != 0)
         shaderStages |= GL_TESS_CONTROL_SHADER_BIT;
-    if ((a_Stage & StageFlagBits::TessEval) != 0)
+    if ((a_Stage & ShaderStageFlagBits::TessEval) != 0)
         shaderStages |= GL_TESS_EVALUATION_SHADER_BIT;
     return shaderStages;
 }
 
-static inline auto GetGLStage(const StageFlags& a_Stage)
+static inline auto GetGLStage(const ShaderStageFlags& a_Stage)
 {
-    if (a_Stage == StageFlagBits::Vertex)
+    if (a_Stage == ShaderStageFlagBits::Vertex)
         return GL_VERTEX_SHADER;
-    if (a_Stage == StageFlagBits::Geometry)
+    if (a_Stage == ShaderStageFlagBits::Geometry)
         return GL_GEOMETRY_SHADER;
-    if (a_Stage == StageFlagBits::Fragment)
+    if (a_Stage == ShaderStageFlagBits::Fragment)
         return GL_FRAGMENT_SHADER;
-    if (a_Stage == StageFlagBits::Compute)
+    if (a_Stage == ShaderStageFlagBits::Compute)
         return GL_COMPUTE_SHADER;
-    if (a_Stage == StageFlagBits::TessControl)
+    if (a_Stage == ShaderStageFlagBits::TessControl)
         return GL_TESS_CONTROL_SHADER;
-    if (a_Stage == StageFlagBits::TessEval)
+    if (a_Stage == ShaderStageFlagBits::TessEval)
         return GL_TESS_EVALUATION_SHADER;
     throw std::runtime_error("Unknown Shader Stage");
 }
@@ -78,31 +86,30 @@ static inline auto CreateShaderProgram(const Device::Handle& a_Device)
     return handle;
 }
 
-Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
+Impl::Impl(const Device::Handle& a_Device, const CreateShaderStageInfo& a_Info)
     : device(a_Device)
-    , info(a_Info)
     , handle(CreateShaderProgram(a_Device))
-    , stage(GetGLStage(info.stage))
-    , stageBits(GetGLStageBits(info.stage))
+    , stage(GetGLStage(a_Info.stage))
+    , stageBits(GetGLStageBits(a_Info.stage))
 {
     std::vector<uint32_t> constantIndex;
     std::vector<uint32_t> constantValue;
-    constantIndex.reserve(info.specializationInfo.mapEntries.size());
-    constantValue.reserve(info.specializationInfo.mapEntries.size());
-    for (const auto& entry : info.specializationInfo.mapEntries) {
+    constantIndex.reserve(a_Info.specializationInfo.mapEntries.size());
+    constantValue.reserve(a_Info.specializationInfo.mapEntries.size());
+    for (const auto& entry : a_Info.specializationInfo.mapEntries) {
         uint32_t value{ 0 };
         OCRA_ASSERT(entry.size <= sizeof(value));
-        auto data = &info.specializationInfo.data.at(entry.offset);
+        auto data = &a_Info.specializationInfo.data.at(entry.offset);
         std::memcpy(&value, data, entry.size);
         constantValue.push_back(value);
         constantIndex.push_back(entry.constantID);
     }
-    a_Device->PushCommand([this, moduleInfo = Module::GetInfo(info.module), constantIndex, constantValue] {
+    a_Device->PushCommand([this, a_Info, constantIndex, constantValue] {
         const auto shader = glCreateShader(stage);
         glProgramParameteri(handle, GL_PROGRAM_SEPARABLE, GL_TRUE);
         OCRA_ASSERT(GLEW_ARB_gl_spirv);
-        glShaderBinary(1, &shader, GL_SHADER_BINARY_FORMAT_SPIR_V, moduleInfo.code.data(), sizeof(moduleInfo.code.front()) * moduleInfo.code.size());
-        glSpecializeShader(shader, info.entryPoint.c_str(), constantIndex.size(), constantIndex.data(), constantValue.data());
+        glShaderBinary(1, &shader, GL_SHADER_BINARY_FORMAT_SPIR_V, a_Info.module->data(), sizeof(a_Info.module->front()) * a_Info.module->size());
+        glSpecializeShader(shader, a_Info.entryPoint.c_str(), constantIndex.size(), constantIndex.data(), constantValue.data());
         if (CheckShaderCompilation(shader)) //compilation is successful
         {
             glAttachShader(handle, shader);
@@ -118,13 +125,5 @@ Impl::~Impl()
     device.lock()->PushCommand([handle = handle] {
         glDeleteProgram(handle);
     }, false);
-}
-Handle Create(const Device::Handle& a_Device, const Info& a_Info)
-{
-    return Handle(new Impl(a_Device, a_Info));
-}
-const Info& GetInfo(const Handle& a_Handle)
-{
-    return a_Handle->info;
 }
 }
