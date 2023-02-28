@@ -256,7 +256,7 @@ enum class PipelineBindingPoint
     RayTracing, //might be unavailable
     MaxValue
 };
-enum class PipelineState {
+enum class DynamicState {
     Viewport,
     Scissor,
     LineWidth,

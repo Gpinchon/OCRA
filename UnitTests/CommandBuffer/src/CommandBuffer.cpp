@@ -16,13 +16,13 @@ using namespace OCRA;
 #ifdef FENCE_VERSION
 static inline void SubmitCommandBuffer(const Device::Handle& a_Device, const Queue::Handle& a_Queue, const Command::Buffer::Handle& a_CommandBuffer)
 {
-    auto fence = Fence::Create(a_Device);
-    Queue::SubmitInfo submitInfo;
+    auto fence = CreateFence(a_Device);
+    QueueSubmitInfo submitInfo;
     for (auto i = 0u; i < SWAP_NBR; ++i)
         submitInfo.commandBuffers.push_back(a_CommandBuffer);
     std::cout << "========== Command Buffer submit ==========\n";
     //test multithreaded submit
-    std::async([a_Queue, submitInfo, fence] {
+    auto future = std::async([a_Queue, submitInfo, fence] {
         VerboseTimer("Queue Submission");
         Queue::Submit(a_Queue, { submitInfo }, fence);
     });
@@ -81,11 +81,11 @@ static inline void RecordSwapCommandBuffer(
     const Buffer::Handle& a_Buffer1,
     const Buffer::Handle& a_BufferT)
 {
-    Command::Buffer::BeginInfo bufferbeginInfo;
-    bufferbeginInfo.flags = Command::Buffer::UsageFlagBits::None;
+    CommandBufferBeginInfo bufferbeginInfo;
+    bufferbeginInfo.flags = CommandBufferUsageFlagBits::None;
     Command::Buffer::Begin(a_CommandBuffer, bufferbeginInfo);
     {
-        Command::BufferCopyRegion copyRegions;
+        BufferCopyRegion copyRegions;
         copyRegions.size = CHUNK_SIZE;
         Command::CopyBuffer(a_CommandBuffer, a_Buffer0, a_BufferT, { copyRegions });
         Command::CopyBuffer(a_CommandBuffer, a_Buffer1, a_Buffer0, { copyRegions });
@@ -99,25 +99,25 @@ int main()
     const auto instance = CreateInstance("Test_CommandBuffer");
     const auto physicalDevice = Instance::EnumeratePhysicalDevices(instance).front();
     const auto device = CreateDevice(physicalDevice);
-    const auto queueFamily = PhysicalDevice::FindQueueFamily(physicalDevice, Queue::FlagsBits::Transfer);
+    const auto queueFamily = PhysicalDevice::FindQueueFamily(physicalDevice, QueueFlagsBits::Transfer);
     const auto queue = Device::GetQueue(device, queueFamily, 0); //Get first available queue
-    const auto memory = AllocateMemory(physicalDevice, device, CHUNK_SIZE * 3, Memory::PropertyFlagBits::HostVisible | Memory::PropertyFlagBits::HostCached);
+    const auto memory = AllocateMemory(physicalDevice, device, CHUNK_SIZE * 3, MemoryPropertyFlagBits::HostVisible | MemoryPropertyFlagBits::HostCached);
     const auto commandPool = CreateCommandPool(device, queueFamily);
-    const auto commandBuffer = CreateCommandBuffer(commandPool, Command::Pool::AllocateInfo::Level::Primary);
+    const auto commandBuffer = CreateCommandBuffer(commandPool, CommandBufferLevel::Primary);
 
     //create test buffers
-    Buffer::Info bufferInfo;
+    CreateBufferInfo bufferInfo;
     bufferInfo.size = CHUNK_SIZE;
-    bufferInfo.usage = Buffer::UsageFlagBits::TransferDst | Buffer::UsageFlagBits::TransferSrc;
-    const auto buffer0 = Buffer::Create(device, bufferInfo);
-    const auto buffer1 = Buffer::Create(device, bufferInfo);
-    const auto bufferT = Buffer::Create(device, bufferInfo);
+    bufferInfo.usage = BufferUsageFlagBits::TransferDst | BufferUsageFlagBits::TransferSrc;
+    const auto buffer0 = CreateBuffer(device, bufferInfo);
+    const auto buffer1 = CreateBuffer(device, bufferInfo);
+    const auto bufferT = CreateBuffer(device, bufferInfo);
     Buffer::BindMemory(buffer0, memory, CHUNK_SIZE * 0);
     Buffer::BindMemory(buffer1, memory, CHUNK_SIZE * 1);
     Buffer::BindMemory(bufferT, memory, CHUNK_SIZE * 2);
     //write some value to the buffer0
     {
-        Memory::MappedRange mappedRange;
+        MemoryMappedRange mappedRange;
         mappedRange.memory = memory;
         mappedRange.offset = CHUNK_SIZE * 0;
         mappedRange.length = CHUNK_SIZE;
@@ -127,7 +127,7 @@ int main()
     }
     //write some value to the buffer1
     {
-        Memory::MappedRange mappedRange;
+        MemoryMappedRange mappedRange;
         mappedRange.memory = memory;
         mappedRange.offset = CHUNK_SIZE * 1;
         mappedRange.length = CHUNK_SIZE;
@@ -146,7 +146,7 @@ int main()
     std::cout << "===== Check if sentences were swapped =====\n";
     int success = 0;
     {
-        Memory::MappedRange mappedRange;
+        MemoryMappedRange mappedRange;
         mappedRange.memory = memory;
         mappedRange.offset = CHUNK_SIZE * 0;
         mappedRange.length = CHUNK_SIZE;
@@ -156,7 +156,7 @@ int main()
         Memory::Unmap(memory);
     }
     {
-        Memory::MappedRange mappedRange;
+        MemoryMappedRange mappedRange;
         mappedRange.memory = memory;
         mappedRange.offset = CHUNK_SIZE * 1;
         mappedRange.length = CHUNK_SIZE;

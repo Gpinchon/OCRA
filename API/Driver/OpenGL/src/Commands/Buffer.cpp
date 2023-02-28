@@ -6,7 +6,7 @@
 #include <GL/Command/ExecutionState.hpp>
 #include <GL/Command/CommandInterface.hpp>
 
-#include <GL/Common/IndexType.hpp>
+#include <GL/Enums.hpp>
 
 namespace OCRA::Command {
 struct UpdateBufferCommand : CommandI {

@@ -1,9 +1,6 @@
 #pragma once
 
-#include <OCRA/Handle.hpp>
-#include <OCRA/Pipeline/InputAssemblyState.hpp>
-
-#include <OCRA/Pipeline/Graphics.hpp>
+#include <OCRA/OCRA.hpp>
 
 #include <Mat4x4.hpp>
 #include <Material.hpp>
@@ -17,7 +14,7 @@ OCRA_DECLARE_HANDLE(OCRA::Device);
 
 namespace OCRA {
 struct Traverser {
-    Pipeline::ViewPortState::Info viewPort{};
+    PipelineViewPortState viewPort{};
 };
 class Mesh {
 public:
@@ -48,7 +45,7 @@ public:
     }
 
     auto GetInputAssembly() const { return inputAssembly; }
-    void SetInputAssembly(const Pipeline::InputAssemblyState::Info& a_InputAssembly) {
+    void SetInputAssembly(const PipelineInputAssemblyState& a_InputAssembly) {
         inputAssembly = a_InputAssembly;
     }
 
@@ -63,12 +60,12 @@ private:
     OCRA::Device::Handle     device;
     Pipeline::Layout::Handle layout;
     Shader::Stage::Handle    vertexShader;
-    Pipeline::InputAssemblyState::Info inputAssembly;
+    PipelineInputAssemblyState inputAssembly;
     Material                material;
     VertexBuffer            vertexBuffer;
     UniformBuffer           projectionMatrix;
     std::vector<Descriptor::Set::Handle>        descriptorSets;
     std::vector<Descriptor::SetLayout::Handle>  descriptorSetLayouts;
-    std::vector<Descriptor::SetLayout::Binding> descriptorSetLayoutBindings;
+    std::vector<DescriptorSetLayoutBinding>     descriptorSetLayoutBindings;
 };
 }

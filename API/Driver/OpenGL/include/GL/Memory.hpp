@@ -11,8 +11,8 @@ struct Impl
     Impl(const Device::Handle& a_Device, const AllocateMemoryInfo& a_Info);
     ~Impl();
     const Device::WeakHandle device;
-    const AllocateMemoryInfo info;
-    uint32_t    handle{ 0 };
-    uint32_t    mapFlags{ 0 };
+    const size_t             size{ 0 };
+    uint32_t handle{ 0 };
+    uint32_t mapFlags{ 0 };
 };
 }

@@ -6,33 +6,27 @@
 */
 #pragma once
 
-#include <OCRA/Handle.hpp>
-#include <OCRA/Pipeline/VertexInputState.hpp>
+#include <OCRA/Core.hpp>
 
-#include <GL/Common/VertexType.hpp>
+#include <GL/Enums.hpp>
 
-OCRA_DECLARE_HANDLE(OCRA::Device);
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
-
-namespace OCRA::Pipeline::DynamicState {
-struct Info;
-}
 
 namespace OCRA::Command::Buffer {
 struct ExecutionState;
 }
 
-namespace OCRA::Pipeline::VertexInputState {
+namespace OCRA::Pipeline {
 //compiles the specified Vertex Input State into a callback
 //only the Vertex Attributes are compiled here, Vertex Bindings are compiled by on execution
-struct Compile
+struct CompileVertexInputState
 {
-    Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info& a_DynamicState);
-    Compile(const Compile& a_Other);
-    ~Compile();
+    CompileVertexInputState(const Device::Handle& a_Device, const PipelineVertexInputState& a_Info, const PipelineDynamicState& a_DynamicState);
+    CompileVertexInputState(const CompileVertexInputState& a_Other);
+    ~CompileVertexInputState();
     void operator()(Command::Buffer::ExecutionState&) const;
     const uint32_t primitiveRestartIndex;
-    const std::vector<BindingDescription> bindingDescriptions;
+    const std::vector<PipelineVertexBindingDescription> bindingDescriptions;
     const Device::WeakHandle device;
     mutable uint32_t handle{ 0 };
 };

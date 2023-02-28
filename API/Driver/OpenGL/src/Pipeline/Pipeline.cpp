@@ -1,5 +1,4 @@
-#include <OCRA/Command/Buffer.hpp>
-#include <OCRA/Pipeline/Pipeline.hpp>
+#include <OCRA/Core.hpp>
 
 #include <GL/Device.hpp>
 #include <GL/Pipeline/Pipeline.hpp>
@@ -11,8 +10,8 @@ namespace OCRA::Command
 {
 void BindPipeline(
     const Command::Buffer::Handle& a_CommandBuffer,
-    const OCRA::Pipeline::BindingPoint& a_BindingPoint,
-    const OCRA::Pipeline::Handle& a_Pipeline)
+    const PipelineBindingPoint& a_BindingPoint,
+    const Pipeline::Handle& a_Pipeline)
 {
     a_CommandBuffer->PushCommand<GenericCommand>([
         bindingPoint = uint8_t(a_BindingPoint),

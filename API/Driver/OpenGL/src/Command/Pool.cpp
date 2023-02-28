@@ -25,6 +25,7 @@ namespace OCRA::Command::Pool
 struct Impl
 {
     Impl(const Device::Handle& a_Device, const CreateCommandPoolInfo& a_Info)
+        : device(a_Device)
     {}
     std::pmr::unsynchronized_pool_resource  memoryResource;
 
@@ -35,9 +36,10 @@ struct Impl
     }
     std::pmr::vector<Buffer::WeakHandle>    allocated{ &memoryResource };
 #endif
+    Device::WeakHandle device;
 };
 
-std::vector<Buffer::Handle> AllocateBuffer(const Device::Handle& a_Device, const AllocateCommandBufferInfo& a_Info)
+std::vector<Buffer::Handle> AllocateCommandBuffer(const AllocateCommandBufferInfo& a_Info)
 {
     std::vector<Buffer::Handle> commandBuffers;
     commandBuffers.reserve(a_Info.count);
@@ -47,7 +49,7 @@ std::vector<Buffer::Handle> AllocateBuffer(const Device::Handle& a_Device, const
     auto& allocated = a_Info.pool->allocated;
 #endif
     for (auto i = 0u; i < a_Info.count; ++i) {
-        auto buffer = std::allocate_shared<Buffer::Impl>(allocator, a_Device, a_Info.level, &memoryResource);
+        auto buffer = std::allocate_shared<Buffer::Impl>(allocator, a_Info.pool->device.lock(), a_Info.level, &memoryResource);
         commandBuffers.push_back(buffer);
 #ifdef _DEBUG
         allocated.push_back(buffer);

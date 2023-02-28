@@ -4,9 +4,20 @@
 
 #include <GL/glew.h>
 
+namespace OCRA::Device
+{
+Pipeline::Layout::Handle CreatePipelineLayout(
+    const Device::Handle&,
+    const CreatePipelineLayoutInfo& a_Info,
+    const AllocationCallback* a_Allocator)
+{
+    return std::make_shared<Pipeline::Layout::Impl>(a_Info);
+}
+}
+
 namespace OCRA::Pipeline::Layout
 {
-Impl::Impl(const Info& a_Info)
+Impl::Impl(const CreatePipelineLayoutInfo& a_Info)
 {
     uint32_t dynamicOffset = 0;
     for (uint32_t i = 0; i < a_Info.setLayouts.size(); ++i) {
@@ -18,8 +29,8 @@ Impl::Impl(const Info& a_Info)
             descriptorSet.at(j).type = setLayout->bindings.at(j).type;
             descriptorSet.at(j).dynamicOffset = dynamicOffset;
             //descriptorSet.bindings[j].offset = setLayout->bindings.at(j).offset;
-            if (descriptorSet.at(j).type == Descriptor::Type::StorageBufferDynamic
-            ||  descriptorSet.at(j).type == Descriptor::Type::UniformBufferDynamic)
+            if (descriptorSet.at(j).type == DescriptorType::StorageBufferDynamic
+            ||  descriptorSet.at(j).type == DescriptorType::UniformBufferDynamic)
                 dynamicOffset += setLayout->bindings.at(j).count;
         }
     }
@@ -30,10 +41,5 @@ Impl::Impl(const Info& a_Info)
 bool Impl::IsCompatibleWith(const Handle & a_Layout)
 {
     return false;
-}
-
-Handle Create(const Device::Handle&, const Info& a_Info, const AllocationCallback* a_Allocator)
-{
-    return Handle(new Impl(a_Info));
 }
 }

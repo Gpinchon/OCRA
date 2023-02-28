@@ -18,14 +18,14 @@ void DescriptorTest(const PhysicalDevice::Handle& a_PhysicalDevice, const Device
     double ReCreatingTimer = 0;
     double UpdatingTimer = 0;
 
-    Descriptor::Pool::CreateInfo poolInfo;
+    CreateDescriptorPoolInfo poolInfo;
     poolInfo.maxSets = DESCRIPTOR_COUNT;
-    poolInfo.sizes.push_back({ Descriptor::Type::UniformBuffer, DESCRIPTOR_COUNT });
-    auto descriptorPool = Descriptor::Pool::Create(a_Device, poolInfo);
-    Descriptor::SetLayout::Info layoutInfo;
-    layoutInfo.bindings.push_back({ 0, Descriptor::Type::UniformBuffer, 1 });
-    auto descriptorLayout = Descriptor::SetLayout::Create(a_Device, layoutInfo);
-    Descriptor::Pool::AllocateSetInfo allocateInfo;
+    poolInfo.sizes.push_back({ DescriptorType::UniformBuffer, DESCRIPTOR_COUNT });
+    auto descriptorPool = CreateDescriptorPool(a_Device, poolInfo);
+    CreateDescriptorSetLayoutInfo layoutInfo;
+    layoutInfo.bindings.push_back({ 0, DescriptorType::UniformBuffer, 1 });
+    auto descriptorLayout = CreateDescriptorSetLayout(a_Device, layoutInfo);
+    AllocateDescriptorSetInfo allocateInfo;
     allocateInfo.layout = descriptorLayout;
     allocateInfo.pool = descriptorPool;
 
@@ -54,18 +54,18 @@ void DescriptorTest(const PhysicalDevice::Handle& a_PhysicalDevice, const Device
             ReCreatingTimer += timer.Elapsed().count() / double(TEST_COUNT);
         }
         {
-            Buffer::Info bufferInfo;
-            bufferInfo.usage = Buffer::UsageFlagBits::UniformBuffer;
+            CreateBufferInfo bufferInfo;
+            bufferInfo.usage = BufferUsageFlagBits::UniformBuffer;
             bufferInfo.size = 1024;
-            auto memory = AllocateMemory(a_PhysicalDevice, a_Device, 1024, Memory::PropertyFlagBits::DeviceLocal);
-            auto buffer = Buffer::Create(a_Device, bufferInfo);
+            auto memory = AllocateMemory(a_PhysicalDevice, a_Device, 1024, MemoryPropertyFlagBits::DeviceLocal);
+            auto buffer = CreateBuffer(a_Device, bufferInfo);
             Buffer::BindMemory(buffer, memory, 0);
-            std::vector<Descriptor::Set::WriteOperation> writeOperations(DESCRIPTOR_COUNT);
+            std::vector<DescriptorSetWrite> writeOperations(DESCRIPTOR_COUNT);
             for (const auto& i : a_IterationIndice) {
-                Descriptor::Set::BufferInfo bufferInfo;
+                DescriptorSetBufferInfo bufferInfo;
                 bufferInfo.buffer = buffer;
                 writeOperations.at(i).dstSet = descriptorSets.at(i);
-                writeOperations.at(i).type = Descriptor::Type::UniformBuffer;
+                writeOperations.at(i).type = DescriptorType::UniformBuffer;
                 writeOperations.at(i).bufferInfo = bufferInfo;
             }
             Timer timer;

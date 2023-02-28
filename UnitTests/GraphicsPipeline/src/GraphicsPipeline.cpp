@@ -6,8 +6,6 @@
 
 #include <OCRA/OCRA.hpp>
 
-#include <Windows.h>
-
 using namespace OCRA;
 constexpr auto VSync = false;
 constexpr auto SwapChainImageNbr = 3;
@@ -78,16 +76,16 @@ struct GraphicsPipelineTestApp : TestApp
         window.OnMaximize = window.OnResize;
         window.OnRestore = window.OnResize;
         window.OnMinimize = [this](const Window&, const uint32_t, const uint32_t) { render = false; };
-        const auto queueFamily = FindQueueFamily(physicalDevice, PhysicalDevice::QueueFlagsBits::Graphics);
+        const auto queueFamily = PhysicalDevice::FindQueueFamily(physicalDevice, QueueFlagsBits::Graphics);
         queue = Device::GetQueue(device, queueFamily, 0); //Get first available queue
         commandPool = CreateCommandPool(device, queueFamily);
         renderPass = CreateRenderPass();
-        imageAcquisitionFence = Fence::Create(device);
-        mainCommandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Primary);
-        drawCommandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Secondary);
-        Semaphore::Info semaphoreInfo;
-        semaphoreInfo.type = Semaphore::Type::Binary;
-        drawSemaphore = Semaphore::Create(device, semaphoreInfo);
+        imageAcquisitionFence = CreateFence(device);
+        mainCommandBuffer = CreateCommandBuffer(commandPool, CommandBufferLevel::Primary);
+        drawCommandBuffer = CreateCommandBuffer(commandPool, CommandBufferLevel::Secondary);
+        CreateSemaphoreInfo semaphoreInfo;
+        semaphoreInfo.type = SemaphoreType::Binary;
+        drawSemaphore = CreateSemaphore(device, semaphoreInfo);
     }
     void Loop()
     {
@@ -102,8 +100,8 @@ struct GraphicsPipelineTestApp : TestApp
             if (window.IsClosing()) break;
 
             swapChainImage = window.AcquireNextImage({}, nullptr, imageAcquisitionFence);
-            render = Fence::WaitFor(device, imageAcquisitionFence, Fence::IgnoreTimeout);
-            Fence::Reset(device, { imageAcquisitionFence });
+            render = Fence::WaitFor(imageAcquisitionFence, Fence::IgnoreTimeout);
+            Fence::Reset({ imageAcquisitionFence });
 
             if (!render) continue;
             
@@ -138,17 +136,17 @@ struct GraphicsPipelineTestApp : TestApp
     }
     RenderPass::Handle CreateRenderPass()
     {
-        RenderPass::SubPassDescription subPassDescription{};
-        RenderPass::AttachmentReference attachmentRef{};
+        SubPassDescription subPassDescription{};
+        AttachmentReference attachmentRef{};
         attachmentRef.location = 0;
         subPassDescription.colorAttachments = { attachmentRef };
-        RenderPass::Info renderPassInfo{};
-        RenderPass::AttachmentDescription colorAttachment;
-        colorAttachment.loadOp = RenderPass::LoadOperation::Clear; //clear the attachment 0 on begin
-        colorAttachment.storeOp = RenderPass::StoreOperation::Store; //write the result to attachment 0
+        CreateRenderPassInfo renderPassInfo{};
+        AttachmentDescription colorAttachment;
+        colorAttachment.loadOp  = LoadOp::Clear; //clear the attachment 0 on begin
+        colorAttachment.storeOp = StoreOp::Store; //write the result to attachment 0
         renderPassInfo.colorAttachments = { colorAttachment };
         renderPassInfo.subPasses = { subPassDescription };
-        return RenderPass::Create(device, renderPassInfo);
+        return Device::CreateRenderPass(device, renderPassInfo);
     }
     void CreateGraphicsPipeline()
     {
@@ -159,12 +157,12 @@ struct GraphicsPipelineTestApp : TestApp
         Rect2D  scissor{};
         scissor.offset = { 0, 0 };
         scissor.extent = window.GetExtent();
-        Pipeline::Graphics::Info graphicsPipelineInfo;
+        CreatePipelineGraphicsInfo graphicsPipelineInfo;
         graphicsPipelineInfo.viewPortState.viewPorts = { viewport };
         graphicsPipelineInfo.viewPortState.scissors = { scissor };
 
         graphicsPipelineInfo.renderPass = renderPass;
-        graphicsPipelineInfo.rasterizationState.cullMode = Pipeline::RasterizationState::CullMode::None;
+        graphicsPipelineInfo.rasterizationState.cullMode = CullMode::None;
 
         graphicsPipelineInfo.layout = mesh.GetPipelineLayout();
         graphicsPipelineInfo.inputAssemblyState = mesh.GetInputAssembly();
@@ -174,54 +172,54 @@ struct GraphicsPipelineTestApp : TestApp
 
         graphicsPipelineInfo.subPass = 0;
         //Everything else is left by default for now
-        graphicsPipeline = Pipeline::Graphics::Create(device, graphicsPipelineInfo);
+        graphicsPipeline = CreatePipelineGraphics(device, graphicsPipelineInfo);
     }
     void CreateFrameBuffer()
     {
         {
-            Image::Info imageInfo;
-            imageInfo.type = Image::Type::Image2D;
+            CreateImageInfo imageInfo;
+            imageInfo.type = ImageType::Image2D;
             imageInfo.extent.width = window.GetExtent().width;
             imageInfo.extent.height = window.GetExtent().height;
-            imageInfo.format = Image::Format::Uint8_Normalized_RGBA;
+            imageInfo.format = Format::Uint8_Normalized_RGBA;
             imageInfo.mipLevels = 1;
-            frameBufferImage = Image::Create(device, imageInfo);
+            frameBufferImage = CreateImage(device, imageInfo);
         }
         Image::View::Handle imageView{};
         {
-            Image::View::Info imageViewInfo;
+            CreateImageViewInfo imageViewInfo;
             imageViewInfo.image = frameBufferImage;
-            imageViewInfo.format = Image::Format::Uint8_Normalized_RGBA;
-            imageViewInfo.type = Image::View::Type::View2D;
+            imageViewInfo.format = Format::Uint8_Normalized_RGBA;
+            imageViewInfo.type = ImageViewType::View2D;
             imageViewInfo.subRange.layerCount = 1;
-            imageView = Image::View::Create(device, imageViewInfo);
+            imageView = CreateImageView(device, imageViewInfo);
         }
         {
-            FrameBuffer::Info frameBufferInfo{};
+            CreateFrameBufferInfo frameBufferInfo{};
             frameBufferInfo.attachments.push_back(imageView);
             frameBufferInfo.extent.depth = 1;
             frameBufferInfo.extent.width = window.GetExtent().width;
             frameBufferInfo.extent.height = window.GetExtent().height;
             frameBufferInfo.renderPass = renderPass;
-            frameBuffer = FrameBuffer::Create(device, frameBufferInfo);
+            frameBuffer = Device::CreateFrameBuffer(device, frameBufferInfo);
         }
     }
     void RecordDrawCommandBuffer()
     {
-        Command::Buffer::BeginInfo bufferBeginInfo{};
-        bufferBeginInfo.flags = Command::Buffer::UsageFlagBits::None;
+        CommandBufferBeginInfo bufferBeginInfo{};
+        bufferBeginInfo.flags = CommandBufferUsageFlagBits::None;
         bufferBeginInfo.inheritanceInfo.emplace();
         Command::Buffer::Reset(drawCommandBuffer);
-        Command::RenderPassBeginInfo renderPassBeginInfo{};
+        RenderPassBeginInfo renderPassBeginInfo{};
         renderPassBeginInfo.renderPass = renderPass;
         renderPassBeginInfo.framebuffer = frameBuffer;
         renderPassBeginInfo.renderArea.offset = { 0, 0 };
         renderPassBeginInfo.renderArea.extent = window.GetExtent();
         renderPassBeginInfo.colorClearValues.push_back(ColorValue(0.9529f, 0.6235f, 0.0941f, 1.f));
         Command::Buffer::Begin(drawCommandBuffer, bufferBeginInfo);
-        Command::BeginRenderPass(drawCommandBuffer, renderPassBeginInfo, Command::SubPassContents::Inline);
+        Command::BeginRenderPass(drawCommandBuffer, renderPassBeginInfo, SubPassContents::Inline);
         {
-            Command::BindPipeline(drawCommandBuffer, Pipeline::BindingPoint::Graphics, graphicsPipeline);
+            Command::BindPipeline(drawCommandBuffer, PipelineBindingPoint::Graphics, graphicsPipeline);
             mesh.Draw(drawCommandBuffer);
         }
         Command::EndRenderPass(drawCommandBuffer);
@@ -237,14 +235,14 @@ struct GraphicsPipelineTestApp : TestApp
     }
     void RecordMainCommandBuffer()
     {
-        Command::Buffer::BeginInfo bufferBeginInfo{};
-        bufferBeginInfo.flags = Command::Buffer::UsageFlagBits::None;
+        CommandBufferBeginInfo bufferBeginInfo{};
+        bufferBeginInfo.flags = CommandBufferUsageFlagBits::None;
         Command::Buffer::Reset(mainCommandBuffer);
         Command::Buffer::Begin(mainCommandBuffer, bufferBeginInfo);
         {
             Command::ExecuteCommandBuffer(mainCommandBuffer, drawCommandBuffer);
             {
-                Image::Copy imageCopy;
+                ImageCopy imageCopy;
                 imageCopy.extent.width  = window.GetExtent().width;
                 imageCopy.extent.height = window.GetExtent().height;
                 imageCopy.extent.depth  = 1;

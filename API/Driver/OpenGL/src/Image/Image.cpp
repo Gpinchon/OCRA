@@ -308,13 +308,12 @@ Handle CreateEmpty(const Device::Handle& a_Device, const CreateImageInfo& a_Info
 }
 
 void CopyBufferToImage(
-    const Device::Handle& a_Device,
     const OCRA::Buffer::Handle& a_SrcBuffer,
     const Image::Handle& a_DstImage,
     const std::vector<ImageBufferCopy>& a_Regions)
 {
     for (const auto& copy : a_Regions) CheckValidCopy(copy, a_DstImage);
-    a_Device->PushCommand([
+    a_SrcBuffer->device.lock()->PushCommand([
         srcBuffer = a_SrcBuffer, dstImage = a_DstImage, regions = a_Regions
     ]() {
         const auto& memoryBinding = srcBuffer->memoryBinding;
@@ -325,13 +324,12 @@ void CopyBufferToImage(
 }
 
 void CopyImageToBuffer(
-    const Device::Handle& a_Device,
     const OCRA::Buffer::Handle& a_DstBuffer,
     const Image::Handle& a_SrcImage,
     const std::vector<ImageBufferCopy>& a_Regions)
 {
     for (const auto& copy : a_Regions) CheckValidCopy(copy, a_SrcImage);
-    a_Device->PushCommand([
+    a_DstBuffer->device.lock()->PushCommand([
         dstBuffer = a_DstBuffer, srcImage = a_SrcImage, regions = a_Regions
     ]() {
             const auto& memoryBinding = dstBuffer->memoryBinding;
@@ -348,6 +346,13 @@ void GenerateMipMap(
     a_Device->PushCommand([image=a_Image] {
         glGenerateTextureMipmap(image->handle);
     }, false);
+}
+size_t GetPixelSize(const Format& a_Format)
+{
+    return
+        GetRedSize(a_Format) + GetGreenSize(a_Format) +
+        GetRedSize(a_Format) + GetAlphaSize(a_Format) +
+        GetDepthSize(a_Format) + GetStencilSize(a_Format);
 }
 }
 

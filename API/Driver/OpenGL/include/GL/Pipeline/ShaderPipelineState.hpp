@@ -6,29 +6,23 @@
 */
 #pragma once
 
-#include <OCRA/Pipeline/ShaderPipelineState.hpp>
+#include <OCRA/Core.hpp>
 
-
-OCRA_DECLARE_HANDLE(OCRA::Device);
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
-
-namespace OCRA::Pipeline::DynamicState {
-struct Info;
-}
 
 namespace OCRA::Command::Buffer {
 struct ExecutionState;
 }
 
-namespace OCRA::Pipeline::ShaderPipelineState {
+namespace OCRA::Pipeline {
 //compiles the specified stages into a program pipeline
-struct Compile {
-    Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info&);
-    Compile(const Compile& a_Other);
-    ~Compile();
+struct CompileShaderPipelineState {
+    CompileShaderPipelineState(const Device::Handle& a_Device, const PipelineShaderPipelineState& a_Info, const PipelineDynamicState&);
+    CompileShaderPipelineState(const CompileShaderPipelineState& a_Other);
+    ~CompileShaderPipelineState();
     void operator()(Command::Buffer::ExecutionState&) const;
     const Device::WeakHandle device;
-    const Info& info;
+    const PipelineShaderPipelineState& info;
     mutable uint32_t handle{ 0 };
 };
 }

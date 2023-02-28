@@ -10,7 +10,7 @@ Device::Handle CreateDevice(
     const CreateDeviceInfo& a_Info,
     const AllocationCallback* a_Allocator)
 {
-    const auto device = std::make_shared<Device::Impl>(a_PhysicalDevice, a_Info);
+    const auto device = std::make_shared<Device::Impl>(a_PhysicalDevice);
     for (const auto& queueInfo : a_Info.queueInfos)
     {
         for (auto queueIndex = 0u; queueIndex < queueInfo.queueCount; ++queueIndex)

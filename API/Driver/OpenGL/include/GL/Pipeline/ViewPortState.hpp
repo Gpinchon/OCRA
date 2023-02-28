@@ -6,20 +6,19 @@
 */
 #pragma once
 
-#include <OCRA/Pipeline/ViewPortState.hpp>
-#include <OCRA/Common/Rect2D.hpp>
-
-#include <array>
+#include <OCRA/Core.hpp>
 
 #include <GL/Command/ExecutionState.hpp>
 #include <GL/glew.h>
 
-namespace OCRA::Pipeline::ViewPortState {
-struct Compile
+#include <array>
+
+namespace OCRA::Pipeline {
+struct CompileViewPortState
 {
-    Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info& a_DynamicState)
-        : dynamicViewport(a_DynamicState.Contains(DynamicState::State::Viewport))
-        , dynamicScissor(a_DynamicState.Contains(DynamicState::State::Scissor))
+    CompileViewPortState(const Device::Handle& a_Device, const PipelineViewPortState& a_Info, const PipelineDynamicState& a_DynamicState)
+        : dynamicViewport(a_DynamicState.Contains(DynamicState::Viewport))
+        , dynamicScissor(a_DynamicState.Contains(DynamicState::Scissor))
         , viewPorts(a_Info.viewPorts)
         , scissors(a_Info.scissors)
     {}

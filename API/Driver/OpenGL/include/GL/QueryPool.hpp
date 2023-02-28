@@ -13,7 +13,11 @@ namespace OCRA::QueryPool
 {
 struct Impl
 {
-    Impl(const Device::Handle& a_Device, const uint32_t& a_Count, const std::vector<GLenum>& a_Targets, const QueryType& a_Type);
+    Impl(
+        const Device::Handle& a_Device,
+        const uint32_t& a_Count,
+        const std::vector<GLenum>& a_Targets,
+        const QueryType& a_Type);
     ~Impl();
     virtual void Begin(const uint32_t& a_Index) {
         glBeginQuery(handles.at(a_Index), targets.at(a_Index));

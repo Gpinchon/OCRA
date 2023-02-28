@@ -1,4 +1,4 @@
-#include <OCRA/FrameBuffer.hpp>
+#include <OCRA/Core.hpp>
 
 #include <GL/Common/Assert.hpp>
 #include <GL/Device.hpp>
@@ -6,8 +6,19 @@
 #include <GL/Image/View.hpp>
 #include <GL/glew.h>
 
+namespace OCRA::Device
+{
+FrameBuffer::Handle CreateFrameBuffer(
+    const Device::Handle&        a_Device,
+    const CreateFrameBufferInfo& a_Info,
+    const AllocationCallback*    a_Allocator)
+{
+    return std::make_shared<FrameBuffer::Impl>(a_Device, a_Info);
+}
+}
+
 namespace OCRA::FrameBuffer {
-static inline auto CreateFrameBuffer(const Device::Handle& a_Device, const Info& a_Info)
+static inline auto CreateFrameBuffer(const Device::Handle& a_Device, const CreateFrameBufferInfo& a_Info)
 {
     GLuint handle = 0;
     a_Device->PushCommand([a_Info, &handle] {
@@ -29,7 +40,7 @@ static inline auto CreateFrameBuffer(const Device::Handle& a_Device, const Info&
     }, true);
     return handle;
 }
-Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
+Impl::Impl(const Device::Handle& a_Device, const CreateFrameBufferInfo& a_Info)
     : info(a_Info)
     , device(a_Device)
     , handle(CreateFrameBuffer(a_Device, a_Info))
@@ -46,12 +57,5 @@ void Impl::Bind()
 void Impl::Unbind()
 {
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-}
-Handle Create(
-    const Device::Handle&       a_Device,
-    const Info&                 a_Info,
-    const AllocationCallback*   a_Allocator)
-{
-    return Handle(new Impl(a_Device, a_Info));
 }
 }

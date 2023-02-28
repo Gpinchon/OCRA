@@ -73,16 +73,6 @@ Device::Handle CreateDevice(const PhysicalDevice::Handle& a_PhysicalDevice)
     return CreateDevice(a_PhysicalDevice, deviceInfo);
 }
 
-uint32_t FindQueueFamily(const PhysicalDevice::Handle& a_PhysicalDevice, const PhysicalDevice::QueueFlags& a_QueueProperties)
-{
-    auto& queueProperties = PhysicalDevice::GetQueueFamilyProperties(a_PhysicalDevice);
-    for (auto familyIndex = 0u; familyIndex < queueProperties.size(); ++familyIndex) {
-        if (queueProperties.at(familyIndex).queueFlags == a_QueueProperties)
-            return familyIndex;
-    }
-    return std::numeric_limits<uint32_t>::infinity();
-}
-
 Command::Pool::Handle CreateCommandPool(const Device::Handle& a_Device, const uint32_t& a_QueueFamily)
 {
     CreateCommandPoolInfo commandPoolInfo;

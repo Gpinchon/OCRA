@@ -3,8 +3,6 @@
 
 #include <OCRA/OCRA.hpp>
 
-#include <Windows.h>
-
 using namespace OCRA;
 
 constexpr auto VSync = false;
@@ -69,15 +67,15 @@ struct SwapChainTestApp : TestApp
         window.OnMaximize = window.OnResize;
         window.OnRestore = window.OnResize;
         window.OnMinimize = [this](const Window&, const uint32_t, const uint32_t) { render = false; };
-        const auto queueFamily = FindQueueFamily(physicalDevice, PhysicalDevice::QueueFlagsBits::Graphics);
+        const auto queueFamily = PhysicalDevice::FindQueueFamily(physicalDevice, QueueFlagsBits::Graphics);
         queue = Device::GetQueue(device, queueFamily, 0); //Get first available queue
-        imageAcquisitionFence = Fence::Create(device);
+        imageAcquisitionFence = CreateFence(device);
         commandPool = CreateCommandPool(device, queueFamily);
-        commandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Primary);
-        Semaphore::Info semaphoreInfo;
-        semaphoreInfo.type = Semaphore::Type::Binary;
-        drawWaitSemaphore = Semaphore::Create(device, semaphoreInfo);
-        drawSignalSemaphore = Semaphore::Create(device, semaphoreInfo);
+        commandBuffer = CreateCommandBuffer(commandPool, CommandBufferLevel::Primary);
+        CreateSemaphoreInfo semaphoreInfo;
+        semaphoreInfo.type = SemaphoreType::Binary;
+        drawWaitSemaphore = CreateSemaphore(device, semaphoreInfo);
+        drawSignalSemaphore = Device::CreateSemaphore(device, semaphoreInfo);
     }
     void Loop()
     {
@@ -90,8 +88,8 @@ struct SwapChainTestApp : TestApp
             if (window.IsClosing()) break;
 
             const auto swapChainImage = window.AcquireNextImage(std::chrono::nanoseconds(0), drawWaitSemaphore, imageAcquisitionFence);
-            render = Fence::WaitFor(device, imageAcquisitionFence, Fence::IgnoreTimeout);
-            Fence::Reset(device, { imageAcquisitionFence });
+            render = Fence::WaitFor(imageAcquisitionFence, Fence::IgnoreTimeout);
+            Fence::Reset({ imageAcquisitionFence });
 
             if (!render) continue;
             
@@ -118,15 +116,15 @@ struct SwapChainTestApp : TestApp
         hue += 0.05 * delta;
         hue = hue > 360 ? 0 : hue;
         const auto color = HSVtoRGB(hue, 0.5f, 1.f);
-        Command::Buffer::BeginInfo bufferBeginInfo;
-        bufferBeginInfo.flags = Command::Buffer::UsageFlagBits::None;
+        CommandBufferBeginInfo bufferBeginInfo;
+        bufferBeginInfo.flags = CommandBufferUsageFlagBits::None;
         Command::Buffer::Reset(commandBuffer);
         Command::Buffer::Begin(commandBuffer, bufferBeginInfo);
         {
             ColorValue clearColor{ color.r, color.g, color.b, 1.f };
-            Image::Subresource::Range range{};
+            ImageSubresourceRange range{};
             range.levelCount = 1;
-            Command::ClearColorImage(commandBuffer, a_Image, Image::Layout::Unknown, clearColor, { range });
+            Command::ClearColorImage(commandBuffer, a_Image, ImageLayout::Unknown, clearColor, { range });
         }
         Command::Buffer::End(commandBuffer);
     }

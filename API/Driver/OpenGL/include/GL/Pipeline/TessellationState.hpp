@@ -6,19 +6,13 @@
 */
 #pragma once
 
-#include <OCRA/Pipeline/TessellationState.hpp>
+#include <OCRA/Core.hpp>
 
-namespace OCRA::Pipeline::DynamicState {
-struct Info;
-}
-
-
-
-namespace OCRA::Pipeline::TessellationState
+namespace OCRA::Pipeline
 {
-struct Compile
+struct CompileTessellationState
 {
-    Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info&)
+    CompileTessellationState(const Device::Handle& a_Device, const PipelineTessellationState& a_Info, const PipelineDynamicState&)
         : patchControlPoints(a_Info.patchControlPoints)
     {}
     void operator()(Command::Buffer::ExecutionState& a_ExecutionState) const

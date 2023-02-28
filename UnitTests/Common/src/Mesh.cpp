@@ -1,8 +1,5 @@
 #include <Mesh.hpp>
 
-#include <OCRA/Command/Draw.hpp>
-#include <OCRA/Pipeline/Layout.hpp>
-
 #include <OCRA/ShaderCompiler/Compiler.hpp>
 #include <OCRA/ShaderCompiler/Shader.hpp>
 
@@ -33,14 +30,14 @@ auto DefaultVertexShader(const Device::Handle& a_Device) {
         "}                                                                  \n"
     };
     const auto vertexShader = ShaderCompiler::Shader::Create(compiler, shaderInfo);
-    Shader::Module::Info shaderModuleInfo;
+    CreateShaderModuleInfo shaderModuleInfo;
     shaderModuleInfo.code = ShaderCompiler::Shader::Compile(vertexShader);
-    const auto shaderModule = Shader::Module::Create(a_Device, shaderModuleInfo);
-    Shader::Stage::Info shaderStageInfo;
+    const auto shaderModule = CreateShaderModule(a_Device, shaderModuleInfo);
+    CreateShaderStageInfo shaderStageInfo;
     shaderStageInfo.entryPoint = "main";
-    shaderStageInfo.stage = Shader::Stage::StageFlagBits::Vertex;
+    shaderStageInfo.stage = ShaderStageFlagBits::Vertex;
     shaderStageInfo.module = shaderModule;
-    auto shaderStageHandle = Shader::Stage::Create(a_Device, shaderStageInfo);
+    auto shaderStageHandle = CreateShaderStage(a_Device, shaderStageInfo);
     shaderStage = shaderStageHandle;
     return shaderStageHandle;
 }
@@ -51,17 +48,17 @@ Mesh::Mesh(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle&
     , projectionMatrix(a_PhysicalDevice, a_Device, 0, Mat4x4{})
     , vertexShader(DefaultVertexShader(a_Device))
 {
-    Pipeline::Layout::Info layoutInfo;
+    CreatePipelineLayoutInfo layoutInfo;
     layoutInfo.setLayouts = GetDescriptorSetLayouts();
-    layout = Pipeline::Layout::Create(device, layoutInfo);
+    layout = CreatePipelineLayout(device, layoutInfo);
 
-    inputAssembly.topology = Primitive::Topology::TriangleList;
+    inputAssembly.topology = PrimitiveTopology::TriangleList;
     inputAssembly.primitiveRestartEnable = false;
 }
 
 void Mesh::Draw(const Command::Buffer::Handle& a_CommandBuffer) {
-    Command::PushDescriptorSet(a_CommandBuffer, Pipeline::BindingPoint::Graphics, layout, projectionMatrix.GetWriteOperations());
-    Command::PushDescriptorSet(a_CommandBuffer, Pipeline::BindingPoint::Graphics, layout, material.GetWriteOperations());
+    Command::PushDescriptorSet(a_CommandBuffer, PipelineBindingPoint::Graphics, layout, projectionMatrix.GetWriteOperations());
+    Command::PushDescriptorSet(a_CommandBuffer, PipelineBindingPoint::Graphics, layout, material.GetWriteOperations());
     Command::BindVertexBuffers(a_CommandBuffer, 0, { GetVertexBuffer().GetBuffer() }, { 0 });
     Command::Draw(a_CommandBuffer, GetVertexBuffer().GetVertexNbr(), 1, 0, 0);
 }

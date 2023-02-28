@@ -7,6 +7,7 @@
 namespace OCRA::Command::Buffer {
 struct ExecutionState;
 }
+
 namespace OCRA::Pipeline {
 struct Impl {
     Impl(const PipelineBindingPoint& a_BindingPoint, const Layout::Handle& a_Layout)

@@ -1,32 +1,32 @@
-#include <OCRA/Semaphore.hpp>
+#include <OCRA/Core.hpp>
 
 #include <GL/Common/Assert.hpp>
 #include <GL/Semaphore.hpp>
 
 #include <stdexcept>
 
-namespace OCRA {
-struct AllocationCallback;
+namespace OCRA::Device
+{
+Semaphore::Handle CreateSemaphore(
+    const Device::Handle& a_Device,
+    const CreateSemaphoreInfo& a_Info,
+    const AllocationCallback* a_Allocator)
+{
+    if (a_Info.type == SemaphoreType::Timeline)
+        return std::make_shared<Semaphore::Timeline>(a_Info.initialValue);
+    else if (a_Info.type == SemaphoreType::Binary)
+        return std::make_shared<Semaphore::Binary>();
+    throw std::runtime_error("Unknown semaphore type");
+}
 }
 
 namespace OCRA::Semaphore {
-Handle Create(
-    const Device::Handle& a_Device,
-    const Info& a_Info,
-    const AllocationCallback* a_Allocator)
-{
-    if (a_Info.type == Type::Timeline)
-        return Handle(new Timeline(a_Info.initialValue));
-    else if (a_Info.type == Type::Binary)
-        return Handle(new Binary);
-    throw std::runtime_error("Unknown semaphore type");
-}
 void Signal(
     const Device::Handle& a_Device,
     const Handle& a_Semaphore,
     const uint64_t& a_Value)
 {
-    OCRA_ASSERT(a_Semaphore->type == Type::Timeline);
+    OCRA_ASSERT(a_Semaphore->type == SemaphoreType::Timeline);
     std::static_pointer_cast<Timeline>(a_Semaphore)->SignalClient(a_Value);
 }
 void Signal(
@@ -43,7 +43,7 @@ bool Wait(
     const uint64_t& a_Value,
     const std::chrono::nanoseconds& a_TimeoutNS)
 {
-    OCRA_ASSERT(a_Semaphore->type == Type::Timeline);
+    OCRA_ASSERT(a_Semaphore->type == SemaphoreType::Timeline);
     return std::static_pointer_cast<Timeline>(a_Semaphore)->WaitClient(a_TimeoutNS, a_Value);
 }
 bool Wait(
@@ -66,7 +66,7 @@ uint64_t GetCounterValue(
     const Device::Handle& a_Device,
     const Handle& a_Semaphore)
 {
-    OCRA_ASSERT(a_Semaphore->type == Type::Timeline);
+    OCRA_ASSERT(a_Semaphore->type == SemaphoreType::Timeline);
     return std::static_pointer_cast<Timeline>(a_Semaphore)->GetCount();
 }
 }

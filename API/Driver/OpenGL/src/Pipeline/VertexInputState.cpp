@@ -6,8 +6,11 @@
 
 #include <GL/glew.h>
 
-namespace OCRA::Pipeline::VertexInputState {
-Compile::Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info& a_DynamicState)
+namespace OCRA::Pipeline {
+CompileVertexInputState::CompileVertexInputState(
+    const Device::Handle& a_Device,
+    const PipelineVertexInputState& a_Info,
+    const PipelineDynamicState& a_DynamicState)
     : device(a_Device)
     , primitiveRestartIndex(a_Info.primitiveRestartIndex)
     , bindingDescriptions(a_Info.bindingDescriptions)
@@ -29,7 +32,7 @@ Compile::Compile(const Device::Handle& a_Device, const Info& a_Info, const Dynam
         }
         for (const auto& description : a_Info.bindingDescriptions) {
             //Is this binding divided by instance or by vertex ?
-            const auto divideByInstance = description.inputRate == BindingDescription::InputRate::Instance;
+            const auto divideByInstance = description.inputRate == VertexInputRate::Instance;
             glVertexBindingDivisor(
                 description.binding,
                 divideByInstance ? 1 : 0);
@@ -38,14 +41,14 @@ Compile::Compile(const Device::Handle& a_Device, const Info& a_Info, const Dynam
     }, true);
 }
 
-Compile::Compile(const Compile& a_Other)
+CompileVertexInputState::CompileVertexInputState(const CompileVertexInputState& a_Other)
     : device(a_Other.device)
     , primitiveRestartIndex(a_Other.primitiveRestartIndex)
     , bindingDescriptions(a_Other.bindingDescriptions)
     , handle(std::exchange(a_Other.handle, 0))
 {}
 
-Compile::~Compile()
+CompileVertexInputState::~CompileVertexInputState()
 {
     if (handle == 0) return;
     device.lock()->PushCommand([handle = handle] {
@@ -53,7 +56,7 @@ Compile::~Compile()
     }, false);
 }
 
-void Compile::operator()(Command::Buffer::ExecutionState& a_ExecutionState) const
+void CompileVertexInputState::operator()(Command::Buffer::ExecutionState& a_ExecutionState) const
 {
     glPrimitiveRestartIndex(primitiveRestartIndex);
     glBindVertexArray(handle);

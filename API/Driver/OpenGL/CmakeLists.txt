@@ -47,6 +47,7 @@ set(OCRA_IMPL_INCLUDE_DIR
 set(OCRA_IMPL_HEADER_FILES
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Buffer.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Device.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Enums.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Fence.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Memory.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Instance.hpp
@@ -60,14 +61,8 @@ set(OCRA_IMPL_HEADER_FILES
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Command/CommandInterface.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Command/ExecutionState.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/Assert.hpp
-  ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/Blend.hpp
-  ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/Compare.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/FixedSizeMemoryPool.hpp
-  ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/IndexType.hpp
-  ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/Logic.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/MemoryPool.hpp
-  ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/Stencil.hpp
-  ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/VertexType.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/WorkerThread.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Descriptor/Binding.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Descriptor/Set.hpp
@@ -117,7 +112,6 @@ set(OCRA_IMPL_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Descriptor/Set.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Descriptor/SetLayout.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Descriptor/Pool.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Image/Format.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Image/Image.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Image/Sampler.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Image/View.cpp

@@ -4,7 +4,6 @@
 
 namespace OCRA::Descriptor::Set {
 void Update(
-    const Device::Handle& a_Device,
     const std::vector<DescriptorSetWrite>&  a_Writes,
     const std::vector<DescriptorSetCopy>&   a_Copies)
 {

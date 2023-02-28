@@ -1,20 +1,15 @@
 #pragma once
 
-#include <OCRA/Structs.hpp>
+#include <OCRA/Core.hpp>
 
+#include <GL/PushConstants.hpp>
+#include <GL/Structs.hpp>
 #include <GL/Common/Stencil.hpp>
 #include <GL/Descriptor/Binding.hpp>
-#include <GL/PushConstants.hpp>
-#include <GL/Common/FixedSizeMemoryPool.hpp>
 #include <GL/glew.h>
 
 #include <vector>
 #include <array>
-#include <algorithm>
-
-OCRA_DECLARE_HANDLE(OCRA::Pipeline);
-OCRA_DECLARE_HANDLE(OCRA::Buffer);
-OCRA_DECLARE_HANDLE(OCRA::Descriptor::Set);
 
 namespace OCRA::Command::Buffer
 {
@@ -34,8 +29,8 @@ struct DynamicStates {
     GLenum                  depthCompareOp { GL_LESS };
     bool                    stencilTestEnable { false };
     bool                    rasterizerDiscardEnable { false };
-    Stencil::GLOpState      frontStencilOP;
-    Stencil::GLOpState      backStencilOP;
+    GLStencilOpState        frontStencilOP;
+    GLStencilOpState        backStencilOP;
     GLenum                  primitiveTopology{ GL_NONE };
     bool                    primitiveRestartEnable { false };
     GLenum                  cullMode{ GL_BACK };

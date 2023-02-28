@@ -1,4 +1,4 @@
-#include <OCRA/PhysicalDevice.hpp>
+#include <OCRA/Core.hpp>
 
 #include <GL/PhysicalDevice.hpp>
 #include <GL/Instance.hpp>
@@ -374,5 +374,14 @@ const PhysicalDeviceFeatures GetFeatures(const Handle& a_PhysicalDevice)
 const std::vector<QueueFamilyProperties> GetQueueFamilyProperties(const Handle& a_PhysicalDevice)
 {
     return { a_PhysicalDevice->queue.properties };
+}
+uint32_t FindQueueFamily(const PhysicalDevice::Handle& a_PhysicalDevice, const QueueFlags& a_QueueProperties)
+{
+    auto& queueProperties = PhysicalDevice::GetQueueFamilyProperties(a_PhysicalDevice);
+    for (auto familyIndex = 0u; familyIndex < queueProperties.size(); ++familyIndex) {
+        if (queueProperties.at(familyIndex).queueFlags == a_QueueProperties)
+            return familyIndex;
+    }
+    return std::numeric_limits<uint32_t>::infinity();
 }
 }

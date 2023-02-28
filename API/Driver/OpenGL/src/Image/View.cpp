@@ -11,10 +11,11 @@
 #include <stdexcept>
 
 #include <GL/Device.hpp>
+#include <GL/Structs.hpp>
 #include <GL/Image/Format.hpp>
 #include <GL/Image/Image.hpp>
 #include <GL/Image/View.hpp>
-#include <GL/Common/Component.hpp>
+
 #include <GL/glew.h>
 
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
@@ -45,7 +46,7 @@ GLenum GetGLType(const ImageViewType& a_Type)
 }
 
 namespace OCRA::Device {
-Image::View::Handle Create(const Device::Handle& a_Device, const CreateImageViewInfo& a_Info)
+Image::View::Handle CreateImageView(const Device::Handle& a_Device, const CreateImageViewInfo& a_Info)
 {
     return std::make_shared<Image::View::Impl>(a_Device, a_Info);
 }
@@ -80,7 +81,7 @@ Impl::Impl(const Device::Handle& a_Device, const CreateImageViewInfo& a_Info)
     , info(a_Info)
     , target(GetGLType(info.type))
     , format(GetGLSizedFormat(a_Info.format))
-    , handle(CreateImageView(a_Device, a_Info))
+    , handle(View::CreateImageView(a_Device, a_Info))
 {}
 Impl::~Impl()
 {

@@ -12,7 +12,9 @@ OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
 
 namespace OCRA::Fence {
 struct Impl {
-    Impl(const Device::Handle& a_Device) : device(a_Device) {}
+    Impl(const FenceStatus& a_DefaultStatus)
+        : status(a_DefaultStatus)
+    {}
     inline auto GetStatus() {
         std::unique_lock<std::mutex> lock(mutex);
         return status;
@@ -41,7 +43,6 @@ struct Impl {
         auto lock = std::unique_lock<std::mutex>(mutex);
         status = FenceStatus::Unsignaled;
     }
-    const Device::WeakHandle device;
     FenceStatus status{ FenceStatus::Unsignaled };
     std::mutex mutex;
     std::condition_variable cv;

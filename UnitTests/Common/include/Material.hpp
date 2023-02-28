@@ -81,7 +81,7 @@ private:
     Shader::Stage::Handle       fragmentShader;
     UniformBuffer               parameters;
     std::vector<UniformTexture> textures;
-    std::vector<Descriptor::SetLayout::Binding> descriptorLayoutBindings;
-    std::vector<Descriptor::Set::WriteOperation>  writeOperations;
+    std::vector<DescriptorSetLayoutBinding> descriptorLayoutBindings;
+    std::vector<DescriptorSetWrite>  writeOperations;
 };
 }

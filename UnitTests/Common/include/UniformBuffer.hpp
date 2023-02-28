@@ -1,5 +1,5 @@
 #pragma once
-#include <OCRA/Buffer.hpp>
+#include <OCRA/OCRA.hpp>
 
 #include <Common.hpp>
 #include <Uniform.hpp>
@@ -58,12 +58,12 @@ inline UniformBuffer::UniformBuffer(const PhysicalDevice::Handle& a_PhysicalDevi
     , data(sizeof(T))
 {
     Set(a_DefaultValue);
-    memory = AllocateMemory(a_PhysicalDevice, a_Device, GetDataSize(), PhysicalDevice::MemoryPropertyFlagBits::HostVisible);
-    Buffer::Info bufferInfo{};
+    memory = AllocateMemory(a_PhysicalDevice, a_Device, GetDataSize(), MemoryPropertyFlagBits::HostVisible);
+    CreateBufferInfo bufferInfo{};
     bufferInfo.size = GetDataSize();
-    bufferInfo.usage = Buffer::UsageFlagBits::UniformBuffer;
+    bufferInfo.usage = BufferUsageFlagBits::UniformBuffer;
     bufferInfo.queueFamilyIndices.push_back(0);
-    buffer = Buffer::Create(a_Device, bufferInfo);
-    Buffer::BindMemory(GetDevice(), buffer, memory, 0);
+    buffer = CreateBuffer(a_Device, bufferInfo);
+    Buffer::BindMemory(buffer, memory, 0);
 }
 }

@@ -1,5 +1,4 @@
-#include <OCRA/Handle.hpp>
-#include <OCRA/Semaphore.hpp>
+#include <OCRA/Core.hpp>
 
 #include <GL/Device.hpp>
 #include <GL/Queue.hpp>
@@ -14,12 +13,12 @@ OCRA_DECLARE_HANDLE(OCRA::Queue);
 
 namespace OCRA::Queue
 {
-static inline void Execute(const SubmitInfo& a_SubmitInfo)
+static inline void Execute(const QueueSubmitInfo& a_SubmitInfo)
 {
     for (auto semaphoreIndex = 0u; semaphoreIndex < a_SubmitInfo.waitSemaphores.size(); ++semaphoreIndex)
     {
         auto& semaphore = a_SubmitInfo.waitSemaphores.at(semaphoreIndex);
-        if (semaphore->type == Semaphore::Type::Binary)
+        if (semaphore->type == SemaphoreType::Binary)
             std::static_pointer_cast<Semaphore::Binary>(semaphore)->Wait();
         else {
             auto& semaphoreValue = a_SubmitInfo.timelineSemaphoreValues.waitSemaphoreValues.at(semaphoreIndex);
@@ -30,7 +29,7 @@ static inline void Execute(const SubmitInfo& a_SubmitInfo)
     for (auto semaphoreIndex = 0u; semaphoreIndex < a_SubmitInfo.signalSemaphores.size(); ++semaphoreIndex)
     {
         auto& semaphore = a_SubmitInfo.signalSemaphores.at(semaphoreIndex);
-        if (semaphore->type == Semaphore::Type::Binary)
+        if (semaphore->type == SemaphoreType::Binary)
             std::static_pointer_cast<Semaphore::Binary>(semaphore)->Signal();
         else {
             auto& semaphoreValue = a_SubmitInfo.timelineSemaphoreValues.signalSemaphoreValues.at(semaphoreIndex);
@@ -41,7 +40,7 @@ static inline void Execute(const SubmitInfo& a_SubmitInfo)
 
 void Submit(
     const Handle& a_Queue,
-    const std::vector<SubmitInfo>& a_SubmitInfos,
+    const std::vector<QueueSubmitInfo>& a_SubmitInfos,
     const Fence::Handle& a_Fence)
 {
     a_Queue->PushCommand([submitInfos = a_SubmitInfos, fence = a_Fence] {

@@ -1,4 +1,4 @@
-#include <OCRA/QueryPool.hpp>
+#include <OCRA/Core.hpp>
 
 #include <GL/Device.hpp>
 #include <GL/QueryPool.hpp>
@@ -28,34 +28,38 @@ static inline auto GenQueries(const Device::Handle& a_Device, const uint32_t& a_
     }, true);
     return handles;
 }
-static inline auto GetPipelineQueryTargets(const PipelineStatisticFlags& a_Flags)
+static inline auto GetPipelineQueryTargets(const QueryPipelineStatisticFlags& a_Flags)
 {
     std::vector<GLenum> targets;
-    if ((a_Flags & PipelineStatisticFlagBits::InputAssemblyVertices) != 0)
+    if ((a_Flags & QueryPipelineStatisticFlagBits::InputAssemblyVertices) != 0)
         targets.push_back(GL_VERTICES_SUBMITTED);
-    if ((a_Flags & PipelineStatisticFlagBits::InputAssemblyPrimitives) != 0)
+    if ((a_Flags & QueryPipelineStatisticFlagBits::InputAssemblyPrimitives) != 0)
         targets.push_back(GL_PRIMITIVES_SUBMITTED);
-    if ((a_Flags & PipelineStatisticFlagBits::VertexShaderInvocations) != 0)
+    if ((a_Flags & QueryPipelineStatisticFlagBits::VertexShaderInvocations) != 0)
         targets.push_back(GL_VERTEX_SHADER_INVOCATIONS);
-    if ((a_Flags & PipelineStatisticFlagBits::GeometryShaderInvocations) != 0)
+    if ((a_Flags & QueryPipelineStatisticFlagBits::GeometryShaderInvocations) != 0)
         targets.push_back(GL_GEOMETRY_SHADER_INVOCATIONS);
-    if ((a_Flags & PipelineStatisticFlagBits::GeometryShaderPrimitives) != 0)
+    if ((a_Flags & QueryPipelineStatisticFlagBits::GeometryShaderPrimitives) != 0)
         targets.push_back(GL_GEOMETRY_SHADER_PRIMITIVES_EMITTED);
-    if ((a_Flags & PipelineStatisticFlagBits::ClippingInvocations) != 0)
+    if ((a_Flags & QueryPipelineStatisticFlagBits::ClippingInvocations) != 0)
         targets.push_back(GL_CLIPPING_INPUT_PRIMITIVES);
-    if ((a_Flags & PipelineStatisticFlagBits::ClippingPrimitives) != 0)
+    if ((a_Flags & QueryPipelineStatisticFlagBits::ClippingPrimitives) != 0)
         targets.push_back(GL_CLIPPING_OUTPUT_PRIMITIVES);
-    if ((a_Flags & PipelineStatisticFlagBits::FragmentShaderInvocations) != 0)
+    if ((a_Flags & QueryPipelineStatisticFlagBits::FragmentShaderInvocations) != 0)
         targets.push_back(GL_FRAGMENT_SHADER_INVOCATIONS);
-    if ((a_Flags & PipelineStatisticFlagBits::TessellationControlShaderPatches) != 0)
+    if ((a_Flags & QueryPipelineStatisticFlagBits::TessellationControlShaderPatches) != 0)
         targets.push_back(GL_TESS_CONTROL_SHADER_PATCHES);
-    if ((a_Flags & PipelineStatisticFlagBits::TessellationEvaluationShaderInvocations) != 0)
+    if ((a_Flags & QueryPipelineStatisticFlagBits::TessellationEvaluationShaderInvocations) != 0)
         targets.push_back(GL_TESS_EVALUATION_SHADER_INVOCATIONS);
-    if ((a_Flags & PipelineStatisticFlagBits::ComputeShaderInvocations) != 0)
+    if ((a_Flags & QueryPipelineStatisticFlagBits::ComputeShaderInvocations) != 0)
         targets.push_back(GL_COMPUTE_SHADER_INVOCATIONS);
     return targets;
 }
-Impl::Impl(const Device::Handle& a_Device, const uint32_t& a_Count, const std::vector<GLenum>& a_Targets, const Type& a_Type)
+Impl::Impl(
+    const Device::Handle& a_Device,
+    const uint32_t& a_Count,
+    const std::vector<GLenum>& a_Targets,
+    const QueryType& a_Type)
     : type(a_Type)
     , device(a_Device)
     , handles(GenQueries(a_Device, a_Count))
@@ -141,14 +145,14 @@ void PipelineStatistics::GetResult(
 }
 Handle Create(
     const Device::Handle&   a_Device,
-    const Info&             a_Info)
+    const CreateQueryPoolInfo&             a_Info)
 {
     switch (a_Info.type) {
-    case(Type::Occlusion) :
-        return Handle(new Impl(a_Device, a_Info.count, std::vector<GLenum>(a_Info.count, GL_SAMPLES_PASSED), Type::Occlusion));
-    case(Type::TimeStamp):
-        return Handle(new Impl(a_Device, a_Info.count, std::vector<GLenum>(a_Info.count, GL_TIME_ELAPSED), Type::TimeStamp));
-    case(Type::PipelineStatistics):
+    case(QueryType::Occlusion) :
+        return Handle(new Impl(a_Device, a_Info.count, std::vector<GLenum>(a_Info.count, GL_SAMPLES_PASSED), QueryType::Occlusion));
+    case(QueryType::TimeStamp):
+        return Handle(new Impl(a_Device, a_Info.count, std::vector<GLenum>(a_Info.count, GL_TIME_ELAPSED), QueryType::TimeStamp));
+    case(QueryType::PipelineStatistics):
         return Handle(new PipelineStatistics(a_Device, a_Info));
     default:
         throw std::runtime_error("Unknown Barrier type");

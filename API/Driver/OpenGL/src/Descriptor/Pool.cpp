@@ -13,7 +13,7 @@ OCRA_DECLARE_WEAK_HANDLE(OCRA::Descriptor::Set);
 
 namespace OCRA::Device
 {
-Descriptor::Pool::Handle Create(
+Descriptor::Pool::Handle CreateDescriptorPool(
     const Device::Handle& a_Device,
     const CreateDescriptorPoolInfo& a_Info,
     const AllocationCallback* a_Allocator)
@@ -47,7 +47,7 @@ struct Impl
 #endif
 };
 
-Set::Handle AllocateSet(const Device::Handle& a_Device, const AllocateDescriptorSetInfo& a_Info)
+Set::Handle AllocateSet(const AllocateDescriptorSetInfo& a_Info)
 {
     size_t bindingCount = 0;
     const auto& bindings = a_Info.layout->bindings;

@@ -6,73 +6,29 @@
 */
 #pragma once
 
-#include <OCRA/Pipeline/ColorBlendState.hpp>
-#include <OCRA/Pipeline/DynamicState.hpp>
-#include <OCRA/Common/Vec_Boolean.hpp>
+#include <OCRA/Core.hpp>
 
+#include <GL/Enums.hpp>
+#include <GL/Structs.hpp>
 #include <GL/Command/ExecutionState.hpp>
-#include <GL/Common/Blend.hpp>
-#include <GL/Common/Logic.hpp>
 
 #include <GL/glew.h>
 
-#include <functional>
 #include <vector>
 
-namespace OCRA::Pipeline::ColorBlendState {
-struct GLAttachmentState {
-    GLAttachmentState(const AttachmentState& a_AttachmentState, const uint8_t& a_Index)
-        : index(a_Index)
-        , enable(a_AttachmentState.enable)
-        , srcColorBlendFactor(GetGLFactor(a_AttachmentState.srcColorBlendFactor))
-        , dstColorBlendFactor(GetGLFactor(a_AttachmentState.dstColorBlendFactor))
-        , colorBlendOperation(GetGLOperation(a_AttachmentState.colorBlendOperation))
-        , srcAlphaBlendFactor(GetGLFactor(a_AttachmentState.srcAlphaBlendFactor))
-        , dstAlphaBlendFactor(GetGLFactor(a_AttachmentState.dstAlphaBlendFactor))
-        , alphaBlendOperation(GetGLOperation(a_AttachmentState.alphaBlendOperation))
-        , colorMask(a_AttachmentState.colorMask)
-    {}
-    void operator()() const {
-        enable ? glEnablei(GL_BLEND, index) : glDisablei(GL_BLEND, index);
-        glBlendFuncSeparatei(
-            index,
-            srcColorBlendFactor,
-            dstColorBlendFactor,
-            srcAlphaBlendFactor,
-            srcAlphaBlendFactor);
-        glBlendEquationSeparatei(
-            index,
-            colorBlendOperation,
-            alphaBlendOperation);
-        glColorMaski(
-            index,
-            Blend::None != (colorMask & Blend::R),
-            Blend::None != (colorMask & Blend::G),
-            Blend::None != (colorMask & Blend::B),
-            Blend::None != (colorMask & Blend::A));
-    }
-    bool enable; //is blending enabled ?
-    GLenum srcColorBlendFactor;
-    GLenum dstColorBlendFactor;
-    GLenum colorBlendOperation;
-    GLenum srcAlphaBlendFactor;
-    GLenum dstAlphaBlendFactor;
-    GLenum alphaBlendOperation;
-    Blend::ColorMask colorMask; //color mask used for writing to this attachment
-    const uint8_t index{ 0 };
-};
-static inline auto CompileAttachments(const Info& a_Info) {
+namespace OCRA::Pipeline {
+static inline auto CompileAttachments(const PipelineColorBlendState& a_Info) {
     std::vector<GLAttachmentState> attachments;
     attachments.reserve(a_Info.attachments.size());
     for (uint8_t index = 0; index < a_Info.attachments.size(); ++index)
         attachments.push_back(GLAttachmentState(a_Info.attachments.at(index), index));
     return attachments;
 }
-struct Compile {
-    Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info& a_DynamicState)
+struct CompileColorBlendState {
+    CompileColorBlendState(const Device::Handle& a_Device, const PipelineColorBlendState& a_Info, const PipelineDynamicState& a_DynamicState)
         : logicOpEnable(a_Info.logicOpEnable)
-        , logicOp(GetGLOperation(a_Info.logicOp))
-        , dynamicBlendConstants(a_DynamicState.Contains(DynamicState::State::BlendConstants))
+        , logicOp(GetGLLogicOp(a_Info.logicOp))
+        , dynamicBlendConstants(a_DynamicState.Contains(DynamicState::BlendConstants))
         , blendConstants(a_Info.blendConstants)
         , attachments(CompileAttachments(a_Info))
     {}
@@ -90,7 +46,26 @@ struct Compile {
             blendConstants.g,
             blendConstants.b,
             blendConstants.a);
-        for (const auto& attachment : attachments) attachment();
+        for (const auto& attachment : attachments)
+        {
+            attachment.enable ? glEnablei(GL_BLEND, attachment.index) : glDisablei(GL_BLEND, attachment.index);
+            glBlendFuncSeparatei(
+                attachment.index,
+                attachment.srcColorBlendFactor,
+                attachment.dstColorBlendFactor,
+                attachment.srcAlphaBlendFactor,
+                attachment.srcAlphaBlendFactor);
+            glBlendEquationSeparatei(
+                attachment.index,
+                attachment.colorBlendOperation,
+                attachment.alphaBlendOperation);
+            glColorMaski(
+                attachment.index,
+                BlendColorMaskFlagBits::None != (attachment.colorMask & BlendColorMaskFlagBits::R),
+                BlendColorMaskFlagBits::None != (attachment.colorMask & BlendColorMaskFlagBits::G),
+                BlendColorMaskFlagBits::None != (attachment.colorMask & BlendColorMaskFlagBits::B),
+                BlendColorMaskFlagBits::None != (attachment.colorMask & BlendColorMaskFlagBits::A));
+        }
     }
     const bool logicOpEnable;
     const GLenum logicOp;
@@ -100,6 +75,6 @@ struct Compile {
 };
 inline auto Default(const Device::Handle& a_Device)
 {
-    return Compile(a_Device, {}, {});
+    return CompileColorBlendState(a_Device, {}, {});
 }
 }

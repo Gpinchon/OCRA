@@ -6,24 +6,20 @@
 */
 #pragma once
 
-#include <OCRA/Pipeline/MultisampleState.hpp>
+#include <OCRA/Core.hpp>
 
 #include <array>
 
 #include <GL/glew.h>
 
-namespace OCRA::Pipeline::DynamicState {
-struct Info;
-}
-
 namespace OCRA::Command::Buffer {
 struct ExecutionState;
 }
 
-namespace OCRA::Pipeline::MultisampleState {
-struct Compile
+namespace OCRA::Pipeline {
+struct CompileMultisampleState
 {
-    Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info&)
+    CompileMultisampleState(const Device::Handle& a_Device, const PipelineMultisampleState& a_Info, const PipelineDynamicState&)
         : sampleShadingEnable(a_Info.sampleShadingEnable)
         , minSampleShading(a_Info.minSampleShading)
         , sampleMasks(a_Info.sampleMasks)

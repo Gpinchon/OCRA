@@ -1,6 +1,6 @@
 #pragma once
 
-#include <OCRA/Common/Vec4.hpp>
+#include <OCRA/Vec.hpp>
 
 namespace OCRA {
 template <size_t C, size_t R, typename T>

@@ -1,12 +1,15 @@
-#include <GL/Pipeline/ShaderPipelineState.hpp>
-#include <GL/Shader/Stage.hpp>
 #include <GL/Device.hpp>
 #include <GL/Command/ExecutionState.hpp>
+#include <GL/Pipeline/ShaderPipelineState.hpp>
+#include <GL/Shader/Stage.hpp>
 
 #include <GL/glew.h>
 
-namespace OCRA::Pipeline::ShaderPipelineState {
-Compile::Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info&)
+namespace OCRA::Pipeline {
+CompileShaderPipelineState::CompileShaderPipelineState(
+    const Device::Handle& a_Device,
+    const PipelineShaderPipelineState& a_Info,
+    const PipelineDynamicState&)
     : device(a_Device)
     , info(a_Info)
 {
@@ -17,20 +20,20 @@ Compile::Compile(const Device::Handle& a_Device, const Info& a_Info, const Dynam
         }
     }, true);
 }
-Compile::Compile(const Compile& a_Other)
+CompileShaderPipelineState::CompileShaderPipelineState(const CompileShaderPipelineState& a_Other)
     : device(a_Other.device)
     , info(a_Other.info)
     , handle(std::exchange(a_Other.handle, 0))
 {}
 
-Compile::~Compile()
+CompileShaderPipelineState::~CompileShaderPipelineState()
 {
     if (handle == 0) return; //this state set does not own a GL pipeline anymore
     device.lock()->PushCommand([handle = handle] {
         glDeleteProgramPipelines(1, &handle);
     }, false);
 }
-void Compile::operator()(Command::Buffer::ExecutionState& a_ExecutionState) const {
+void CompileShaderPipelineState::operator()(Command::Buffer::ExecutionState& a_ExecutionState) const {
     glBindProgramPipeline(handle);
 }
 }

@@ -204,7 +204,7 @@ struct ImageCopy {
     Extent3D               extent{};
 };
 
-struct StencilOpState {
+struct PipelineStencilOpState {
     StencilOp failOp { StencilOp::Keep }; //the operation to be realized when stencil test FAILS
     StencilOp passOp { StencilOp::Keep }; //the operation to be realized when stencil test PASSES
     StencilOp depthFailOp { StencilOp::Keep }; //the operation to be realized when stencil test PASSES but depth test FAILS
@@ -214,7 +214,7 @@ struct StencilOpState {
     uint32_t reference { 0 }; //the reference value used in comparison.
 };
 
-struct ColorBlendAttachmentState {
+struct PipelineColorBlendAttachmentState {
     bool enable { false }; //is blending enabled ?
     BlendFactor srcColorBlendFactor { BlendFactor::One };
     BlendFactor dstColorBlendFactor { BlendFactor::Zero };
@@ -224,33 +224,33 @@ struct ColorBlendAttachmentState {
     BlendOp alphaBlendOperation { BlendOp::Add };
     BlendColorMaskFlags colorMask { BlendColorMaskFlagBits::R | BlendColorMaskFlagBits::G | BlendColorMaskFlagBits::B | BlendColorMaskFlagBits::A }; //color mask used for writing to this attachment
 };
-struct ColorBlendState {
+struct PipelineColorBlendState {
     bool logicOpEnable{ false };
     LogicOp logicOp{ LogicOp::Copy }; //see glLogicOp
-    std::vector<ColorBlendAttachmentState> attachments;
+    std::vector<PipelineColorBlendAttachmentState> attachments;
     Vec4 blendConstants;
 };
-struct DepthStencilState {
+struct PipelineDepthStencilState {
     bool depthTestEnable { true };
     bool depthWriteEnable { true };
     CompareOp depthCompareOp { CompareOp::Less };
     bool depthBoundsTestEnable { false };
     bool stencilTestEnable { false };
-    StencilOpState frontStencilOpState;
-    StencilOpState backStencilOpState;
+    PipelineStencilOpState frontStencilOpState;
+    PipelineStencilOpState backStencilOpState;
     DepthBounds<double> depthBounds{ 0, 1 };
 };
-struct DynamicState {
-    std::list<PipelineState> dynamicStates;
-    inline bool Contains(const PipelineState a_DynamicState) const {
+struct PipelineDynamicState {
+    std::list<DynamicState> dynamicStates;
+    inline bool Contains(const DynamicState a_DynamicState) const {
         return std::find(dynamicStates.begin(), dynamicStates.end(), a_DynamicState) != dynamicStates.end();
     }
 };
-struct InputAssemblyState {
+struct PipelineInputAssemblyState {
     PrimitiveTopology topology { PrimitiveTopology::Unknown };
     bool primitiveRestartEnable { false };
 };
-struct MultisampleState {
+struct PipelineMultisampleState {
     SampleCount rasterizationSamples { SampleCount::Count1 };
     bool sampleShadingEnable { false };
     float minSampleShading { 1 };
@@ -258,7 +258,7 @@ struct MultisampleState {
     bool alphaToCoverageEnable { false };
     bool alphaToOneEnable { false };
 };
-struct RasterizationState {
+struct PipelineRasterizationState {
     bool rasterizerDiscardEnable { false };
     bool depthClampEnable { true };
     bool depthBiasEnable { false };
@@ -270,13 +270,13 @@ struct RasterizationState {
     CullMode cullMode { CullMode::Back };
     FrontFace frontFace { FrontFace::CounterClockwise };
 };
-struct ShaderPipelineState {
+struct PipelineShaderPipelineState {
     std::vector<Shader::Stage::Handle> stages;
 };
-struct TessellationState {
+struct PipelineTessellationState {
     uint32_t patchControlPoints { 0 };
 };
-struct VertexAttributeDescription {
+struct PipelineVertexAttributeDescription {
     struct Format {
         uint8_t size{ 0 }; //Number of components per vertex
         VertexType type{ VertexType::None }; //Type of data of each components
@@ -286,17 +286,17 @@ struct VertexAttributeDescription {
     uint8_t binding{ 0 }; //The binding number this attribute takes its data from
     uint32_t location{ 0 }; //Location in the shader for this attribute
 };
-struct VertexBindingDescription {
+struct PipelineVertexBindingDescription {
     uint32_t binding{ 0 }; //index inside the BindVertexBuffers Command
     uint32_t stride{ 0 }; //byte stride
     VertexInputRate inputRate{ VertexInputRate::Vertex }; //is the data divided by vertex or by instance ?
 };
-struct VertexInputState {
+struct PipelineVertexInputState {
     uint32_t primitiveRestartIndex{ 0 };
-    std::vector<VertexAttributeDescription> attributeDescriptions;
-    std::vector<VertexBindingDescription> bindingDescriptions;
+    std::vector<PipelineVertexAttributeDescription> attributeDescriptions;
+    std::vector<PipelineVertexBindingDescription> bindingDescriptions;
 };
-struct ViewPortState {
+struct PipelineViewPortState {
     std::vector<ViewPort> viewPorts{};
     std::vector<Rect2D>   scissors{};
 };
@@ -615,7 +615,6 @@ struct CreateDescriptorSetLayoutInfo
 };
 struct CreateDeviceInfo {
     std::vector<QueueInfo> queueInfos;
-    PhysicalDeviceFeatures enabledFeatures;
 };
 struct CreateImageInfo {
     ImageType type{ ImageType::Unknown };
@@ -642,19 +641,19 @@ struct CreateFrameBufferInfo {
     Extent<3, uint16_t>              extent; //default FB extent
 };
 struct CreatePipelineGraphicsInfo { //describes a graphics pipeline with each stage
-    ColorBlendState     colorBlendState{};
-    DepthStencilState   depthStencilState{};
-    InputAssemblyState  inputAssemblyState{};
-    MultisampleState    multisampleState{};
-    RasterizationState  rasterizationState{};
-    ShaderPipelineState shaderPipelineState{};
-    TessellationState   tessellationState{};
-    VertexInputState    vertexInputState{};
-    ViewPortState       viewPortState{};
-    DynamicState        dynamicState{};
-    Layout::Handle      layout{};
-    RenderPass::Handle  renderPass{}; //the RenderPass this Graphics Pipeline will be used with
-    uint8_t             subPass{ 0 }; //the subPass to "start" with inside the RenderPass
+    PipelineColorBlendState     colorBlendState{};
+    PipelineDepthStencilState   depthStencilState{};
+    PipelineInputAssemblyState  inputAssemblyState{};
+    PipelineMultisampleState    multisampleState{};
+    PipelineRasterizationState  rasterizationState{};
+    PipelineShaderPipelineState shaderPipelineState{};
+    PipelineTessellationState   tessellationState{};
+    PipelineVertexInputState    vertexInputState{};
+    PipelineViewPortState       viewPortState{};
+    PipelineDynamicState        dynamicState{};
+    Pipeline::Layout::Handle    layout{};
+    RenderPass::Handle          renderPass{}; //the RenderPass this Graphics Pipeline will be used with
+    uint8_t                     subPass{ 0 }; //the subPass to "start" with inside the RenderPass
 };
 struct CreatePipelineLayoutInfo
 {

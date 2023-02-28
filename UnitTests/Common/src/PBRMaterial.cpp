@@ -1,6 +1,6 @@
 #include <PBRMaterial.hpp>
 
-#include <OCRA/Memory.hpp>
+#include <OCRA/OCRA.hpp>
 
 #include <OCRA/ShaderCompiler/Compiler.hpp>
 #include <OCRA/ShaderCompiler/Shader.hpp>
@@ -33,39 +33,39 @@ auto PBRFragmentShader(const Device::Handle& a_Device)
         "}                                                      \n"
     };
     const auto fragmentShader = ShaderCompiler::Shader::Create(compiler, shaderInfo);
-    Shader::Module::Info shaderModuleInfo;
+    CreateShaderModuleInfo shaderModuleInfo;
     shaderModuleInfo.code = ShaderCompiler::Shader::Compile(fragmentShader);
-    const auto shaderModule = Shader::Module::Create(a_Device, shaderModuleInfo);
-    Shader::Stage::Info shaderStageInfo;
+    const auto shaderModule = CreateShaderModule(a_Device, shaderModuleInfo);
+    CreateShaderStageInfo shaderStageInfo;
     shaderStageInfo.entryPoint = "main";
-    shaderStageInfo.stage = Shader::Stage::StageFlagBits::Fragment;
+    shaderStageInfo.stage = ShaderStageFlagBits::Fragment;
     shaderStageInfo.module = shaderModule;
-    auto shaderStageHandle = Shader::Stage::Create(a_Device, shaderStageInfo);
+    auto shaderStageHandle = CreateShaderStage(a_Device, shaderStageInfo);
     shaderStage = shaderStageHandle;
     return shaderStageHandle;
 }
 PBRMaterial::PBRMaterial(
     const PhysicalDevice::Handle& a_PhysicalDevice,
     const Device::Handle& a_Device)
-    : Material(a_PhysicalDevice, a_Device, PBRParameters{}, { Texture2D(a_Device, Image::Format::Uint8_Normalized_RGBA, 1, 1) }, PBRFragmentShader(a_Device))
+    : Material(a_PhysicalDevice, a_Device, PBRParameters{}, { Texture2D(a_Device, Format::Uint8_Normalized_RGBA, 1, 1) }, PBRFragmentShader(a_Device))
 {
     //Fill texture with white
     auto& texture = static_cast<const Texture2D&>(GetTexture(0));
     const auto textureSize = texture.GetWidth() * texture.GetHeight() * Image::GetPixelSize(texture.GetImageInfo().format);
-    Buffer::Info bufferInfo;
+    CreateBufferInfo bufferInfo;
     bufferInfo.size = textureSize;
-    bufferInfo.usage = Buffer::UsageFlagBits::TransferSrc;
-    auto textureTransferBuffer = Buffer::Create(a_Device, bufferInfo);
+    bufferInfo.usage = BufferUsageFlagBits::TransferSrc;
+    auto textureTransferBuffer = CreateBuffer(a_Device, bufferInfo);
     auto textureTransferMemory = AllocateMemory(
         a_PhysicalDevice, a_Device,
         bufferInfo.size,
-        PhysicalDevice::MemoryPropertyFlagBits::HostVisible);
-    Buffer::BindMemory(a_Device, textureTransferBuffer, textureTransferMemory, 0);
-    Memory::MappedRange range;
+        MemoryPropertyFlagBits::HostVisible);
+    Buffer::BindMemory(textureTransferBuffer, textureTransferMemory, 0);
+    MemoryMappedRange range;
     range.memory = textureTransferMemory;
     range.length = textureSize;
     range.offset = 0;
-    auto bufferPtr = (Vec<4, uint8_t>*)Memory::Map(a_Device, range);
+    auto bufferPtr = (Vec<4, uint8_t>*)Memory::Map(range);
     for (uint32_t x = 0; x < texture.GetWidth(); ++x) {
         for (uint32_t y = 0; y < texture.GetHeight(); ++y) {
             const size_t index = x + y * texture.GetWidth();
@@ -75,8 +75,8 @@ PBRMaterial::PBRMaterial(
             bufferPtr[index].a = 255;
         }
     }
-    Memory::Unmap(a_Device, textureTransferMemory);
-    Image::BufferCopy bufferCopy;
+    Memory::Unmap(textureTransferMemory);
+    ImageBufferCopy bufferCopy;
     bufferCopy.bufferImageHeight = texture.GetHeight();
     bufferCopy.bufferRowLength   = texture.GetWidth();
     bufferCopy.bufferOffset      = 0;
@@ -84,6 +84,6 @@ PBRMaterial::PBRMaterial(
     bufferCopy.imageExtent.height = texture.GetHeight();
     bufferCopy.imageExtent.depth  = 1;
     bufferCopy.imageSubresource.level = 0;
-    Image::CopyBufferToImage(a_Device, textureTransferBuffer, texture.GetImage(), { bufferCopy });
+    Image::CopyBufferToImage(textureTransferBuffer, texture.GetImage(), { bufferCopy });
 }
 }

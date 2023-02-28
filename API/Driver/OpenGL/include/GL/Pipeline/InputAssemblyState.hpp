@@ -1,51 +1,49 @@
 #pragma once
 
-#include <OCRA/Pipeline/InputAssemblyState.hpp>
-#include <OCRA/Primitive/Topology.hpp>
-#include <OCRA/Pipeline/DynamicState.hpp>
+#include <OCRA/Core.hpp>
 
 #include <GL/Command/ExecutionState.hpp>
 #include <GL/glew.h>
 
-namespace OCRA::Pipeline::InputAssemblyState {
-inline auto GetGLTopology(const Primitive::Topology& a_Topology)
+namespace OCRA::Pipeline {
+inline auto GetGLPrimitiveTopology(const PrimitiveTopology& a_Topology)
 {
     switch (a_Topology) {
-    case Primitive::Topology::Unknown:
+    case PrimitiveTopology::Unknown:
         return GL_NONE;
-    case Primitive::Topology::PointList:
+    case PrimitiveTopology::PointList:
         return GL_POINTS;
-    case Primitive::Topology::LineList:
+    case PrimitiveTopology::LineList:
         return GL_LINES;
-    case Primitive::Topology::LineStrip:
+    case PrimitiveTopology::LineStrip:
         return GL_LINE_STRIP;
-    case Primitive::Topology::TriangleList:
+    case PrimitiveTopology::TriangleList:
         return GL_TRIANGLES;
-    case Primitive::Topology::TriangleStrip:
+    case PrimitiveTopology::TriangleStrip:
         return GL_TRIANGLE_STRIP;
-    case Primitive::Topology::TriangleFan:
+    case PrimitiveTopology::TriangleFan:
         return GL_TRIANGLE_FAN;
-    case Primitive::Topology::LineListWithAdjacency:
+    case PrimitiveTopology::LineListWithAdjacency:
         return GL_LINES_ADJACENCY;
-    case Primitive::Topology::LineStripWithAdjacency:
+    case PrimitiveTopology::LineStripWithAdjacency:
         return GL_LINE_STRIP_ADJACENCY;
-    case Primitive::Topology::TriangleListWithAdjacency:
+    case PrimitiveTopology::TriangleListWithAdjacency:
         return GL_TRIANGLES_ADJACENCY;
-    case Primitive::Topology::TriangleStripWithAdjacency:
+    case PrimitiveTopology::TriangleStripWithAdjacency:
         return GL_TRIANGLE_STRIP_ADJACENCY;
-    case Primitive::Topology::PatchList:
+    case PrimitiveTopology::PatchList:
         return GL_PATCHES;
     default:
         throw std::runtime_error("Unknown Primitive Topology");
     }
 }
-struct Compile
+struct CompileInputAssemblyState
 {
-    Compile(const Device::Handle& a_Device, const InputAssemblyState::Info& a_Info, const DynamicState::Info& a_DynamicState)
-        : dynamicPrimitiveRestartEnable(a_DynamicState.Contains(DynamicState::State::PrimitiveRestartEnable))
-        , dynamicPrimitiveTopology(a_DynamicState.Contains(DynamicState::State::PrimitiveTopology))
+    CompileInputAssemblyState(const Device::Handle& a_Device, const PipelineInputAssemblyState& a_Info, const PipelineDynamicState& a_DynamicState)
+        : dynamicPrimitiveRestartEnable(a_DynamicState.Contains(DynamicState::PrimitiveRestartEnable))
+        , dynamicPrimitiveTopology(a_DynamicState.Contains(DynamicState::PrimitiveTopology))
         , primitiveRestartEnable(a_Info.primitiveRestartEnable)
-        , primitiveTopology(GetGLTopology(a_Info.topology))
+        , primitiveTopology(GetGLPrimitiveTopology(a_Info.topology))
     {}
     void operator()(Command::Buffer::ExecutionState& a_ExecutionState) const
     {

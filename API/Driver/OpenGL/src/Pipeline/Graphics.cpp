@@ -4,8 +4,7 @@
 * @Last Modified by:   gpinchon
 * @Last Modified time: 2021-09-26 15:03:53
 */
-#include <OCRA/Pipeline/Pipeline.hpp>
-#include <OCRA/Pipeline/Graphics.hpp>
+#include <OCRA/Core.hpp>
 
 #include <GL/Common/Assert.hpp>
 #include <GL/Pipeline/Pipeline.hpp>
@@ -22,34 +21,34 @@
 
 namespace OCRA::Pipeline::Graphics {
 struct Impl : Pipeline::Impl {
-    Impl::Impl(const Device::Handle& a_Device, const Info& a_Info);
+    Impl::Impl(const Device::Handle& a_Device, const CreatePipelineGraphicsInfo& a_Info);
     virtual void Impl::Apply(Command::Buffer::ExecutionState& a_ExecutionState) const override;
     const uint32_t                      subPass;
     const RenderPass::Handle            renderPass;
-    const ColorBlendState::Compile      colorBlendState;
-    const DepthStencilState::Compile    depthStencilState;
-    const InputAssemblyState::Compile   inputAssemblyState;
-    const MultisampleState::Compile     multisampleState;
-    const RasterizationState::Compile   rasterizationState;
-    const ShaderPipelineState::Compile  shaderPipelineState;
-    const TessellationState::Compile    tessellationState;
-    const ViewPortState::Compile        viewportState;
-    const VertexInputState::Compile     vertexInputState;
+    const CompileColorBlendState      colorBlendState;
+    const CompileDepthStencilState    depthStencilState;
+    const CompileInputAssemblyState   inputAssemblyState;
+    const CompileMultisampleState     multisampleState;
+    const CompileRasterizationState   rasterizationState;
+    const CompileShaderPipelineState  shaderPipelineState;
+    const CompileTessellationState    tessellationState;
+    const CompileViewPortState        viewportState;
+    const CompileVertexInputState     vertexInputState;
 };
 
-Impl::Impl(const Device::Handle& a_Device, const Info& a_Info)
-    : Pipeline::Impl(BindingPoint::Graphics, a_Info.layout)
+Impl::Impl(const Device::Handle& a_Device, const CreatePipelineGraphicsInfo& a_Info)
+    : Pipeline::Impl(PipelineBindingPoint::Graphics, a_Info.layout)
     , renderPass(a_Info.renderPass)
     , subPass(a_Info.subPass)
-    , colorBlendState(ColorBlendState::Compile(a_Device, a_Info.colorBlendState, a_Info.dynamicState))
-    , depthStencilState(DepthStencilState::Compile(a_Device, a_Info.depthStencilState, a_Info.dynamicState))
-    , inputAssemblyState(InputAssemblyState::Compile(a_Device, a_Info.inputAssemblyState, a_Info.dynamicState))
-    , multisampleState(MultisampleState::Compile(a_Device, a_Info.multisampleState, a_Info.dynamicState))
-    , rasterizationState(RasterizationState::Compile(a_Device, a_Info.rasterizationState, a_Info.dynamicState))
-    , shaderPipelineState(ShaderPipelineState::Compile(a_Device, a_Info.shaderPipelineState, a_Info.dynamicState))
-    , tessellationState(TessellationState::Compile(a_Device, a_Info.tessellationState, a_Info.dynamicState))
-    , viewportState(ViewPortState::Compile(a_Device, a_Info.viewPortState, a_Info.dynamicState))
-    , vertexInputState(VertexInputState::Compile(a_Device, a_Info.vertexInputState, a_Info.dynamicState))
+    , colorBlendState(a_Device, a_Info.colorBlendState, a_Info.dynamicState)
+    , depthStencilState(a_Device, a_Info.depthStencilState, a_Info.dynamicState)
+    , inputAssemblyState(a_Device, a_Info.inputAssemblyState, a_Info.dynamicState)
+    , multisampleState(a_Device, a_Info.multisampleState, a_Info.dynamicState)
+    , rasterizationState(a_Device, a_Info.rasterizationState, a_Info.dynamicState)
+    , shaderPipelineState(a_Device, a_Info.shaderPipelineState, a_Info.dynamicState)
+    , tessellationState(a_Device, a_Info.tessellationState, a_Info.dynamicState)
+    , viewportState(a_Device, a_Info.viewPortState, a_Info.dynamicState)
+    , vertexInputState(a_Device, a_Info.vertexInputState, a_Info.dynamicState)
 {}
 
 void Impl::Apply(Command::Buffer::ExecutionState& a_ExecutionState) const {
@@ -58,7 +57,7 @@ void Impl::Apply(Command::Buffer::ExecutionState& a_ExecutionState) const {
         a_ExecutionState.subpassIndex = subPass;
         a_ExecutionState.renderPass.renderPass->BeginSubPass(a_ExecutionState);
     }
-    const auto& lastPipeline = std::static_pointer_cast<Impl>(a_ExecutionState.lastPipelineState.at(size_t(BindingPoint::Graphics)).pipeline);
+    const auto& lastPipeline = std::static_pointer_cast<Impl>(a_ExecutionState.lastPipelineState.at(size_t(PipelineBindingPoint::Graphics)).pipeline);
     if (lastPipeline.get() == this) return; //we did not change states set
     if (lastPipeline == nullptr) { //first graphics pipeline on this command buffer, just apply the states
         colorBlendState(a_ExecutionState);
@@ -92,8 +91,11 @@ void Impl::Apply(Command::Buffer::ExecutionState& a_ExecutionState) const {
             vertexInputState(a_ExecutionState);
     }
 }
+}
 
-Handle Create(const Device::Handle& a_Device, const Info& a_Info) {
-    return Handle(new Graphics::Impl(a_Device, a_Info));
+namespace OCRA::Device
+{
+Pipeline::Handle CreatePipelineGraphics(const Device::Handle& a_Device, const CreatePipelineGraphicsInfo& a_Info) {
+    return std::make_shared<Pipeline::Graphics::Impl>(a_Device, a_Info);
 }
 }

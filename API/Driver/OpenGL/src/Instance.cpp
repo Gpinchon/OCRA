@@ -1,15 +1,18 @@
-#include <OCRA/Instance.hpp>
+#include <OCRA/Core.hpp>
 
 #include <GL/Instance.hpp>
 #include <GL/Win32/Instance.hpp>
 
-OCRA::Instance::Handle OCRA::CreateInstance(
+namespace OCRA
+{
+Instance::Handle CreateInstance(
     const CreateInstanceInfo& a_Info,
     const AllocationCallback* a_Allocator)
 {
 #ifdef _WIN32
     return Win32::CreateInstance(a_Info);
 #endif //_WIN32
+}
 }
 
 namespace OCRA::Instance

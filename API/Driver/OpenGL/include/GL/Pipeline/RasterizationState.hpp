@@ -7,107 +7,23 @@
 #pragma once
 
 #include <OCRA/Handle.hpp>
-#include <OCRA/Pipeline/RasterizationState.hpp>
-#include <OCRA/Pipeline/DynamicState.hpp>
 
 #include <GL/Command/ExecutionState.hpp>
+#include <GL/Structs.hpp>
+#include <GL/Enums.hpp>
 #include <GL/glew.h>
 
-#include <stdexcept>
-
-namespace OCRA::Pipeline::RasterizationState {
-static inline auto GetGLPolygonMode(const PolygonMode& a_Mode)
+namespace OCRA::Pipeline {
+struct CompileRasterizationState
 {
-    switch (a_Mode)
-    {
-    case PolygonMode::Fill :
-        return GL_FILL;
-    case PolygonMode::Line :
-        return GL_LINE;
-    case PolygonMode::Point :
-        return GL_POINT;
-    default:
-        throw std::runtime_error("Unknown Polygon Mode");
-    }
-}
-static inline auto GetGLPolygonOffsetMode(const PolygonMode& a_Mode)
-{
-    switch (a_Mode)
-    {
-    case PolygonMode::Fill :
-        return GL_POLYGON_OFFSET_FILL;
-    case PolygonMode::Line :
-        return GL_POLYGON_OFFSET_LINE;
-    case PolygonMode::Point :
-        return GL_POLYGON_OFFSET_POINT;
-    default:
-        throw std::runtime_error("Unknown Polygon Mode");
-    }
-}
-static inline auto GetGLCullMode(const CullMode& a_Mode)
-{
-    switch (a_Mode)
-    {
-    case CullMode::None :
-        return GL_NONE;
-    case CullMode::Front :
-        return GL_FRONT;
-    case CullMode::Back :
-        return GL_BACK;
-    case CullMode::FrontAndBack :
-        return GL_FRONT_AND_BACK;
-    default:
-        throw std::runtime_error("Unknown Cull Mode");
-    }
-}
-static inline auto GetGLFrontFace(const FrontFace& a_FrontFace)
-{
-    switch (a_FrontFace)
-    {
-    case FrontFace::Clockwise :
-        return GL_CW;
-    case FrontFace::CounterClockwise:
-        return GL_CCW;
-    default :
-        throw std::runtime_error("Unknown Front Face");
-    }
-}
-struct GLInfo {
-    GLInfo(const Info& a_Info)
-    : rasterizerDiscardEnable(a_Info.rasterizerDiscardEnable)
-    , depthClampEnable(a_Info.depthClampEnable)
-    , depthBiasEnable(a_Info.depthBiasEnable)
-    , depthBiasConstantFactor(a_Info.depthBiasConstantFactor)
-    , depthBiasClamp(a_Info.depthBiasClamp)
-    , depthBiasSlopeFactor(a_Info.depthBiasSlopeFactor)
-    , lineWidth(a_Info.lineWidth)
-    , polygonOffsetMode(GetGLPolygonOffsetMode(a_Info.polygonMode))
-    , polygonMode(GetGLPolygonMode(a_Info.polygonMode))
-    , cullMode(GetGLCullMode(a_Info.cullMode))
-    , frontFace(GetGLFrontFace(a_Info.frontFace))
-    {}
-    GLboolean rasterizerDiscardEnable { false };
-    GLboolean depthClampEnable { true };
-    GLboolean depthBiasEnable { false };
-    GLfloat depthBiasConstantFactor { 0 };
-    GLfloat depthBiasClamp { 0 };
-    GLfloat depthBiasSlopeFactor { 0 };
-    GLfloat lineWidth { 1 };
-    GLenum polygonOffsetMode{ GL_POLYGON_OFFSET_FILL };
-    GLenum polygonMode { GL_FILL };
-    GLenum cullMode { GL_BACK };
-    GLenum frontFace { GL_CCW };
-};
-struct Compile
-{
-    Compile(const Device::Handle& a_Device, const Info& a_Info, const DynamicState::Info& a_DynamicState)
-        : info(GLInfo(a_Info))
-        , dynamicRasterizerDiscardEnable(a_DynamicState.Contains(DynamicState::State::RasterizerDiscardEnable))
-        , dynamicLineWidth(a_DynamicState.Contains(DynamicState::State::LineWidth))
-        , dynamicCullMode(a_DynamicState.Contains(DynamicState::State::CullMode))
-        , dynamicFrontFace(a_DynamicState.Contains(DynamicState::State::FrontFace))
-        , dynamicDepthBiasEnable(a_DynamicState.Contains(DynamicState::State::DepthBiasEnable))
-        , dynamicDepthBias(a_DynamicState.Contains(DynamicState::State::DepthBias))
+    CompileRasterizationState(const Device::Handle& a_Device, const PipelineRasterizationState& a_Info, const PipelineDynamicState& a_DynamicState)
+        : info(GLRasterizationState(a_Info))
+        , dynamicRasterizerDiscardEnable(a_DynamicState.Contains(DynamicState::RasterizerDiscardEnable))
+        , dynamicLineWidth(a_DynamicState.Contains(DynamicState::LineWidth))
+        , dynamicCullMode(a_DynamicState.Contains(DynamicState::CullMode))
+        , dynamicFrontFace(a_DynamicState.Contains(DynamicState::FrontFace))
+        , dynamicDepthBiasEnable(a_DynamicState.Contains(DynamicState::DepthBiasEnable))
+        , dynamicDepthBias(a_DynamicState.Contains(DynamicState::DepthBias))
     {}
     void operator()(Command::Buffer::ExecutionState& a_ExecutionState) const
     {
@@ -137,7 +53,7 @@ struct Compile
         }
         else glDisable(GL_CULL_FACE);
     }
-    const GLInfo info;
+    const GLRasterizationState info;
     const bool dynamicRasterizerDiscardEnable;
     const bool dynamicLineWidth;
     const bool dynamicCullMode;
@@ -145,8 +61,8 @@ struct Compile
     const bool dynamicDepthBiasEnable;
     const bool dynamicDepthBias;
 };
-static inline auto Default(const Device::Handle& a_Device)
+static inline auto DefaultRasterizationState(const Device::Handle& a_Device)
 {
-    return Compile(a_Device, {}, {});
+    return CompileRasterizationState(a_Device, {}, {});
 }
 }

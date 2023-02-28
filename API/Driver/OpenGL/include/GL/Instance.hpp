@@ -1,11 +1,8 @@
 #pragma once
 
-#include <OCRA/Handle.hpp>
-#include <OCRA/Instance.hpp>
+#include <OCRA/Handles.hpp>
 
-#include <functional>
-
-OCRA_DECLARE_HANDLE(OCRA::PhysicalDevice);
+#include <vector>
 
 namespace OCRA::Instance
 {
