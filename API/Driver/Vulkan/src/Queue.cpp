@@ -1,9 +1,22 @@
-#include <VK/Queue.hpp>
-#include <VK/Fence.hpp>
 #include <VK/CommandBuffer.hpp>
+#include <VK/Device.hpp>
+#include <VK/Fence.hpp>
+#include <VK/Queue.hpp>
 #include <VK/Semaphore.hpp>
 
 #include <OCRA/Structs.hpp>
+
+namespace OCRA::Device {
+Queue::Handle GetQueue(
+    const Handle& a_Device,
+    uint32_t a_FamilyIndex,
+    uint32_t a_QueueIndex)
+{
+    VkQueue queue{};
+    vkGetDeviceQueue(*a_Device, a_FamilyIndex, a_QueueIndex, &queue);
+    return std::make_shared<Queue::Impl>(queue);
+}
+}
 
 namespace OCRA::Queue
 {

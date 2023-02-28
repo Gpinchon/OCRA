@@ -666,7 +666,7 @@ struct CreateRenderPassInfo {
     AttachmentDescription              depthAttachment;
     AttachmentDescription              stencilAttachment;
 };
-struct CreateSamplerInfo {
+struct CreateImageSamplerInfo {
     Filter minFilter{ Filter::Linear };
     Filter magFilter{ Filter::Linear };
     Filter mipmapMode{ Filter::Linear };

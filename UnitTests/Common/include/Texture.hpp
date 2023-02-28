@@ -8,7 +8,7 @@ public:
     Texture() = default;
     Texture(const Device::Handle& a_Device, ImageType a_Type, Format a_Format, const unsigned& a_X, const unsigned& a_Y, const unsigned& a_Z, const unsigned& a_MipLevels)
         : device(a_Device)
-        , sampler(CreateSampler(device, samplerInfo))
+        , sampler(CreateImageSampler(device, samplerInfo))
     {
         imageInfo.type = a_Type;
         imageInfo.format = a_Format;
@@ -18,9 +18,9 @@ public:
     }
     auto& GetSampler() const { return sampler; }
     auto& GetSamplerInfo() const { return samplerInfo; }
-    void SetSamplerInfo(const CreateSamplerInfo& a_Info) {
+    void SetSamplerInfo(const CreateImageSamplerInfo& a_Info) {
         samplerInfo = a_Info;
-        sampler = CreateSampler(device, samplerInfo);
+        sampler = CreateImageSampler(device, samplerInfo);
     };
     auto& GetImageView() const { return imageView; }
     auto& GetImageViewInfo() const { return imageViewInfo; }
@@ -33,11 +33,11 @@ public:
     
 private:
     Device::Handle                device;
-    CreateImageInfo                   imageInfo{};
+    CreateImageInfo               imageInfo{};
     Image::Handle                 image;
-    CreateImageViewInfo             imageViewInfo{};
+    CreateImageViewInfo           imageViewInfo{};
     Image::View::Handle           imageView;
-    CreateSamplerInfo          samplerInfo{};
+    CreateImageSamplerInfo        samplerInfo{};
     Image::Sampler::Handle        sampler;
 };
 

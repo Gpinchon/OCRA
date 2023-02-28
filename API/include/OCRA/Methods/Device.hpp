@@ -59,6 +59,10 @@ Image::Handle CreateImage(
     const Device::Handle& a_Device,
     const CreateImageInfo& a_Info);
 
+Image::Sampler::Handle CreateImageSampler(
+    const Device::Handle& a_Device,
+    const CreateImageSamplerInfo& a_Info);
+
 Image::View::Handle CreateImageView(
     const Device::Handle& a_Device,
     const CreateImageViewInfo& a_Info);
@@ -79,10 +83,6 @@ Handle CreateQueryPool(
 RenderPass::Handle CreateRenderPass(
     const Handle& a_Device,
     const CreateRenderPassInfo& a_Info);
-
-Image::Sampler::Handle CreateSampler(
-    const Device::Handle& a_Device,
-    const CreateSamplerInfo& a_Info);
 
 Semaphore::Handle CreateSemaphore(
     const Device::Handle& a_Device,

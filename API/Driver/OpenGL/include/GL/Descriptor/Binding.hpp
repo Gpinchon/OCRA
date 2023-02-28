@@ -75,12 +75,14 @@ struct StorageImage : ImageStorage {
 struct BufferStorage : Storage {
     virtual ~BufferStorage() override = default;
     virtual void operator=(const Storage& a_Other) override {
+        OCRA_ASSERT(data.range > 0 && "range must be greather than ZERO");
         auto& data = static_cast<const BufferStorage&>(a_Other);
         buffer = data.buffer;
         offset = data.offset;
         range  = data.range;
     }
     virtual void operator=(const DescriptorSetWrite& a_Write) override {
+        OCRA_ASSERT(data.range > 0 && "range must be greather than ZERO");
         buffer = a_Write.bufferInfo->buffer;
         offset = a_Write.bufferInfo->offset + buffer->memoryBinding.offset;
         range = a_Write.bufferInfo->range;

@@ -3,6 +3,19 @@
 
 #include <OCRA/Structs.hpp>
 
+namespace OCRA::Device
+{
+Memory::Handle AllocateMemory(const Device::Handle& a_Device, const AllocateMemoryInfo& a_Info)
+{
+    VkDeviceMemory memory = nullptr;
+    VkMemoryAllocateInfo info{ VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO };
+    info.allocationSize = a_Info.size;
+    info.memoryTypeIndex = a_Info.memoryTypeIndex;
+    vkAllocateMemory(*a_Device, &info, nullptr, &memory);
+    return std::make_shared<Memory::Impl>(*a_Device, memory);
+}
+}
+
 namespace OCRA::Memory
 {
 void* Map(const MemoryMappedRange& a_MemoryRange)

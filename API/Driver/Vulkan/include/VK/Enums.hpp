@@ -1,3 +1,6 @@
+/**
+ * @brief this header contains functions to convert OCRA enums to VK enums
+ */
 #pragma once
 
 #include <OCRA/Enums.hpp>
@@ -36,5 +39,15 @@ static inline auto GetVkDescriptorType(const DescriptorType& a_Type)
         return VK_DESCRIPTOR_TYPE_SAMPLER;
     }
     return VK_DESCRIPTOR_TYPE_MAX_ENUM;
+}
+static inline auto GetVkSharingMode(const SharingMode& a_SharingMode) {
+    switch (a_SharingMode)
+    {
+    case SharingMode::Exclusive :
+        return VK_SHARING_MODE_EXCLUSIVE;
+    case SharingMode::Concurrent :
+        return VK_SHARING_MODE_EXCLUSIVE;
+    }
+    return VK_SHARING_MODE_MAX_ENUM;
 }
 }

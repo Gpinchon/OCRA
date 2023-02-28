@@ -6,7 +6,7 @@ namespace OCRA::Command::Buffer
 {
 //Begin Command Buffer recording, switching it to Recording state
 void Begin(const Handle& a_CommandBuffer,
-           const BeginCommandBufferInfo& a_BeginInfo)
+           const CommandBufferBeginInfo& a_BeginInfo)
 {
     VkCommandBufferBeginInfo info{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
     if (a_BeginInfo.inheritanceInfo.has_value()) {

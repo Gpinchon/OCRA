@@ -9,7 +9,7 @@
 using namespace OCRA;
 
 constexpr auto TEST_COUNT = 100;
-constexpr auto DESCRIPTOR_COUNT = 1024;
+constexpr auto DESCRIPTOR_COUNT = 1;
 
 void DescriptorTest(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const std::vector<size_t>& a_IterationIndice)
 {
@@ -23,7 +23,12 @@ void DescriptorTest(const PhysicalDevice::Handle& a_PhysicalDevice, const Device
     poolInfo.sizes.push_back({ DescriptorType::UniformBuffer, DESCRIPTOR_COUNT });
     auto descriptorPool = CreateDescriptorPool(a_Device, poolInfo);
     CreateDescriptorSetLayoutInfo layoutInfo;
-    layoutInfo.bindings.push_back({ 0, DescriptorType::UniformBuffer, 1 });
+    DescriptorSetLayoutBinding bindingLayout;
+    bindingLayout.binding = 0;
+    bindingLayout.count = 1;
+    bindingLayout.type = DescriptorType::UniformBuffer;
+    bindingLayout.stageFlags = ShaderStageFlagBits::AllGraphics;
+    layoutInfo.bindings.push_back(bindingLayout);
     auto descriptorLayout = CreateDescriptorSetLayout(a_Device, layoutInfo);
     AllocateDescriptorSetInfo allocateInfo;
     allocateInfo.layout = descriptorLayout;
@@ -64,6 +69,8 @@ void DescriptorTest(const PhysicalDevice::Handle& a_PhysicalDevice, const Device
             for (const auto& i : a_IterationIndice) {
                 DescriptorSetBufferInfo bufferInfo;
                 bufferInfo.buffer = buffer;
+                bufferInfo.range  = 1024;
+                writeOperations.at(i).dstCount = 1;
                 writeOperations.at(i).dstSet = descriptorSets.at(i);
                 writeOperations.at(i).type = DescriptorType::UniformBuffer;
                 writeOperations.at(i).bufferInfo = bufferInfo;

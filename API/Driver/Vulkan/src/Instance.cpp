@@ -3,10 +3,36 @@
 
 #include <OCRA/Core.hpp>
 
+#include <stdexcept>
+
 #include <vulkan/vulkan.h>
 
 namespace OCRA
 {
+const std::vector<const char*> validationLayers = {
+    "VK_LAYER_KHRONOS_validation"
+};
+bool CheckValidationLayerSupport() {
+    uint32_t layerCount;
+    vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+
+    std::vector<VkLayerProperties> availableLayers(layerCount);
+    vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+
+    for (const char* layerName : validationLayers) {
+        bool layerFound = false;
+        for (const auto& layerProperties : availableLayers) {
+            if (strcmp(layerName, layerProperties.layerName) == 0) {
+                layerFound = true;
+                break;
+            }
+        }
+        if (!layerFound) {
+            return false;
+        }
+    }
+    return true;
+}
 Instance::Handle CreateInstance(
     const CreateInstanceInfo& a_Info,
     const AllocationCallback* a_Allocator)
@@ -19,6 +45,11 @@ Instance::Handle CreateInstance(
     appInfo.engineVersion = a_Info.applicationInfo.engineVersion;
     appInfo.pEngineName = a_Info.applicationInfo.engineName.c_str();
     info.pApplicationInfo = &appInfo;
+#ifdef _DEBUG
+    if (!CheckValidationLayerSupport())  throw std::runtime_error("Validation layers unavailable");
+    info.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+    info.ppEnabledLayerNames = validationLayers.data();
+#endif
     vkCreateInstance(&info, nullptr, &instance);
     return std::make_shared<Instance::Impl>(instance);
 }

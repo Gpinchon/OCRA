@@ -1,9 +1,8 @@
 #include <VK/Device.hpp>
 #include <VK/Buffer.hpp>
-#include <VK/BufferCreateFlags.hpp>
-#include <VK/BufferUsageFlags.hpp>
+#include <VK/Flags.hpp>
 #include <VK/Memory.hpp>
-#include <VK/SharingMode.hpp>
+#include <VK/Enums.hpp>
 
 #include <OCRA/Structs.hpp>
 

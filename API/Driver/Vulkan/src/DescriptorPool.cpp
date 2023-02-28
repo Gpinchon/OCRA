@@ -2,7 +2,7 @@
 #include <VK/DescriptorPool.hpp>
 #include <VK/DescriptorSet.hpp>
 #include <VK/DescriptorSetLayout.hpp>
-#include <VK/DescriptorType.hpp>
+#include <VK/Enums.hpp>
 
 #include <OCRA/Structs.hpp>
 
@@ -20,6 +20,7 @@ Descriptor::Pool::Handle CreateDescriptorPool(const Device::Handle& a_Device, co
         vkSize.type = GetVkDescriptorType(size.type);
         vkPoolSizes.push_back(vkSize);
     }
+    info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT | VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
     info.poolSizeCount = vkPoolSizes.size();
     info.pPoolSizes = vkPoolSizes.data();
     info.maxSets = a_Info.maxSets;

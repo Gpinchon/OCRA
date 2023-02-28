@@ -5,7 +5,7 @@
 #include <GL/glew.h>
 
 namespace OCRA::Device {
-Image::Sampler::Handle CreateSampler(const Device::Handle& a_Device, const CreateSamplerInfo& a_Info) {
+Image::Sampler::Handle CreateImageSampler(const Device::Handle& a_Device, const CreateImageSamplerInfo& a_Info) {
     return std::make_shared<Image::Sampler::Impl>(a_Device, a_Info);
 }
 }
@@ -51,7 +51,7 @@ static inline auto GetGLMinFilter(const Filter& a_Filter, const Filter& a_Mipmap
     }
 }
 
-static inline auto CreateImageSampler(const Device::Handle& a_Device, const CreateSamplerInfo& a_Info)
+static inline auto CreateImageSampler(const Device::Handle& a_Device, const CreateImageSamplerInfo& a_Info)
 {
     uint32_t handle{ 0 };
     a_Device->PushCommand([&handle, &a_Info] {
@@ -71,7 +71,7 @@ static inline auto CreateImageSampler(const Device::Handle& a_Device, const Crea
     }, true);
     return handle;
 }
-Impl::Impl(const Device::Handle& a_Device, const CreateSamplerInfo& a_Info)
+Impl::Impl(const Device::Handle& a_Device, const CreateImageSamplerInfo& a_Info)
     : device(a_Device)
     , handle(CreateImageSampler(a_Device, a_Info))
     , info(a_Info)
