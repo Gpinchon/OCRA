@@ -384,4 +384,18 @@ uint32_t FindQueueFamily(const PhysicalDevice::Handle& a_PhysicalDevice, const Q
     }
     return std::numeric_limits<uint32_t>::infinity();
 }
+uint32_t FindMemoryType(const PhysicalDevice::Handle& a_PhysicalDevice, const MemoryPropertyFlags& a_MemoryProperties)
+{
+    auto& memoryProperties = PhysicalDevice::GetMemoryProperties(a_PhysicalDevice);
+    for (auto memoryTypeIndex = 0u; memoryTypeIndex < memoryProperties.memoryTypes.size(); ++memoryTypeIndex) {
+        if (memoryProperties.memoryTypes.at(memoryTypeIndex).propertyFlags == a_MemoryProperties)
+            return memoryTypeIndex;
+    }
+    //Couldn't find optimal memory type, take any fitting type
+    for (auto memoryTypeIndex = 0u; memoryTypeIndex < memoryProperties.memoryTypes.size(); ++memoryTypeIndex) {
+        if ((memoryProperties.memoryTypes.at(memoryTypeIndex).propertyFlags & a_MemoryProperties) != 0)
+            return memoryTypeIndex;
+    }
+    return std::numeric_limits<uint32_t>::infinity();
+}
 }

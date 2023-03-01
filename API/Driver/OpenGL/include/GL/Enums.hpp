@@ -293,4 +293,44 @@ static inline auto GetGLFrontFace(const FrontFace& a_FrontFace)
         throw std::runtime_error("Unknown Front Face");
     }
 }
+
+static inline auto GetGLAddressMode(const SamplerAddressMode& a_AddressMode) {
+    switch (a_AddressMode)
+    {
+    case SamplerAddressMode::Repeat:
+        return GL_REPEAT;
+    case SamplerAddressMode::MirroredRepeat:
+        return GL_MIRRORED_REPEAT;
+    case SamplerAddressMode::ClampToEdge:
+        return GL_CLAMP_TO_EDGE;
+    case SamplerAddressMode::ClampToBorder:
+        return GL_CLAMP_TO_BORDER;
+    default:
+        throw std::runtime_error("Unknown Address Mode");
+    }
+}
+
+static inline auto GetGLMagFilter(const Filter& a_Filter) {
+    switch (a_Filter)
+    {
+    case Filter::Nearest:
+        return GL_NEAREST;
+    case Filter::Linear:
+        return GL_LINEAR;
+    default:
+        throw std::runtime_error("Unknown Filter Mode");
+    }
+}
+
+static inline auto GetGLMinFilter(const Filter& a_Filter, const Filter& a_MipmapMode) {
+    switch (a_Filter)
+    {
+    case Filter::Nearest:
+        return (a_MipmapMode == Filter::Nearest) ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST_MIPMAP_LINEAR;
+    case Filter::Linear:
+        return (a_MipmapMode == Filter::Nearest) ? GL_LINEAR_MIPMAP_NEAREST : GL_LINEAR_MIPMAP_LINEAR;;
+    default:
+        throw std::runtime_error("Unknown Filter Mode");
+    }
+}
 }
