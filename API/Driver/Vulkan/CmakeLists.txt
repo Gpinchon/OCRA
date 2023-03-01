@@ -45,7 +45,6 @@ set(OCRA_IMPL_HEADER_FILES
 )
 
 set(OCRA_IMPL_SOURCE_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Commands/Buffer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Buffer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/CommandBuffer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/CommandPool.cpp
