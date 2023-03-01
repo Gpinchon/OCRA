@@ -9,7 +9,7 @@
 using namespace OCRA;
 
 constexpr auto TEST_COUNT = 100;
-constexpr auto DESCRIPTOR_COUNT = 1;
+constexpr auto DESCRIPTOR_COUNT = 1024;
 
 void DescriptorTest(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const std::vector<size_t>& a_IterationIndice)
 {
@@ -59,12 +59,12 @@ void DescriptorTest(const PhysicalDevice::Handle& a_PhysicalDevice, const Device
             ReCreatingTimer += timer.Elapsed().count() / double(TEST_COUNT);
         }
         {
-            CreateBufferInfo bufferInfo;
-            bufferInfo.usage = BufferUsageFlagBits::UniformBuffer;
+            AllocateBufferInfo bufferInfo;
+            bufferInfo.memoryFlags = MemoryPropertyFlagBits::DeviceLocal;
+            bufferInfo.bufferFlags = CreateBufferFlagBits::None;
+            bufferInfo.bufferUsage = BufferUsageFlagBits::UniformBuffer;
             bufferInfo.size = 1024;
-            auto memory = AllocateMemory(a_PhysicalDevice, a_Device, 1024, MemoryPropertyFlagBits::DeviceLocal);
-            auto buffer = CreateBuffer(a_Device, bufferInfo);
-            Buffer::BindMemory(buffer, memory, 0);
+            auto buffer = AllocateBuffer(a_Device, bufferInfo);
             std::vector<DescriptorSetWrite> writeOperations(DESCRIPTOR_COUNT);
             for (const auto& i : a_IterationIndice) {
                 DescriptorSetBufferInfo bufferInfo;
