@@ -6,10 +6,10 @@
 */
 #include <OCRA/Core.hpp>
 
-#include <GL/Common/Assert.hpp>
-#include <GL/Shader/Module.hpp>
-#include <GL/Shader/Stage.hpp>
 #include <GL/Device.hpp>
+#include <GL/ShaderModule.hpp>
+#include <GL/ShaderStage.hpp>
+#include <GL/Common/Assert.hpp>
 
 #include <GL/glew.h>
 

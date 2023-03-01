@@ -2,7 +2,7 @@
 //  RenderPass commands
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <GL/Command/Buffer.hpp>
+#include <GL/CommandBuffer.hpp>
 
 #include <GL/Common/Assert.hpp>
 #include <GL/RenderPass.hpp>

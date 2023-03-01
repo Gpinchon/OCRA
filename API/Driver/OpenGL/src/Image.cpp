@@ -8,8 +8,8 @@
 
 #include <GL/Common/Assert.hpp>
 #include <GL/Buffer.hpp>
-#include <GL/Image/Image.hpp>
-#include <GL/Image/Format.hpp>
+#include <GL/Enums.hpp>
+#include <GL/Image.hpp>
 #include <GL/Memory.hpp>
 #include <GL/Device.hpp>
 #include <GL/Common/BufferOffset.hpp>

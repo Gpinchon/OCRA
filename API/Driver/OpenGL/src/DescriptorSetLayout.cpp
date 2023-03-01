@@ -1,6 +1,4 @@
-#include <GL/Descriptor/SetLayout.hpp>
-
-OCRA_DECLARE_HANDLE(OCRA::Descriptor::SetLayout);
+#include <GL/DescriptorSetLayout.hpp>
 
 namespace OCRA::Device
 {

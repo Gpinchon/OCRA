@@ -58,31 +58,32 @@ set(OCRA_IMPL_HEADER_FILES
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Queue.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/RenderPass.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Semaphore.hpp
-  ${OCRA_IMPL_INCLUDE_DIR}/GL/Command/Buffer.hpp
-  ${OCRA_IMPL_INCLUDE_DIR}/GL/Command/CommandInterface.hpp
-  ${OCRA_IMPL_INCLUDE_DIR}/GL/Command/ExecutionState.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/CommandBuffer.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/CommandInterface.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/ExecutionState.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/DescriptorBinding.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/DescriptorSet.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/DescriptorSetLayout.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Image.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/ImageSampler.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/ImageView.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/Pipeline.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/PipelineLayout.hpp
+
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/Assert.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/FixedSizeMemoryPool.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/MemoryPool.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/WorkerThread.hpp
-  ${OCRA_IMPL_INCLUDE_DIR}/GL/Descriptor/Binding.hpp
-  ${OCRA_IMPL_INCLUDE_DIR}/GL/Descriptor/Set.hpp
-  ${OCRA_IMPL_INCLUDE_DIR}/GL/Descriptor/SetLayout.hpp
-  ${OCRA_IMPL_INCLUDE_DIR}/GL/Image/Format.hpp
-  ${OCRA_IMPL_INCLUDE_DIR}/GL/Image/Image.hpp
-  ${OCRA_IMPL_INCLUDE_DIR}/GL/Image/Sampler.hpp
-  ${OCRA_IMPL_INCLUDE_DIR}/GL/Image/View.hpp
-  ${OCRA_IMPL_INCLUDE_DIR}/GL/Pipeline/Layout.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Pipeline/ColorBlendState.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Pipeline/DepthStencilState.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Pipeline/MultisampleState.hpp
-  ${OCRA_IMPL_INCLUDE_DIR}/GL/Pipeline/Pipeline.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Pipeline/RasterizationState.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Pipeline/ShaderPipelineState.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Pipeline/TessellationState.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Pipeline/VertexInputState.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Pipeline/ViewPortState.hpp
-  ${OCRA_IMPL_INCLUDE_DIR}/GL/Shader/Stage.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/ShaderModule.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/ShaderStage.hpp
 )
 
 set(OCRA_IMPL_SOURCE_FILES
@@ -98,31 +99,29 @@ set(OCRA_IMPL_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Queue.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/QueryPool.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Semaphore.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Buffer.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/MemoryBarrier.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Pool.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Query.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/Scissor.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Command/ViewPort.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/CommandBuffer.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/CommandPool.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Commands.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/DescriptorSet.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/DescriptorSetLayout.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/DescriptorPool.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Image.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/ImageSampler.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/ImageView.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/PipelineGraphics.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/PipelineLayout.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/ShaderModule.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/ShaderStage.cpp
+  
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Commands/Buffer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Commands/CommandBuffer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Commands/Draw.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Commands/DescriptorSet.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Commands/Image.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Commands/RenderPass.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Descriptor/Set.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Descriptor/SetLayout.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Descriptor/Pool.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Image/Image.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Image/Sampler.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Image/View.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/Graphics.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/Layout.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/ShaderPipelineState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/VertexInputState.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline/Pipeline.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Shader/Stage.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Shader/Module.cpp
 )
 
 if (WIN32)

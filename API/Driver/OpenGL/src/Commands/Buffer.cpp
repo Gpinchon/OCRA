@@ -2,11 +2,10 @@
 //  Buffer commands
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <GL/Command/Buffer.hpp>
-#include <GL/Command/ExecutionState.hpp>
-#include <GL/Command/CommandInterface.hpp>
-
+#include <GL/CommandBuffer.hpp>
+#include <GL/CommandInterface.hpp>
 #include <GL/Enums.hpp>
+#include <GL/ExecutionState.hpp>
 
 namespace OCRA::Command {
 struct UpdateBufferCommand : CommandI {

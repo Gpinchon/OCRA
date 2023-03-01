@@ -1,7 +1,6 @@
 #include <OCRA/Core.hpp>
 
-#include <GL/Command/Buffer.hpp>
-#include <GL/Common/FixedSizeMemoryPool.hpp>
+#include <GL/CommandBuffer.hpp>
 
 #include <memory_resource>
 

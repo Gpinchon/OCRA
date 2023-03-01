@@ -12,8 +12,8 @@
 #include <GL/Surface.hpp>
 #include <GL/Common/Assert.hpp>
 #include <GL/Device.hpp>
-#include <GL/Image/Format.hpp>
-#include <GL/Image/Image.hpp>
+#include <GL/Enums.hpp>
+#include <GL/Image.hpp>
 #include <GL/Queue.hpp>
 #include <GL/Semaphore.hpp>
 #include <GL/Fence.hpp>

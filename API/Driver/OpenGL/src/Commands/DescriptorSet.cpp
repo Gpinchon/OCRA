@@ -3,10 +3,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <GL/Common/Assert.hpp>
-#include <GL/Command/Buffer.hpp>
-#include <GL/Command/ExecutionState.hpp>
-#include <GL/Pipeline/Pipeline.hpp>
-#include <GL/Pipeline/Layout.hpp>
+#include <GL/CommandBuffer.hpp>
+#include <GL/ExecutionState.hpp>
+#include <GL/Pipeline.hpp>
+#include <GL/PipelineLayout.hpp>
 
 namespace OCRA::Command{
 struct BindDescriptorSetCommand : CommandI {

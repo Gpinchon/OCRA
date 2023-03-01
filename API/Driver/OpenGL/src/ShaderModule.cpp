@@ -1,6 +1,6 @@
 #include <OCRA/Core.hpp>
 
-#include <GL/Shader/Module.hpp>
+#include <GL/ShaderModule.hpp>
 
 namespace OCRA::Device{
 

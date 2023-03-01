@@ -1,6 +1,6 @@
 #include <GL/Win32/PresentTexture.hpp>
 
-#include <GL/Image/Image.hpp>
+#include <GL/Image.hpp>
 
 #include <GL/glew.h>
 

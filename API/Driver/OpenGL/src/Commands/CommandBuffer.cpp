@@ -3,7 +3,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <GL/Common/Assert.hpp>
-#include <GL/Command/Buffer.hpp>
+#include <GL/CommandBuffer.hpp>
 
 namespace OCRA::Command
 {

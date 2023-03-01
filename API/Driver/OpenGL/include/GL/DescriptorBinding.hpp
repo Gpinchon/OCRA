@@ -3,11 +3,11 @@
 #include <OCRA/Core.hpp>
 
 #include <GL/Common/Assert.hpp>
-#include <GL/Descriptor/SetLayout.hpp>
+#include <GL/DescriptorSetLayout.hpp>
 #include <GL/Buffer.hpp>
 #include <GL/Memory.hpp>
-#include <GL/Image/View.hpp>
-#include <GL/Image/Sampler.hpp>
+#include <GL/ImageView.hpp>
+#include <GL/ImageSampler.hpp>
 
 #include <GL/glew.h>
 

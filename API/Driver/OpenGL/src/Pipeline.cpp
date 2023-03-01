@@ -1,10 +1,10 @@
 #include <OCRA/Core.hpp>
 
 #include <GL/Device.hpp>
-#include <GL/Pipeline/Pipeline.hpp>
-#include <GL/Pipeline/Layout.hpp>
-#include <GL/Command/ExecutionState.hpp>
-#include <GL/Command/Buffer.hpp>
+#include <GL/Pipeline.hpp>
+#include <GL/PipelineLayout.hpp>
+#include <GL/ExecutionState.hpp>
+#include <GL/CommandBuffer.hpp>
 
 namespace OCRA::Command
 {

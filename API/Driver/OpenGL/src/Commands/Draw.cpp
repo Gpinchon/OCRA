@@ -7,11 +7,11 @@
 #include <GL/Buffer.hpp>
 #include <GL/Enums.hpp>
 #include <GL/Memory.hpp>
-#include <GL/Command/ExecutionState.hpp>
-#include <GL/Command/Buffer.hpp>
+#include <GL/ExecutionState.hpp>
+#include <GL/CommandBuffer.hpp>
 #include <GL/Common/BufferOffset.hpp>
-#include <GL/Descriptor/Set.hpp>
-#include <GL/Pipeline/Pipeline.hpp>
+#include <GL/DescriptorSet.hpp>
+#include <GL/Pipeline.hpp>
 
 namespace OCRA::Command
 {

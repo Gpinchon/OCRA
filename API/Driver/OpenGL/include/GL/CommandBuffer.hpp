@@ -3,8 +3,8 @@
 #include <OCRA/Handle.hpp>
 
 #include <GL/Common/Assert.hpp>
-#include <GL/Command/CommandInterface.hpp>
-#include <GL/Command/ExecutionState.hpp>
+#include <GL/CommandInterface.hpp>
+#include <GL/ExecutionState.hpp>
 #include <GL/PushConstants.hpp>
 
 #include <functional>

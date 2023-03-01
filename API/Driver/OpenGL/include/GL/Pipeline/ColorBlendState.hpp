@@ -10,7 +10,7 @@
 
 #include <GL/Enums.hpp>
 #include <GL/Structs.hpp>
-#include <GL/Command/ExecutionState.hpp>
+#include <GL/ExecutionState.hpp>
 
 #include <GL/glew.h>
 

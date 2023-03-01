@@ -1,6 +1,6 @@
 #include <GL/Device.hpp>
 #include <GL/Enums.hpp>
-#include <GL/Image/Sampler.hpp>
+#include <GL/ImageSampler.hpp>
 
 #include <GL/glew.h>
 

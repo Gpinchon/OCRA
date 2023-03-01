@@ -3,7 +3,7 @@
 #include <OCRA/Core.hpp>
 
 #include <GL/Common/Assert.hpp>
-#include <GL/Descriptor/Binding.hpp>
+#include <GL/DescriptorBinding.hpp>
 
 #include <memory_resource>
 

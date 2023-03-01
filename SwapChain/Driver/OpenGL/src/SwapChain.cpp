@@ -12,8 +12,8 @@
 #include <GL/Queue.hpp>
 #include <GL/PhysicalDevice.hpp>
 #include <GL/Device.hpp>
-#include <GL/Image/Image.hpp>
-#include <GL/Image/Format.hpp>
+#include <GL/Image.hpp>
+#include <GL/Enums.hpp>
 #include <GL/glew.h>
 
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);

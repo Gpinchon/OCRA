@@ -8,7 +8,7 @@
 
 #include <OCRA/Handle.hpp>
 
-#include <GL/Command/ExecutionState.hpp>
+#include <GL/ExecutionState.hpp>
 #include <GL/Structs.hpp>
 #include <GL/Enums.hpp>
 #include <GL/glew.h>

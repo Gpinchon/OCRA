@@ -1,6 +1,5 @@
-#include <GL/Command/Buffer.hpp>
-#include <GL/Image/Image.hpp>
-#include <GL/Image/Format.hpp>
+#include <GL/CommandBuffer.hpp>
+#include <GL/Image.hpp>
 
 namespace OCRA::Command
 {

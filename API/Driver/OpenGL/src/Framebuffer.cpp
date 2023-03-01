@@ -3,7 +3,7 @@
 #include <GL/Common/Assert.hpp>
 #include <GL/Device.hpp>
 #include <GL/FrameBuffer.hpp>
-#include <GL/Image/View.hpp>
+#include <GL/ImageView.hpp>
 #include <GL/glew.h>
 
 namespace OCRA::Device

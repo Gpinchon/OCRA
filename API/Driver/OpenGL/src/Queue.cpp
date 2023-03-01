@@ -4,7 +4,7 @@
 #include <GL/Queue.hpp>
 #include <GL/Fence.hpp>
 #include <GL/Semaphore.hpp>
-#include <GL/Command/Buffer.hpp>
+#include <GL/CommandBuffer.hpp>
 
 #include <vector>
 

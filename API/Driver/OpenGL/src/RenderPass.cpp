@@ -2,8 +2,8 @@
 
 #include <GL/FrameBuffer.hpp>
 #include <GL/RenderPass.hpp>
-#include <GL/Command/Buffer.hpp>
-#include <GL/Command/ExecutionState.hpp>
+#include <GL/CommandBuffer.hpp>
+#include <GL/ExecutionState.hpp>
 
 #include <GL/glew.h>
 

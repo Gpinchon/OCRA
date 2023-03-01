@@ -2,7 +2,7 @@
 
 #include <OCRA/Core.hpp>
 
-#include <GL/Descriptor/Binding.hpp>
+#include <GL/DescriptorBinding.hpp>
 
 #include <algorithm>
 

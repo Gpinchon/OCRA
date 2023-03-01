@@ -8,8 +8,8 @@
 #include <OCRA/OCRA.hpp>
 
 #include <GL/Common/Assert.hpp>
-#include <GL/Command/Buffer.hpp>
-#include <GL/Command/ExecutionState.hpp>
+#include <GL/CommandBuffer.hpp>
+#include <GL/ExecutionState.hpp>
 
 #include <functional>
 #include <array>

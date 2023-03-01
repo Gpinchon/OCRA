@@ -1,6 +1,6 @@
-#include <GL/Pipeline/Layout.hpp>
 #include <GL/Device.hpp>
-#include <GL/Descriptor/SetLayout.hpp>
+#include <GL/DescriptorSetLayout.hpp>
+#include <GL/PipelineLayout.hpp>
 
 #include <GL/glew.h>
 

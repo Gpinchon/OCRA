@@ -6,8 +6,9 @@
 */
 #include <OCRA/Core.hpp>
 
+#include <GL/ExecutionState.hpp>
 #include <GL/Common/Assert.hpp>
-#include <GL/Pipeline/Pipeline.hpp>
+#include <GL/Pipeline.hpp>
 #include <GL/Pipeline/ColorBlendState.hpp>
 #include <GL/Pipeline/DepthStencilState.hpp>
 #include <GL/Pipeline/InputAssemblyState.hpp>

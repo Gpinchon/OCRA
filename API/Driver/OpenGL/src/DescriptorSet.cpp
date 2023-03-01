@@ -1,6 +1,6 @@
 #include <OCRA/Core.hpp>
 
-#include <GL/Descriptor/Set.hpp>
+#include <GL/DescriptorSet.hpp>
 
 namespace OCRA::Descriptor::Set {
 void Update(

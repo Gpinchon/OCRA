@@ -1,7 +1,7 @@
 #include <GL/Device.hpp>
-#include <GL/Command/ExecutionState.hpp>
+#include <GL/ExecutionState.hpp>
 #include <GL/Pipeline/ShaderPipelineState.hpp>
-#include <GL/Shader/Stage.hpp>
+#include <GL/ShaderStage.hpp>
 
 #include <GL/glew.h>
 

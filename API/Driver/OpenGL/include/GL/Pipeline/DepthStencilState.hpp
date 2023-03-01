@@ -8,8 +8,7 @@
 
 #include <OCRA/Core.hpp>
 
-#include <GL/Command/ExecutionState.hpp>
-#include <GL/Common/Stencil.hpp>
+#include <GL/ExecutionState.hpp>
 #include <GL/Enums.hpp>
 #include <GL/RenderPass.hpp>
 

@@ -1,8 +1,8 @@
 #include <OCRA/Core.hpp>
 
-#include <GL/Descriptor/Set.hpp>
-#include <GL/Descriptor/SetLayout.hpp>
-#include <GL/Descriptor/Binding.hpp>
+#include <GL/DescriptorSet.hpp>
+#include <GL/DescriptorSetLayout.hpp>
+#include <GL/DescriptorBinding.hpp>
 
 #include <memory_resource>
 

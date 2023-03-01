@@ -2,10 +2,11 @@
 
 #include <OCRA/Core.hpp>
 
+#include <GL/DescriptorBinding.hpp>
+#include <GL/Enums.hpp>
 #include <GL/PushConstants.hpp>
 #include <GL/Structs.hpp>
-#include <GL/Common/Stencil.hpp>
-#include <GL/Descriptor/Binding.hpp>
+
 #include <GL/glew.h>
 
 #include <vector>
