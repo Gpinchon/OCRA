@@ -1,5 +1,7 @@
 #pragma once
 
+#include <OCRA/Handles.hpp>
+
 #include <vulkan/vulkan.h>
 
 namespace OCRA::Buffer
@@ -18,5 +20,6 @@ struct Impl
     }
     const VkDevice device;
     const VkBuffer buffer;
+    Memory::Handle memory;
 };
 }

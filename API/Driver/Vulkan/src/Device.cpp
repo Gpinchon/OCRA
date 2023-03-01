@@ -25,6 +25,6 @@ Device::Handle CreateDevice(
     info.queueCreateInfoCount = vkDeviceQueue.size();
     info.pQueueCreateInfos = vkDeviceQueue.data();
     vkCreateDevice(*a_PhysicalDevice, &info, nullptr, &device);
-    return std::make_shared<Device::Impl>(device);
+    return std::make_shared<Device::Impl>(*a_PhysicalDevice, device);
 }
 }

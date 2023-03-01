@@ -12,25 +12,35 @@ namespace OCRA
 static inline auto GetVkBufferCreateFlags(const CreateBufferFlags& a_Flags)
 {
     VkBufferCreateFlags vkFlags = 0;
-    vkFlags |= (a_Flags & CreateBufferFlagBits::SparseBinding)              == CreateBufferFlagBits::SparseBinding              ? VK_BUFFER_CREATE_SPARSE_BINDING_BIT                : 0;
-    vkFlags |= (a_Flags & CreateBufferFlagBits::SparseResidency)            == CreateBufferFlagBits::SparseResidency            ? VK_BUFFER_CREATE_SPARSE_RESIDENCY_BIT              : 0;
-    vkFlags |= (a_Flags & CreateBufferFlagBits::SparseAliased)              == CreateBufferFlagBits::SparseAliased              ? VK_BUFFER_CREATE_SPARSE_ALIASED_BIT                : 0;
-    vkFlags |= (a_Flags & CreateBufferFlagBits::Protected)                  == CreateBufferFlagBits::Protected                  ? VK_BUFFER_CREATE_PROTECTED_BIT                     : 0;
-    vkFlags |= (a_Flags & CreateBufferFlagBits::DeviceAddressCaptureReplay) == CreateBufferFlagBits::DeviceAddressCaptureReplay ? VK_BUFFER_CREATE_DEVICE_ADDRESS_CAPTURE_REPLAY_BIT : 0;
+    vkFlags |= (a_Flags & CreateBufferFlagBits::SparseBinding)              != 0 ? VK_BUFFER_CREATE_SPARSE_BINDING_BIT                : 0;
+    vkFlags |= (a_Flags & CreateBufferFlagBits::SparseResidency)            != 0 ? VK_BUFFER_CREATE_SPARSE_RESIDENCY_BIT              : 0;
+    vkFlags |= (a_Flags & CreateBufferFlagBits::SparseAliased)              != 0 ? VK_BUFFER_CREATE_SPARSE_ALIASED_BIT                : 0;
+    vkFlags |= (a_Flags & CreateBufferFlagBits::Protected)                  != 0 ? VK_BUFFER_CREATE_PROTECTED_BIT                     : 0;
+    vkFlags |= (a_Flags & CreateBufferFlagBits::DeviceAddressCaptureReplay) != 0 ? VK_BUFFER_CREATE_DEVICE_ADDRESS_CAPTURE_REPLAY_BIT : 0;
    return vkFlags;
 }
 static inline auto GetVkBufferUsageFlags(const BufferUsageFlags& a_Flags) {
     VkBufferUsageFlags vkFlags = 0;
-    vkFlags |= (a_Flags & BufferUsageFlagBits::TransferSrc)         == BufferUsageFlagBits::TransferSrc         ? VK_BUFFER_USAGE_TRANSFER_SRC_BIT          : 0;
-    vkFlags |= (a_Flags & BufferUsageFlagBits::TransferDst)         == BufferUsageFlagBits::TransferDst         ? VK_BUFFER_USAGE_TRANSFER_DST_BIT          : 0;
-    vkFlags |= (a_Flags & BufferUsageFlagBits::UniformTexelBuffer)  == BufferUsageFlagBits::UniformTexelBuffer  ? VK_BUFFER_USAGE_UNIFORM_TEXEL_BUFFER_BIT  : 0;
-    vkFlags |= (a_Flags & BufferUsageFlagBits::StorageTexelBuffer)  == BufferUsageFlagBits::StorageTexelBuffer  ? VK_BUFFER_USAGE_STORAGE_TEXEL_BUFFER_BIT  : 0;
-    vkFlags |= (a_Flags & BufferUsageFlagBits::UniformBuffer)       == BufferUsageFlagBits::UniformBuffer       ? VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT        : 0;
-    vkFlags |= (a_Flags & BufferUsageFlagBits::StorageBuffer)       == BufferUsageFlagBits::StorageBuffer       ? VK_BUFFER_USAGE_STORAGE_BUFFER_BIT        : 0;
-    vkFlags |= (a_Flags & BufferUsageFlagBits::IndexBuffer)         == BufferUsageFlagBits::IndexBuffer         ? VK_BUFFER_USAGE_INDEX_BUFFER_BIT          : 0;
-    vkFlags |= (a_Flags & BufferUsageFlagBits::VertexBuffer)        == BufferUsageFlagBits::VertexBuffer        ? VK_BUFFER_USAGE_VERTEX_BUFFER_BIT         : 0;
-    vkFlags |= (a_Flags & BufferUsageFlagBits::IndirectBuffer)      == BufferUsageFlagBits::IndirectBuffer      ? VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT       : 0;
-    vkFlags |= (a_Flags & BufferUsageFlagBits::ShaderDeviceAddress) == BufferUsageFlagBits::ShaderDeviceAddress ? VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT : 0;
+    vkFlags |= (a_Flags & BufferUsageFlagBits::TransferSrc)         != 0 ? VK_BUFFER_USAGE_TRANSFER_SRC_BIT          : 0;
+    vkFlags |= (a_Flags & BufferUsageFlagBits::TransferDst)         != 0 ? VK_BUFFER_USAGE_TRANSFER_DST_BIT          : 0;
+    vkFlags |= (a_Flags & BufferUsageFlagBits::UniformTexelBuffer)  != 0 ? VK_BUFFER_USAGE_UNIFORM_TEXEL_BUFFER_BIT  : 0;
+    vkFlags |= (a_Flags & BufferUsageFlagBits::StorageTexelBuffer)  != 0 ? VK_BUFFER_USAGE_STORAGE_TEXEL_BUFFER_BIT  : 0;
+    vkFlags |= (a_Flags & BufferUsageFlagBits::UniformBuffer)       != 0 ? VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT        : 0;
+    vkFlags |= (a_Flags & BufferUsageFlagBits::StorageBuffer)       != 0 ? VK_BUFFER_USAGE_STORAGE_BUFFER_BIT        : 0;
+    vkFlags |= (a_Flags & BufferUsageFlagBits::IndexBuffer)         != 0 ? VK_BUFFER_USAGE_INDEX_BUFFER_BIT          : 0;
+    vkFlags |= (a_Flags & BufferUsageFlagBits::VertexBuffer)        != 0 ? VK_BUFFER_USAGE_VERTEX_BUFFER_BIT         : 0;
+    vkFlags |= (a_Flags & BufferUsageFlagBits::IndirectBuffer)      != 0 ? VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT       : 0;
+    vkFlags |= (a_Flags & BufferUsageFlagBits::ShaderDeviceAddress) != 0 ? VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT : 0;
+    return vkFlags;
+}
+static inline auto GetVKMemoryPropertyFlags(const MemoryPropertyFlags a_Flags) {
+    VkMemoryPropertyFlags vkFlags = 0;
+    vkFlags |= (a_Flags & MemoryPropertyFlagBits::DeviceLocal)     != 0 ? VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT     : 0;
+    vkFlags |= (a_Flags & MemoryPropertyFlagBits::HostCached)      != 0 ? VK_MEMORY_PROPERTY_HOST_CACHED_BIT      : 0;
+    vkFlags |= (a_Flags & MemoryPropertyFlagBits::HostCoherent)    != 0 ? VK_MEMORY_PROPERTY_HOST_COHERENT_BIT    : 0;
+    vkFlags |= (a_Flags & MemoryPropertyFlagBits::HostVisible)     != 0 ? VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT     : 0;
+    vkFlags |= (a_Flags & MemoryPropertyFlagBits::LazilyAllocated) != 0 ? VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT : 0;
+    vkFlags |= (a_Flags & MemoryPropertyFlagBits::Protected)       != 0 ? VK_MEMORY_PROPERTY_PROTECTED_BIT        : 0;
     return vkFlags;
 }
 static inline auto GetVkShaderStage(const ShaderStageFlags& a_Flags) {

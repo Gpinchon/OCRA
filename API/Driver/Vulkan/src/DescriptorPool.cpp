@@ -40,7 +40,8 @@ Descriptor::Set::Handle AllocateSet(const AllocateDescriptorSetInfo& a_Info)
     info.descriptorSetCount = 1;
     info.pSetLayouts = &(const VkDescriptorSetLayout&)(*a_Info.layout);
     vkAllocateDescriptorSets(pool.device, &info, &vkSet);
-    return std::allocate_shared<Set::Impl>(std::pmr::polymorphic_allocator<Set::Impl>(&pool.memoryResource),
+    auto allocator = std::pmr::polymorphic_allocator<Set::Impl>(&pool.memoryResource);
+    return std::allocate_shared<Set::Impl>(allocator,
         pool.device, (const VkDescriptorPool&)pool, vkSet);
 }
 }
