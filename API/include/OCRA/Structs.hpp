@@ -709,4 +709,12 @@ struct AllocateMemoryInfo {
     size_t   size{ 0 };
     uint32_t memoryTypeIndex{ 0 };
 };
+struct AllocateBufferInfo {
+    MemoryPropertyFlags     memoryFlags{ MemoryPropertyFlagBits::None };
+    CreateBufferFlags       bufferFlags{ CreateBufferFlagBits::None };
+    BufferUsageFlags        bufferUsage{ BufferUsageFlagBits::None };
+    uint64_t                size{ 0 };
+    SharingMode             sharingMode{ SharingMode::Exclusive };
+    std::vector<uint32_t>   queueFamilyIndices;
+};
 }

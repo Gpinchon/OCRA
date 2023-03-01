@@ -12,4 +12,9 @@ void BindMemory(
     const Handle&           a_Buffer,
     const Memory::Handle&   a_Memory,
     const size_t&           a_MemoryOffset);
+
+/**
+* @return the memory bound to the specified buffer
+*/
+Memory::Handle GetMemory(const Handle& a_Buffer);
 }

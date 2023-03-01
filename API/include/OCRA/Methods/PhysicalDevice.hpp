@@ -29,6 +29,11 @@ const PhysicalDeviceFeatures GetFeatures(const Handle& a_PhysicalDevice);
 uint32_t FindQueueFamily(const Handle& a_PhysicalDevice, const QueueFlags& a_QueueFlags);
 
 /**
+ * @brief try finding a memory type with all the specified flags, returns 'infinity' if none was found
+ */
+uint32_t FindMemoryType(const PhysicalDevice::Handle& a_PhysicalDevice, const MemoryPropertyFlags& a_MemoryProperties);
+
+/**
 * @brief creates a logical device that'll use the specified physical device
 */
 Device::Handle CreateDevice(

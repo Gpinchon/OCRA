@@ -17,6 +17,14 @@ Buffer::Handle CreateBuffer(
     const Handle& a_Device,
     const CreateBufferInfo& a_Info,
     const AllocationCallback* a_Allocator = nullptr);
+/**
+* @brief Allocates a memory according to buffer usage,
+* creates a new buffer and binds the memory to it
+*/
+Buffer::Handle AllocateBuffer(
+    const Handle& a_Device,
+    const AllocateBufferInfo& a_Info,
+    const AllocationCallback* a_Allocator = nullptr);
 
 Command::Pool::Handle CreateCommandPool(
     const Device::Handle& a_Device,
