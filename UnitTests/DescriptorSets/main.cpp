@@ -88,7 +88,7 @@ void DescriptorTest(const PhysicalDevice::Handle& a_PhysicalDevice, const Device
 
 int main(int argc, char const *argv[])
 {
-    const auto instance = CreateInstance("Test_CommandBuffer");
+    const auto instance = CreateInstance("Test_DescriptorSets");
     const auto physicalDevice = Instance::EnumeratePhysicalDevices(instance).front();
     const auto device = CreateDevice(physicalDevice);
     std::vector<size_t> iterationIndice(DESCRIPTOR_COUNT);

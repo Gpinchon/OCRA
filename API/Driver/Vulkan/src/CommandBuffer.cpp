@@ -1,4 +1,5 @@
 #include <VK/CommandBuffer.hpp>
+#include <VK/Flags.hpp>
 
 #include <OCRA/Structs.hpp>
 
@@ -9,6 +10,7 @@ void Begin(const Handle& a_CommandBuffer,
            const CommandBufferBeginInfo& a_BeginInfo)
 {
     VkCommandBufferBeginInfo info{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
+    info.flags = GetVkCommandBufferUsageFlags(a_BeginInfo.flags);
     if (a_BeginInfo.inheritanceInfo.has_value()) {
         VkCommandBufferInheritanceInfo inheritanceInfo{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO };
         //inheritanceInfo.framebuffer = *a_BeginInfo.inheritanceInfo->framebuffer;

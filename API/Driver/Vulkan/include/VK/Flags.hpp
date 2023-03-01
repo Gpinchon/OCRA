@@ -53,4 +53,11 @@ static inline auto GetVkShaderStage(const ShaderStageFlags& a_Flags) {
     vkFlags |= (a_Flags & ShaderStageFlagBits::Vertex)      != 0 ? VK_SHADER_STAGE_VERTEX_BIT                  : 0;
     return vkFlags;
 }
+static inline auto GetVkCommandBufferUsageFlags(const CommandBufferUsageFlags& a_Flags) {
+    VkCommandBufferUsageFlags vkFlags = 0;
+    vkFlags |= (a_Flags & CommandBufferUsageFlagBits::OneTimeSubmit)      != 0 ? VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT      : 0;
+    vkFlags |= (a_Flags & CommandBufferUsageFlagBits::RenderPassContinue) != 0 ? VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT : 0;
+    vkFlags |= (a_Flags & CommandBufferUsageFlagBits::SimultaneousUse)    != 0 ? VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT     : 0;
+    return vkFlags;
+}
 }

@@ -1,6 +1,7 @@
 #include <VK/Device.hpp>
 #include <VK/CommandPool.hpp>
 #include <VK/CommandBuffer.hpp>
+#include <VK/Enums.hpp>
 
 #include <OCRA/Structs.hpp>
 
@@ -32,7 +33,10 @@ std::vector<Buffer::Handle> AllocateCommandBuffer(const AllocateCommandBufferInf
     std::vector<VkCommandBuffer> vkBuffers;
     vkBuffers.resize(a_Info.count);
     buffers.reserve(vkBuffers.size());
-    VkCommandBufferAllocateInfo info{};
+    VkCommandBufferAllocateInfo info{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
+    info.level = GetVkCommandBufferLevel(a_Info.level);
+    info.commandPool = *a_Info.pool;
+    info.commandBufferCount = a_Info.count;
     vkAllocateCommandBuffers(pool.device, &info, vkBuffers.data());
     auto allocator = std::pmr::polymorphic_allocator<Buffer::Impl>(&pool.memoryResource);
     for (const auto& vkBuffer : vkBuffers) {

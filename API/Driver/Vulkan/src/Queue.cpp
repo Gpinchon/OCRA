@@ -31,9 +31,9 @@ void Submit(
     std::vector<std::vector<VkSemaphore>>     vkSignSemaphores;
 
     submitInfos.reserve(a_SubmitInfos.size());
-    vkCommandBuffers.reserve(a_SubmitInfos.size());
-    vkWaitSemaphores.reserve(a_SubmitInfos.size());
-    vkSignSemaphores.reserve(a_SubmitInfos.size());
+    vkCommandBuffers.resize(a_SubmitInfos.size());
+    vkWaitSemaphores.resize(a_SubmitInfos.size());
+    vkSignSemaphores.resize(a_SubmitInfos.size());
 
     for (auto i = 0u; i < a_SubmitInfos.size(); ++i) {
         const auto& submitInfo = a_SubmitInfos.at(i);
@@ -57,8 +57,8 @@ void Submit(
         for (const auto& handle : submitInfo.signalSemaphores) {
             vkSignSemaphores.at(i).push_back(*handle);
         }
-        vkSubmitInfo.waitSemaphoreCount = vkSignSemaphores.at(i).size();
-        vkSubmitInfo.pWaitSemaphores = vkSignSemaphores.at(i).data();
+        vkSubmitInfo.signalSemaphoreCount = vkSignSemaphores.at(i).size();
+        vkSubmitInfo.pSignalSemaphores = vkSignSemaphores.at(i).data();
         
         submitInfos.push_back(vkSubmitInfo);
     }

@@ -9,8 +9,7 @@
 
 namespace OCRA
 {
-static inline auto GetVkDescriptorType(const DescriptorType& a_Type)
-{
+static inline auto GetVkDescriptorType(const DescriptorType& a_Type) {
     switch (a_Type)
     {
     case DescriptorType::SampledImage:
@@ -49,5 +48,15 @@ static inline auto GetVkSharingMode(const SharingMode& a_SharingMode) {
         return VK_SHARING_MODE_EXCLUSIVE;
     }
     return VK_SHARING_MODE_MAX_ENUM;
+}
+static inline auto GetVkCommandBufferLevel(const CommandBufferLevel& a_Level) {
+    switch (a_Level)
+    {
+    case CommandBufferLevel::Primary:
+        return VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    case CommandBufferLevel::Secondary:
+        return VK_COMMAND_BUFFER_LEVEL_SECONDARY;
+    }
+    return VK_COMMAND_BUFFER_LEVEL_MAX_ENUM;
 }
 }

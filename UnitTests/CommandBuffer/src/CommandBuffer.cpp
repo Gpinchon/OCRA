@@ -21,22 +21,22 @@ static inline void SubmitCommandBuffer(const Device::Handle& a_Device, const Que
     for (auto i = 0u; i < SWAP_NBR; ++i)
         submitInfo.commandBuffers.push_back(a_CommandBuffer);
     std::cout << "========== Command Buffer submit ==========\n";
-    //test multithreaded submit
-    auto future = std::async([a_Queue, submitInfo, fence] {
+    {
         VerboseTimer("Queue Submission");
         Queue::Submit(a_Queue, { submitInfo }, fence);
-    });
+    }
     //make sure GPU is done
     {
         VerboseTimer bufferCopiesTimer("Buffer Copies");
-        Fence::WaitFor(fence, std::chrono::nanoseconds(15000000));
+        Fence::WaitFor(fence, Fence::IgnoreTimeout);
     }
     //test for function time itself
     {
         auto timer = Timer();
-        int waitNbr = 100000;
-        for (auto i = 0; i < waitNbr; ++i)
-            Fence::WaitFor(fence, std::chrono::nanoseconds(15000000));
+        int waitNbr = 100;
+        for (auto i = 0; i < waitNbr; ++i) {
+            Fence::WaitFor(fence, Fence::IgnoreTimeout);
+        }
         std::cout << "Already signaled Fence mean wait time : " << timer.Elapsed().count() / double(waitNbr) << " nanoseconds\n";
     }
     std::cout << "===========================================\n";
@@ -82,7 +82,7 @@ static inline void RecordSwapCommandBuffer(
     const Buffer::Handle& a_BufferT)
 {
     CommandBufferBeginInfo bufferbeginInfo;
-    bufferbeginInfo.flags = CommandBufferUsageFlagBits::None;
+    bufferbeginInfo.flags = CommandBufferUsageFlagBits::SimultaneousUse;
     Command::Buffer::Begin(a_CommandBuffer, bufferbeginInfo);
     {
         BufferCopyRegion copyRegions;

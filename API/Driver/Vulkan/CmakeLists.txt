@@ -48,6 +48,7 @@ set(OCRA_IMPL_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Buffer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/CommandBuffer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/CommandPool.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Commands.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/DescriptorPool.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/DescriptorSet.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/DescriptorSetLayout.cpp
