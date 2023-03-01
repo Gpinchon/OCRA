@@ -102,26 +102,10 @@ void OCRA::SubmitCommandBuffer(
     Queue::Submit(a_Queue, { submitInfo });
 }
 
-uint32_t FindProperMemoryType(const PhysicalDevice::Handle& a_PhysicalDevice, const MemoryPropertyFlags& a_MemoryProperties)
-{
-    auto& memoryProperties = PhysicalDevice::GetMemoryProperties(a_PhysicalDevice);
-    for (auto memoryTypeIndex = 0u; memoryTypeIndex < memoryProperties.memoryTypes.size(); ++memoryTypeIndex) {
-        if (memoryProperties.memoryTypes.at(memoryTypeIndex).propertyFlags == a_MemoryProperties)
-            return memoryTypeIndex;
-    }
-    //Couldn't find optimal memory type, take any fitting type
-    for (auto memoryTypeIndex = 0u; memoryTypeIndex < memoryProperties.memoryTypes.size(); ++memoryTypeIndex) {
-        if ((memoryProperties.memoryTypes.at(memoryTypeIndex).propertyFlags & a_MemoryProperties) != 0)
-            return memoryTypeIndex;
-    }
-    throw std::runtime_error("Could not find matching memory type");
-    return (std::numeric_limits<uint32_t>::max)();
-}
-
 Memory::Handle AllocateMemory(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const uint64_t& a_Size, const MemoryPropertyFlags& a_MemoryProperties)
 {
     AllocateMemoryInfo memoryInfo;
-    memoryInfo.memoryTypeIndex = FindProperMemoryType(a_PhysicalDevice, a_MemoryProperties);
+    memoryInfo.memoryTypeIndex = FindMemoryType(a_PhysicalDevice, a_MemoryProperties);
     memoryInfo.size = a_Size;
     return AllocateMemory(a_Device, memoryInfo);
 }
