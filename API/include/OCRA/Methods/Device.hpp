@@ -18,7 +18,7 @@ Buffer::Handle CreateBuffer(
     const CreateBufferInfo& a_Info,
     const AllocationCallback* a_Allocator = nullptr);
 /**
-* @brief Allocates a memory according to buffer usage,
+* @brief Allocates a memory memory flags,
 * creates a new buffer and binds the memory to it
 */
 Buffer::Handle AllocateBuffer(
