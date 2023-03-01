@@ -9,9 +9,12 @@ endif()
 find_package(Vulkan REQUIRED)
 
 set(OCRA_IMPL_SWAPCHAIN_HEADER_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/Surface.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/SwapChain.hpp
 )
 
 set(OCRA_IMPL_SWAPCHAIN_SOURCE_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Surface.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/SwapChain.cpp
 )
 
