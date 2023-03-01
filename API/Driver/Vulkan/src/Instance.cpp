@@ -9,15 +9,15 @@
 
 namespace OCRA
 {
+#ifdef _DEBUG
+const std::vector<const char*> validationLayers = {
+    "VK_LAYER_KHRONOS_validation"
+};
 bool CheckValidationLayerSupport() {
     uint32_t layerCount;
     vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
-
     std::vector<VkLayerProperties> availableLayers(layerCount);
     vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
-    const std::vector<const char*> validationLayers = {
-        "VK_LAYER_KHRONOS_validation"
-    };
     for (const char* layerName : validationLayers) {
         bool layerFound = false;
         for (const auto& layerProperties : availableLayers) {
@@ -32,6 +32,7 @@ bool CheckValidationLayerSupport() {
     }
     return true;
 }
+#endif
 Instance::Handle CreateInstance(
     const CreateInstanceInfo& a_Info,
     const AllocationCallback* a_Allocator)
