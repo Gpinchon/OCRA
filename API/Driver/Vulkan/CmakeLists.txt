@@ -35,6 +35,7 @@ set(OCRA_IMPL_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Enums.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Fence.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Flags.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Image.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/ImageSampler.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/ImageView.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Instance.hpp

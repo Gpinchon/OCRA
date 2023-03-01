@@ -81,6 +81,11 @@ static inline void RecordSwapCommandBuffer(
     const Buffer::Handle& a_Buffer1,
     const Buffer::Handle& a_BufferT)
 {
+    BufferMemoryBarrier bufferMemoryBarrier;
+    bufferMemoryBarrier.buffer = a_Buffer0;
+    bufferMemoryBarrier.dstAccessMask = AccessFlagBits::TransferWrite;
+    bufferMemoryBarrier.srcAccessMask = AccessFlagBits::TransferRead;
+    bufferMemoryBarrier.size = CHUNK_SIZE;
     CommandBufferBeginInfo bufferbeginInfo;
     bufferbeginInfo.flags = CommandBufferUsageFlagBits::SimultaneousUse;
     Command::Buffer::Begin(a_CommandBuffer, bufferbeginInfo);
@@ -88,8 +93,30 @@ static inline void RecordSwapCommandBuffer(
         BufferCopyRegion copyRegions;
         copyRegions.size = CHUNK_SIZE;
         Command::CopyBuffer(a_CommandBuffer, a_Buffer0, a_BufferT, { copyRegions });
+        {
+            bufferMemoryBarrier.buffer = a_Buffer0;
+            Command::PipelineBarrier(a_CommandBuffer,
+                PipelineStageFlagBits::Transfer, PipelineStageFlagBits::Transfer,
+                DependencyFlagBits::None,
+                {}, { bufferMemoryBarrier }, {});
+        }
+        
         Command::CopyBuffer(a_CommandBuffer, a_Buffer1, a_Buffer0, { copyRegions });
+        {
+            bufferMemoryBarrier.buffer = a_Buffer1;
+            Command::PipelineBarrier(a_CommandBuffer,
+                PipelineStageFlagBits::Transfer, PipelineStageFlagBits::Transfer,
+                DependencyFlagBits::None,
+                {}, { bufferMemoryBarrier }, {});
+        }
         Command::CopyBuffer(a_CommandBuffer, a_BufferT, a_Buffer1, { copyRegions });
+        {
+            bufferMemoryBarrier.buffer = a_BufferT;
+            Command::PipelineBarrier(a_CommandBuffer,
+                PipelineStageFlagBits::Transfer, PipelineStageFlagBits::Transfer,
+                DependencyFlagBits::None,
+                {}, { bufferMemoryBarrier }, {});
+        }
     }
     Command::Buffer::End(a_CommandBuffer);
 }

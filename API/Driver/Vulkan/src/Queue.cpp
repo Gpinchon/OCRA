@@ -64,4 +64,8 @@ void Submit(
     }
     vkQueueSubmit(*a_Queue, submitInfos.size(), submitInfos.data(), *a_Fence);
 }
+void WaitIdle(const Handle& a_Queue)
+{
+    vkQueueWaitIdle(*a_Queue);
+}
 }

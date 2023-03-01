@@ -6,9 +6,17 @@ namespace OCRA::Image::View
 {
 struct Impl
 {
-    operator auto& () const {
-        return sampler;
+    Impl(const VkDevice& a_Device, const VkImageView& a_ImageView)
+        : device(a_Device)
+        , imageView(a_ImageView)
+    {}
+    ~Impl() {
+        vkDestroyImageView(device, imageView, nullptr);
     }
-    VkImageView sampler;
+    operator auto& () const {
+        return imageView;
+    }
+    const VkDevice    device;
+    const VkImageView imageView;
 };
 }

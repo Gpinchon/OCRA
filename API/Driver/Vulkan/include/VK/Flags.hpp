@@ -60,4 +60,51 @@ static inline auto GetVkCommandBufferUsageFlags(const CommandBufferUsageFlags& a
     vkFlags |= (a_Flags & CommandBufferUsageFlagBits::SimultaneousUse)    != 0 ? VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT     : 0;
     return vkFlags;
 }
+static inline auto GetVkPipelineStageFlags(const PipelineStageFlags& a_Flags) {
+    VkPipelineStageFlags vkFlags = 0;
+    vkFlags |= (a_Flags & PipelineStageFlagBits::BottomOfPipe)                 != 0 ? VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT                 : 0;
+    vkFlags |= (a_Flags & PipelineStageFlagBits::ColorAttachmentOutput)        != 0 ? VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT        : 0;
+    vkFlags |= (a_Flags & PipelineStageFlagBits::ComputeShader)                != 0 ? VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT                 : 0;
+    vkFlags |= (a_Flags & PipelineStageFlagBits::DrawIndirect)                 != 0 ? VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT                  : 0;
+    vkFlags |= (a_Flags & PipelineStageFlagBits::EarlyFragmentTests)           != 0 ? VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT           : 0;
+    vkFlags |= (a_Flags & PipelineStageFlagBits::FragmentShader)               != 0 ? VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT                : 0;
+    vkFlags |= (a_Flags & PipelineStageFlagBits::GeometryShader)               != 0 ? VK_PIPELINE_STAGE_GEOMETRY_SHADER_BIT                : 0;
+    vkFlags |= (a_Flags & PipelineStageFlagBits::Host)                         != 0 ? VK_PIPELINE_STAGE_HOST_BIT                           : 0;
+    vkFlags |= (a_Flags & PipelineStageFlagBits::LateFragmentTests)            != 0 ? VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT            : 0;
+    vkFlags |= (a_Flags & PipelineStageFlagBits::TessellationControlShader)    != 0 ? VK_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT    : 0;
+    vkFlags |= (a_Flags & PipelineStageFlagBits::TessellationEvaluationShader) != 0 ? VK_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT : 0;
+    vkFlags |= (a_Flags & PipelineStageFlagBits::TopOfPipe)                    != 0 ? VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT                    : 0;
+    vkFlags |= (a_Flags & PipelineStageFlagBits::Transfer)                     != 0 ? VK_PIPELINE_STAGE_TRANSFER_BIT                       : 0;
+    vkFlags |= (a_Flags & PipelineStageFlagBits::VertexInput)                  != 0 ? VK_PIPELINE_STAGE_VERTEX_INPUT_BIT                   : 0;
+    vkFlags |= (a_Flags & PipelineStageFlagBits::VertexShader)                 != 0 ? VK_PIPELINE_STAGE_VERTEX_SHADER_BIT                  : 0;
+    return vkFlags;
+}
+static inline auto GetVkDependencyFlags(const DependencyFlags& a_Flags) {
+    VkDependencyFlags vkFlags = 0;
+    vkFlags |= (a_Flags & DependencyFlagBits::ByRegion)    != 0 ? VK_DEPENDENCY_BY_REGION_BIT    : 0;
+    vkFlags |= (a_Flags & DependencyFlagBits::DeviceGroup) != 0 ? VK_DEPENDENCY_DEVICE_GROUP_BIT : 0;
+    vkFlags |= (a_Flags & DependencyFlagBits::ViewLocal)   != 0 ? VK_DEPENDENCY_VIEW_LOCAL_BIT   : 0;
+    return vkFlags;
+}
+static inline auto GetVkAccessMaskFlags(const AccessFlags& a_Flags) {
+    VkAccessFlags vkFlags = 0;
+    vkFlags |= (a_Flags & AccessFlagBits::IndirectCommandRead)         != 0 ? VK_ACCESS_INDIRECT_COMMAND_READ_BIT          : 0;
+    vkFlags |= (a_Flags & AccessFlagBits::IndexRead)                   != 0 ? VK_ACCESS_INDEX_READ_BIT                     : 0;
+    vkFlags |= (a_Flags & AccessFlagBits::VertexAttributeRead)         != 0 ? VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT          : 0;
+    vkFlags |= (a_Flags & AccessFlagBits::UniformRead)                 != 0 ? VK_ACCESS_UNIFORM_READ_BIT                   : 0;
+    vkFlags |= (a_Flags & AccessFlagBits::InputAttachmentRead)         != 0 ? VK_ACCESS_INPUT_ATTACHMENT_READ_BIT          : 0;
+    vkFlags |= (a_Flags & AccessFlagBits::ShaderRead)                  != 0 ? VK_ACCESS_SHADER_READ_BIT                    : 0;
+    vkFlags |= (a_Flags & AccessFlagBits::ShaderWrite)                 != 0 ? VK_ACCESS_SHADER_WRITE_BIT                   : 0;
+    vkFlags |= (a_Flags & AccessFlagBits::ColorAttachmentRead)         != 0 ? VK_ACCESS_COLOR_ATTACHMENT_READ_BIT          : 0;
+    vkFlags |= (a_Flags & AccessFlagBits::ColorAttachmentWrite)        != 0 ? VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT         : 0;
+    vkFlags |= (a_Flags & AccessFlagBits::DepthStencilAttachmentRead)  != 0 ? VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT  : 0;
+    vkFlags |= (a_Flags & AccessFlagBits::DepthStencilAttachmentWrite) != 0 ? VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT : 0;
+    vkFlags |= (a_Flags & AccessFlagBits::TransferRead)                != 0 ? VK_ACCESS_TRANSFER_READ_BIT                  : 0;
+    vkFlags |= (a_Flags & AccessFlagBits::TransferWrite)               != 0 ? VK_ACCESS_TRANSFER_WRITE_BIT                 : 0;
+    vkFlags |= (a_Flags & AccessFlagBits::HostRead)                    != 0 ? VK_ACCESS_HOST_READ_BIT                      : 0;
+    vkFlags |= (a_Flags & AccessFlagBits::HostWrite)                   != 0 ? VK_ACCESS_HOST_WRITE_BIT                     : 0;
+    vkFlags |= (a_Flags & AccessFlagBits::MemoryRead)                  != 0 ? VK_ACCESS_MEMORY_READ_BIT                    : 0;
+    vkFlags |= (a_Flags & AccessFlagBits::MemoryWrite)                 != 0 ? VK_ACCESS_MEMORY_WRITE_BIT                   : 0;
+    return vkFlags;
+}
 }

@@ -6,9 +6,17 @@ namespace OCRA::Image::Sampler
 {
 struct Impl
 {
+    Impl(const VkDevice& a_Device, const VkSampler& a_Sampler)
+        : device(a_Device)
+        , sampler(a_Sampler)
+    {}
+    ~Impl() {
+        vkDestroySampler(device, sampler, nullptr);
+    }
     operator auto& () const {
         return sampler;
     }
-    VkSampler sampler;
+    const VkDevice  device;
+    const VkSampler sampler;
 };
 }
