@@ -326,6 +326,11 @@ const std::vector<QueueFamilyProperties> GetQueueFamilyProperties(const Handle& 
     return queueProperties;
 }
 
+//const auto GetImageFormatProperties(const Handle& a_PhysicalDevice)
+//{
+//    vkGetPhysicalDeviceImageFormatProperties()
+//}
+
 uint32_t FindQueueFamily(const PhysicalDevice::Handle& a_PhysicalDevice, const QueueFlags& a_QueueFlags)
 {
     auto& queueProperties = GetQueueFamilyProperties(a_PhysicalDevice);

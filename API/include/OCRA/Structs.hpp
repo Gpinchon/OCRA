@@ -684,7 +684,7 @@ struct CreateImageSamplerInfo {
 };
 struct CreateSemaphoreInfo {
     SemaphoreType type{ SemaphoreType::Unknown };
-    uint64_t initialValue;
+    uint64_t initialValue{ 0 };
 };
 struct CreateShaderModuleInfo {
     std::vector<uint32_t> code;

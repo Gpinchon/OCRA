@@ -76,6 +76,7 @@ Device::Handle CreateDevice(const PhysicalDevice::Handle& a_PhysicalDevice)
 Command::Pool::Handle CreateCommandPool(const Device::Handle& a_Device, const uint32_t& a_QueueFamily)
 {
     CreateCommandPoolInfo commandPoolInfo;
+    commandPoolInfo.flags = CreateCommandPoolFlagBits::Reset;
     commandPoolInfo.queueFamilyIndex = a_QueueFamily;
     return CreateCommandPool(a_Device, commandPoolInfo);
 }
@@ -93,13 +94,14 @@ void OCRA::SubmitCommandBuffer(
     const Queue::Handle& a_Queue,
     const Command::Buffer::Handle& a_CommandBuffer,
     const Semaphore::Handle& a_WaitSemaphore,
-    const Semaphore::Handle& a_SignalSemaphore)
+    const Semaphore::Handle& a_SignalSemaphore,
+    const Fence::Handle& a_Fence)
 {
     QueueSubmitInfo submitInfo;
     submitInfo.commandBuffers.push_back(a_CommandBuffer);
     if (a_WaitSemaphore)   submitInfo.waitSemaphores = { a_WaitSemaphore };
     if (a_SignalSemaphore) submitInfo.signalSemaphores = { a_SignalSemaphore };
-    Queue::Submit(a_Queue, { submitInfo });
+    Queue::Submit(a_Queue, { submitInfo }, a_Fence);
 }
 
 Memory::Handle AllocateMemory(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const uint64_t& a_Size, const MemoryPropertyFlags& a_MemoryProperties)

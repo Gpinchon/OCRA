@@ -8,6 +8,10 @@
 
 namespace OCRA
 {
+struct SurfaceFormat {
+    Format     format;
+    ColorSpace colorSpace;
+};
 struct SwapChainPresentInfo
 {
     std::vector<Semaphore::Handle>  waitSemaphores;

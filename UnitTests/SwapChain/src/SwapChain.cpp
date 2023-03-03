@@ -69,7 +69,6 @@ struct SwapChainTestApp : TestApp
         window.OnMinimize = [this](const Window&, const uint32_t, const uint32_t) { render = false; };
         const auto queueFamily = PhysicalDevice::FindQueueFamily(physicalDevice, QueueFlagsBits::Graphics);
         queue = Device::GetQueue(device, queueFamily, 0); //Get first available queue
-        imageAcquisitionFence = CreateFence(device);
         commandPool = CreateCommandPool(device, queueFamily);
         commandBuffer = CreateCommandBuffer(commandPool, CommandBufferLevel::Primary);
         CreateSemaphoreInfo semaphoreInfo;
@@ -83,18 +82,18 @@ struct SwapChainTestApp : TestApp
         auto printTime = std::chrono::high_resolution_clock::now();
         window.SetVSync(VSync);
         fpsCounter.StartFrame();
+        auto completeBufferFence = Device::CreateFence(device, FenceStatus::Signaled);
+        auto imageAcquisitionFence = Device::CreateFence(device, FenceStatus::Signaled);
         while (true) {
             window.PushEvents();
             if (window.IsClosing()) break;
-
-            const auto swapChainImage = window.AcquireNextImage(std::chrono::nanoseconds(0), drawWaitSemaphore, imageAcquisitionFence);
-            render = Fence::WaitFor(imageAcquisitionFence, Fence::IgnoreTimeout);
-            Fence::Reset({ imageAcquisitionFence });
-
+            render = Fence::WaitFor({ imageAcquisitionFence, completeBufferFence }, true, Fence::IgnoreTimeout);
+            Fence::Reset({ imageAcquisitionFence, completeBufferFence });
             if (!render) continue;
-            
+            const auto swapChainImage = window.AcquireNextImage(std::chrono::nanoseconds(0), drawWaitSemaphore, imageAcquisitionFence);
             RecordClearCommandBuffer(swapChainImage);
-            SubmitCommandBuffer(queue, commandBuffer, drawWaitSemaphore, drawSignalSemaphore);
+            SubmitCommandBuffer(queue, commandBuffer,
+                drawWaitSemaphore, drawSignalSemaphore, completeBufferFence);
             window.Present(queue, drawSignalSemaphore);
             
             fpsCounter.EndFrame();
@@ -117,7 +116,7 @@ struct SwapChainTestApp : TestApp
         hue = hue > 360 ? 0 : hue;
         const auto color = HSVtoRGB(hue, 0.5f, 1.f);
         CommandBufferBeginInfo bufferBeginInfo;
-        bufferBeginInfo.flags = CommandBufferUsageFlagBits::None;
+        bufferBeginInfo.flags = CommandBufferUsageFlagBits::SimultaneousUse;
         Command::Buffer::Reset(commandBuffer);
         Command::Buffer::Begin(commandBuffer, bufferBeginInfo);
         {
@@ -133,7 +132,6 @@ struct SwapChainTestApp : TestApp
     Queue::Handle            queue;
     Semaphore::Handle drawWaitSemaphore;
     Semaphore::Handle drawSignalSemaphore;
-    Fence::Handle     imageAcquisitionFence;
     Command::Pool::Handle    commandPool;
     Command::Buffer::Handle  commandBuffer;
 };

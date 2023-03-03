@@ -62,7 +62,7 @@ void Submit(
         
         submitInfos.push_back(vkSubmitInfo);
     }
-    vkQueueSubmit(*a_Queue, submitInfos.size(), submitInfos.data(), *a_Fence);
+    vkQueueSubmit(*a_Queue, submitInfos.size(), submitInfos.data(), a_Fence ? (VkFence)*a_Fence : VK_NULL_HANDLE);
 }
 void WaitIdle(const Handle& a_Queue)
 {

@@ -75,4 +75,28 @@ void PipelineBarrier(
         vkBufferMemoryBarriers.size(), vkBufferMemoryBarriers.data(),
         vkImageMemoryBarriers.size(),  vkImageMemoryBarriers.data());
 }
+void ClearColorImage(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const Image::Handle& a_Image,
+    const ImageLayout& a_ImageLayout,
+    const ColorValue& a_Color,
+    const std::vector<ImageSubresourceRange>& a_Ranges)
+{
+    static_assert(sizeof(ColorValue) == sizeof(VkClearColorValue));
+    VkClearColorValue color{};
+    std::memcpy(&color, &a_Color, sizeof(ColorValue));
+    std::vector<VkImageSubresourceRange> vkRanges(a_Ranges.size());
+    for (auto i = 0u; i < a_Ranges.size(); ++i)
+    {
+        auto& range = a_Ranges.at(i);
+        auto& vkRange = vkRanges.at(i);
+        vkRange.baseArrayLayer = range.baseArrayLayer;
+        vkRange.baseMipLevel   = range.baseMipLevel;
+        vkRange.layerCount     = range.layerCount;
+        vkRange.levelCount     = range.levelCount;
+        vkRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
+    }
+    vkCmdClearColorImage(*a_CommandBuffer, *a_Image, VK_IMAGE_LAYOUT_GENERAL,
+        &color, vkRanges.size(), vkRanges.data());
+}
 }

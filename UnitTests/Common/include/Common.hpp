@@ -73,8 +73,9 @@ Command::Buffer::Handle CreateCommandBuffer(const Command::Pool::Handle& a_Comma
 void SubmitCommandBuffer(
     const Queue::Handle& a_Queue,
     const Command::Buffer::Handle& a_CommandBuffer,
-    const Semaphore::Handle& a_WaitSemaphore = nullptr,
-    const Semaphore::Handle& a_SignalSemaphore = nullptr);
+    const Semaphore::Handle& a_WaitSemaphore,
+    const Semaphore::Handle& a_SignalSemaphore,
+    const Fence::Handle& a_Fence);
 //allocate GPU memory with the specified properties
 Memory::Handle AllocateMemory(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const uint64_t& a_Size, const MemoryPropertyFlags& a_MemoryProperties);
 //creates a Descriptor Pool with the specified max sets

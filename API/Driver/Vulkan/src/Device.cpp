@@ -10,8 +10,14 @@ Device::Handle CreateDevice(
     const CreateDeviceInfo& a_Info,
     const AllocationCallback* a_Allocator)
 {
+    const std::vector<const char*> extensions{
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+        VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME,
+    };
     VkDevice device = nullptr;
     VkDeviceCreateInfo info{ VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO };
+    info.enabledExtensionCount = extensions.size();
+    info.ppEnabledExtensionNames = extensions.data();
     std::vector<VkDeviceQueueCreateInfo> vkDeviceQueue;
     vkDeviceQueue.reserve(a_Info.queueInfos.size());
     for (const auto& queueInfo : a_Info.queueInfos) {

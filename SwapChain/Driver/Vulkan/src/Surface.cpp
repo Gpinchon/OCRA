@@ -1,6 +1,8 @@
 #include <Surface.hpp>
 
 #include <VK/Instance.hpp>
+#include <VK/PhysicalDevice.hpp>
+#include <VK/Enums.hpp>
 
 #include <OCRA/Core.hpp>
 #include <OCRA/SwapChain.hpp>
@@ -24,5 +26,29 @@ Surface::Handle CreateSurface(
     vkCreateWin32SurfaceKHR(*a_Instance, &vkInfo, nullptr, &surface);
 #endif //_WIN32
     return std::make_shared<Surface::Impl>(*a_Instance, surface);
+}
+}
+
+namespace OCRA::PhysicalDevice
+{
+std::vector<SurfaceFormat> GetSurfaceFormats(
+    const PhysicalDevice::Handle& a_PhysicalDevice,
+    const Surface::Handle& a_Surface)
+{
+    auto& physicalDevice = *a_PhysicalDevice;
+    auto& surface = *a_Surface;
+    
+    uint32_t formatCount = 0;
+    vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, nullptr);
+    std::vector<VkSurfaceFormatKHR> vkFormats(formatCount);
+    std::vector<SurfaceFormat>      formats(formatCount);
+    vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, vkFormats.data());
+    for (auto i = 0u; i < formatCount; ++i) {
+        auto& format = formats.at(i);
+        auto& vkFormat = vkFormats.at(i);
+        format.colorSpace = GetOCColorSpace(vkFormat.colorSpace);
+        format.format     = GetOCFormat(vkFormat.format);
+    }
+    return formats;
 }
 }

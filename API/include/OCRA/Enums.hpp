@@ -36,6 +36,7 @@ enum class ColorSpace {
     Unknown = -1,
     Linear,
     sRGB,
+    HDR10,
     MaxValue
 };
 enum class CommandBufferLevel {
@@ -97,6 +98,10 @@ enum class Format {
     Uint8_Normalized_RG,
     Uint8_Normalized_RGB,
     Uint8_Normalized_RGBA,
+    Uint8_Normalized_BGR,
+    Uint8_Normalized_BGRA,
+    Uint8_SBGR,
+    Uint8_SBGRA,
     /// <summary>
     /// Normalized Int8 pixel types
     /// </summary>
@@ -187,6 +192,11 @@ enum class Format {
     /// </summary>
     S3TC_DXT5_RGBA,
     S3TC_DXT5_SRGBA,
+    /// <summary>
+    /// Special pixel types
+    /// </summary>
+    Normalized_BGR10_A2,
+    BGR10_A2,
     MaxValue
 };
 enum class FrontFace {

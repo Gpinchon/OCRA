@@ -7,6 +7,11 @@
 
 #include <vulkan/vulkan.h>
 
+#ifdef _WIN32
+  #include <Windows.h>
+  #include <vulkan/vulkan_win32.h>
+#endif
+
 namespace OCRA
 {
 #ifdef _DEBUG
@@ -37,6 +42,12 @@ Instance::Handle CreateInstance(
     const CreateInstanceInfo& a_Info,
     const AllocationCallback* a_Allocator)
 {
+    const std::vector<const char*> extensions{
+#ifdef _WIN32
+        VK_KHR_WIN32_SURFACE_EXTENSION_NAME,
+#endif
+        VK_KHR_SURFACE_EXTENSION_NAME
+    };
     VkInstance instance = nullptr;
     VkInstanceCreateInfo info{ VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO };
     VkApplicationInfo appInfo{ VK_STRUCTURE_TYPE_APPLICATION_INFO };
@@ -44,7 +55,10 @@ Instance::Handle CreateInstance(
     appInfo.pApplicationName = a_Info.applicationInfo.name.c_str();
     appInfo.engineVersion = a_Info.applicationInfo.engineVersion;
     appInfo.pEngineName = a_Info.applicationInfo.engineName.c_str();
+    appInfo.apiVersion = VK_API_VERSION_1_3;
     info.pApplicationInfo = &appInfo;
+    info.enabledExtensionCount = extensions.size();
+    info.ppEnabledExtensionNames = extensions.data();
 #ifdef _DEBUG
     if (!CheckValidationLayerSupport())  throw std::runtime_error("Validation layers unavailable");
     info.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
