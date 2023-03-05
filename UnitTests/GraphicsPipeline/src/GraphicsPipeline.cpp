@@ -100,7 +100,7 @@ struct GraphicsPipelineTestApp : TestApp
             if (window.IsClosing()) break;
 
             swapChainImage = window.AcquireNextImage({}, nullptr, imageAcquisitionFence);
-            render = Fence::WaitFor(imageAcquisitionFence, Fence::IgnoreTimeout);
+            render = Fence::WaitFor(imageAcquisitionFence, IgnoreTimeout);
             Fence::Reset({ imageAcquisitionFence });
 
             if (!render) continue;
@@ -119,14 +119,17 @@ struct GraphicsPipelineTestApp : TestApp
                 mesh.Update();
                 if (firstLoop) RecordDrawCommandBuffer();
             }
-            
-            
+
             RecordMainCommandBuffer();
-            SubmitCommandBuffer(queue, mainCommandBuffer, nullptr, drawSemaphore);
+            QueueSubmitInfo submitInfo;
+            submitInfo.commandBuffers = { mainCommandBuffer };
+            //submitInfo.waitSemaphores = { { imageAcquisitionSemaphore, 0, PipelineStageFlagBits::BottomOfPipe } };
+            submitInfo.signalSemaphores = { { drawSemaphore } };
+            Queue::Submit(queue, { submitInfo }/*, completeBufferFence*/);
             window.Present(queue, drawSemaphore);
+
             fpsCounter.EndFrame();
             fpsCounter.StartFrame();
-            
             if (std::chrono::duration<double, std::milli>(now - printTime).count() >= 48) {
                 printTime = now;
                 fpsCounter.Print();

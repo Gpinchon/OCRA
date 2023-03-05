@@ -69,13 +69,6 @@ uint32_t FindQueueFamily(const PhysicalDevice::Handle& a_PhysicalDevice, const P
 Command::Pool::Handle CreateCommandPool(const Device::Handle& a_Device, const uint32_t& a_QueueFamily);
 //Creates a command buffer from the specified command pool
 Command::Buffer::Handle CreateCommandBuffer(const Command::Pool::Handle& a_CommandPool, const CommandBufferLevel& a_Level);
-//Submits a Command Buffer to the specified Queue
-void SubmitCommandBuffer(
-    const Queue::Handle& a_Queue,
-    const Command::Buffer::Handle& a_CommandBuffer,
-    const Semaphore::Handle& a_WaitSemaphore,
-    const Semaphore::Handle& a_SignalSemaphore,
-    const Fence::Handle& a_Fence);
 //allocate GPU memory with the specified properties
 Memory::Handle AllocateMemory(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const uint64_t& a_Size, const MemoryPropertyFlags& a_MemoryProperties);
 //creates a Descriptor Pool with the specified max sets
