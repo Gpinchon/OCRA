@@ -20,14 +20,15 @@ Fence::Handle CreateFence(
 }
 }
 
-namespace OCRA::Fence {
-
+namespace OCRA::Fence
+{
 bool WaitFor(
     const Handle& a_Fence,
     const std::chrono::nanoseconds& a_TimeoutNS)
 {
     return a_Fence->WaitFor(a_TimeoutNS);
 }
+
 bool WaitFor(
     const std::vector<Handle>& a_Fences,
     bool a_WaitAll,
@@ -41,10 +42,17 @@ bool WaitFor(
     }
     return ret;
 }
+
+void Reset(const Handle& a_Fence)
+{
+    a_Fence->Reset();
+}
+
 void Reset(const std::vector<Handle>& a_Fences)
 {
     for (auto& fence : a_Fences) fence->Reset();
 }
+
 FenceStatus GetStatus(const Handle& a_Fence)
 {
     return a_Fence->GetStatus();

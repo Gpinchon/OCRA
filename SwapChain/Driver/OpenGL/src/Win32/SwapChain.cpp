@@ -257,7 +257,7 @@ Image::Handle Impl::AcquireNextImage(
             OCRA_ASSERT(semaphore->type == SemaphoreType::Binary && "Cannot wait on Timeline Semaphores when requesting next image");
             std::static_pointer_cast<Semaphore::Binary>(semaphore)->Signal();
         }
-        if (fence != nullptr) fence->SignalNoSync();
+        if (fence != nullptr) fence->Signal();
     }, false);
     return images.at(backBufferIndex);
 }
