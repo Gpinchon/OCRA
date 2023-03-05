@@ -94,7 +94,7 @@ Window::Window(const Instance::Handle& a_Instance, const PhysicalDevice::Handle&
     info.hinstance = GetModuleHandle(0);
     info.hwnd = hwnd;
     surface = Instance::CreateSurface(a_Instance, info);
-    auto formats = PhysicalDevice::GetSurfaceFormats(a_PhysicalDevice, surface);
+    swapChainFormat = PhysicalDevice::GetSurfaceFormats(a_PhysicalDevice, surface).front();
 }
 
 Window::~Window()
@@ -150,8 +150,8 @@ void Window::ResizeCallback(const uint32_t a_Width, const uint32_t a_Height)
 {
     if (IsClosing()) return;
     CreateSwapChainInfo info{};
-    info.imageColorSpace = ColorSpace::sRGB;
-    info.imageFormat = Format::Uint8_Normalized_BGRA;
+    info.imageColorSpace = swapChainFormat.colorSpace;
+    info.imageFormat = swapChainFormat.format;
     info.imageCount = GetSwapChainImageNbr();
     info.imageExtent.width = a_Width;
     info.imageExtent.height = a_Height;

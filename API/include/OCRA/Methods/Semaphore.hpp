@@ -12,8 +12,6 @@
 #include <chrono>
 
 namespace OCRA::Semaphore {
-//Use this to ignore timeout and wait indefinitely
-static constexpr auto IgnoreTimeout = (std::chrono::nanoseconds::max)();
 void Signal(
     const Handle& a_Semaphore,
     const uint64_t& a_Value);

@@ -6,8 +6,6 @@
 #include <chrono>
 
 namespace OCRA::Fence {
-//Use this to ignore timeout and wait indefinitely
-static constexpr auto IgnoreTimeout = (std::chrono::nanoseconds::max)();
 /**
  * @brief Used to wait for one or more fences to enter signal state
  * @arg a_WaitAll : if true, will wait for all fences to signal, else will wait for at least one fence to signal
@@ -25,6 +23,11 @@ bool WaitFor(
 bool WaitFor(
     const Handle& a_Fences,
     const std::chrono::nanoseconds& a_TimeoutNS);
+
+/**
+* @brief resets the fence status to Unsignaled
+*/
+void Reset(const Handle& a_Fence);
 
 /**
 * @brief resets the fences status to Unsignaled

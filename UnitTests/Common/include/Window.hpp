@@ -57,6 +57,7 @@ private:
     Device::Handle        device;
     Surface::Handle       surface;
     SwapChain::Handle     swapChain;
+    SurfaceFormat         swapChainFormat;
     SwapChainPresentInfo  presentInfo;
     uint32_t              swapChainImageNbr{ 3 };
     uExtent2D             extent;

@@ -30,6 +30,7 @@ struct Impl {
         glClientWaitSync(sync, 0, GL_TIMEOUT_IGNORED);
         glDeleteSync(sync);
         status = FenceStatus::Signaled;
+        lock.unlock();
         cv.notify_all();
     }
     //Signals the Fence without actually syncing with the GPU
@@ -37,6 +38,7 @@ struct Impl {
         auto lock = std::unique_lock<std::mutex>(mutex);
         if (status == FenceStatus::Signaled) return;
         status = FenceStatus::Signaled;
+        lock.unlock();
         cv.notify_all();
     }
     inline void Reset() {

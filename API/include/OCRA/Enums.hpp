@@ -205,7 +205,24 @@ enum class FrontFace {
     MaxValue
 };
 enum class ImageLayout {
-    Unknown = -1,
+    Undefined,
+    General,
+    ColorAttachmentOptimal,
+    DepthStencilAttachmentOptimal,
+    DepthStencilReadOnlyOptimal,
+    ShaderReadOnlyOptimal,
+    TransferSrcOptimal,
+    TransferDstOptimal,
+    Preinitialized,
+    DepthReadOnlyStencilAttachmentOptimal,
+    DepthAttachmentStencilReadOnlyOptimal,
+    DepthAttachmentOptimal,
+    DepthReadOnlyOptimal,
+    StencilAttachmentOptimal,
+    StencilReadOnlyOptimal,
+    ReadOnlyOptimal,
+    AttachmentOptimal,
+    PresentSrc,
     MaxValue
 };
 enum class ImageType {

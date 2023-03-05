@@ -79,6 +79,17 @@ namespace DependencyFlagBits {
     constexpr DependencyFlags DeviceGroup = 0b100;
     constexpr DependencyFlags None        = 0b000;
 }
+using ImageAspectFlags = std::bitset<7>;
+namespace ImageAspectFlagBits {
+    constexpr ImageAspectFlags None     = 0b0000000;
+    constexpr ImageAspectFlags Color    = 0b1000000;
+    constexpr ImageAspectFlags Depth    = 0b0100000;
+    constexpr ImageAspectFlags Stencil  = 0b0010000;
+    constexpr ImageAspectFlags Metadata = 0b0001000;
+    constexpr ImageAspectFlags Plane0   = 0b0000100;
+    constexpr ImageAspectFlags Plane1   = 0b0000010;
+    constexpr ImageAspectFlags Plane2   = 0b0000001;
+}
 using ImageUsageFlags = std::bitset<8>;
 namespace ImageUsageFlagBits {
     constexpr ImageUsageFlags TransferSrc             = 0b10000000;

@@ -20,6 +20,16 @@ Surface::Handle CreateSurface(
 }
 }
 
+namespace OCRA::PhysicalDevice
+{
+std::vector<SurfaceFormat> GetSurfaceFormats(
+    const PhysicalDevice::Handle& a_PhysicalDevice,
+    const Surface::Handle& a_Surface)
+{
+    return { {Format::Uint8_Normalized_RGBA, ColorSpace::sRGB} };
+}
+}
+
 namespace OCRA::Surface::Win32
 {
 Impl::Impl(const Instance::Handle& a_Instance, const CreateSurfaceInfo& a_Info)

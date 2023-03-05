@@ -46,6 +46,13 @@ void GenerateMipMap(
     const Command::Buffer::Handle&  a_CommandBuffer,
     const Image::Handle&            a_Image);
 
+void TransitionImageLayout(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const Image::Handle& a_Image,
+    const ImageSubresourceRange& a_SubResource,
+    const ImageLayout& a_OldLayout,
+    const ImageLayout& a_NewLayout);
+
 void ClearColorImage(
     const Command::Buffer::Handle&  a_CommandBuffer,
     const Image::Handle&            a_Image,

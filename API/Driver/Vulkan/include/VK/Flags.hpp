@@ -107,6 +107,17 @@ static inline auto GetVkAccessMaskFlags(const AccessFlags& a_Flags) {
     vkFlags |= (a_Flags & AccessFlagBits::MemoryWrite)                 != 0 ? VK_ACCESS_MEMORY_WRITE_BIT                   : 0;
     return vkFlags;
 }
+static inline auto GetVkImageAspectFlags(const ImageAspectFlags& a_Flags) {
+    VkImageAspectFlags vkFlags = 0;
+    vkFlags |= (a_Flags & ImageAspectFlagBits::Color)    != 0 ? VK_IMAGE_ASPECT_COLOR_BIT    : 0;
+    vkFlags |= (a_Flags & ImageAspectFlagBits::Depth)    != 0 ? VK_IMAGE_ASPECT_DEPTH_BIT    : 0;
+    vkFlags |= (a_Flags & ImageAspectFlagBits::Stencil)  != 0 ? VK_IMAGE_ASPECT_STENCIL_BIT  : 0;
+    vkFlags |= (a_Flags & ImageAspectFlagBits::Metadata) != 0 ? VK_IMAGE_ASPECT_METADATA_BIT : 0;
+    vkFlags |= (a_Flags & ImageAspectFlagBits::Plane0)   != 0 ? VK_IMAGE_ASPECT_PLANE_0_BIT  : 0;
+    vkFlags |= (a_Flags & ImageAspectFlagBits::Plane1)   != 0 ? VK_IMAGE_ASPECT_PLANE_1_BIT  : 0;
+    vkFlags |= (a_Flags & ImageAspectFlagBits::Plane2)   != 0 ? VK_IMAGE_ASPECT_PLANE_2_BIT  : 0;
+    return vkFlags;
+}
 static inline auto GetVkImageUsage(const ImageUsageFlags& a_Flags) {
     VkImageUsageFlags vkFlags = 0;
     vkFlags |= (a_Flags & ImageUsageFlagBits::TransferSrc)            != 0 ? VK_IMAGE_USAGE_TRANSFER_SRC_BIT             : 0;

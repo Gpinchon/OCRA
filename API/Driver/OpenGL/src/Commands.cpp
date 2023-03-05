@@ -6,6 +6,16 @@
 
 namespace OCRA::Command
 {
+void TransitionImageLayout(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const Image::Handle& a_Image,
+    const ImageSubresourceRange& a_SubResource,
+    const ImageLayout& a_OldLayout,
+    const ImageLayout& a_NewLayout)
+{
+    //TODO use glTextureBarrier, glMemoryBarrier and glMemoryBarrierByRegion when relevant
+}
+
 void PipelineBarrier(
     const Buffer::Handle& a_CommandBuffer,
     const PipelineStageFlags& srcStageMask,
@@ -15,8 +25,10 @@ void PipelineBarrier(
     const std::vector<BufferMemoryBarrier>& a_BufferMemoryBarriers,
     const std::vector<ImageMemoryBarrier>&  a_ImageMemoryBarriers)
 {
-    a_CommandBuffer->PushCommand<GenericCommand>(
-        [memoryBarriers = a_MemoryBarriers, bufferMemoryBarriers = a_BufferMemoryBarriers, imageMemoryBarriers = a_ImageMemoryBarriers](const Buffer::ExecutionState&) {
+    a_CommandBuffer->PushCommand<GenericCommand>([
+            memoryBarriers = a_MemoryBarriers,
+            bufferMemoryBarriers = a_BufferMemoryBarriers,
+            imageMemoryBarriers = a_ImageMemoryBarriers](const Buffer::ExecutionState&) {
         for (const auto& memoryBarrier : memoryBarriers) {
             glMemoryBarrierEXT(GetGLBarrierAccessBits(memoryBarrier.dstAccessMask));
         }

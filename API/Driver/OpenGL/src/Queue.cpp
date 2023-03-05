@@ -15,25 +15,23 @@ namespace OCRA::Queue
 {
 static inline void Execute(const QueueSubmitInfo& a_SubmitInfo)
 {
-    for (auto semaphoreIndex = 0u; semaphoreIndex < a_SubmitInfo.waitSemaphores.size(); ++semaphoreIndex)
+    for (auto& waitInfo : a_SubmitInfo.waitSemaphores)
     {
-        auto& semaphore = a_SubmitInfo.waitSemaphores.at(semaphoreIndex);
-        if (semaphore->type == SemaphoreType::Binary)
-            std::static_pointer_cast<Semaphore::Binary>(semaphore)->Wait();
+        if (waitInfo.semaphore->type == SemaphoreType::Binary)
+            std::static_pointer_cast<Semaphore::Binary>(waitInfo.semaphore)->Wait();
         else {
-            auto& semaphoreValue = a_SubmitInfo.timelineSemaphoreValues.waitSemaphoreValues.at(semaphoreIndex);
-            std::static_pointer_cast<Semaphore::Timeline>(semaphore)->WaitDevice(semaphoreValue);
+            auto& semaphoreValue = waitInfo.timelineValue;
+            std::static_pointer_cast<Semaphore::Timeline>(waitInfo.semaphore)->WaitDevice(semaphoreValue);
         }
     }
     OCRA::Command::Buffer::Execute(a_SubmitInfo.commandBuffers);
-    for (auto semaphoreIndex = 0u; semaphoreIndex < a_SubmitInfo.signalSemaphores.size(); ++semaphoreIndex)
+    for (auto& signalInfo : a_SubmitInfo.signalSemaphores)
     {
-        auto& semaphore = a_SubmitInfo.signalSemaphores.at(semaphoreIndex);
-        if (semaphore->type == SemaphoreType::Binary)
-            std::static_pointer_cast<Semaphore::Binary>(semaphore)->Signal();
+        if (signalInfo.semaphore->type == SemaphoreType::Binary)
+            std::static_pointer_cast<Semaphore::Binary>(signalInfo.semaphore)->Signal();
         else {
-            auto& semaphoreValue = a_SubmitInfo.timelineSemaphoreValues.signalSemaphoreValues.at(semaphoreIndex);
-            std::static_pointer_cast<Semaphore::Timeline>(semaphore)->SignalDevice(semaphoreValue);
+            auto& semaphoreValue = signalInfo.timelineValue;
+            std::static_pointer_cast<Semaphore::Timeline>(signalInfo.semaphore)->SignalDevice(semaphoreValue);
         }
     }
 }

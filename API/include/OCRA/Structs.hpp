@@ -8,6 +8,7 @@
 #include <OCRA/Extent.hpp>
 
 #include <array>
+#include <chrono>
 #include <cstdint>
 #include <optional>
 #include <string>
@@ -17,6 +18,9 @@
 
 namespace OCRA
 {
+//Use this to ignore timeout and wait indefinitely
+static constexpr auto IgnoreTimeout = (std::chrono::nanoseconds::max)();
+static constexpr auto IgnoreQueueFamily = (std::numeric_limits<uint32_t>::max)();
 struct AttachmentDescription {
     LoadOp  loadOp{ LoadOp::DontCare };   //determines what to do with the buffer before rendering
     StoreOp storeOp{ StoreOp::DontCare }; //determines what to do with the buffer after rendering
@@ -53,7 +57,7 @@ struct DescriptorSetImageInfo
 {
     Image::Sampler::Handle sampler;
     Image::View::Handle    imageView;
-    ImageLayout            imageLayout{ ImageLayout::Unknown };
+    ImageLayout            imageLayout{ ImageLayout::Undefined };
 };
 struct DescriptorSetWrite
 {
@@ -183,6 +187,7 @@ struct ImageSubresourceLayers {
     uint32_t level{ 0 }; //indicates the base level (mipmap or array layer) used for the copy
 };
 struct ImageSubresourceRange {
+    ImageAspectFlags      aspect{ ImageAspectFlagBits::None };
     uint32_t              baseMipLevel{ 0 };
     uint32_t              levelCount{ 1000 };
     uint32_t              baseArrayLayer{ 0 };
@@ -351,12 +356,19 @@ struct TimelineSemaphoreSubmitInfo {
     std::vector<uint64_t> waitSemaphoreValues;  //The list of semaphores to wait
     std::vector<uint64_t> signalSemaphoreValues;//The list of semaphores to signal
 };
+struct QueueSubmitSemaphore {
+    Semaphore::Handle  semaphore;
+    uint64_t           timelineValue{ 0 }; //the value to wait after if semaphore is of type Timeline
+};
+struct QueueSubmitWaitInfo : QueueSubmitSemaphore {
+    PipelineStageFlags dstStages{ PipelineStageFlagBits::None };
+};
+using QueueSubmitSignalInfo = QueueSubmitSemaphore;
 struct QueueSubmitInfo
 {
-    TimelineSemaphoreSubmitInfo timelineSemaphoreValues;
-    std::vector<Semaphore::Handle> waitSemaphores;
     std::vector<OCRA::Command::Buffer::Handle> commandBuffers;
-    std::vector<Semaphore::Handle> signalSemaphores;
+    std::vector<QueueSubmitWaitInfo>    waitSemaphores;
+    std::vector<QueueSubmitSignalInfo>  signalSemaphores;
 };
 
 struct CreateQueryPoolInfo {
@@ -379,7 +391,10 @@ struct BufferMemoryBarrier : MemoryBarrier {
 struct ImageMemoryBarrier : MemoryBarrier {
     uint32_t    srcQueueFamilyIndex{ 0 };
     uint32_t    dstQueueFamilyIndex{ 0 };
-    Image::Handle image;
+    Image::Handle         image;
+    ImageSubresourceRange subRange;
+    ImageLayout oldLayout;
+    ImageLayout newLayout;
 };
 
 struct ShaderSpecializationMapEntry {

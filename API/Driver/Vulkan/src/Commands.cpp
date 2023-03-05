@@ -1,5 +1,6 @@
 #include <VK/Buffer.hpp>
 #include <VK/CommandBuffer.hpp>
+#include <VK/Enums.hpp>
 #include <VK/Flags.hpp>
 #include <VK/Image.hpp>
 
@@ -60,11 +61,17 @@ void PipelineBarrier(
     vkImageMemoryBarriers.reserve(a_ImageMemoryBarriers.size());
     for (const auto& barrier : a_ImageMemoryBarriers) {
         VkImageMemoryBarrier vkBarrier{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+        vkBarrier.image = *barrier.image;
+        vkBarrier.newLayout     = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
         vkBarrier.dstAccessMask = GetVkAccessMaskFlags(barrier.dstAccessMask);
         vkBarrier.srcAccessMask = GetVkAccessMaskFlags(barrier.srcAccessMask);
         vkBarrier.dstQueueFamilyIndex = barrier.dstQueueFamilyIndex;
         vkBarrier.srcQueueFamilyIndex = barrier.srcQueueFamilyIndex;
-        vkBarrier.image = *barrier.image;
+        vkBarrier.subresourceRange.aspectMask     = GetVkImageAspectFlags(barrier.subRange.aspect);
+        vkBarrier.subresourceRange.baseArrayLayer = barrier.subRange.baseArrayLayer;
+        vkBarrier.subresourceRange.baseMipLevel   = barrier.subRange.baseMipLevel;
+        vkBarrier.subresourceRange.layerCount     = barrier.subRange.layerCount;
+        vkBarrier.subresourceRange.levelCount     = barrier.subRange.levelCount;
         vkImageMemoryBarriers.push_back(vkBarrier);
     }
     vkCmdPipelineBarrier(*a_CommandBuffer,
@@ -74,6 +81,167 @@ void PipelineBarrier(
         vkMemoryBarriers.size(),       vkMemoryBarriers.data(),
         vkBufferMemoryBarriers.size(), vkBufferMemoryBarriers.data(),
         vkImageMemoryBarriers.size(),  vkImageMemoryBarriers.data());
+}
+
+static inline auto GetTransitionAccessMask(const VkImageLayout& a_Layout)
+{
+    switch (a_Layout)
+    {
+    case VK_IMAGE_LAYOUT_UNDEFINED:
+    case VK_IMAGE_LAYOUT_PRESENT_SRC_KHR:
+        return VkAccessFlagBits(0);
+    case VK_IMAGE_LAYOUT_GENERAL:
+        return VkAccessFlagBits(
+            VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
+            VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT |
+            VK_ACCESS_TRANSFER_WRITE_BIT | VK_ACCESS_TRANSFER_READ_BIT |
+            VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_HOST_WRITE_BIT |
+            VK_ACCESS_HOST_READ_BIT | VK_ACCESS_INPUT_ATTACHMENT_READ_BIT |
+            VK_ACCESS_COLOR_ATTACHMENT_READ_BIT |
+            VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT |
+            VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT);
+    case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
+        return VkAccessFlagBits(
+            VK_ACCESS_COLOR_ATTACHMENT_READ_BIT |
+            VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
+
+    case VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL:
+    case VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL:
+    case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
+        return VkAccessFlagBits(
+            VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT |
+            VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT);
+    case VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL:
+    case VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL:
+    case VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL:
+    case VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL:
+    case VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL:
+        return VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+
+    case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
+        return VkAccessFlagBits(
+            VK_ACCESS_SHADER_READ_BIT |
+            VK_ACCESS_INPUT_ATTACHMENT_READ_BIT);
+
+    case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
+        return VK_ACCESS_TRANSFER_READ_BIT;
+    case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
+        return VK_ACCESS_TRANSFER_WRITE_BIT;
+    case VK_IMAGE_LAYOUT_PREINITIALIZED:
+        return VkAccessFlagBits(
+            VK_ACCESS_HOST_WRITE_BIT |
+            VK_ACCESS_TRANSFER_WRITE_BIT);
+
+    case VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL:
+        break;
+    case VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL:
+        break;
+    case VK_IMAGE_LAYOUT_VIDEO_DECODE_DST_KHR:
+        break;
+    case VK_IMAGE_LAYOUT_VIDEO_DECODE_SRC_KHR:
+        break;
+    case VK_IMAGE_LAYOUT_VIDEO_DECODE_DPB_KHR:
+        break;
+    case VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR:
+        return VK_ACCESS_MEMORY_READ_BIT;
+    case VK_IMAGE_LAYOUT_FRAGMENT_DENSITY_MAP_OPTIMAL_EXT:
+        break;
+    case VK_IMAGE_LAYOUT_FRAGMENT_SHADING_RATE_ATTACHMENT_OPTIMAL_KHR:
+        break;
+    case VK_IMAGE_LAYOUT_ATTACHMENT_FEEDBACK_LOOP_OPTIMAL_EXT:
+        break;
+    }
+    throw std::runtime_error("Error: unsupported layout transition!");
+    return VK_ACCESS_FLAG_BITS_MAX_ENUM;
+}
+
+static inline auto GetTransitionStage(const VkImageLayout& a_Stage)
+{
+    switch (a_Stage)
+    {
+    case VK_IMAGE_LAYOUT_UNDEFINED:
+        return VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+    case VK_IMAGE_LAYOUT_GENERAL:
+        return VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+    case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
+        break;
+    case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
+        break;
+    case VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL:
+        break;
+    case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
+        return VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+    case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
+    case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
+        return VK_PIPELINE_STAGE_TRANSFER_BIT;
+    case VK_IMAGE_LAYOUT_PREINITIALIZED:
+        return VK_PIPELINE_STAGE_HOST_BIT;
+    case VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL:
+        break;
+    case VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL:
+        break;
+    case VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL:
+        break;
+    case VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL:
+        break;
+    case VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL:
+        break;
+    case VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL:
+        break;
+    case VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL:
+        break;
+    case VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL:
+        return VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    case VK_IMAGE_LAYOUT_PRESENT_SRC_KHR:
+        return VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+    case VK_IMAGE_LAYOUT_VIDEO_DECODE_DST_KHR:
+        break;
+    case VK_IMAGE_LAYOUT_VIDEO_DECODE_SRC_KHR:
+        break;
+    case VK_IMAGE_LAYOUT_VIDEO_DECODE_DPB_KHR:
+        break;
+    case VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR:
+        return VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+    case VK_IMAGE_LAYOUT_FRAGMENT_DENSITY_MAP_OPTIMAL_EXT:
+        break;
+    case VK_IMAGE_LAYOUT_FRAGMENT_SHADING_RATE_ATTACHMENT_OPTIMAL_KHR:
+        break;
+    case VK_IMAGE_LAYOUT_ATTACHMENT_FEEDBACK_LOOP_OPTIMAL_EXT:
+        break;
+    }
+    throw std::runtime_error("Error: unsupported layout transition!");
+    return VK_PIPELINE_STAGE_FLAG_BITS_MAX_ENUM;
+}
+
+void TransitionImageLayout(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const Image::Handle& a_Image,
+    const ImageSubresourceRange& a_SubResource,
+    const ImageLayout& a_OldLayout,
+    const ImageLayout& a_NewLayout)
+{
+    auto old_layout = GetVkImageLayout(a_OldLayout);
+    auto new_layout = GetVkImageLayout(a_NewLayout);
+    VkImageMemoryBarrier barrier{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+    barrier.image = *a_Image;
+    barrier.oldLayout = old_layout;
+    barrier.newLayout = new_layout;
+    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.subresourceRange.aspectMask     = GetVkImageAspectFlags(a_SubResource.aspect);
+    barrier.subresourceRange.baseMipLevel   = a_SubResource.baseMipLevel;
+    barrier.subresourceRange.levelCount     = a_SubResource.levelCount;
+    barrier.subresourceRange.baseArrayLayer = a_SubResource.baseArrayLayer;
+    barrier.subresourceRange.layerCount     = a_SubResource.layerCount;
+    barrier.srcAccessMask = GetTransitionAccessMask(old_layout);
+    barrier.dstAccessMask = GetTransitionAccessMask(new_layout);
+    vkCmdPipelineBarrier(*a_CommandBuffer,
+        GetTransitionStage(old_layout),
+        GetTransitionStage(new_layout),
+        0,
+        0, nullptr,
+        0, nullptr,
+        1, &barrier);
 }
 void ClearColorImage(
     const Command::Buffer::Handle& a_CommandBuffer,
@@ -94,9 +262,9 @@ void ClearColorImage(
         vkRange.baseMipLevel   = range.baseMipLevel;
         vkRange.layerCount     = range.layerCount;
         vkRange.levelCount     = range.levelCount;
-        vkRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
+        vkRange.aspectMask     = GetVkImageAspectFlags(range.aspect);
     }
-    vkCmdClearColorImage(*a_CommandBuffer, *a_Image, VK_IMAGE_LAYOUT_GENERAL,
+    vkCmdClearColorImage(*a_CommandBuffer, *a_Image, GetVkImageLayout(a_ImageLayout),
         &color, vkRanges.size(), vkRanges.data());
 }
 }

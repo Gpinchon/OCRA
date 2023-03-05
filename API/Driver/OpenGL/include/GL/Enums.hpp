@@ -371,6 +371,10 @@ inline auto GetGLSizedFormat(const Format& format)
         return GL_RGB8;
     case Format::Uint8_Normalized_RGBA:
         return GL_RGBA8;
+    case Format::Uint8_Normalized_BGR:
+        return GL_BGR;
+    case Format::Uint8_Normalized_BGRA:
+        return GL_BGRA8_EXT;
     case Format::Int8_Normalized_R:
         return GL_R8_SNORM;
     case Format::Int8_Normalized_RG:
@@ -379,6 +383,7 @@ inline auto GetGLSizedFormat(const Format& format)
         return GL_RGB8_SNORM;
     case Format::Int8_Normalized_RGBA:
         return GL_RGBA8_SNORM;
+
     case Format::Uint8_R:
         return GL_R8UI;
     case Format::Uint8_RG:
@@ -539,6 +544,10 @@ inline auto GetGLDataFormat(const Format& format)
     case Format::Uint32_RGBA:
     case Format::Int32_RGBA:
         return GL_RGBA_INTEGER;
+    case Format::Uint8_Normalized_BGR:
+        return GL_BGR;
+    case Format::Uint8_Normalized_BGRA:
+        return GL_BGRA;
     case Format::Uint16_Normalized_Depth:
     case Format::Float32_Depth:
         return GL_DEPTH_COMPONENT;
@@ -622,6 +631,8 @@ inline auto GetGLDataType(const Format& a_Format)
     case Format::Uint8_RGB:
     case Format::Uint8_Normalized_RGBA:
     case Format::Uint8_RGBA:
+    case Format::Uint8_Normalized_BGR:
+    case Format::Uint8_Normalized_BGRA:
         return GL_UNSIGNED_BYTE;
     case Format::Int8_Normalized_R:
     case Format::Int8_R:

@@ -68,13 +68,10 @@ struct SwapChainTestApp : TestApp
         window.OnRestore = window.OnResize;
         window.OnMinimize = [this](const Window&, const uint32_t, const uint32_t) { render = false; };
         const auto queueFamily = PhysicalDevice::FindQueueFamily(physicalDevice, QueueFlagsBits::Graphics);
-        queue = Device::GetQueue(device, queueFamily, 0); //Get first available queue
+        queue = GetQueue(device, queueFamily, 0); //Get first available queue
         commandPool = CreateCommandPool(device, queueFamily);
         commandBuffer = CreateCommandBuffer(commandPool, CommandBufferLevel::Primary);
-        CreateSemaphoreInfo semaphoreInfo;
-        semaphoreInfo.type = SemaphoreType::Binary;
-        drawWaitSemaphore = CreateSemaphore(device, semaphoreInfo);
-        drawSignalSemaphore = Device::CreateSemaphore(device, semaphoreInfo);
+        
     }
     void Loop()
     {
@@ -82,20 +79,34 @@ struct SwapChainTestApp : TestApp
         auto printTime = std::chrono::high_resolution_clock::now();
         window.SetVSync(VSync);
         fpsCounter.StartFrame();
-        auto completeBufferFence = Device::CreateFence(device, FenceStatus::Signaled);
-        auto imageAcquisitionFence = Device::CreateFence(device, FenceStatus::Signaled);
+        CreateSemaphoreInfo semaphoreInfo;
+        semaphoreInfo.type = SemaphoreType::Binary;
+        auto completeBufferSemaphore = CreateSemaphore(device, semaphoreInfo);
+        auto completeBufferFence     = CreateFence(device, FenceStatus::Unsignaled);
+        auto imageAcquisitionSemaphore = CreateSemaphore(device, semaphoreInfo);
+        auto imageAcquisitionFence     = CreateFence(device, FenceStatus::Unsignaled);
         while (true) {
             window.PushEvents();
             if (window.IsClosing()) break;
-            render = Fence::WaitFor({ imageAcquisitionFence, completeBufferFence }, true, Fence::IgnoreTimeout);
-            Fence::Reset({ imageAcquisitionFence, completeBufferFence });
             if (!render) continue;
-            const auto swapChainImage = window.AcquireNextImage(std::chrono::nanoseconds(0), drawWaitSemaphore, imageAcquisitionFence);
-            RecordClearCommandBuffer(swapChainImage);
-            SubmitCommandBuffer(queue, commandBuffer,
-                drawWaitSemaphore, drawSignalSemaphore, completeBufferFence);
-            window.Present(queue, drawSignalSemaphore);
+
+            const auto swapChainImage = window.AcquireNextImage(
+                std::chrono::nanoseconds(0),
+                imageAcquisitionSemaphore, imageAcquisitionFence);
+            Fence::WaitFor(imageAcquisitionFence, IgnoreTimeout);
             
+            RecordClearCommandBuffer(swapChainImage);
+
+            QueueSubmitInfo submitInfo;
+            submitInfo.commandBuffers   = { commandBuffer };
+            submitInfo.waitSemaphores   = { { imageAcquisitionSemaphore, 0, PipelineStageFlagBits::BottomOfPipe } };
+            submitInfo.signalSemaphores = { { completeBufferSemaphore } };
+            Queue::Submit(queue, { submitInfo }, completeBufferFence);
+
+            window.Present(queue, completeBufferSemaphore);
+
+            Fence::WaitFor(completeBufferFence, IgnoreTimeout);
+            Fence::Reset({ completeBufferFence, imageAcquisitionFence });
             fpsCounter.EndFrame();
             fpsCounter.StartFrame();
             const auto now = std::chrono::high_resolution_clock::now();
@@ -120,18 +131,29 @@ struct SwapChainTestApp : TestApp
         Command::Buffer::Reset(commandBuffer);
         Command::Buffer::Begin(commandBuffer, bufferBeginInfo);
         {
-            ColorValue clearColor{ color.r, color.g, color.b, 1.f };
             ImageSubresourceRange range{};
+            range.aspect = ImageAspectFlagBits::Color;
             range.levelCount = 1;
-            Command::ClearColorImage(commandBuffer, a_Image, ImageLayout::Unknown, clearColor, { range });
+            range.layerCount = 1;
+
+            Command::TransitionImageLayout(
+                commandBuffer, a_Image, range,
+                ImageLayout::Undefined,
+                ImageLayout::TransferDstOptimal);
+            Command::ClearColorImage(commandBuffer, a_Image,
+                ImageLayout::TransferDstOptimal,
+                ColorValue{ color.r, color.g, color.b, 1.f },
+                { range });
+            Command::TransitionImageLayout(
+                commandBuffer, a_Image, range,
+                ImageLayout::TransferDstOptimal,
+                ImageLayout::PresentSrc);
         }
         Command::Buffer::End(commandBuffer);
     }
     bool                     render{ false };
     Window                   window;
     Queue::Handle            queue;
-    Semaphore::Handle drawWaitSemaphore;
-    Semaphore::Handle drawSignalSemaphore;
     Command::Pool::Handle    commandPool;
     Command::Buffer::Handle  commandBuffer;
 };

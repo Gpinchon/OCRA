@@ -43,6 +43,13 @@ bool WaitFor(
     return vkWaitForFences(a_Fences->device, 1, &vkFence, true, a_TimeoutNS.count()) == VK_SUCCESS;
 }
 
+void Reset(const Handle& a_Fence)
+{
+    auto& fence = *a_Fence;
+    VkFence vkFence = fence;
+    vkResetFences(fence.device, 1, &vkFence);
+}
+
 void Reset(const std::vector<Handle>& a_Fences)
 {
     const auto& device = a_Fences.front()->device;

@@ -3,6 +3,7 @@
 #include <VK/Fence.hpp>
 #include <VK/Queue.hpp>
 #include <VK/Semaphore.hpp>
+#include <VK/Flags.hpp>
 
 #include <OCRA/Structs.hpp>
 
@@ -20,49 +21,67 @@ Queue::Handle GetQueue(
 
 namespace OCRA::Queue
 {
+struct TransitoryQueueSubmitInfo {
+    std::vector<VkCommandBuffer>      vkCommandBuffers;
+    std::vector<VkSemaphore>          vkSignSemaphores;
+    std::vector<uint64_t>             vkSignValue;
+    std::vector<VkSemaphore>          vkWaitSemaphores;
+    std::vector<uint64_t>             vkWaitValue;
+    std::vector<VkPipelineStageFlags> vkWaitDstStages;
+};
 void Submit(
     const Handle& a_Queue,
     const std::vector<QueueSubmitInfo>& a_SubmitInfos,
     const Fence::Handle& a_Fence)
 {
-    std::vector<VkSubmitInfo> submitInfos;
-    std::vector<std::vector<VkCommandBuffer>> vkCommandBuffers;
-    std::vector<std::vector<VkSemaphore>>     vkWaitSemaphores;
-    std::vector<std::vector<VkSemaphore>>     vkSignSemaphores;
-
-    submitInfos.reserve(a_SubmitInfos.size());
-    vkCommandBuffers.resize(a_SubmitInfos.size());
-    vkWaitSemaphores.resize(a_SubmitInfos.size());
-    vkSignSemaphores.resize(a_SubmitInfos.size());
+    std::vector<VkSubmitInfo> vkSubmitInfos(a_SubmitInfos.size(), { VK_STRUCTURE_TYPE_SUBMIT_INFO });
+    std::vector<VkTimelineSemaphoreSubmitInfo> vkTimelineSemaphoreInfos(a_SubmitInfos.size(), { VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO });
+    std::vector<TransitoryQueueSubmitInfo> tSubmitInfos(a_SubmitInfos.size());
 
     for (auto i = 0u; i < a_SubmitInfos.size(); ++i) {
-        const auto& submitInfo = a_SubmitInfos.at(i);
-        VkSubmitInfo vkSubmitInfo{ VK_STRUCTURE_TYPE_SUBMIT_INFO };
+        auto& submitInfo  = a_SubmitInfos.at(i);
+        auto& tSubmitInfo = tSubmitInfos.at(i);
+        auto& vkSubmitInfo = vkSubmitInfos.at(i);
+        auto& vkCommandBuffers = tSubmitInfo.vkCommandBuffers;
+        auto& vkSignSemaphores = tSubmitInfo.vkSignSemaphores;
+        auto& vkSignValues     = tSubmitInfo.vkSignValue;
+        auto& vkWaitSemaphores = tSubmitInfo.vkWaitSemaphores;
+        auto& vkWaitValues     = tSubmitInfo.vkWaitValue;
+        auto& vkWaitDstFlags   = tSubmitInfo.vkWaitDstStages;
+        auto& vkTimelineSemaphoreInfo = vkTimelineSemaphoreInfos.at(i);
 
-        vkCommandBuffers.at(i).reserve(submitInfo.commandBuffers.size());
+        vkSubmitInfo.pNext = &vkTimelineSemaphoreInfo;
+
+        vkCommandBuffers.reserve(submitInfo.commandBuffers.size());
         for (const auto& handle : submitInfo.commandBuffers) {
-            vkCommandBuffers.at(i).push_back(*handle);
+            vkCommandBuffers.push_back(*handle);
         }
-        vkSubmitInfo.commandBufferCount = vkCommandBuffers.at(i).size();
-        vkSubmitInfo.pCommandBuffers    = vkCommandBuffers.at(i).data();
+        vkSubmitInfo.commandBufferCount = vkCommandBuffers.size();
+        vkSubmitInfo.pCommandBuffers    = vkCommandBuffers.data();
 
-        vkWaitSemaphores.at(i).reserve(submitInfo.waitSemaphores.size());
-        for (const auto& handle : submitInfo.waitSemaphores) {
-            vkWaitSemaphores.at(i).push_back(*handle);
+        vkWaitSemaphores.reserve(submitInfo.waitSemaphores.size());
+        for (const auto& waitInfo : submitInfo.waitSemaphores) {
+            vkWaitSemaphores.push_back(*waitInfo.semaphore);
+            vkWaitValues.push_back(waitInfo.timelineValue);
+            vkWaitDstFlags.push_back(GetVkPipelineStageFlags(waitInfo.dstStages));
         }
-        vkSubmitInfo.waitSemaphoreCount = vkWaitSemaphores.at(i).size();
-        vkSubmitInfo.pWaitSemaphores    = vkWaitSemaphores.at(i).data();
+        vkSubmitInfo.waitSemaphoreCount = vkWaitSemaphores.size();
+        vkSubmitInfo.pWaitSemaphores    = vkWaitSemaphores.data();
+        vkSubmitInfo.pWaitDstStageMask  = vkWaitDstFlags.data();
+        vkTimelineSemaphoreInfo.waitSemaphoreValueCount = vkWaitValues.size();
+        vkTimelineSemaphoreInfo.pWaitSemaphoreValues    = vkWaitValues.data();
 
-        vkSignSemaphores.at(i).reserve(submitInfo.waitSemaphores.size());
-        for (const auto& handle : submitInfo.signalSemaphores) {
-            vkSignSemaphores.at(i).push_back(*handle);
+        vkSignSemaphores.reserve(submitInfo.waitSemaphores.size());
+        for (const auto& signInfo : submitInfo.signalSemaphores) {
+            vkSignSemaphores.push_back(*signInfo.semaphore);
+            vkSignValues.push_back(signInfo.timelineValue);
         }
-        vkSubmitInfo.signalSemaphoreCount = vkSignSemaphores.at(i).size();
-        vkSubmitInfo.pSignalSemaphores = vkSignSemaphores.at(i).data();
-        
-        submitInfos.push_back(vkSubmitInfo);
+        vkSubmitInfo.signalSemaphoreCount = vkSignSemaphores.size();
+        vkSubmitInfo.pSignalSemaphores    = vkSignSemaphores.data();
+        vkTimelineSemaphoreInfo.signalSemaphoreValueCount = vkSignValues.size();
+        vkTimelineSemaphoreInfo.pSignalSemaphoreValues    = vkSignValues.data();
     }
-    vkQueueSubmit(*a_Queue, submitInfos.size(), submitInfos.data(), a_Fence ? (VkFence)*a_Fence : VK_NULL_HANDLE);
+    vkQueueSubmit(*a_Queue, vkSubmitInfos.size(), vkSubmitInfos.data(), a_Fence ? (VkFence)*a_Fence : VK_NULL_HANDLE);
 }
 void WaitIdle(const Handle& a_Queue)
 {

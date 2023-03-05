@@ -9,6 +9,48 @@
 
 namespace OCRA
 {
+static inline auto GetVkImageLayout(const ImageLayout& a_Layout) {
+    switch (a_Layout)
+    {
+    case OCRA::ImageLayout::Undefined:
+        return VK_IMAGE_LAYOUT_UNDEFINED;
+    case OCRA::ImageLayout::General:
+        return VK_IMAGE_LAYOUT_GENERAL;
+    case OCRA::ImageLayout::ColorAttachmentOptimal:
+        return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    case OCRA::ImageLayout::DepthStencilAttachmentOptimal:
+        return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+    case OCRA::ImageLayout::DepthStencilReadOnlyOptimal:
+        return VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+    case OCRA::ImageLayout::ShaderReadOnlyOptimal:
+        return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    case OCRA::ImageLayout::TransferSrcOptimal:
+        return VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+    case OCRA::ImageLayout::TransferDstOptimal:
+        return VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    case OCRA::ImageLayout::Preinitialized:
+        return VK_IMAGE_LAYOUT_PREINITIALIZED;
+    case OCRA::ImageLayout::DepthReadOnlyStencilAttachmentOptimal:
+        return VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL;
+    case OCRA::ImageLayout::DepthAttachmentStencilReadOnlyOptimal:
+        return VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL;
+    case OCRA::ImageLayout::DepthAttachmentOptimal:
+        return VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
+    case OCRA::ImageLayout::DepthReadOnlyOptimal:
+        return VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
+    case OCRA::ImageLayout::StencilAttachmentOptimal:
+        return VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL;
+    case OCRA::ImageLayout::StencilReadOnlyOptimal:
+        return VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL;
+    case OCRA::ImageLayout::ReadOnlyOptimal:
+        return VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL;
+    case OCRA::ImageLayout::AttachmentOptimal:
+        return VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
+    case OCRA::ImageLayout::PresentSrc:
+        return VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    }
+    return VK_IMAGE_LAYOUT_MAX_ENUM;
+}
 static inline auto GetVkDescriptorType(const DescriptorType& a_Type) {
     switch (a_Type)
     {
