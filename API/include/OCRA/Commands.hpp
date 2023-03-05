@@ -46,12 +46,26 @@ void GenerateMipMap(
     const Command::Buffer::Handle&  a_CommandBuffer,
     const Image::Handle&            a_Image);
 
+/**
+* On VK, this issues a Pipeline Barrier with appropriate flags
+* On OGL, might not do anything
+*/
 void TransitionImageLayout(
     const Command::Buffer::Handle& a_CommandBuffer,
-    const Image::Handle& a_Image,
-    const ImageSubresourceRange& a_SubResource,
-    const ImageLayout& a_OldLayout,
-    const ImageLayout& a_NewLayout);
+    const Image::Handle&           a_Image,
+    const ImageSubresourceRange&   a_SubResource,
+    const ImageLayout&             a_OldLayout,
+    const ImageLayout&             a_NewLayout);
+
+/**
+* Same as TransitionImageLayout but for multiple images at once
+*/
+void TransitionImagesLayout(
+    const Command::Buffer::Handle&            a_CommandBuffer,
+    const std::vector<Image::Handle>&         a_Images,
+    const std::vector<ImageSubresourceRange>& a_SubResources,
+    const ImageLayout&                        a_OldLayout,
+    const ImageLayout&                        a_NewLayout);
 
 void ClearColorImage(
     const Command::Buffer::Handle&  a_CommandBuffer,

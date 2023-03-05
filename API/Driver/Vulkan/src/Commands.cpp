@@ -213,6 +213,44 @@ static inline auto GetTransitionStage(const VkImageLayout& a_Stage)
     return VK_PIPELINE_STAGE_FLAG_BITS_MAX_ENUM;
 }
 
+void TransitionImagesLayout(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const std::vector<Image::Handle>& a_Images,
+    const std::vector<ImageSubresourceRange>& a_SubResources,
+    const ImageLayout& a_OldLayout,
+    const ImageLayout& a_NewLayout)
+{
+    auto oldLayout = GetVkImageLayout(a_OldLayout);
+    auto newLayout = GetVkImageLayout(a_NewLayout);
+    auto srcAccessMask = GetTransitionAccessMask(oldLayout);
+    auto dstAccessMask = GetTransitionAccessMask(newLayout);
+    std::vector<VkImageMemoryBarrier> barriers(a_Images.size(), { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER });
+    for (auto i = 0u; i < barriers.size(); ++i) {
+        auto& image = *a_Images.at(i);
+        auto& subResource = a_SubResources.at(i);
+        auto& barrier = barriers.at(i);
+        barrier.image = image;
+        barrier.oldLayout = oldLayout;
+        barrier.newLayout = newLayout;
+        barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.subresourceRange.aspectMask     = GetVkImageAspectFlags(subResource.aspect);
+        barrier.subresourceRange.baseMipLevel   = subResource.baseMipLevel;
+        barrier.subresourceRange.levelCount     = subResource.levelCount;
+        barrier.subresourceRange.baseArrayLayer = subResource.baseArrayLayer;
+        barrier.subresourceRange.layerCount     = subResource.layerCount;
+        barrier.srcAccessMask = srcAccessMask;
+        barrier.dstAccessMask = dstAccessMask;
+    }
+    vkCmdPipelineBarrier(*a_CommandBuffer,
+        GetTransitionStage(oldLayout),
+        GetTransitionStage(newLayout),
+        0,
+        0, nullptr,
+        0, nullptr,
+        barriers.size(), barriers.data());
+}
+
 void TransitionImageLayout(
     const Command::Buffer::Handle& a_CommandBuffer,
     const Image::Handle& a_Image,
@@ -220,29 +258,12 @@ void TransitionImageLayout(
     const ImageLayout& a_OldLayout,
     const ImageLayout& a_NewLayout)
 {
-    auto old_layout = GetVkImageLayout(a_OldLayout);
-    auto new_layout = GetVkImageLayout(a_NewLayout);
-    VkImageMemoryBarrier barrier{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
-    barrier.image = *a_Image;
-    barrier.oldLayout = old_layout;
-    barrier.newLayout = new_layout;
-    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    barrier.subresourceRange.aspectMask     = GetVkImageAspectFlags(a_SubResource.aspect);
-    barrier.subresourceRange.baseMipLevel   = a_SubResource.baseMipLevel;
-    barrier.subresourceRange.levelCount     = a_SubResource.levelCount;
-    barrier.subresourceRange.baseArrayLayer = a_SubResource.baseArrayLayer;
-    barrier.subresourceRange.layerCount     = a_SubResource.layerCount;
-    barrier.srcAccessMask = GetTransitionAccessMask(old_layout);
-    barrier.dstAccessMask = GetTransitionAccessMask(new_layout);
-    vkCmdPipelineBarrier(*a_CommandBuffer,
-        GetTransitionStage(old_layout),
-        GetTransitionStage(new_layout),
-        0,
-        0, nullptr,
-        0, nullptr,
-        1, &barrier);
+    TransitionImagesLayout(
+        a_CommandBuffer,
+        { a_Image }, { a_SubResource },
+        a_OldLayout, a_NewLayout);
 }
+
 void ClearColorImage(
     const Command::Buffer::Handle& a_CommandBuffer,
     const Image::Handle& a_Image,

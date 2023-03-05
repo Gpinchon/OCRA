@@ -16,6 +16,14 @@ void TransitionImageLayout(
     //TODO use glTextureBarrier, glMemoryBarrier and glMemoryBarrierByRegion when relevant
 }
 
+void TransitionImagesLayout(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const std::vector<Image::Handle>& a_Images,
+    const std::vector<ImageSubresourceRange>& a_SubResources,
+    const std::vector<ImageLayout>& a_OldLayouts,
+    const std::vector<ImageLayout>& a_NewLayouts)
+{}
+
 void PipelineBarrier(
     const Buffer::Handle& a_CommandBuffer,
     const PipelineStageFlags& srcStageMask,
