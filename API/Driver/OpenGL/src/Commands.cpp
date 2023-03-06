@@ -37,15 +37,17 @@ void PipelineBarrier(
             memoryBarriers = a_MemoryBarriers,
             bufferMemoryBarriers = a_BufferMemoryBarriers,
             imageMemoryBarriers = a_ImageMemoryBarriers](const Buffer::ExecutionState&) {
+        GLbitfield flags = 0;
         for (const auto& memoryBarrier : memoryBarriers) {
-            glMemoryBarrierEXT(GetGLBarrierAccessBits(memoryBarrier.dstAccessMask));
+            flags |= GetGLBarrierAccessBits(memoryBarrier.dstAccessMask);
         }
         for (const auto& bufferMemoryBarrier : bufferMemoryBarriers) {
-            glMemoryBarrierEXT(GetGLBarrierAccessBits(bufferMemoryBarrier.dstAccessMask));
+            flags |= GetGLBarrierAccessBits(bufferMemoryBarrier.dstAccessMask);
         }
         for (const auto& imageMemoryBarrier : imageMemoryBarriers) {
-            glMemoryBarrierEXT(GetGLBarrierAccessBits(imageMemoryBarrier.dstAccessMask));
+            flags |= GetGLBarrierAccessBits(imageMemoryBarrier.dstAccessMask);
         }
+        glMemoryBarrierEXT(flags);
     });
 }
 void BeginQuery(
