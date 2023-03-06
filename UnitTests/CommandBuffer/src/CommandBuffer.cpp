@@ -28,14 +28,14 @@ static inline void SubmitCommandBuffer(const Device::Handle& a_Device, const Que
     //make sure GPU is done
     {
         VerboseTimer bufferCopiesTimer("Buffer Copies");
-        Fence::WaitFor(fence, Fence::IgnoreTimeout);
+        Fence::WaitFor(fence, IgnoreTimeout);
     }
     //test for function time itself
     {
         auto timer = Timer();
         int waitNbr = 100;
         for (auto i = 0; i < waitNbr; ++i) {
-            Fence::WaitFor(fence, Fence::IgnoreTimeout);
+            Fence::WaitFor(fence, IgnoreTimeout);
         }
         std::cout << "Already signaled Fence mean wait time : " << timer.Elapsed().count() / double(waitNbr) << " nanoseconds\n";
     }
@@ -82,7 +82,6 @@ static inline void RecordSwapCommandBuffer(
     const Buffer::Handle& a_BufferT)
 {
     BufferMemoryBarrier bufferMemoryBarrier;
-    bufferMemoryBarrier.buffer = a_Buffer0;
     bufferMemoryBarrier.dstAccessMask = AccessFlagBits::TransferWrite;
     bufferMemoryBarrier.srcAccessMask = AccessFlagBits::TransferRead;
     bufferMemoryBarrier.size = CHUNK_SIZE;

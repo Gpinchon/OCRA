@@ -131,7 +131,7 @@ Image::Handle Window::AcquireNextImage(
     const Semaphore::Handle& a_Semaphore,
     const Fence::Handle& a_Fence)
 {
-    return SwapChain::AcquireNextImage(device, swapChain, a_Timeout, a_Semaphore, a_Fence);
+    return SwapChain::GetNextImage(swapChain, a_Timeout, a_Semaphore, a_Fence, swapChainImageIndex);
 }
 
 void Window::SetSwapChainImageNbr(uint32_t a_ImageNbr)
@@ -164,5 +164,6 @@ void Window::ResizeCallback(const uint32_t a_Width, const uint32_t a_Height)
         swapChain = CreateSwapChain(device, info);
     extent = { a_Width, a_Height };
     presentInfo.swapChains = { swapChain };
+    swapChainImageNbr = SwapChain::GetImageCount(swapChain);
 }
 }

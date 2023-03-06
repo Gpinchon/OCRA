@@ -34,6 +34,7 @@ public:
     auto GetSwapChain() const { return swapChain; }
     auto GetExtent() const { return extent; }
     auto GetSwapChainImageNbr() const { return swapChainImageNbr; }
+    auto GetNextImageIndex() const { return swapChainImageIndex; }
     void SetSwapChainImageNbr(uint32_t a_ImageNbr);
     auto VSyncEnabled() const { return vSync; }
     void SetVSync(bool a_VSync);
@@ -59,6 +60,7 @@ private:
     SwapChain::Handle     swapChain;
     SurfaceFormat         swapChainFormat;
     SwapChainPresentInfo  presentInfo;
+    uint32_t              swapChainImageIndex{ 0 };
     uint32_t              swapChainImageNbr{ 3 };
     uExtent2D             extent;
 };

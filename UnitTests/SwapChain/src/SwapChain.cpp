@@ -6,7 +6,7 @@
 using namespace OCRA;
 
 constexpr auto VSync = false;
-constexpr auto SWAPCHAIN_IMAGE_NBR = 2;
+constexpr auto SWAPCHAIN_IMAGE_NBR = 5;
 
 Vec3 HSVtoRGB(float fH, float fS, float fV) {
     float fC = fV * fS; // Chroma
@@ -63,7 +63,9 @@ struct SwapChainTestApp : TestApp
         : TestApp("Test_SwapChain")
         , window(Window(instance, physicalDevice, device, name, 1280, 720))
     {
-        window.OnResize = [this](const Window&, const uint32_t a_Width, const uint32_t a_Height) { render = a_Width > 0 && a_Height > 0; };
+        window.OnResize = [this](const Window&, const uint32_t a_Width, const uint32_t a_Height) {
+            render = a_Width > 0 && a_Height > 0;
+        };
         window.OnMaximize = window.OnResize;
         window.OnRestore = window.OnResize;
         window.OnMinimize = [this](const Window&, const uint32_t, const uint32_t) { render = false; };
@@ -71,7 +73,20 @@ struct SwapChainTestApp : TestApp
         queue = GetQueue(device, queueFamily, 0); //Get first available queue
         commandPool = CreateCommandPool(device, queueFamily);
         commandBuffer = CreateCommandBuffer(commandPool, CommandBufferLevel::Primary);
-        
+    }
+    void CreateSyncObjects()
+    {
+        auto swapchainNbr = window.GetSwapChainImageNbr();
+        CreateSemaphoreInfo semaphoreInfo;
+        semaphoreInfo.type = SemaphoreType::Binary;
+        completeBufferSemaphores.resize(swapchainNbr);
+        completeBufferFences.resize(swapchainNbr);
+        imageAcquisitionSemaphores.resize(swapchainNbr);
+        imageAcquisitionFences.resize(swapchainNbr);
+        for (auto& semaphore : completeBufferSemaphores) semaphore = CreateSemaphore(device, semaphoreInfo);
+        for (auto& fence     : completeBufferFences)     fence = CreateFence(device, FenceStatus::Unsignaled);
+        for (auto& semaphore : imageAcquisitionSemaphores) semaphore = CreateSemaphore(device, semaphoreInfo);
+        for (auto& fence     : imageAcquisitionFences)     fence = CreateFence(device, FenceStatus::Unsignaled);
     }
     void Loop()
     {
@@ -79,16 +94,17 @@ struct SwapChainTestApp : TestApp
         auto printTime = std::chrono::high_resolution_clock::now();
         window.SetVSync(VSync);
         fpsCounter.StartFrame();
-        CreateSemaphoreInfo semaphoreInfo;
-        semaphoreInfo.type = SemaphoreType::Binary;
-        auto completeBufferSemaphore = CreateSemaphore(device, semaphoreInfo);
-        auto completeBufferFence     = CreateFence(device, FenceStatus::Unsignaled);
-        auto imageAcquisitionSemaphore = CreateSemaphore(device, semaphoreInfo);
-        auto imageAcquisitionFence     = CreateFence(device, FenceStatus::Unsignaled);
+        CreateSyncObjects();
         while (true) {
             window.PushEvents();
             if (window.IsClosing()) break;
             if (!render) continue;
+
+            uint32_t imageIndex = window.GetNextImageIndex();
+            auto& completeBufferSemaphore = completeBufferSemaphores.at(imageIndex);
+            auto& completeBufferFence     = completeBufferFences.at(imageIndex);
+            auto& imageAcquisitionSemaphore = imageAcquisitionSemaphores.at(imageIndex);
+            auto& imageAcquisitionFence     = imageAcquisitionFences.at(imageIndex);
 
             const auto swapChainImage = window.AcquireNextImage(
                 std::chrono::nanoseconds(0),
@@ -120,7 +136,7 @@ struct SwapChainTestApp : TestApp
     {
         static float hue = 0;
         static auto lastTime = std::chrono::high_resolution_clock::now();
-        const auto now = std::chrono::high_resolution_clock::now();
+        const auto now   = std::chrono::high_resolution_clock::now();
         const auto delta = std::chrono::duration<double, std::milli>(now - lastTime).count();
         lastTime = now;
         hue += 0.05 * delta;
@@ -156,6 +172,10 @@ struct SwapChainTestApp : TestApp
     Queue::Handle            queue;
     Command::Pool::Handle    commandPool;
     Command::Buffer::Handle  commandBuffer;
+    std::vector<Semaphore::Handle> completeBufferSemaphores;
+    std::vector<Fence::Handle>     completeBufferFences;
+    std::vector<Semaphore::Handle> imageAcquisitionSemaphores;
+    std::vector<Fence::Handle>     imageAcquisitionFences;
 };
 
 int main()
