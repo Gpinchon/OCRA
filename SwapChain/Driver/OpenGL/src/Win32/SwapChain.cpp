@@ -1,5 +1,7 @@
 #include <OCRA/OCRA.hpp>
+#include <OCRA/SwapChain/Core.hpp>
 
+#include <GL/Win32/Surface.hpp>
 #include <GL/Win32/SwapChain.hpp>
 #include <GL/Win32/PresentGeometry.hpp>
 #include <GL/Win32/PresentPixels.hpp>
@@ -9,7 +11,6 @@
 #include <GL/Win32/Error.hpp>
 #include <GL/Win32/OpenGL.hpp>
 
-#include <GL/Surface.hpp>
 #include <GL/Common/Assert.hpp>
 #include <GL/Device.hpp>
 #include <GL/Enums.hpp>
@@ -25,7 +26,7 @@
 #include <iostream>
 #include <sstream>
 
-namespace OCRA::SwapChain::Win32
+namespace OCRA::SwapChain
 {
 void GLAPIENTRY MessageCallback(
     GLenum source,
@@ -51,17 +52,16 @@ static inline auto CreateImages(const Device::Handle& a_Device, const CreateSwap
 {
     std::vector<Image::Handle> images;
     images.reserve(a_Info.imageCount);
-    auto win32SwapChain = std::static_pointer_cast<SwapChain::Win32::Impl>(a_Info.oldSwapchain);
     for (auto i = 0u; i < a_Info.imageCount; ++i)
     {
         Image::Handle image;
-        if (win32SwapChain != nullptr) {
-            const auto& imageInfo = win32SwapChain->images.at(i)->info;
+        if (a_Info.oldSwapchain != nullptr && a_Info.oldSwapchain->images.size() > i) {
+            const auto& imageInfo = a_Info.oldSwapchain->images.at(i)->info;
             const bool canRecycle = imageInfo.extent.width == a_Info.imageExtent.width &&
                                     imageInfo.extent.height == a_Info.imageExtent.height &&
                                     imageInfo.arrayLayers == a_Info.imageArrayLayers &&
                                     imageInfo.format == a_Info.imageFormat;
-            if (canRecycle) image = win32SwapChain->images.at(i);
+            if (canRecycle) image = a_Info.oldSwapchain->images.at(i);
         }
         if (image == nullptr) {
             CreateImageInfo imageInfo{};
@@ -86,7 +86,7 @@ Impl::Impl(const Device::Handle& a_Device, const CreateSwapChainInfo& a_Info)
     , images(CreateImages(a_Device, a_Info))
 {
     const auto pixelSize = Image::GetPixelSize(a_Info.imageFormat);
-    auto win32SwapChain = std::static_pointer_cast<SwapChain::Win32::Impl>(a_Info.oldSwapchain);
+    auto win32SwapChain = a_Info.oldSwapchain;
     if (win32SwapChain != nullptr && !win32SwapChain->retired) {
         win32SwapChain->workerThread.Wait();
         hdc = win32SwapChain->hdc;
@@ -95,7 +95,7 @@ Impl::Impl(const Device::Handle& a_Device, const CreateSwapChainInfo& a_Info)
         win32SwapChain->Retire();
     }
     else {
-        hdc = GetDC(HWND(a_Info.surface->nativeWindow));
+        hdc = GetDC(HWND(a_Info.surface->hwnd));
         OpenGL::Win32::Initialize();
         const int attribIList[] = {
             WGL_DRAW_TO_WINDOW_ARB, true,
@@ -126,15 +126,15 @@ Impl::Impl(const Device::Handle& a_Device, const CreateSwapChainInfo& a_Info)
         glDebugMessageCallback(MessageCallback, 0);
 #endif _DEBUG
         if (presentTexture == nullptr) {
-            presentTexture.reset(new PresentTexture(images.front()));
+            presentTexture.reset(new Win32::PresentTexture(images.front()));
             presentTexture->Bind();
         }
         if (presentShader == nullptr) {
-            presentShader.reset(new PresentShader);
+            presentShader.reset(new Win32::PresentShader);
             presentShader->Bind();
         }
         if (presentGeometry == nullptr) {
-            presentGeometry.reset(new PresentGeometry);
+            presentGeometry.reset(new Win32::PresentGeometry);
             presentGeometry->Bind();
         }
         if (!WGLEW_NV_copy_image && presentPixels == nullptr) {
@@ -144,7 +144,7 @@ Impl::Impl(const Device::Handle& a_Device, const CreateSwapChainInfo& a_Info)
                 warningPrinted = true;
             }
             const auto transferBufferSize = a_Info.imageExtent.width * a_Info.imageExtent.height * pixelSize / 8;
-            presentPixels.reset(new PresentPixels(transferBufferSize));
+            presentPixels.reset(new Win32::PresentPixels(transferBufferSize));
             presentPixels->Bind();
         }
         glViewport(0, 0, presentTexture->extent.width, presentTexture->extent.height);
@@ -166,7 +166,7 @@ Impl::~Impl()
         wglMakeCurrent(nullptr, nullptr);
     }, true);
     if (hdc != nullptr)
-        ReleaseDC(HWND(surface->nativeWindow), HDC(hdc));
+        ReleaseDC(HWND(surface->hwnd), HDC(hdc));
     if (hglrc != nullptr)
         wglDeleteContext(HGLRC(hglrc));
 }
@@ -245,20 +245,60 @@ void Impl::PresentGL(const Queue::Handle& a_Queue)
     }, false);
     backBufferIndex = (backBufferIndex + 1) % images.size();
 }
+}
 
-Image::Handle Impl::AcquireNextImage(
+namespace OCRA::Device
+{
+SwapChain::Handle CreateSwapChain(const Device::Handle& a_Device, const CreateSwapChainInfo& a_Info)
+{
+    return std::make_shared<SwapChain::Impl>(a_Device, a_Info);
+}
+}
+
+namespace OCRA::SwapChain
+{
+uint32_t GetImageCount(const Handle& a_SwapChain)
+{
+    return a_SwapChain->images.size();
+}
+
+Image::Handle GetNextImage(
+    const Handle& a_SwapChain,
     const std::chrono::nanoseconds& a_Timeout,
     const Semaphore::Handle& a_Semaphore,
-    const Fence::Handle& a_Fence)
+    const Fence::Handle& a_Fence,
+    uint32_t& out_ImageIndex)
 {
-    device.lock()->PushCommand([semaphore = a_Semaphore, fence = a_Fence] {
-        //We do not need to synchronize with the GPU for real here
+    a_SwapChain->device.lock()->PushCommand([semaphore = a_Semaphore, fence = a_Fence] {
         if (semaphore != nullptr) {
             OCRA_ASSERT(semaphore->type == SemaphoreType::Binary && "Cannot wait on Timeline Semaphores when requesting next image");
             std::static_pointer_cast<Semaphore::Binary>(semaphore)->Signal();
         }
         if (fence != nullptr) fence->Signal();
     }, false);
-    return images.at(backBufferIndex);
+    out_ImageIndex = a_SwapChain->backBufferIndex;
+    return a_SwapChain->images.at(out_ImageIndex);
+}
+
+Image::Handle GetNextImage(
+    const Handle& a_SwapChain,
+    const std::chrono::nanoseconds& a_Timeout,
+    const Semaphore::Handle& a_Semaphore,
+    const Fence::Handle& a_Fence)
+{
+    uint32_t imageIndex = 0;
+    return GetNextImage(a_SwapChain, a_Timeout, a_Semaphore, a_Fence, imageIndex);
+}
+
+void Present(const Queue::Handle& a_Queue, const SwapChainPresentInfo& a_PresentInfo)
+{
+    a_Queue->PushCommand([a_PresentInfo] {
+        for (const auto& semaphore : a_PresentInfo.waitSemaphores) {
+            OCRA_ASSERT(semaphore->type == SemaphoreType::Binary && "Cannot wait on Timeline Semaphores when presenting");
+            std::static_pointer_cast<Semaphore::Binary>(semaphore)->Wait();
+        }
+        }, false);
+    for (const auto& swapChain : a_PresentInfo.swapChains)
+        swapChain->Present(a_Queue);
 }
 }

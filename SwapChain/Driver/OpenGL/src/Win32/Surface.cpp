@@ -1,12 +1,9 @@
 #include <OCRA/SwapChain/Core.hpp>
 
-#include <GL/Surface.hpp>
 #include <GL/Win32/Surface.hpp>
 #include <GL/Win32/Window.hpp>
 
 #include <windows.h>
-
-OCRA_DECLARE_WEAK_HANDLE(OCRA::Instance);
 
 namespace OCRA::Instance
 {
@@ -14,9 +11,7 @@ Surface::Handle CreateSurface(
     const Instance::Handle& a_Instance,
     const CreateSurfaceInfo& a_Info)
 {
-#ifdef WIN32
-    return std::make_shared<Surface::Win32::Impl>(a_Instance, a_Info);
-#endif
+    return std::make_shared<Surface::Impl>(a_Instance, a_Info);
 }
 }
 
@@ -30,16 +25,18 @@ std::vector<SurfaceFormat> GetSurfaceFormats(
 }
 }
 
-namespace OCRA::Surface::Win32
+namespace OCRA::Surface
 {
 Impl::Impl(const Instance::Handle& a_Instance, const CreateSurfaceInfo& a_Info)
-    : Surface::Impl(a_Instance, a_Info.hwnd, "Win32")
-    , hdc(GetDC(HWND(nativeWindow)))
-{
-}
+    : type("Win32")
+    , instance(a_Instance)
+    , hwnd(a_Info.hwnd)
+    , hdc(GetDC(HWND(hwnd)))
+{}
+
 Impl::~Impl()
 {
-    ReleaseDC(HWND(nativeWindow), HDC(hdc));
+    ReleaseDC(HWND(hwnd), HDC(hdc));
     DeleteDC(HDC(hdc));
 }
 }

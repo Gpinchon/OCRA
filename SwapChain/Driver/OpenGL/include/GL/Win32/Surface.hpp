@@ -1,13 +1,20 @@
 #pragma once
 
-#include <GL/Surface.hpp>
+#include <OCRA/Handles.hpp>
 
-namespace OCRA::Surface::Win32
+#include <string>
+
+OCRA_DECLARE_WEAK_HANDLE(OCRA::Instance);
+
+namespace OCRA::Surface
 {
-struct Impl : Surface::Impl
+struct Impl
 {
     Impl(const Instance::Handle& a_Instance, const CreateSurfaceInfo& a_Info);
     ~Impl();
+    const std::string type;
+    const Instance::WeakHandle instance;
+    const void* hwnd;
     const void* hdc;
 };
 }
