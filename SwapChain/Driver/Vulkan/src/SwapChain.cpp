@@ -89,17 +89,33 @@ void Present(
     info.pWaitSemaphores    = waitSemaphores.data();
     vkQueuePresentKHR(*a_Queue, &info);
 }
-Image::Handle AcquireNextImage(
-    const Device::Handle& a_Device,
+
+Image::Handle GetNextImage(
+    const Handle& a_SwapChain,
+    const std::chrono::nanoseconds& a_Timeout,
+    const Semaphore::Handle& a_Semaphore,
+    const Fence::Handle& a_Fence,
+    uint32_t& out_ImageIndex)
+{
+    auto& swapChain = *a_SwapChain;
+    vkAcquireNextImageKHR(swapChain.device, swapChain, a_Timeout.count(),
+        *a_Semaphore, *a_Fence, &out_ImageIndex);
+    swapChain.imageIndex = out_ImageIndex;
+    return Image::Handle(swapChain.GetCurrentImage(), [](auto&) {});
+}
+
+Image::Handle GetNextImage(
     const Handle& a_SwapChain,
     const std::chrono::nanoseconds& a_Timeout,
     const Semaphore::Handle& a_Semaphore,
     const Fence::Handle& a_Fence)
 {
-    auto& device = *a_Device;
-    auto& swapChain = *a_SwapChain;
-    vkAcquireNextImageKHR(device, swapChain, a_Timeout.count(),
-        *a_Semaphore, *a_Fence, &swapChain.imageIndex);
-    return Image::Handle(swapChain.GetCurrentImage(), [](auto&) {});
+    uint32_t imageIndex = 0;
+    return GetNextImage(a_SwapChain, a_Timeout, a_Semaphore, a_Fence, imageIndex);
+}
+
+uint32_t GetImageCount(const Handle& a_SwapChain)
+{
+    return a_SwapChain->images.size();
 }
 }
