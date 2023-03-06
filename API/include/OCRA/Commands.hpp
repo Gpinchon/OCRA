@@ -52,20 +52,18 @@ void GenerateMipMap(
 */
 void TransitionImageLayout(
     const Command::Buffer::Handle& a_CommandBuffer,
-    const Image::Handle&           a_Image,
-    const ImageSubresourceRange&   a_SubResource,
-    const ImageLayout&             a_OldLayout,
-    const ImageLayout&             a_NewLayout);
+    const ImageLayoutTransitionInfo& a_Transition,
+    const ImageLayout& a_OldLayout,
+    const ImageLayout& a_NewLayout);
 
 /**
 * Same as TransitionImageLayout but for multiple images at once
 */
 void TransitionImagesLayout(
-    const Command::Buffer::Handle&            a_CommandBuffer,
-    const std::vector<Image::Handle>&         a_Images,
-    const std::vector<ImageSubresourceRange>& a_SubResources,
-    const ImageLayout&                        a_OldLayout,
-    const ImageLayout&                        a_NewLayout);
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const std::vector<ImageLayoutTransitionInfo>& a_Transitions,
+    const ImageLayout& a_OldLayout,
+    const ImageLayout& a_NewLayout);
 
 void ClearColorImage(
     const Command::Buffer::Handle&  a_CommandBuffer,

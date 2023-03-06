@@ -382,19 +382,26 @@ struct MemoryBarrier {
     AccessFlags dstAccessMask{ AccessFlagBits::None };
 };
 struct BufferMemoryBarrier : MemoryBarrier {
-    uint32_t    srcQueueFamilyIndex{ 0 };
-    uint32_t    dstQueueFamilyIndex{ 0 };
+    uint32_t    srcQueueFamilyIndex{ IgnoreQueueFamily };
+    uint32_t    dstQueueFamilyIndex{ IgnoreQueueFamily };
     OCRA::Buffer::Handle buffer;
     uint64_t    offset{ 0 };
     uint64_t    size{ 0 };
 };
 struct ImageMemoryBarrier : MemoryBarrier {
-    uint32_t    srcQueueFamilyIndex{ 0 };
-    uint32_t    dstQueueFamilyIndex{ 0 };
+    uint32_t    srcQueueFamilyIndex{ IgnoreQueueFamily };
+    uint32_t    dstQueueFamilyIndex{ IgnoreQueueFamily };
     Image::Handle         image;
     ImageSubresourceRange subRange;
     ImageLayout oldLayout;
     ImageLayout newLayout;
+};
+
+struct ImageLayoutTransitionInfo {
+    Image::Handle         image;
+    ImageSubresourceRange subRange;
+    uint32_t    srcQueueFamilyIndex{ IgnoreQueueFamily };
+    uint32_t    dstQueueFamilyIndex{ IgnoreQueueFamily };
 };
 
 struct ShaderSpecializationMapEntry {

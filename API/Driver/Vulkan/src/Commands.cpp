@@ -215,8 +215,7 @@ static inline auto GetTransitionStage(const VkImageLayout& a_Stage)
 
 void TransitionImagesLayout(
     const Command::Buffer::Handle& a_CommandBuffer,
-    const std::vector<Image::Handle>& a_Images,
-    const std::vector<ImageSubresourceRange>& a_SubResources,
+    const std::vector<ImageLayoutTransitionInfo>& a_Transitions,
     const ImageLayout& a_OldLayout,
     const ImageLayout& a_NewLayout)
 {
@@ -224,16 +223,20 @@ void TransitionImagesLayout(
     auto newLayout = GetVkImageLayout(a_NewLayout);
     auto srcAccessMask = GetTransitionAccessMask(oldLayout);
     auto dstAccessMask = GetTransitionAccessMask(newLayout);
-    std::vector<VkImageMemoryBarrier> barriers(a_Images.size(), { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER });
+    std::vector<VkImageMemoryBarrier> barriers(a_Transitions.size(), { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER });
     for (auto i = 0u; i < barriers.size(); ++i) {
-        auto& image = *a_Images.at(i);
-        auto& subResource = a_SubResources.at(i);
+        auto& transition = a_Transitions.at(i);
+        auto& image = *transition.image;
+        auto& subResource = transition.subRange;
+        auto& srcQueueFamily = transition.srcQueueFamilyIndex;
+        auto& dstQueueFamily = transition.dstQueueFamilyIndex;
         auto& barrier = barriers.at(i);
+
         barrier.image = image;
         barrier.oldLayout = oldLayout;
         barrier.newLayout = newLayout;
-        barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.srcQueueFamilyIndex = srcQueueFamily;
+        barrier.dstQueueFamilyIndex = dstQueueFamily;
         barrier.subresourceRange.aspectMask     = GetVkImageAspectFlags(subResource.aspect);
         barrier.subresourceRange.baseMipLevel   = subResource.baseMipLevel;
         barrier.subresourceRange.levelCount     = subResource.levelCount;
@@ -253,14 +256,12 @@ void TransitionImagesLayout(
 
 void TransitionImageLayout(
     const Command::Buffer::Handle& a_CommandBuffer,
-    const Image::Handle& a_Image,
-    const ImageSubresourceRange& a_SubResource,
+    const ImageLayoutTransitionInfo& a_Transition,
     const ImageLayout& a_OldLayout,
     const ImageLayout& a_NewLayout)
 {
     TransitionImagesLayout(
-        a_CommandBuffer,
-        { a_Image }, { a_SubResource },
+        a_CommandBuffer, { a_Transition },
         a_OldLayout, a_NewLayout);
 }
 

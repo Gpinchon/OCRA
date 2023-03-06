@@ -151,9 +151,8 @@ struct SwapChainTestApp : TestApp
             range.aspect = ImageAspectFlagBits::Color;
             range.levelCount = 1;
             range.layerCount = 1;
-
             Command::TransitionImageLayout(
-                commandBuffer, a_Image, range,
+                commandBuffer, { a_Image, range },
                 ImageLayout::Undefined,
                 ImageLayout::TransferDstOptimal);
             Command::ClearColorImage(commandBuffer, a_Image,
@@ -161,7 +160,7 @@ struct SwapChainTestApp : TestApp
                 ColorValue{ color.r, color.g, color.b, 1.f },
                 { range });
             Command::TransitionImageLayout(
-                commandBuffer, a_Image, range,
+                commandBuffer, { a_Image, range },
                 ImageLayout::TransferDstOptimal,
                 ImageLayout::PresentSrc);
         }
