@@ -100,7 +100,6 @@ namespace ImageUsageFlagBits {
     constexpr ImageUsageFlags DepthStencilAttachment  = 0b00000100;
     constexpr ImageUsageFlags TransientAttachment     = 0b00000010;
     constexpr ImageUsageFlags InputAttachment         = 0b00000001;
-    //VK_VERSION_1_3
     constexpr ImageUsageFlags None                    = 0b00000000;
 }
 using MemoryHeapFlags = std::bitset<2>;
@@ -157,7 +156,7 @@ namespace QueryPipelineStatisticFlagBits {
     static QueryPipelineStatisticFlags ComputeShaderInvocations = 0b00000000001;
 }
 using QueueFlags = std::bitset<5>;
-namespace QueueFlagsBits {
+namespace QueueFlagBits {
     static QueueFlags None          = 0b00000;
     static QueueFlags Graphics      = 0b10000;
     static QueueFlags Compute       = 0b01000;

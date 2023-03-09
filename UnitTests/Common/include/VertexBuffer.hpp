@@ -41,10 +41,10 @@ struct DefaultVertex {
 class VertexBuffer {
 public:
     template<typename V = DefaultVertex>
-    VertexBuffer(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const std::vector<V> a_Vertices)
+    VertexBuffer(const Device::Handle& a_Device, const std::vector<V> a_Vertices)
         : size(sizeof(V) * a_Vertices.size())
         , vertexSize(sizeof(V))
-        , memory(AllocateMemory(a_PhysicalDevice, a_Device))
+        , memory(AllocateMemory(a_Device))
         , buffer(CreateBuffer(a_Device))
         , bindings(V::GetBindingDescriptions())
         , attribs(V::GetAttributeDescription())
@@ -71,7 +71,7 @@ public:
     auto& GetAttribsDescriptions() const { return attribs; }
 
 private:
-    Memory::Handle AllocateMemory(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device);
+    Memory::Handle AllocateMemory(const Device::Handle& a_Device);
     void FillMemory(const void* a_Data);
     Buffer::Handle CreateBuffer(const Device::Handle& a_Device);
     const size_t offset{ 0 };

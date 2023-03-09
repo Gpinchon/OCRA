@@ -40,9 +40,11 @@ set(OCRA_IMPL_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/ImageView.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Instance.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Memory.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Pipeline.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/PhysicalDevice.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Queue.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Semaphore.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Structs.hpp
 )
 
 set(OCRA_IMPL_SOURCE_FILES
@@ -55,6 +57,8 @@ set(OCRA_IMPL_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/DescriptorSetLayout.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Device.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Fence.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Image.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/ImageView.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Instance.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Memory.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/PhysicalDevice.cpp

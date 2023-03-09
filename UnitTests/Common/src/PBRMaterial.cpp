@@ -47,7 +47,7 @@ auto PBRFragmentShader(const Device::Handle& a_Device)
 PBRMaterial::PBRMaterial(
     const PhysicalDevice::Handle& a_PhysicalDevice,
     const Device::Handle& a_Device)
-    : Material(a_PhysicalDevice, a_Device, PBRParameters{}, { Texture2D(a_Device, Format::Uint8_Normalized_RGBA, 1, 1) }, PBRFragmentShader(a_Device))
+    : Material(a_Device, PBRParameters{}, { Texture2D(a_Device, Format::Uint8_Normalized_RGBA, 1, 1) }, PBRFragmentShader(a_Device))
 {
     //Fill texture with white
     auto& texture = static_cast<const Texture2D&>(GetTexture(0));
@@ -56,10 +56,8 @@ PBRMaterial::PBRMaterial(
     bufferInfo.size = textureSize;
     bufferInfo.usage = BufferUsageFlagBits::TransferSrc;
     auto textureTransferBuffer = CreateBuffer(a_Device, bufferInfo);
-    auto textureTransferMemory = AllocateMemory(
-        a_PhysicalDevice, a_Device,
-        bufferInfo.size,
-        MemoryPropertyFlagBits::HostVisible);
+    auto textureTransferMemory = AllocateMemory(a_Device,
+        bufferInfo.size, MemoryPropertyFlagBits::HostVisible);
     Buffer::BindMemory(textureTransferBuffer, textureTransferMemory, 0);
     MemoryMappedRange range;
     range.memory = textureTransferMemory;
@@ -83,7 +81,7 @@ PBRMaterial::PBRMaterial(
     bufferCopy.imageExtent.width  = texture.GetWidth();
     bufferCopy.imageExtent.height = texture.GetHeight();
     bufferCopy.imageExtent.depth  = 1;
-    bufferCopy.imageSubresource.level = 0;
+    bufferCopy.imageSubresource.baseMipLevel = 0;
     Image::CopyBufferToImage(textureTransferBuffer, texture.GetImage(), { bufferCopy });
 }
 }

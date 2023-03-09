@@ -79,7 +79,7 @@ struct GraphicsPipelineTestApp : TestApp
         const auto queueFamily = PhysicalDevice::FindQueueFamily(physicalDevice, QueueFlagsBits::Graphics);
         queue = Device::GetQueue(device, queueFamily, 0); //Get first available queue
         commandPool = CreateCommandPool(device, queueFamily);
-        renderPass = CreateRenderPass();
+        //renderPass = CreateRenderPass();
         imageAcquisitionFence = CreateFence(device);
         mainCommandBuffer = CreateCommandBuffer(commandPool, CommandBufferLevel::Primary);
         drawCommandBuffer = CreateCommandBuffer(commandPool, CommandBufferLevel::Secondary);
@@ -164,7 +164,7 @@ struct GraphicsPipelineTestApp : TestApp
         graphicsPipelineInfo.viewPortState.viewPorts = { viewport };
         graphicsPipelineInfo.viewPortState.scissors = { scissor };
 
-        graphicsPipelineInfo.renderPass = renderPass;
+        //graphicsPipelineInfo.renderPass = renderPass;
         graphicsPipelineInfo.rasterizationState.cullMode = CullMode::None;
 
         graphicsPipelineInfo.layout = mesh.GetPipelineLayout();
@@ -188,23 +188,22 @@ struct GraphicsPipelineTestApp : TestApp
             imageInfo.mipLevels = 1;
             frameBufferImage = CreateImage(device, imageInfo);
         }
-        Image::View::Handle imageView{};
         {
             CreateImageViewInfo imageViewInfo;
             imageViewInfo.image = frameBufferImage;
             imageViewInfo.format = Format::Uint8_Normalized_RGBA;
             imageViewInfo.type = ImageViewType::View2D;
             imageViewInfo.subRange.layerCount = 1;
-            imageView = CreateImageView(device, imageViewInfo);
+            frameBufferImageView = CreateImageView(device, imageViewInfo);
         }
         {
-            CreateFrameBufferInfo frameBufferInfo{};
-            frameBufferInfo.attachments.push_back(imageView);
-            frameBufferInfo.extent.depth = 1;
-            frameBufferInfo.extent.width = window.GetExtent().width;
-            frameBufferInfo.extent.height = window.GetExtent().height;
-            frameBufferInfo.renderPass = renderPass;
-            frameBuffer = Device::CreateFrameBuffer(device, frameBufferInfo);
+            //CreateFrameBufferInfo frameBufferInfo{};
+            //frameBufferInfo.attachments.push_back(frameBufferImageView);
+            //frameBufferInfo.extent.depth = 1;
+            //frameBufferInfo.extent.width = window.GetExtent().width;
+            //frameBufferInfo.extent.height = window.GetExtent().height;
+            //frameBufferInfo.renderPass = renderPass;
+            //frameBuffer = Device::CreateFrameBuffer(device, frameBufferInfo);
         }
     }
     void RecordDrawCommandBuffer()
@@ -213,19 +212,33 @@ struct GraphicsPipelineTestApp : TestApp
         bufferBeginInfo.flags = CommandBufferUsageFlagBits::None;
         bufferBeginInfo.inheritanceInfo.emplace();
         Command::Buffer::Reset(drawCommandBuffer);
-        RenderPassBeginInfo renderPassBeginInfo{};
-        renderPassBeginInfo.renderPass = renderPass;
-        renderPassBeginInfo.framebuffer = frameBuffer;
-        renderPassBeginInfo.renderArea.offset = { 0, 0 };
-        renderPassBeginInfo.renderArea.extent = window.GetExtent();
-        renderPassBeginInfo.colorClearValues.push_back(ColorValue(0.9529f, 0.6235f, 0.0941f, 1.f));
+        //RenderPassBeginInfo renderPassBeginInfo{};
+        //renderPassBeginInfo.renderPass = renderPass;
+        //renderPassBeginInfo.framebuffer = frameBuffer;
+        //renderPassBeginInfo.renderArea.offset = { 0, 0 };
+        //renderPassBeginInfo.renderArea.extent = window.GetExtent();
+        //renderPassBeginInfo.colorClearValues.push_back(ColorValue(0.9529f, 0.6235f, 0.0941f, 1.f));
+        RenderingAttachmentInfo renderingAttachment{};
+        renderingAttachment.clearValue  = ColorValue(0.9529f, 0.6235f, 0.0941f, 1.f);
+        renderingAttachment.imageView   = frameBufferImageView;
+        renderingAttachment.imageLayout = ImageLayout::General;
+        renderingAttachment.loadOp      = LoadOp::Clear;
+        renderingAttachment.storeOp     = StoreOp::Store;
+        RenderingInfo renderingInfo{};
+        renderingInfo.area.offset = { 0, 0 };
+        renderingInfo.area.extent = window.GetExtent();
+        renderingInfo.colorAttachments.push_back(renderingAttachment);
+        renderingInfo.layerCount = 1;
+
         Command::Buffer::Begin(drawCommandBuffer, bufferBeginInfo);
-        Command::BeginRenderPass(drawCommandBuffer, renderPassBeginInfo, SubPassContents::Inline);
+        //Command::BeginRenderPass(drawCommandBuffer, renderPassBeginInfo, SubPassContents::Inline);
+        Command::BeginRendering(drawCommandBuffer, renderingInfo);
         {
-            Command::BindPipeline(drawCommandBuffer, PipelineBindingPoint::Graphics, graphicsPipeline);
+            Command::BindPipeline(drawCommandBuffer, graphicsPipeline);
             mesh.Draw(drawCommandBuffer);
         }
-        Command::EndRenderPass(drawCommandBuffer);
+        Command::EndRendering(drawCommandBuffer);
+        //Command::EndRenderPass(drawCommandBuffer);
         Command::Buffer::End(drawCommandBuffer);
     }
     void UpdateMeshColor(const double a_Delta)
@@ -264,18 +277,19 @@ struct GraphicsPipelineTestApp : TestApp
     Window                   window;
     Image::Handle            swapChainImage;
     
-    FrameBuffer::Handle      frameBuffer;
+    //FrameBuffer::Handle      frameBuffer;
     Image::Handle            frameBufferImage;
+    Image::View::Handle      frameBufferImageView;
 
-    Mesh    mesh{ physicalDevice, device,
-        VertexBuffer(physicalDevice, device, std::vector<DefaultVertex>{
+    Mesh    mesh{ device,
+        VertexBuffer(device, std::vector<DefaultVertex>{
             { {  0.0f, -0.5f, 0.f }, { 1.0f, 0.0f, 0.0f }, { 0.f, 1.f }},
             { {  0.5f,  0.5f, 0.f }, { 0.0f, 1.0f, 0.0f }, { 1.f, 0.f }},
             { { -0.5f,  0.5f, 0.f }, { 0.0f, 0.0f, 1.0f }, { 1.f, 1.f }}
         }),
         PBRMaterial(physicalDevice, device) };
 
-    RenderPass::Handle       renderPass;
+    //RenderPass::Handle       renderPass;
     Pipeline::Handle         graphicsPipeline;
     Command::Pool::Handle    commandPool;
     Command::Buffer::Handle  mainCommandBuffer;

@@ -1,23 +1,15 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
+#include <vulkan/vulkan_raii.hpp>
 
 namespace OCRA::Surface
 {
-struct Impl
+struct Impl : vk::raii::SurfaceKHR
 {
-    Impl(const VkInstance& a_Instance, const VkSurfaceKHR& a_Surface)
-        : instance(a_Instance)
-        , surface(a_Surface)
+    Impl(
+        const vk::raii::Instance& a_Instance,
+        const VkSurfaceKHR& a_Surface)
+        : vk::raii::SurfaceKHR(a_Instance, a_Surface)
     {}
-    ~Impl() {
-        vkDestroySurfaceKHR(instance, surface, nullptr);
-    }
-    operator auto& () const {
-        return surface;
-    }
-    const VkInstance   instance;
-    const VkSurfaceKHR surface;
-
 };
 }

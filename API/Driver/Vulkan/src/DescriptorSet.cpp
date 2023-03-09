@@ -1,5 +1,6 @@
 #include <VK/Buffer.hpp>
 #include <VK/DescriptorSet.hpp>
+#include <VK/Device.hpp>
 #include <VK/Enums.hpp>
 #include <VK/ImageSampler.hpp>
 #include <VK/ImageView.hpp>
@@ -12,20 +13,20 @@ void Update(
     const std::vector<DescriptorSetWrite>&  a_Writes,
     const std::vector<DescriptorSetCopy>&   a_Copies)
 {
-    VkDevice device = nullptr;
-    if (!a_Writes.empty()) device = a_Writes.front().dstSet->device;
-    else if (!a_Copies.empty()) device = a_Copies.front().dstSet->device;
-    std::vector<VkWriteDescriptorSet>   vkWrites(a_Writes.size(), { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET });
-    std::vector<VkDescriptorBufferInfo> vkWriteBufferInfo(a_Writes.size());
-    std::vector<VkDescriptorImageInfo>  vkWriteImageInfo(a_Writes.size());
-    std::vector<VkBufferView>           vkWriteBufferView(a_Writes.size());
+    vk::Device device;
+    if (!a_Writes.empty()) device = a_Writes.front().dstSet->getDevice();
+    else if (!a_Copies.empty()) device = a_Copies.front().dstSet->getDevice();
+    std::vector<vk::WriteDescriptorSet>   vkWrites(a_Writes.size());
+    std::vector<vk::DescriptorBufferInfo> vkWriteBufferInfo(a_Writes.size());
+    std::vector<vk::DescriptorImageInfo>  vkWriteImageInfo(a_Writes.size());
+    std::vector<vk::BufferView>           vkWriteBufferView(a_Writes.size());
 
-    std::vector<VkCopyDescriptorSet>    vkCopies(a_Copies.size());
+    std::vector<vk::CopyDescriptorSet>    vkCopies(a_Copies.size());
 
     for (auto i = 0u; i < a_Writes.size(); ++i) {
         auto& write   = a_Writes.at(i);
         auto& vkWrite = vkWrites.at(i);
-        vkWrite.dstSet     = *write.dstSet;
+        vkWrite.dstSet     = **write.dstSet;
         vkWrite.dstBinding = write.dstBinding;
         vkWrite.dstArrayElement = write.dstArrayElement;
         vkWrite.descriptorCount = write.dstCount;
@@ -33,7 +34,7 @@ void Update(
         if (write.bufferInfo.has_value()) {
             auto& bufferInfo   = write.bufferInfo.value();
             auto& vkBufferInfo = vkWriteBufferInfo.at(i);
-            vkBufferInfo.buffer = *bufferInfo.buffer;
+            vkBufferInfo.buffer = **bufferInfo.buffer;
             vkBufferInfo.offset = bufferInfo.offset;
             vkBufferInfo.range = bufferInfo.range;
             vkWrite.pBufferInfo = &vkBufferInfo;
@@ -41,23 +42,21 @@ void Update(
         if (write.imageInfo.has_value()) {
             auto& imageInfo   = write.imageInfo.value();
             auto& vkImageInfo = vkWriteImageInfo.at(i);
-            vkImageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+            vkImageInfo.imageLayout = vk::ImageLayout::eGeneral;
             vkImageInfo.imageView   = *imageInfo.imageView;
             vkImageInfo.sampler     = *imageInfo.sampler;
         }
     }
-    for (const auto& copy : a_Copies) {
-        VkCopyDescriptorSet vkCopy{ VK_STRUCTURE_TYPE_COPY_DESCRIPTOR_SET };
-        vkCopy.srcSet = *copy.srcSet;
-        vkCopy.dstSet = *copy.dstSet;
+    for (auto i = 0u; i < a_Copies.size(); ++i) {
+        auto& copy = a_Copies.at(i);
+        auto& vkCopy = vkCopies.at(i);
+        vkCopy.srcSet = **copy.srcSet;
+        vkCopy.dstSet = **copy.dstSet;
         vkCopy.srcBinding = copy.srcBinding;
         vkCopy.dstBinding = copy.dstBinding;
         vkCopy.srcArrayElement = copy.srcArrayElement;
         vkCopy.dstArrayElement = copy.dstArrayElement;
-        vkCopies.push_back(vkCopy);
     }
-    vkUpdateDescriptorSets(device,
-        a_Writes.size(), vkWrites.data(),
-        a_Copies.size(), vkCopies.data());
+    device.updateDescriptorSets(vkWrites, vkCopies);
 }
 }

@@ -1,22 +1,15 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
+#include <vulkan/vulkan_raii.hpp>
 
 namespace OCRA::Semaphore
 {
-struct Impl
+struct Impl : vk::raii::Semaphore
 {
-    Impl(const VkDevice& a_Device, const VkSemaphore& a_Semaphore)
-        : device(a_Device)
-        , semaphore(a_Semaphore)
+    Impl(
+        const vk::raii::Device& a_Device,
+        const vk::SemaphoreCreateInfo& a_Info)
+        : vk::raii::Semaphore(a_Device, a_Info)
     {}
-    ~Impl() {
-        vkDestroySemaphore(device, semaphore, nullptr);
-    }
-    operator auto& () const {
-        return semaphore;
-    }
-    const VkDevice    device;
-    const VkSemaphore semaphore;
 };
 }

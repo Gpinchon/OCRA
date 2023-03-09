@@ -5,7 +5,7 @@
 
 #include <stdexcept>
 
-#include <vulkan/vulkan.h>
+#include <vulkan/vulkan_raii.hpp>
 
 #ifdef _WIN32
   #include <Windows.h>
@@ -20,9 +20,9 @@ const std::vector<const char*> validationLayers = {
 };
 bool CheckValidationLayerSupport() {
     uint32_t layerCount;
-    vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
-    std::vector<VkLayerProperties> availableLayers(layerCount);
-    vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+    vk::enumerateInstanceLayerProperties(&layerCount, nullptr);
+    std::vector<vk::LayerProperties> availableLayers(layerCount);
+    vk::enumerateInstanceLayerProperties(&layerCount, availableLayers.data());
     for (const char* layerName : validationLayers) {
         bool layerFound = false;
         for (const auto& layerProperties : availableLayers) {
@@ -48,9 +48,9 @@ Instance::Handle CreateInstance(
 #endif
         VK_KHR_SURFACE_EXTENSION_NAME
     };
-    VkInstance instance = nullptr;
-    VkInstanceCreateInfo info{ VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO };
-    VkApplicationInfo appInfo{ VK_STRUCTURE_TYPE_APPLICATION_INFO };
+    static vk::raii::Context context;
+    vk::InstanceCreateInfo info;
+    vk::ApplicationInfo appInfo;
     appInfo.applicationVersion = a_Info.applicationInfo.applicationVersion;
     appInfo.pApplicationName = a_Info.applicationInfo.name.c_str();
     appInfo.engineVersion = a_Info.applicationInfo.engineVersion;
@@ -64,8 +64,7 @@ Instance::Handle CreateInstance(
     info.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
     info.ppEnabledLayerNames = validationLayers.data();
 #endif
-    vkCreateInstance(&info, nullptr, &instance);
-    return std::make_shared<Instance::Impl>(instance);
+    return std::make_shared<Instance::Impl>(context, info);
 }
 }
 
@@ -78,13 +77,10 @@ const std::string GetType(const Handle& a_Instance)
 
 const std::vector<PhysicalDevice::Handle> EnumeratePhysicalDevices(const Instance::Handle& a_Instance)
 {
-    uint32_t devicesCount = 0;
-    vkEnumeratePhysicalDevices(*a_Instance, &devicesCount, nullptr);
-    std::vector<VkPhysicalDevice>       vkPhysicaldevices{ devicesCount };
-    std::vector<PhysicalDevice::Handle> ocPhysicalDevices{ devicesCount };
-    vkEnumeratePhysicalDevices(*a_Instance, &devicesCount, vkPhysicaldevices.data());
-    for (auto i = 0u; i < devicesCount; ++i)
-        ocPhysicalDevices.at(i) = std::make_shared<PhysicalDevice::Impl>(vkPhysicaldevices.at(i));
+    auto vkPhysicaldevices = a_Instance->enumeratePhysicalDevices();
+    std::vector<PhysicalDevice::Handle> ocPhysicalDevices{ vkPhysicaldevices.size() };
+    for (auto i = 0u; i < vkPhysicaldevices.size(); ++i)
+        ocPhysicalDevices.at(i) = std::make_shared<PhysicalDevice::Impl>(*a_Instance, *vkPhysicaldevices.at(i));
     return ocPhysicalDevices;
 }
 }

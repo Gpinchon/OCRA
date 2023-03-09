@@ -125,9 +125,10 @@ int main()
     const auto instance = CreateInstance("Test_CommandBuffer");
     const auto physicalDevice = Instance::EnumeratePhysicalDevices(instance).front();
     const auto device = CreateDevice(physicalDevice);
-    const auto queueFamily = PhysicalDevice::FindQueueFamily(physicalDevice, QueueFlagsBits::Transfer);
+    const auto queueFamily = PhysicalDevice::FindQueueFamily(physicalDevice, QueueFlagBits::Transfer);
     const auto queue = Device::GetQueue(device, queueFamily, 0); //Get first available queue
-    const auto memory = AllocateMemory(physicalDevice, device, CHUNK_SIZE * 3, MemoryPropertyFlagBits::HostVisible | MemoryPropertyFlagBits::HostCached);
+    const auto memory = Device::AllocateMemory(device, CHUNK_SIZE * 3,
+        MemoryPropertyFlagBits::HostVisible | MemoryPropertyFlagBits::HostCached);
     const auto commandPool = CreateCommandPool(device, queueFamily);
     const auto commandBuffer = CreateCommandBuffer(commandPool, CommandBufferLevel::Primary);
 

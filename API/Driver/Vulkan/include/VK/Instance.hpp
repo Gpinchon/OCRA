@@ -1,20 +1,16 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
+#include <vulkan/vulkan_raii.hpp>
 
 namespace OCRA::Instance
 {
-struct Impl
+struct Impl : vk::raii::Instance
 {
-    Impl(const VkInstance& a_Instance)
-        : instance(a_Instance)
+    Impl(vk::raii::Context& a_Context, const vk::InstanceCreateInfo& a_Info)
+        : vk::raii::Instance(a_Context, a_Info)
     {}
-    ~Impl() {
-        vkDestroyInstance(instance, nullptr);
-    }
-    operator auto& () const {
-        return instance;
-    }
-    const VkInstance instance;
+    //Impl(const VkInstance& a_Instance) noexcept
+    //    : vk::raii::Instance(a_Instance)
+    //{}
 };
 }

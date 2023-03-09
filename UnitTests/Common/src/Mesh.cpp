@@ -41,11 +41,11 @@ auto DefaultVertexShader(const Device::Handle& a_Device) {
     shaderStage = shaderStageHandle;
     return shaderStageHandle;
 }
-Mesh::Mesh(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const VertexBuffer& a_VertexBuffer, const Material& a_Material)
+Mesh::Mesh(const Device::Handle& a_Device, const VertexBuffer& a_VertexBuffer, const Material& a_Material)
     : device(a_Device)
     , material(a_Material)
     , vertexBuffer(a_VertexBuffer)
-    , projectionMatrix(a_PhysicalDevice, a_Device, 0, Mat4x4{})
+    , projectionMatrix(a_Device, 0, Mat4x4{})
     , vertexShader(DefaultVertexShader(a_Device))
 {
     CreatePipelineLayoutInfo layoutInfo;

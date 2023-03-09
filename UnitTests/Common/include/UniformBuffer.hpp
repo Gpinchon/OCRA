@@ -20,7 +20,7 @@ namespace OCRA {
 class UniformBuffer : public Uniform {
 public:
     template<typename T>
-    UniformBuffer(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const uint32_t& a_Binding, const T& a_DefaultValue);
+    UniformBuffer(const Device::Handle& a_Device, const uint32_t& a_Binding, const T& a_DefaultValue);
     virtual void Update() override;
     inline auto GetDataSize() const {
         return data.size();
@@ -53,12 +53,12 @@ private:
 };
 
 template<typename T>
-inline UniformBuffer::UniformBuffer(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const uint32_t& a_Binding, const T& a_DefaultValue)
+inline UniformBuffer::UniformBuffer(const Device::Handle& a_Device, const uint32_t& a_Binding, const T& a_DefaultValue)
     : Uniform(a_Device, { CreateSetLayoutBinding(a_Binding) })
     , data(sizeof(T))
 {
     Set(a_DefaultValue);
-    memory = AllocateMemory(a_PhysicalDevice, a_Device, GetDataSize(), MemoryPropertyFlagBits::HostVisible);
+    memory = AllocateMemory(a_Device, GetDataSize(), MemoryPropertyFlagBits::HostVisible);
     CreateBufferInfo bufferInfo{};
     bufferInfo.size = GetDataSize();
     bufferInfo.usage = BufferUsageFlagBits::UniformBuffer;

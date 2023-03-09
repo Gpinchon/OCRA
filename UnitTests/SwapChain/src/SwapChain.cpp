@@ -69,7 +69,7 @@ struct SwapChainTestApp : TestApp
         window.OnMaximize = window.OnResize;
         window.OnRestore = window.OnResize;
         window.OnMinimize = [this](const Window&, const uint32_t, const uint32_t) { render = false; };
-        const auto queueFamily = PhysicalDevice::FindQueueFamily(physicalDevice, QueueFlagsBits::Graphics);
+        const auto queueFamily = PhysicalDevice::FindQueueFamily(physicalDevice, QueueFlagBits::Graphics);
         queue = GetQueue(device, queueFamily, 0); //Get first available queue
         commandPool = CreateCommandPool(device, queueFamily);
         commandBuffer = CreateCommandBuffer(commandPool, CommandBufferLevel::Primary);
@@ -148,21 +148,20 @@ struct SwapChainTestApp : TestApp
         Command::Buffer::Begin(commandBuffer, bufferBeginInfo);
         {
             ImageSubresourceRange range{};
-            range.aspect = ImageAspectFlagBits::Color;
+            range.aspects = ImageAspectFlagBits::Color;
             range.levelCount = 1;
             range.layerCount = 1;
             Command::TransitionImageLayout(
-                commandBuffer, { a_Image, range },
+                commandBuffer, { a_Image, range,
                 ImageLayout::Undefined,
-                ImageLayout::TransferDstOptimal);
+                ImageLayout::TransferDstOptimal });
             Command::ClearColorImage(commandBuffer, a_Image,
-                ImageLayout::TransferDstOptimal,
                 ColorValue{ color.r, color.g, color.b, 1.f },
                 { range });
             Command::TransitionImageLayout(
-                commandBuffer, { a_Image, range },
+                commandBuffer, { a_Image, range,
                 ImageLayout::TransferDstOptimal,
-                ImageLayout::PresentSrc);
+                ImageLayout::PresentSrc });
         }
         Command::Buffer::End(commandBuffer);
     }

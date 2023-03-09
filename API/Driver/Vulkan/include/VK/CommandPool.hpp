@@ -1,25 +1,20 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
+#include <VK/Device.hpp>
+
+#include <vulkan/vulkan_raii.hpp>
 
 #include <memory_resource>
 
 namespace OCRA::Command::Pool
 {
-struct Impl
+struct Impl : vk::raii::CommandPool
 {
-    Impl(const VkDevice& a_Device, const VkCommandPool& a_Pool)
-        : device(a_Device)
-        , pool(a_Pool)
+    Impl(const Device::Impl& a_Device, const vk::CommandPoolCreateInfo& a_Info)
+        : vk::raii::CommandPool(a_Device, a_Info)
+        , device(a_Device)
     {}
-    ~Impl() {
-        vkDestroyCommandPool(device, pool, nullptr);
-    }
-    operator auto& () const {
-        return pool;
-    }
-    const VkDevice      device;
-    const VkCommandPool pool;
+    const Device::Impl& device;
     std::pmr::unsynchronized_pool_resource memoryResource;
 };
 }

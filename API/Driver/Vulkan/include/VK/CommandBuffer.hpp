@@ -1,24 +1,13 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
+#include <vulkan/vulkan_raii.hpp>
 
 namespace OCRA::Command::Buffer
 {
-struct Impl
+struct Impl : vk::raii::CommandBuffer
 {
-    Impl(const VkDevice& a_Device, const VkCommandPool& a_CommandPool, const VkCommandBuffer& a_CommandBuffer)
-        : device(a_Device)
-        , commandPool(a_CommandPool)
-        , commandBuffer(a_CommandBuffer)
+    Impl(vk::raii::CommandBuffer&& a_CommandBuffer)
+        : vk::raii::CommandBuffer(std::move(a_CommandBuffer))
     {}
-    ~Impl() {
-        vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
-    }
-    operator auto& () const {
-        return commandBuffer;
-    }
-    const VkDevice        device;
-    const VkCommandPool   commandPool;
-    const VkCommandBuffer commandBuffer;
 };
 }

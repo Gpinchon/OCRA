@@ -1,22 +1,13 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
+#include <vulkan/vulkan_raii.hpp>
 
 namespace OCRA::Fence
 {
-struct Impl
+struct Impl : vk::raii::Fence
 {
-    Impl(const VkDevice& a_Device, const VkFence& a_Fence)
-        : device(a_Device)
-        , fence(a_Fence)
+    Impl(const vk::raii::Device& a_Device, const vk::FenceCreateInfo& a_Info)
+        : vk::raii::Fence(a_Device, a_Info)
     {}
-    ~Impl() {
-        vkDestroyFence(device, fence, nullptr);
-    }
-    operator auto& () const {
-        return fence;
-    }
-    const VkDevice device;
-    const VkFence fence;
 };
 }

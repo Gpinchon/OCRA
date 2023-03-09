@@ -1,17 +1,18 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
+#include <VK/Device.hpp>
+
+#include <vulkan/vulkan_raii.hpp>
 
 namespace OCRA::Queue
 {
-struct Impl
+struct Impl : vk::raii::Queue
 {
-    Impl(const VkQueue& a_Queue)
-        : queue(a_Queue)
+    Impl(
+        const vk::raii::Device& a_Device,
+        const uint32_t a_Family,
+        const uint32_t a_Index)
+        : vk::raii::Queue(a_Device, a_Family, a_Index)
     {}
-    operator auto& () const {
-        return queue;
-    }
-    const VkQueue queue;
 };
 }

@@ -69,8 +69,8 @@ uint32_t FindQueueFamily(const PhysicalDevice::Handle& a_PhysicalDevice, const P
 Command::Pool::Handle CreateCommandPool(const Device::Handle& a_Device, const uint32_t& a_QueueFamily);
 //Creates a command buffer from the specified command pool
 Command::Buffer::Handle CreateCommandBuffer(const Command::Pool::Handle& a_CommandPool, const CommandBufferLevel& a_Level);
-//allocate GPU memory with the specified properties
-Memory::Handle AllocateMemory(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const uint64_t& a_Size, const MemoryPropertyFlags& a_MemoryProperties);
+////allocate GPU memory with the specified properties
+//Memory::Handle AllocateMemory(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const uint64_t& a_Size, const MemoryPropertyFlags& a_MemoryProperties);
 //creates a Descriptor Pool with the specified max sets
 Descriptor::Pool::Handle CreateDescriptorPool(const Device::Handle& a_Device, const size_t& a_MaxSets);
 

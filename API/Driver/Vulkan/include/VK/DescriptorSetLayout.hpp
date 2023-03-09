@@ -1,22 +1,13 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
+#include <vulkan/vulkan_raii.hpp>
 
 namespace OCRA::Descriptor::SetLayout
 {
-struct Impl
+struct Impl : vk::raii::DescriptorSetLayout
 {
-    Impl(const VkDevice& a_Device, const VkDescriptorSetLayout& a_Layout)
-        : device(a_Device)
-        , layout(a_Layout)
+    Impl(const vk::raii::Device& a_Device, const vk::DescriptorSetLayoutCreateInfo& a_Info)
+        : vk::raii::DescriptorSetLayout(a_Device, a_Info)
     {}
-    ~Impl() {
-        vkDestroyDescriptorSetLayout(device, layout, nullptr);
-    }
-    operator auto& () const {
-        return layout;
-    }
-    const VkDevice              device;
-    const VkDescriptorSetLayout layout;
 };
 }

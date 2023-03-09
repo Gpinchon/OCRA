@@ -5,28 +5,27 @@
 
 namespace OCRA::Command::Buffer
 {
-//Begin Command Buffer recording, switching it to Recording state
 void Begin(const Handle& a_CommandBuffer,
            const CommandBufferBeginInfo& a_BeginInfo)
 {
-    VkCommandBufferBeginInfo info{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
+    vk::CommandBufferBeginInfo info;
     info.flags = GetVkCommandBufferUsageFlags(a_BeginInfo.flags);
     if (a_BeginInfo.inheritanceInfo.has_value()) {
-        VkCommandBufferInheritanceInfo inheritanceInfo{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO };
+        vk::CommandBufferInheritanceInfo inheritanceInfo;
         //inheritanceInfo.framebuffer = *a_BeginInfo.inheritanceInfo->framebuffer;
         //inheritanceInfo.renderPass  = *a_BeginInfo.inheritanceInfo->renderPass;
         info.pInheritanceInfo = &inheritanceInfo;
     }
-    vkBeginCommandBuffer(*a_CommandBuffer, &info);
+    a_CommandBuffer->begin(info);
 }
-//End Command Buffer recording, switching it to Executable state
+
 void End(const Handle& a_CommandBuffer)
 {
-    vkEndCommandBuffer(*a_CommandBuffer);
+    a_CommandBuffer->end();
 }
-//Reset Command Buffer to Initial state
+
 void Reset(const Handle& a_CommandBuffer)
 {
-    vkResetCommandBuffer(*a_CommandBuffer, 0);
+    a_CommandBuffer->reset();
 }
 }

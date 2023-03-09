@@ -54,11 +54,11 @@ void PrintQueueInfos(const PhysicalDevice::Handle& a_PhysicalDevice)
         std::cout << "  Index         : " << familyIndex << "\n";
         std::cout << "  Count         : " << queueFamily.queueCount << "\n";
         std::cout << " == Capabilities ==\n";
-        std::cout << "  Graphics      : " << ((queueFamily.queueFlags & QueueFlagsBits::Graphics) != 0) << "\n";
-        std::cout << "  Compute       : " << ((queueFamily.queueFlags & QueueFlagsBits::Compute) != 0) << "\n";
-        std::cout << "  Protected     : " << ((queueFamily.queueFlags & QueueFlagsBits::Protected) != 0) << "\n";
-        std::cout << "  SparseBinding : " << ((queueFamily.queueFlags & QueueFlagsBits::SparseBinding) != 0) << "\n";
-        std::cout << "  Transfer      : " << ((queueFamily.queueFlags & QueueFlagsBits::Transfer) != 0) << "\n";
+        std::cout << "  Graphics      : " << ((queueFamily.queueFlags & QueueFlagBits::Graphics) != 0) << "\n";
+        std::cout << "  Compute       : " << ((queueFamily.queueFlags & QueueFlagBits::Compute) != 0) << "\n";
+        std::cout << "  Protected     : " << ((queueFamily.queueFlags & QueueFlagBits::Protected) != 0) << "\n";
+        std::cout << "  SparseBinding : " << ((queueFamily.queueFlags & QueueFlagBits::SparseBinding) != 0) << "\n";
+        std::cout << "  Transfer      : " << ((queueFamily.queueFlags & QueueFlagBits::Transfer) != 0) << "\n";
         std::cout << " ==================\n";
         ++familyIndex;
     }
@@ -84,19 +84,18 @@ Command::Pool::Handle CreateCommandPool(const Device::Handle& a_Device, const ui
 Command::Buffer::Handle CreateCommandBuffer(const Command::Pool::Handle& a_CommandPool, const CommandBufferLevel& a_Level)
 {
     AllocateCommandBufferInfo commandBufferAllocateInfo;
-    commandBufferAllocateInfo.pool = a_CommandPool;
     commandBufferAllocateInfo.count = 1;
     commandBufferAllocateInfo.level = a_Level;
-    return Command::Pool::AllocateCommandBuffer(commandBufferAllocateInfo).front();
+    return Command::Pool::AllocateCommandBuffer(a_CommandPool, commandBufferAllocateInfo).front();
 }
 
-Memory::Handle AllocateMemory(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const uint64_t& a_Size, const MemoryPropertyFlags& a_MemoryProperties)
-{
-    AllocateMemoryInfo memoryInfo;
-    memoryInfo.memoryTypeIndex = FindMemoryType(a_PhysicalDevice, a_MemoryProperties);
-    memoryInfo.size = a_Size;
-    return AllocateMemory(a_Device, memoryInfo);
-}
+//Memory::Handle AllocateMemory(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const uint64_t& a_Size, const MemoryPropertyFlags& a_MemoryProperties)
+//{
+//    AllocateMemoryInfo memoryInfo;
+//    memoryInfo.memoryTypeIndex = FindMemoryType(a_PhysicalDevice, a_MemoryProperties);
+//    memoryInfo.size = a_Size;
+//    return AllocateMemory(a_Device, memoryInfo);
+//}
 
 Descriptor::Pool::Handle CreateDescriptorPool(const Device::Handle& a_Device, const size_t& a_MaxSets)
 {

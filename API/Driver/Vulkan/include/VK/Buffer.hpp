@@ -1,25 +1,20 @@
 #pragma once
 
+#include <VK/Device.hpp>
+
 #include <OCRA/Handles.hpp>
 
-#include <vulkan/vulkan.h>
+#include <vulkan/vulkan_raii.hpp>
 
 namespace OCRA::Buffer
 {
-struct Impl
+struct Impl : vk::raii::Buffer
 {
-    Impl(const VkDevice& a_Device, const VkBuffer& a_Buffer)
-        : device(a_Device)
-        , buffer(a_Buffer)
+    Impl(Device::Impl& a_Device, const vk::BufferCreateInfo& a_Info)
+        : vk::raii::Buffer(a_Device, a_Info)
+        , device(a_Device)
     {}
-    ~Impl() {
-        vkDestroyBuffer(device, buffer, nullptr);
-    }
-    operator auto& () const {
-        return buffer;
-    }
-    const VkDevice device;
-    const VkBuffer buffer;
+    const Device::Impl& device;
     Memory::Handle memory;
 };
 }

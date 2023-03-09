@@ -116,9 +116,12 @@ struct DepthStencilValue {
     float    depth{ 0 };
     uint32_t stencil{ 0 };
 };
-struct ClearValue {
-    ColorValue        color{};
-    DepthStencilValue depthStencil{};
+union ClearValue {
+    ClearValue() {};
+    ClearValue(const ColorValue& a_Value) : color(a_Value) {}
+    ClearValue(const DepthStencilValue& a_Value) : depthStencil(a_Value) {}
+    ColorValue        color;
+    DepthStencilValue depthStencil;
 };
 struct ComponentMapping {
     Swizzle r{ Swizzle::R };
@@ -141,9 +144,9 @@ struct DepthRange {
     {}
     T near{ 0 }, far{ 1 };
 };
-struct Offset3D {
-    int32_t x { 0 }, y { 0 }, z { 0 };
-};
+
+using Offset2D = iVec2;
+using Offset3D = iVec3;
 
 struct SamplerBorderColor {
     float R { 0 }, G { 0 }, B { 0 }, A { 0 };
@@ -158,7 +161,7 @@ struct Rect2D
         : offset(a_X, a_Y)
         , extent(a_Width, a_Height)
     {}
-    iVec2     offset{ 0, 0 };
+    Offset2D  offset{ 0, 0 };
     uExtent2D extent{ 0, 0 };
 };
 struct Rect3D
@@ -178,16 +181,13 @@ struct ScissorTest {
 
 
 struct ImageSubresourceLayers {
-    /*
-    * //TODO support aspect copy for OGL
-    enum class Aspect {
-        Unknown = -1, Color, Depth, Stencil, DepthStencil, MaxValue
-    } aspect{ Aspect::Unknown };
-    */
-    uint32_t level{ 0 }; //indicates the base level (mipmap or array layer) used for the copy
+    ImageAspectFlags    aspects        = ImageAspectFlagBits::None;
+    uint32_t            mipLevel       = 0;
+    uint32_t            baseArrayLayer = 0;
+    uint32_t            layerCount     = 1;
 };
 struct ImageSubresourceRange {
-    ImageAspectFlags      aspect{ ImageAspectFlagBits::None };
+    ImageAspectFlags      aspects{ ImageAspectFlagBits::None };
     uint32_t              baseMipLevel{ 0 };
     uint32_t              levelCount{ 1000 };
     uint32_t              baseArrayLayer{ 0 };
@@ -342,7 +342,7 @@ struct PushConstantRange {
 };
 
 struct QueueFamilyProperties {
-    QueueFlags    queueFlags{ QueueFlagsBits::None };
+    QueueFlags    queueFlags{ QueueFlagBits::None };
     uint32_t queueCount{ 0 };
     uint32_t timestampValidBits{ 0 };
     Extent3D minImageTransferGranularity{};
@@ -400,6 +400,8 @@ struct ImageMemoryBarrier : MemoryBarrier {
 struct ImageLayoutTransitionInfo {
     Image::Handle         image;
     ImageSubresourceRange subRange;
+    ImageLayout           oldLayout{ ImageLayout::Undefined };
+    ImageLayout           newLayout{ ImageLayout::Undefined };
     uint32_t    srcQueueFamilyIndex{ IgnoreQueueFamily };
     uint32_t    dstQueueFamilyIndex{ IgnoreQueueFamily };
 };
@@ -412,6 +414,23 @@ struct ShaderSpecializationMapEntry {
 struct ShaderSpecializationInfo {
     std::vector<ShaderSpecializationMapEntry> mapEntries;
     std::vector<uint8_t> data;
+};
+
+struct RenderingAttachmentInfo {
+    Image::View::Handle imageView;
+    ImageLayout imageLayout{ ImageLayout::Undefined };
+    //TODO support multisample
+    LoadOp  loadOp{ LoadOp::DontCare };
+    StoreOp storeOp{ StoreOp::DontCare };
+    ClearValue clearValue;
+};
+
+struct RenderingInfo {
+    Rect2D area;
+    uint32_t layerCount{ 0 };
+    std::vector<RenderingAttachmentInfo> colorAttachments;
+    RenderingAttachmentInfo depthAttachment;
+    RenderingAttachmentInfo stencilAttachment;
 };
 
 struct PhysicalDeviceLimits {
@@ -610,8 +629,7 @@ struct RenderPassBeginInfo
     FrameBuffer::Handle     framebuffer{ 0 };
     Rect2D                  renderArea{ 0, 0, 0, 0 }; //defines the area that this RenderPass is gonna render to
     std::vector<ColorValue> colorClearValues;         //defines the values to be used to clear color buffers, must be the same size as colorAttachments member of RenderPass
-    float                   depthClearValue{ 0 };     //defines the values to be used to clear the depth buffer
-    int32_t                 stencilClearValue{ 0 };   //defines the values to be used to clear the stencil buffer
+    DepthStencilValue       depthStencilClearValue;   //defines the values to be used to clear the depth/stencil buffer
 };
 
 struct CreateBufferInfo {
@@ -639,12 +657,14 @@ struct CreateDeviceInfo {
     std::vector<QueueInfo> queueInfos;
 };
 struct CreateImageInfo {
-    ImageType type{ ImageType::Unknown };
-    SampleCount samples{ SampleCount::Count1 };
-    Format format{ Format::Unknown };
-    Extent3D extent{};
-    uint16_t mipLevels{ 0 }, arrayLayers{ 0 };
-    bool fixedSampleLocations{ false };
+    ImageType           type{ ImageType::Unknown };
+    ImageLayout         initialLayout{ ImageLayout::General };
+    ImageUsageFlags     usage{ ImageUsageFlagBits::None }; //Specifies how the image will be used
+    SampleCount         samples{ SampleCount::Count1 };
+    Format              format{ Format::Unknown };
+    Extent3D            extent{};
+    uint16_t            mipLevels{ 0 }, arrayLayers{ 0 };
+    bool                fixedSampleLocations{ false };
 };
 struct CreateImageViewInfo {
     ImageViewType type { ImageViewType::Unknown };
@@ -719,12 +739,10 @@ struct CreateShaderStageInfo {
 };
 
 struct AllocateCommandBufferInfo {
-    Command::Pool::Handle pool;
     CommandBufferLevel    level{ CommandBufferLevel::Unknown };
     uint32_t              count{ 0 };
 };
 struct AllocateDescriptorSetInfo {
-    Descriptor::Pool::Handle      pool;
     Descriptor::SetLayout::Handle layout;
 };
 struct AllocateMemoryInfo {

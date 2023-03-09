@@ -4,7 +4,7 @@
 
 #include <VK/Image.hpp>
 
-#include <vulkan/vulkan.h>
+#include <vulkan/vulkan_raii.hpp>
 
 #include <vector>
 
@@ -13,25 +13,18 @@ namespace OCRA::SwapChain
 struct ImageStorage {
     alignas(Image::Impl) std::byte storage[sizeof(Image::Impl)];
 };
-struct Impl
+struct Impl : vk::raii::SwapchainKHR
 {
-    Impl(const VkDevice& a_Device, const VkSwapchainKHR& a_SwapChain)
-        : device(a_Device)
-        , swapChain(a_SwapChain)
+    Impl(
+        const vk::raii::Device& a_Device,
+        const vk::SwapchainCreateInfoKHR& a_Info)
+        : vk::raii::SwapchainKHR(a_Device, a_Info)
     {}
-    ~Impl() {
-        vkDestroySwapchainKHR(device, swapChain, nullptr);
-    }
     auto& GetCurrentImage() const {
         return images.at(imageIndex);
     }
-    operator auto& () const {
-        return swapChain;
-    }
-    const VkDevice       device;
-    const VkSwapchainKHR swapChain;
-    uint32_t                  imageIndex = 0;
-    std::vector<Image::Impl*> images;
-    std::vector<ImageStorage> imagesMemory;
+    uint32_t                   imageIndex = 0;
+    std::vector<Image::Handle> images;
+    std::vector<ImageStorage>  imagesMemory;
 };
 }

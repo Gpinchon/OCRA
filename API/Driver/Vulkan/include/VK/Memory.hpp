@@ -1,22 +1,17 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
+#include <VK/Device.hpp>
+
+#include <vulkan/vulkan_raii.hpp>
 
 namespace OCRA::Memory
 {
-struct Impl
+struct Impl : vk::raii::DeviceMemory
 {
-    Impl(const VkDevice& a_Device, const VkDeviceMemory& a_Memory)
-        : device(a_Device)
-        , memory(a_Memory)
+    Impl(const Device::Impl& a_Device, const vk::MemoryAllocateInfo& a_Info)
+        : vk::raii::DeviceMemory(a_Device, a_Info)
+        , device(a_Device)
     {}
-    ~Impl() {
-        vkFreeMemory(device, memory, nullptr);
-    }
-    operator auto& () const {
-        return memory;
-    }
-    const VkDevice       device;
-    const VkDeviceMemory memory;
+    const Device::Impl&  device;
 };
 }

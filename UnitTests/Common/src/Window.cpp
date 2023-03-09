@@ -131,7 +131,9 @@ Image::Handle Window::AcquireNextImage(
     const Semaphore::Handle& a_Semaphore,
     const Fence::Handle& a_Fence)
 {
-    return SwapChain::GetNextImage(swapChain, a_Timeout, a_Semaphore, a_Fence, swapChainImageIndex);
+    auto res = SwapChain::GetNextImage(swapChain, a_Timeout, a_Semaphore, a_Fence);
+    swapChainImageIndex = res.second;
+    return res.first;
 }
 
 void Window::SetSwapChainImageNbr(uint32_t a_ImageNbr)

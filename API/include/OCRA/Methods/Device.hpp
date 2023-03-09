@@ -18,7 +18,7 @@ Buffer::Handle CreateBuffer(
     const CreateBufferInfo& a_Info,
     const AllocationCallback* a_Allocator = nullptr);
 /**
-* @brief Allocates a memory memory flags,
+* @brief Allocates a memory using the specified memory flags,
 * creates a new buffer and binds the memory to it
 */
 Buffer::Handle AllocateBuffer(
@@ -121,6 +121,14 @@ Queue::Handle GetQueue(
 Memory::Handle AllocateMemory(
     const Handle& a_Device,
     const AllocateMemoryInfo& a_Info);
+/**
+* @brief Finds an appropriate memory type and allocates it
+*/
+Memory::Handle AllocateMemory(
+    const Handle& a_Device,
+    const size_t  a_Size,
+    const MemoryPropertyFlags& a_MemoryFlags);
+
 /**
 * Wait for the device to finish commands execution
 * In OGL, this will push an empty synchronized command

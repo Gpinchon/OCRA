@@ -23,7 +23,7 @@ Surface::Handle CreateSurface(
     VkWin32SurfaceCreateInfoKHR vkInfo{ VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR };
     vkInfo.hinstance = HINSTANCE(a_Info.hinstance);
     vkInfo.hwnd = HWND(a_Info.hwnd);
-    vkCreateWin32SurfaceKHR(*a_Instance, &vkInfo, nullptr, &surface);
+    vkCreateWin32SurfaceKHR(**a_Instance, &vkInfo, nullptr, &surface);
 #endif //_WIN32
     return std::make_shared<Surface::Impl>(*a_Instance, surface);
 }
@@ -37,13 +37,10 @@ std::vector<SurfaceFormat> GetSurfaceFormats(
 {
     auto& physicalDevice = *a_PhysicalDevice;
     auto& surface = *a_Surface;
-    
-    uint32_t formatCount = 0;
-    vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, nullptr);
-    std::vector<VkSurfaceFormatKHR> vkFormats(formatCount);
-    std::vector<SurfaceFormat>      formats(formatCount);
-    vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, vkFormats.data());
-    for (auto i = 0u; i < formatCount; ++i) {
+
+    auto vkFormats = physicalDevice.getSurfaceFormatsKHR(*surface);
+    std::vector<SurfaceFormat>      formats(vkFormats.size());
+    for (auto i = 0u; i < vkFormats.size(); ++i) {
         auto& format = formats.at(i);
         auto& vkFormat = vkFormats.at(i);
         format.colorSpace = GetOCColorSpace(vkFormat.colorSpace);

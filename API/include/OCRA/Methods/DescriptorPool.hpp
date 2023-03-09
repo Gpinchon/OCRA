@@ -10,5 +10,7 @@ namespace OCRA::Descriptor::Pool
 /**
 * Allocates a descriptor with the corresponding layout
 */
-Descriptor::Set::Handle AllocateSet(const AllocateDescriptorSetInfo& a_Info);
+Descriptor::Set::Handle AllocateDescriptorSet(
+    const Descriptor::Pool::Handle&  a_Pool,
+    const AllocateDescriptorSetInfo& a_Info);
 }

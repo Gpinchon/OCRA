@@ -5,129 +5,315 @@
 
 #include <OCRA/Flags.hpp>
 
-#include <vulkan/vulkan.h>
+#include <vulkan/vulkan.hpp>
+
+#include <stdexcept>
 
 namespace OCRA
 {
+static inline auto GetOCMemoryHeapFlags(const vk::MemoryHeapFlags& a_Flags) {
+    MemoryHeapFlags flags = 0;
+    flags |= a_Flags & vk::MemoryHeapFlagBits::eDeviceLocal   ? MemoryHeapFlagBits::DeviceLocal   : MemoryHeapFlags{};
+    flags |= a_Flags & vk::MemoryHeapFlagBits::eMultiInstance ? MemoryHeapFlagBits::MultiInstance : MemoryHeapFlags{};
+    return flags;
+}
+static inline auto GetOCMemoryPropertyFlags(const vk::MemoryPropertyFlags& a_Flags) {
+    MemoryPropertyFlags vkFlags;
+    vkFlags |= a_Flags & vk::MemoryPropertyFlagBits::eDeviceLocal     ? MemoryPropertyFlagBits::DeviceLocal     : MemoryPropertyFlags{};
+    vkFlags |= a_Flags & vk::MemoryPropertyFlagBits::eHostCached      ? MemoryPropertyFlagBits::HostCached      : MemoryPropertyFlags{};
+    vkFlags |= a_Flags & vk::MemoryPropertyFlagBits::eHostCoherent    ? MemoryPropertyFlagBits::HostCoherent    : MemoryPropertyFlags{};
+    vkFlags |= a_Flags & vk::MemoryPropertyFlagBits::eHostVisible     ? MemoryPropertyFlagBits::HostVisible     : MemoryPropertyFlags{};
+    vkFlags |= a_Flags & vk::MemoryPropertyFlagBits::eLazilyAllocated ? MemoryPropertyFlagBits::LazilyAllocated : MemoryPropertyFlags{};
+    vkFlags |= a_Flags & vk::MemoryPropertyFlagBits::eProtected       ? MemoryPropertyFlagBits::Protected       : MemoryPropertyFlags{};
+    return vkFlags;
+}
+static inline auto GetOCQueueFlags(const vk::QueueFlags& a_Flags) {
+    QueueFlags ocFlags = 0;
+    ocFlags |= (a_Flags & vk::QueueFlagBits::eCompute)       ? QueueFlagBits::Compute       : 0;
+    ocFlags |= (a_Flags & vk::QueueFlagBits::eGraphics)      ? QueueFlagBits::Graphics      : 0;
+    ocFlags |= (a_Flags & vk::QueueFlagBits::eProtected)     ? QueueFlagBits::Protected     : 0;
+    ocFlags |= (a_Flags & vk::QueueFlagBits::eSparseBinding) ? QueueFlagBits::SparseBinding : 0;
+    ocFlags |= (a_Flags & vk::QueueFlagBits::eTransfer)      ? QueueFlagBits::Transfer      : 0;
+    return ocFlags;
+}
+
 static inline auto GetVkBufferCreateFlags(const CreateBufferFlags& a_Flags)
 {
-    VkBufferCreateFlags vkFlags = 0;
-    vkFlags |= (a_Flags & CreateBufferFlagBits::SparseBinding)              != 0 ? VK_BUFFER_CREATE_SPARSE_BINDING_BIT                : 0;
-    vkFlags |= (a_Flags & CreateBufferFlagBits::SparseResidency)            != 0 ? VK_BUFFER_CREATE_SPARSE_RESIDENCY_BIT              : 0;
-    vkFlags |= (a_Flags & CreateBufferFlagBits::SparseAliased)              != 0 ? VK_BUFFER_CREATE_SPARSE_ALIASED_BIT                : 0;
-    vkFlags |= (a_Flags & CreateBufferFlagBits::Protected)                  != 0 ? VK_BUFFER_CREATE_PROTECTED_BIT                     : 0;
-    vkFlags |= (a_Flags & CreateBufferFlagBits::DeviceAddressCaptureReplay) != 0 ? VK_BUFFER_CREATE_DEVICE_ADDRESS_CAPTURE_REPLAY_BIT : 0;
+    vk::BufferCreateFlags vkFlags;
+    vkFlags |= (a_Flags & CreateBufferFlagBits::SparseBinding)              != 0 ? vk::BufferCreateFlagBits::eSparseBinding              : vk::BufferCreateFlags{};
+    vkFlags |= (a_Flags & CreateBufferFlagBits::SparseResidency)            != 0 ? vk::BufferCreateFlagBits::eSparseResidency            : vk::BufferCreateFlags{};
+    vkFlags |= (a_Flags & CreateBufferFlagBits::SparseAliased)              != 0 ? vk::BufferCreateFlagBits::eSparseAliased              : vk::BufferCreateFlags{};
+    vkFlags |= (a_Flags & CreateBufferFlagBits::Protected)                  != 0 ? vk::BufferCreateFlagBits::eProtected                  : vk::BufferCreateFlags{};
+    vkFlags |= (a_Flags & CreateBufferFlagBits::DeviceAddressCaptureReplay) != 0 ? vk::BufferCreateFlagBits::eDeviceAddressCaptureReplay : vk::BufferCreateFlags{};
    return vkFlags;
 }
 static inline auto GetVkBufferUsageFlags(const BufferUsageFlags& a_Flags) {
-    VkBufferUsageFlags vkFlags = 0;
-    vkFlags |= (a_Flags & BufferUsageFlagBits::TransferSrc)         != 0 ? VK_BUFFER_USAGE_TRANSFER_SRC_BIT          : 0;
-    vkFlags |= (a_Flags & BufferUsageFlagBits::TransferDst)         != 0 ? VK_BUFFER_USAGE_TRANSFER_DST_BIT          : 0;
-    vkFlags |= (a_Flags & BufferUsageFlagBits::UniformTexelBuffer)  != 0 ? VK_BUFFER_USAGE_UNIFORM_TEXEL_BUFFER_BIT  : 0;
-    vkFlags |= (a_Flags & BufferUsageFlagBits::StorageTexelBuffer)  != 0 ? VK_BUFFER_USAGE_STORAGE_TEXEL_BUFFER_BIT  : 0;
-    vkFlags |= (a_Flags & BufferUsageFlagBits::UniformBuffer)       != 0 ? VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT        : 0;
-    vkFlags |= (a_Flags & BufferUsageFlagBits::StorageBuffer)       != 0 ? VK_BUFFER_USAGE_STORAGE_BUFFER_BIT        : 0;
-    vkFlags |= (a_Flags & BufferUsageFlagBits::IndexBuffer)         != 0 ? VK_BUFFER_USAGE_INDEX_BUFFER_BIT          : 0;
-    vkFlags |= (a_Flags & BufferUsageFlagBits::VertexBuffer)        != 0 ? VK_BUFFER_USAGE_VERTEX_BUFFER_BIT         : 0;
-    vkFlags |= (a_Flags & BufferUsageFlagBits::IndirectBuffer)      != 0 ? VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT       : 0;
-    vkFlags |= (a_Flags & BufferUsageFlagBits::ShaderDeviceAddress) != 0 ? VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT : 0;
+    vk::BufferUsageFlags vkFlags;
+    vkFlags |= (a_Flags & BufferUsageFlagBits::TransferSrc)         != 0 ? vk::BufferUsageFlagBits::eTransferSrc         : vk::BufferUsageFlags{};
+    vkFlags |= (a_Flags & BufferUsageFlagBits::TransferDst)         != 0 ? vk::BufferUsageFlagBits::eTransferDst         : vk::BufferUsageFlags{};
+    vkFlags |= (a_Flags & BufferUsageFlagBits::UniformTexelBuffer)  != 0 ? vk::BufferUsageFlagBits::eUniformTexelBuffer  : vk::BufferUsageFlags{};
+    vkFlags |= (a_Flags & BufferUsageFlagBits::StorageTexelBuffer)  != 0 ? vk::BufferUsageFlagBits::eStorageTexelBuffer  : vk::BufferUsageFlags{};
+    vkFlags |= (a_Flags & BufferUsageFlagBits::UniformBuffer)       != 0 ? vk::BufferUsageFlagBits::eUniformBuffer       : vk::BufferUsageFlags{};
+    vkFlags |= (a_Flags & BufferUsageFlagBits::StorageBuffer)       != 0 ? vk::BufferUsageFlagBits::eStorageBuffer       : vk::BufferUsageFlags{};
+    vkFlags |= (a_Flags & BufferUsageFlagBits::IndexBuffer)         != 0 ? vk::BufferUsageFlagBits::eIndexBuffer         : vk::BufferUsageFlags{};
+    vkFlags |= (a_Flags & BufferUsageFlagBits::VertexBuffer)        != 0 ? vk::BufferUsageFlagBits::eVertexBuffer        : vk::BufferUsageFlags{};
+    vkFlags |= (a_Flags & BufferUsageFlagBits::IndirectBuffer)      != 0 ? vk::BufferUsageFlagBits::eIndirectBuffer      : vk::BufferUsageFlags{};
+    vkFlags |= (a_Flags & BufferUsageFlagBits::ShaderDeviceAddress) != 0 ? vk::BufferUsageFlagBits::eShaderDeviceAddress : vk::BufferUsageFlags{};
     return vkFlags;
 }
-static inline auto GetVKMemoryPropertyFlags(const MemoryPropertyFlags a_Flags) {
-    VkMemoryPropertyFlags vkFlags = 0;
-    vkFlags |= (a_Flags & MemoryPropertyFlagBits::DeviceLocal)     != 0 ? VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT     : 0;
-    vkFlags |= (a_Flags & MemoryPropertyFlagBits::HostCached)      != 0 ? VK_MEMORY_PROPERTY_HOST_CACHED_BIT      : 0;
-    vkFlags |= (a_Flags & MemoryPropertyFlagBits::HostCoherent)    != 0 ? VK_MEMORY_PROPERTY_HOST_COHERENT_BIT    : 0;
-    vkFlags |= (a_Flags & MemoryPropertyFlagBits::HostVisible)     != 0 ? VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT     : 0;
-    vkFlags |= (a_Flags & MemoryPropertyFlagBits::LazilyAllocated) != 0 ? VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT : 0;
-    vkFlags |= (a_Flags & MemoryPropertyFlagBits::Protected)       != 0 ? VK_MEMORY_PROPERTY_PROTECTED_BIT        : 0;
+static inline auto GetVkImageUsageFlags(const ImageUsageFlags& a_Flags) {
+    vk::ImageUsageFlags flags;
+    flags |= (a_Flags & ImageUsageFlagBits::TransferSrc)            != 0 ? vk::ImageUsageFlagBits::eTransferSrc            : vk::ImageUsageFlags{};
+    flags |= (a_Flags & ImageUsageFlagBits::TransferDst)            != 0 ? vk::ImageUsageFlagBits::eTransferDst            : vk::ImageUsageFlags{};
+    flags |= (a_Flags & ImageUsageFlagBits::Sampled)                != 0 ? vk::ImageUsageFlagBits::eSampled                : vk::ImageUsageFlags{};
+    flags |= (a_Flags & ImageUsageFlagBits::Storage)                != 0 ? vk::ImageUsageFlagBits::eStorage                : vk::ImageUsageFlags{};
+    flags |= (a_Flags & ImageUsageFlagBits::ColorAttachment)        != 0 ? vk::ImageUsageFlagBits::eColorAttachment        : vk::ImageUsageFlags{};
+    flags |= (a_Flags & ImageUsageFlagBits::DepthStencilAttachment) != 0 ? vk::ImageUsageFlagBits::eDepthStencilAttachment : vk::ImageUsageFlags{};
+    flags |= (a_Flags & ImageUsageFlagBits::TransientAttachment)    != 0 ? vk::ImageUsageFlagBits::eTransientAttachment    : vk::ImageUsageFlags{};
+    flags |= (a_Flags & ImageUsageFlagBits::InputAttachment)        != 0 ? vk::ImageUsageFlagBits::eInputAttachment        : vk::ImageUsageFlags{};
+    return flags;
+}
+static inline auto GetVkMemoryPropertyFlags(const MemoryPropertyFlags& a_Flags) {
+    vk::MemoryPropertyFlags vkFlags;
+    vkFlags |= (a_Flags & MemoryPropertyFlagBits::DeviceLocal)     != 0 ? vk::MemoryPropertyFlagBits::eDeviceLocal      : vk::MemoryPropertyFlags{};
+    vkFlags |= (a_Flags & MemoryPropertyFlagBits::HostCached)      != 0 ? vk::MemoryPropertyFlagBits::eHostCached       : vk::MemoryPropertyFlags{};
+    vkFlags |= (a_Flags & MemoryPropertyFlagBits::HostCoherent)    != 0 ? vk::MemoryPropertyFlagBits::eHostCoherent     : vk::MemoryPropertyFlags{};
+    vkFlags |= (a_Flags & MemoryPropertyFlagBits::HostVisible)     != 0 ? vk::MemoryPropertyFlagBits::eHostVisible      : vk::MemoryPropertyFlags{};
+    vkFlags |= (a_Flags & MemoryPropertyFlagBits::LazilyAllocated) != 0 ? vk::MemoryPropertyFlagBits::eLazilyAllocated  : vk::MemoryPropertyFlags{};
+    vkFlags |= (a_Flags & MemoryPropertyFlagBits::Protected)       != 0 ? vk::MemoryPropertyFlagBits::eProtected        : vk::MemoryPropertyFlags{};
+    return vkFlags;
+}
+static inline auto GetVkQueueFlags(const QueueFlags& a_Flags) {
+    vk::QueueFlags vkFlags;
+    vkFlags |= (a_Flags & QueueFlagBits::Compute)       != 0 ? vk::QueueFlagBits::eCompute        : vk::QueueFlags{};
+    vkFlags |= (a_Flags & QueueFlagBits::Graphics)      != 0 ? vk::QueueFlagBits::eGraphics       : vk::QueueFlags{};
+    vkFlags |= (a_Flags & QueueFlagBits::Protected)     != 0 ? vk::QueueFlagBits::eProtected      : vk::QueueFlags{};
+    vkFlags |= (a_Flags & QueueFlagBits::SparseBinding) != 0 ? vk::QueueFlagBits::eSparseBinding  : vk::QueueFlags{};
+    vkFlags |= (a_Flags & QueueFlagBits::Transfer)      != 0 ? vk::QueueFlagBits::eTransfer       : vk::QueueFlags{};
     return vkFlags;
 }
 static inline auto GetVkShaderStage(const ShaderStageFlags& a_Flags) {
-    VkShaderStageFlags vkFlags = 0;
-    vkFlags |= (a_Flags & ShaderStageFlagBits::Compute)     != 0 ? VK_SHADER_STAGE_COMPUTE_BIT                 : 0;
-    vkFlags |= (a_Flags & ShaderStageFlagBits::Fragment)    != 0 ? VK_SHADER_STAGE_FRAGMENT_BIT                : 0;
-    vkFlags |= (a_Flags & ShaderStageFlagBits::Geometry)    != 0 ? VK_SHADER_STAGE_GEOMETRY_BIT                : 0;
-    vkFlags |= (a_Flags & ShaderStageFlagBits::TessControl) != 0 ? VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT    : 0;
-    vkFlags |= (a_Flags & ShaderStageFlagBits::TessEval)    != 0 ? VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT : 0;
-    vkFlags |= (a_Flags & ShaderStageFlagBits::Vertex)      != 0 ? VK_SHADER_STAGE_VERTEX_BIT                  : 0;
+    vk::ShaderStageFlags vkFlags;
+    vkFlags |= (a_Flags & ShaderStageFlagBits::Compute)     != 0 ? vk::ShaderStageFlagBits::eCompute                : vk::ShaderStageFlags{};
+    vkFlags |= (a_Flags & ShaderStageFlagBits::Fragment)    != 0 ? vk::ShaderStageFlagBits::eFragment               : vk::ShaderStageFlags{};
+    vkFlags |= (a_Flags & ShaderStageFlagBits::Geometry)    != 0 ? vk::ShaderStageFlagBits::eGeometry               : vk::ShaderStageFlags{};
+    vkFlags |= (a_Flags & ShaderStageFlagBits::TessControl) != 0 ? vk::ShaderStageFlagBits::eTessellationControl    : vk::ShaderStageFlags{};
+    vkFlags |= (a_Flags & ShaderStageFlagBits::TessEval)    != 0 ? vk::ShaderStageFlagBits::eTessellationEvaluation : vk::ShaderStageFlags{};
+    vkFlags |= (a_Flags & ShaderStageFlagBits::Vertex)      != 0 ? vk::ShaderStageFlagBits::eVertex                 : vk::ShaderStageFlags{};
     return vkFlags;
 }
 static inline auto GetVkCommandBufferUsageFlags(const CommandBufferUsageFlags& a_Flags) {
-    VkCommandBufferUsageFlags vkFlags = 0;
-    vkFlags |= (a_Flags & CommandBufferUsageFlagBits::OneTimeSubmit)      != 0 ? VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT      : 0;
-    vkFlags |= (a_Flags & CommandBufferUsageFlagBits::RenderPassContinue) != 0 ? VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT : 0;
-    vkFlags |= (a_Flags & CommandBufferUsageFlagBits::SimultaneousUse)    != 0 ? VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT     : 0;
+    vk::CommandBufferUsageFlags vkFlags;
+    vkFlags |= (a_Flags & CommandBufferUsageFlagBits::OneTimeSubmit)      != 0 ? vk::CommandBufferUsageFlagBits::eOneTimeSubmit      : vk::CommandBufferUsageFlags{};
+    vkFlags |= (a_Flags & CommandBufferUsageFlagBits::RenderPassContinue) != 0 ? vk::CommandBufferUsageFlagBits::eRenderPassContinue : vk::CommandBufferUsageFlags{};
+    vkFlags |= (a_Flags & CommandBufferUsageFlagBits::SimultaneousUse)    != 0 ? vk::CommandBufferUsageFlagBits::eSimultaneousUse    : vk::CommandBufferUsageFlags{};
+    return vkFlags;
+}
+static inline auto GetVkCommandPoolCreateFlags(const CreateCommandPoolFlags& a_Flags) {
+    vk::CommandPoolCreateFlags vkFlags;
+    vkFlags |= (a_Flags & CreateCommandPoolFlagBits::Protected) == CreateCommandPoolFlagBits::Protected ? vk::CommandPoolCreateFlagBits::eProtected          : vk::CommandPoolCreateFlags{};
+    vkFlags |= (a_Flags & CreateCommandPoolFlagBits::Transient) == CreateCommandPoolFlagBits::Transient ? vk::CommandPoolCreateFlagBits::eTransient          : vk::CommandPoolCreateFlags{};
+    vkFlags |= (a_Flags & CreateCommandPoolFlagBits::Reset)     == CreateCommandPoolFlagBits::Reset     ? vk::CommandPoolCreateFlagBits::eResetCommandBuffer : vk::CommandPoolCreateFlags{};
     return vkFlags;
 }
 static inline auto GetVkPipelineStageFlags(const PipelineStageFlags& a_Flags) {
-    VkPipelineStageFlags vkFlags = 0;
-    vkFlags |= (a_Flags & PipelineStageFlagBits::BottomOfPipe)                 != 0 ? VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT                 : 0;
-    vkFlags |= (a_Flags & PipelineStageFlagBits::ColorAttachmentOutput)        != 0 ? VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT        : 0;
-    vkFlags |= (a_Flags & PipelineStageFlagBits::ComputeShader)                != 0 ? VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT                 : 0;
-    vkFlags |= (a_Flags & PipelineStageFlagBits::DrawIndirect)                 != 0 ? VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT                  : 0;
-    vkFlags |= (a_Flags & PipelineStageFlagBits::EarlyFragmentTests)           != 0 ? VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT           : 0;
-    vkFlags |= (a_Flags & PipelineStageFlagBits::FragmentShader)               != 0 ? VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT                : 0;
-    vkFlags |= (a_Flags & PipelineStageFlagBits::GeometryShader)               != 0 ? VK_PIPELINE_STAGE_GEOMETRY_SHADER_BIT                : 0;
-    vkFlags |= (a_Flags & PipelineStageFlagBits::Host)                         != 0 ? VK_PIPELINE_STAGE_HOST_BIT                           : 0;
-    vkFlags |= (a_Flags & PipelineStageFlagBits::LateFragmentTests)            != 0 ? VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT            : 0;
-    vkFlags |= (a_Flags & PipelineStageFlagBits::TessellationControlShader)    != 0 ? VK_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT    : 0;
-    vkFlags |= (a_Flags & PipelineStageFlagBits::TessellationEvaluationShader) != 0 ? VK_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT : 0;
-    vkFlags |= (a_Flags & PipelineStageFlagBits::TopOfPipe)                    != 0 ? VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT                    : 0;
-    vkFlags |= (a_Flags & PipelineStageFlagBits::Transfer)                     != 0 ? VK_PIPELINE_STAGE_TRANSFER_BIT                       : 0;
-    vkFlags |= (a_Flags & PipelineStageFlagBits::VertexInput)                  != 0 ? VK_PIPELINE_STAGE_VERTEX_INPUT_BIT                   : 0;
-    vkFlags |= (a_Flags & PipelineStageFlagBits::VertexShader)                 != 0 ? VK_PIPELINE_STAGE_VERTEX_SHADER_BIT                  : 0;
+    vk::PipelineStageFlags vkFlags;
+    vkFlags |= (a_Flags & PipelineStageFlagBits::BottomOfPipe)                 != 0 ? vk::PipelineStageFlagBits::eBottomOfPipe                 : vk::PipelineStageFlags{};
+    vkFlags |= (a_Flags & PipelineStageFlagBits::ColorAttachmentOutput)        != 0 ? vk::PipelineStageFlagBits::eColorAttachmentOutput        : vk::PipelineStageFlags{};
+    vkFlags |= (a_Flags & PipelineStageFlagBits::ComputeShader)                != 0 ? vk::PipelineStageFlagBits::eComputeShader                : vk::PipelineStageFlags{};
+    vkFlags |= (a_Flags & PipelineStageFlagBits::DrawIndirect)                 != 0 ? vk::PipelineStageFlagBits::eDrawIndirect                 : vk::PipelineStageFlags{};
+    vkFlags |= (a_Flags & PipelineStageFlagBits::EarlyFragmentTests)           != 0 ? vk::PipelineStageFlagBits::eEarlyFragmentTests           : vk::PipelineStageFlags{};
+    vkFlags |= (a_Flags & PipelineStageFlagBits::FragmentShader)               != 0 ? vk::PipelineStageFlagBits::eFragmentShader               : vk::PipelineStageFlags{};
+    vkFlags |= (a_Flags & PipelineStageFlagBits::GeometryShader)               != 0 ? vk::PipelineStageFlagBits::eGeometryShader               : vk::PipelineStageFlags{};
+    vkFlags |= (a_Flags & PipelineStageFlagBits::Host)                         != 0 ? vk::PipelineStageFlagBits::eHost                         : vk::PipelineStageFlags{};
+    vkFlags |= (a_Flags & PipelineStageFlagBits::LateFragmentTests)            != 0 ? vk::PipelineStageFlagBits::eLateFragmentTests            : vk::PipelineStageFlags{};
+    vkFlags |= (a_Flags & PipelineStageFlagBits::TessellationControlShader)    != 0 ? vk::PipelineStageFlagBits::eTessellationControlShader    : vk::PipelineStageFlags{};
+    vkFlags |= (a_Flags & PipelineStageFlagBits::TessellationEvaluationShader) != 0 ? vk::PipelineStageFlagBits::eTessellationEvaluationShader : vk::PipelineStageFlags{};
+    vkFlags |= (a_Flags & PipelineStageFlagBits::TopOfPipe)                    != 0 ? vk::PipelineStageFlagBits::eTopOfPipe                    : vk::PipelineStageFlags{};
+    vkFlags |= (a_Flags & PipelineStageFlagBits::Transfer)                     != 0 ? vk::PipelineStageFlagBits::eTransfer                     : vk::PipelineStageFlags{};
+    vkFlags |= (a_Flags & PipelineStageFlagBits::VertexInput)                  != 0 ? vk::PipelineStageFlagBits::eVertexInput                  : vk::PipelineStageFlags{};
+    vkFlags |= (a_Flags & PipelineStageFlagBits::VertexShader)                 != 0 ? vk::PipelineStageFlagBits::eVertexShader                 : vk::PipelineStageFlags{};
     return vkFlags;
 }
 static inline auto GetVkDependencyFlags(const DependencyFlags& a_Flags) {
-    VkDependencyFlags vkFlags = 0;
-    vkFlags |= (a_Flags & DependencyFlagBits::ByRegion)    != 0 ? VK_DEPENDENCY_BY_REGION_BIT    : 0;
-    vkFlags |= (a_Flags & DependencyFlagBits::DeviceGroup) != 0 ? VK_DEPENDENCY_DEVICE_GROUP_BIT : 0;
-    vkFlags |= (a_Flags & DependencyFlagBits::ViewLocal)   != 0 ? VK_DEPENDENCY_VIEW_LOCAL_BIT   : 0;
+    vk::DependencyFlags vkFlags;
+    vkFlags |= (a_Flags & DependencyFlagBits::ByRegion)    != 0 ? vk::DependencyFlagBits::eByRegion    : vk::DependencyFlags{};
+    vkFlags |= (a_Flags & DependencyFlagBits::DeviceGroup) != 0 ? vk::DependencyFlagBits::eDeviceGroup : vk::DependencyFlags{};
+    vkFlags |= (a_Flags & DependencyFlagBits::ViewLocal)   != 0 ? vk::DependencyFlagBits::eViewLocal   : vk::DependencyFlags{};
     return vkFlags;
 }
 static inline auto GetVkAccessMaskFlags(const AccessFlags& a_Flags) {
-    VkAccessFlags vkFlags = 0;
-    vkFlags |= (a_Flags & AccessFlagBits::IndirectCommandRead)         != 0 ? VK_ACCESS_INDIRECT_COMMAND_READ_BIT          : 0;
-    vkFlags |= (a_Flags & AccessFlagBits::IndexRead)                   != 0 ? VK_ACCESS_INDEX_READ_BIT                     : 0;
-    vkFlags |= (a_Flags & AccessFlagBits::VertexAttributeRead)         != 0 ? VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT          : 0;
-    vkFlags |= (a_Flags & AccessFlagBits::UniformRead)                 != 0 ? VK_ACCESS_UNIFORM_READ_BIT                   : 0;
-    vkFlags |= (a_Flags & AccessFlagBits::InputAttachmentRead)         != 0 ? VK_ACCESS_INPUT_ATTACHMENT_READ_BIT          : 0;
-    vkFlags |= (a_Flags & AccessFlagBits::ShaderRead)                  != 0 ? VK_ACCESS_SHADER_READ_BIT                    : 0;
-    vkFlags |= (a_Flags & AccessFlagBits::ShaderWrite)                 != 0 ? VK_ACCESS_SHADER_WRITE_BIT                   : 0;
-    vkFlags |= (a_Flags & AccessFlagBits::ColorAttachmentRead)         != 0 ? VK_ACCESS_COLOR_ATTACHMENT_READ_BIT          : 0;
-    vkFlags |= (a_Flags & AccessFlagBits::ColorAttachmentWrite)        != 0 ? VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT         : 0;
-    vkFlags |= (a_Flags & AccessFlagBits::DepthStencilAttachmentRead)  != 0 ? VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT  : 0;
-    vkFlags |= (a_Flags & AccessFlagBits::DepthStencilAttachmentWrite) != 0 ? VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT : 0;
-    vkFlags |= (a_Flags & AccessFlagBits::TransferRead)                != 0 ? VK_ACCESS_TRANSFER_READ_BIT                  : 0;
-    vkFlags |= (a_Flags & AccessFlagBits::TransferWrite)               != 0 ? VK_ACCESS_TRANSFER_WRITE_BIT                 : 0;
-    vkFlags |= (a_Flags & AccessFlagBits::HostRead)                    != 0 ? VK_ACCESS_HOST_READ_BIT                      : 0;
-    vkFlags |= (a_Flags & AccessFlagBits::HostWrite)                   != 0 ? VK_ACCESS_HOST_WRITE_BIT                     : 0;
-    vkFlags |= (a_Flags & AccessFlagBits::MemoryRead)                  != 0 ? VK_ACCESS_MEMORY_READ_BIT                    : 0;
-    vkFlags |= (a_Flags & AccessFlagBits::MemoryWrite)                 != 0 ? VK_ACCESS_MEMORY_WRITE_BIT                   : 0;
+    vk::AccessFlags vkFlags;
+    vkFlags |= (a_Flags & AccessFlagBits::IndirectCommandRead)         != 0 ? vk::AccessFlagBits::eIndirectCommandRead         : vk::AccessFlags{};
+    vkFlags |= (a_Flags & AccessFlagBits::IndexRead)                   != 0 ? vk::AccessFlagBits::eIndexRead                   : vk::AccessFlags{};
+    vkFlags |= (a_Flags & AccessFlagBits::VertexAttributeRead)         != 0 ? vk::AccessFlagBits::eVertexAttributeRead         : vk::AccessFlags{};
+    vkFlags |= (a_Flags & AccessFlagBits::UniformRead)                 != 0 ? vk::AccessFlagBits::eUniformRead                 : vk::AccessFlags{};
+    vkFlags |= (a_Flags & AccessFlagBits::InputAttachmentRead)         != 0 ? vk::AccessFlagBits::eInputAttachmentRead         : vk::AccessFlags{};
+    vkFlags |= (a_Flags & AccessFlagBits::ShaderRead)                  != 0 ? vk::AccessFlagBits::eShaderRead                  : vk::AccessFlags{};
+    vkFlags |= (a_Flags & AccessFlagBits::ShaderWrite)                 != 0 ? vk::AccessFlagBits::eShaderWrite                 : vk::AccessFlags{};
+    vkFlags |= (a_Flags & AccessFlagBits::ColorAttachmentRead)         != 0 ? vk::AccessFlagBits::eColorAttachmentRead         : vk::AccessFlags{};
+    vkFlags |= (a_Flags & AccessFlagBits::ColorAttachmentWrite)        != 0 ? vk::AccessFlagBits::eColorAttachmentWrite        : vk::AccessFlags{};
+    vkFlags |= (a_Flags & AccessFlagBits::DepthStencilAttachmentRead)  != 0 ? vk::AccessFlagBits::eDepthStencilAttachmentRead  : vk::AccessFlags{};
+    vkFlags |= (a_Flags & AccessFlagBits::DepthStencilAttachmentWrite) != 0 ? vk::AccessFlagBits::eDepthStencilAttachmentWrite : vk::AccessFlags{};
+    vkFlags |= (a_Flags & AccessFlagBits::TransferRead)                != 0 ? vk::AccessFlagBits::eTransferRead                : vk::AccessFlags{};
+    vkFlags |= (a_Flags & AccessFlagBits::TransferWrite)               != 0 ? vk::AccessFlagBits::eTransferWrite               : vk::AccessFlags{};
+    vkFlags |= (a_Flags & AccessFlagBits::HostRead)                    != 0 ? vk::AccessFlagBits::eHostRead                    : vk::AccessFlags{};
+    vkFlags |= (a_Flags & AccessFlagBits::HostWrite)                   != 0 ? vk::AccessFlagBits::eHostWrite                   : vk::AccessFlags{};
+    vkFlags |= (a_Flags & AccessFlagBits::MemoryRead)                  != 0 ? vk::AccessFlagBits::eMemoryRead                  : vk::AccessFlags{};
+    vkFlags |= (a_Flags & AccessFlagBits::MemoryWrite)                 != 0 ? vk::AccessFlagBits::eMemoryWrite                 : vk::AccessFlags{};
     return vkFlags;
 }
 static inline auto GetVkImageAspectFlags(const ImageAspectFlags& a_Flags) {
-    VkImageAspectFlags vkFlags = 0;
-    vkFlags |= (a_Flags & ImageAspectFlagBits::Color)    != 0 ? VK_IMAGE_ASPECT_COLOR_BIT    : 0;
-    vkFlags |= (a_Flags & ImageAspectFlagBits::Depth)    != 0 ? VK_IMAGE_ASPECT_DEPTH_BIT    : 0;
-    vkFlags |= (a_Flags & ImageAspectFlagBits::Stencil)  != 0 ? VK_IMAGE_ASPECT_STENCIL_BIT  : 0;
-    vkFlags |= (a_Flags & ImageAspectFlagBits::Metadata) != 0 ? VK_IMAGE_ASPECT_METADATA_BIT : 0;
-    vkFlags |= (a_Flags & ImageAspectFlagBits::Plane0)   != 0 ? VK_IMAGE_ASPECT_PLANE_0_BIT  : 0;
-    vkFlags |= (a_Flags & ImageAspectFlagBits::Plane1)   != 0 ? VK_IMAGE_ASPECT_PLANE_1_BIT  : 0;
-    vkFlags |= (a_Flags & ImageAspectFlagBits::Plane2)   != 0 ? VK_IMAGE_ASPECT_PLANE_2_BIT  : 0;
+    vk::ImageAspectFlags vkFlags;
+    vkFlags |= (a_Flags & ImageAspectFlagBits::Color)    != 0 ? vk::ImageAspectFlagBits::eColor    : vk::ImageAspectFlags{};
+    vkFlags |= (a_Flags & ImageAspectFlagBits::Depth)    != 0 ? vk::ImageAspectFlagBits::eDepth    : vk::ImageAspectFlags{};
+    vkFlags |= (a_Flags & ImageAspectFlagBits::Stencil)  != 0 ? vk::ImageAspectFlagBits::eStencil  : vk::ImageAspectFlags{};
+    vkFlags |= (a_Flags & ImageAspectFlagBits::Metadata) != 0 ? vk::ImageAspectFlagBits::eMetadata : vk::ImageAspectFlags{};
+    vkFlags |= (a_Flags & ImageAspectFlagBits::Plane0)   != 0 ? vk::ImageAspectFlagBits::ePlane0   : vk::ImageAspectFlags{};
+    vkFlags |= (a_Flags & ImageAspectFlagBits::Plane1)   != 0 ? vk::ImageAspectFlagBits::ePlane1   : vk::ImageAspectFlags{};
+    vkFlags |= (a_Flags & ImageAspectFlagBits::Plane2)   != 0 ? vk::ImageAspectFlagBits::ePlane2   : vk::ImageAspectFlags{};
     return vkFlags;
 }
 static inline auto GetVkImageUsage(const ImageUsageFlags& a_Flags) {
-    VkImageUsageFlags vkFlags = 0;
-    vkFlags |= (a_Flags & ImageUsageFlagBits::TransferSrc)            != 0 ? VK_IMAGE_USAGE_TRANSFER_SRC_BIT             : 0;
-    vkFlags |= (a_Flags & ImageUsageFlagBits::TransferDst)            != 0 ? VK_IMAGE_USAGE_TRANSFER_DST_BIT             : 0;
-    vkFlags |= (a_Flags & ImageUsageFlagBits::Sampled)                != 0 ? VK_IMAGE_USAGE_SAMPLED_BIT                  : 0;
-    vkFlags |= (a_Flags & ImageUsageFlagBits::Storage)                != 0 ? VK_IMAGE_USAGE_STORAGE_BIT                  : 0;
-    vkFlags |= (a_Flags & ImageUsageFlagBits::ColorAttachment)        != 0 ? VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT         : 0;
-    vkFlags |= (a_Flags & ImageUsageFlagBits::DepthStencilAttachment) != 0 ? VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT : 0;
-    vkFlags |= (a_Flags & ImageUsageFlagBits::TransientAttachment)    != 0 ? VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT     : 0;
-    vkFlags |= (a_Flags & ImageUsageFlagBits::InputAttachment)        != 0 ? VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT         : 0;
+    vk::ImageUsageFlags vkFlags;
+    vkFlags |= (a_Flags & ImageUsageFlagBits::TransferSrc)            != 0 ? vk::ImageUsageFlagBits::eTransferSrc            : vk::ImageUsageFlags{};
+    vkFlags |= (a_Flags & ImageUsageFlagBits::TransferDst)            != 0 ? vk::ImageUsageFlagBits::eTransferDst            : vk::ImageUsageFlags{};
+    vkFlags |= (a_Flags & ImageUsageFlagBits::Sampled)                != 0 ? vk::ImageUsageFlagBits::eSampled                : vk::ImageUsageFlags{};
+    vkFlags |= (a_Flags & ImageUsageFlagBits::Storage)                != 0 ? vk::ImageUsageFlagBits::eStorage                : vk::ImageUsageFlags{};
+    vkFlags |= (a_Flags & ImageUsageFlagBits::ColorAttachment)        != 0 ? vk::ImageUsageFlagBits::eColorAttachment        : vk::ImageUsageFlags{};
+    vkFlags |= (a_Flags & ImageUsageFlagBits::DepthStencilAttachment) != 0 ? vk::ImageUsageFlagBits::eDepthStencilAttachment : vk::ImageUsageFlags{};
+    vkFlags |= (a_Flags & ImageUsageFlagBits::TransientAttachment)    != 0 ? vk::ImageUsageFlagBits::eTransientAttachment    : vk::ImageUsageFlags{};
+    vkFlags |= (a_Flags & ImageUsageFlagBits::InputAttachment)        != 0 ? vk::ImageUsageFlagBits::eInputAttachment        : vk::ImageUsageFlags{};
     return vkFlags;
+}
+
+static inline vk::AccessFlags GetImageTransitionAccessMask(const vk::ImageLayout& a_Layout)
+{
+    switch (a_Layout)
+    {
+    case vk::ImageLayout::eUndefined:
+    case vk::ImageLayout::ePresentSrcKHR:
+        return vk::AccessFlagBits::eNone;
+    case vk::ImageLayout::eGeneral:
+        return
+            vk::AccessFlagBits::eColorAttachmentWrite |
+            vk::AccessFlagBits::eDepthStencilAttachmentWrite |
+            vk::AccessFlagBits::eTransferWrite | vk::AccessFlagBits::eTransferRead |
+            vk::AccessFlagBits::eShaderRead | vk::AccessFlagBits::eHostWrite |
+            vk::AccessFlagBits::eHostRead | vk::AccessFlagBits::eInputAttachmentRead |
+            vk::AccessFlagBits::eColorAttachmentRead |
+            vk::AccessFlagBits::eDepthStencilAttachmentRead |
+            vk::AccessFlagBits::eMemoryRead | vk::AccessFlagBits::eMemoryWrite;
+    case vk::ImageLayout::eColorAttachmentOptimal:
+        return
+            vk::AccessFlagBits::eColorAttachmentRead |
+            vk::AccessFlagBits::eColorAttachmentWrite;
+
+    case vk::ImageLayout::eStencilAttachmentOptimal:
+    case vk::ImageLayout::eDepthAttachmentOptimal:
+    case vk::ImageLayout::eDepthStencilAttachmentOptimal:
+        return
+            vk::AccessFlagBits::eDepthStencilAttachmentRead |
+            vk::AccessFlagBits::eDepthStencilAttachmentWrite;
+    case vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal:
+    case vk::ImageLayout::eDepthReadOnlyOptimal:
+    case vk::ImageLayout::eDepthReadOnlyStencilAttachmentOptimal:
+    case vk::ImageLayout::eDepthStencilReadOnlyOptimal:
+    case vk::ImageLayout::eStencilReadOnlyOptimal:
+        return vk::AccessFlagBits::eDepthStencilAttachmentRead;
+
+    case vk::ImageLayout::eShaderReadOnlyOptimal:
+        return
+            vk::AccessFlagBits::eShaderRead |
+            vk::AccessFlagBits::eInputAttachmentRead;
+
+    case vk::ImageLayout::eTransferSrcOptimal:
+        return vk::AccessFlagBits::eTransferRead;
+    case vk::ImageLayout::eTransferDstOptimal:
+        return vk::AccessFlagBits::eTransferWrite;
+    case vk::ImageLayout::ePreinitialized:
+        return
+            vk::AccessFlagBits::eHostWrite |
+            vk::AccessFlagBits::eTransferWrite;
+
+    case vk::ImageLayout::eReadOnlyOptimal:
+        break;
+    case vk::ImageLayout::eAttachmentOptimal:
+        break;
+    case vk::ImageLayout::eVideoDecodeDstKHR:
+        break;
+    case vk::ImageLayout::eVideoDecodeSrcKHR:
+        break;
+    case vk::ImageLayout::eVideoDecodeDpbKHR:
+        break;
+    case vk::ImageLayout::eSharedPresentKHR:
+        return vk::AccessFlagBits::eMemoryRead;
+    case vk::ImageLayout::eFragmentDensityMapOptimalEXT:
+        break;
+    case vk::ImageLayout::eFragmentShadingRateAttachmentOptimalKHR:
+        break;
+    case vk::ImageLayout::eAttachmentFeedbackLoopOptimalEXT:
+        break;
+    }
+    throw std::runtime_error("Error: unsupported layout transition!");
+    return vk::AccessFlagBits(-1);
+}
+
+static inline auto GetImageTransitionStage(const vk::ImageLayout& a_Stage)
+{
+    switch (a_Stage)
+    {
+    case vk::ImageLayout::eUndefined:
+        return vk::PipelineStageFlagBits::eTopOfPipe;
+    case vk::ImageLayout::eGeneral:
+        return vk::PipelineStageFlagBits::eAllCommands;
+    case vk::ImageLayout::eColorAttachmentOptimal:
+        break;
+    case vk::ImageLayout::eDepthStencilAttachmentOptimal:
+        break;
+    case vk::ImageLayout::eDepthStencilReadOnlyOptimal:
+        break;
+    case vk::ImageLayout::eShaderReadOnlyOptimal:
+        return vk::PipelineStageFlagBits::eFragmentShader;
+    case vk::ImageLayout::eTransferSrcOptimal:
+    case vk::ImageLayout::eTransferDstOptimal:
+        return vk::PipelineStageFlagBits::eTransfer;
+    case vk::ImageLayout::ePreinitialized:
+        return vk::PipelineStageFlagBits::eHost;
+    case vk::ImageLayout::eDepthReadOnlyStencilAttachmentOptimal:
+        break;
+    case vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal:
+        break;
+    case vk::ImageLayout::eDepthAttachmentOptimal:
+        break;
+    case vk::ImageLayout::eDepthReadOnlyOptimal:
+        break;
+    case vk::ImageLayout::eStencilAttachmentOptimal:
+        break;
+    case vk::ImageLayout::eStencilReadOnlyOptimal:
+        break;
+    case vk::ImageLayout::eReadOnlyOptimal:
+        break;
+    case vk::ImageLayout::eAttachmentOptimal:
+        return vk::PipelineStageFlagBits::eColorAttachmentOutput;
+    case vk::ImageLayout::ePresentSrcKHR:
+        return vk::PipelineStageFlagBits::eBottomOfPipe;
+    case vk::ImageLayout::eVideoDecodeDstKHR:
+        break;
+    case vk::ImageLayout::eVideoDecodeSrcKHR:
+        break;
+    case vk::ImageLayout::eVideoDecodeDpbKHR:
+        break;
+    case vk::ImageLayout::eSharedPresentKHR:
+        return vk::PipelineStageFlagBits::eBottomOfPipe;
+    case vk::ImageLayout::eFragmentDensityMapOptimalEXT:
+        break;
+    case vk::ImageLayout::eFragmentShadingRateAttachmentOptimalKHR:
+        break;
+    case vk::ImageLayout::eAttachmentFeedbackLoopOptimalEXT:
+        break;
+    }
+    throw std::runtime_error("Error: unsupported layout transition!");
+    return vk::PipelineStageFlagBits(-1);
 }
 }

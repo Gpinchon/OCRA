@@ -19,7 +19,6 @@ struct Traverser {
 class Mesh {
 public:
     Mesh(
-        const PhysicalDevice::Handle& a_PhysicalDevice,
         const Device::Handle& a_Device,
         const VertexBuffer& a_VertexBuffer,
         const Material& a_Material);

@@ -17,12 +17,12 @@ class Material
 {
 public:
     template<typename Parameters>
-    Material(const PhysicalDevice::Handle& a_PhysicalDevice,
+    Material(
         const Device::Handle& a_Device,
         const Parameters& a_Parameters,
         const std::vector<Texture>& a_Textures = {},
         const Shader::Stage::Handle& a_Shader = {})
-        : parameters(a_PhysicalDevice, a_Device, 1, Parameters{})
+        : parameters(a_Device, 1, Parameters{})
         , fragmentShader(a_Shader)
     {
         uint32_t binding = 1;

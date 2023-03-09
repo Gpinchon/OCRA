@@ -32,7 +32,6 @@ void DescriptorTest(const PhysicalDevice::Handle& a_PhysicalDevice, const Device
     auto descriptorLayout = CreateDescriptorSetLayout(a_Device, layoutInfo);
     AllocateDescriptorSetInfo allocateInfo;
     allocateInfo.layout = descriptorLayout;
-    allocateInfo.pool = descriptorPool;
 
     for (int j = 0; j < TEST_COUNT; ++j)
     {
@@ -40,7 +39,7 @@ void DescriptorTest(const PhysicalDevice::Handle& a_PhysicalDevice, const Device
         {
             Timer timer;
             for (int i = 0; i < DESCRIPTOR_COUNT; ++i) {
-                descriptorSets.at(i) = Descriptor::Pool::AllocateSet(allocateInfo);
+                descriptorSets.at(i) = Descriptor::Pool::AllocateDescriptorSet(descriptorPool, allocateInfo);
             }
             CreatingTimer += timer.Elapsed().count() / double(TEST_COUNT);
         }
@@ -54,7 +53,7 @@ void DescriptorTest(const PhysicalDevice::Handle& a_PhysicalDevice, const Device
         {
             Timer timer;
             for (const auto& i : a_IterationIndice) {
-                if (i % 3 == 0) descriptorSets.at(i) = Descriptor::Pool::AllocateSet(allocateInfo);
+                if (i % 3 == 0) descriptorSets.at(i) = Descriptor::Pool::AllocateDescriptorSet(descriptorPool, allocateInfo);
             }
             ReCreatingTimer += timer.Elapsed().count() / double(TEST_COUNT);
         }

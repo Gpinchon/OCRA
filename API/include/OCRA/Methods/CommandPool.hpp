@@ -9,5 +9,7 @@
 */
 namespace OCRA::Command::Pool
 {
-std::vector<Buffer::Handle> AllocateCommandBuffer(const AllocateCommandBufferInfo& a_Info);
+std::vector<Command::Buffer::Handle> AllocateCommandBuffer(
+    const Command::Pool::Handle& a_Pool,
+    const AllocateCommandBufferInfo& a_Info);
 }

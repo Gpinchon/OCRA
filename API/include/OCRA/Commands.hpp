@@ -8,10 +8,11 @@
 
 namespace OCRA::Command
 {
-//Bind the specified Pipeline to the specified Command Buffer at the specified Binding Point
+/**
+* @brief Binds the specified pipeline to the command buffer
+*/
 void BindPipeline(
     const Command::Buffer::Handle& a_CommandBuffer,
-    const PipelineBindingPoint& a_BindingPoint,
     const Pipeline::Handle& a_Pipeline);
 
 /**
@@ -36,6 +37,11 @@ void CopyImageToBuffer(
     const Image::Handle&                a_SrcImage,
     const std::vector<ImageBufferCopy>& a_Regions);
 
+/**
+* @brief Copies an image to an other,
+* a_SrcImage should be in Transfer Src Optimal
+* a_DstImage should be in Transfer Dst Optimal
+*/
 void CopyImage(
     const Command::Buffer::Handle&  a_CommandBuffer,
     const Image::Handle&            a_SrcImage,
@@ -52,23 +58,22 @@ void GenerateMipMap(
 */
 void TransitionImageLayout(
     const Command::Buffer::Handle& a_CommandBuffer,
-    const ImageLayoutTransitionInfo& a_Transition,
-    const ImageLayout& a_OldLayout,
-    const ImageLayout& a_NewLayout);
+    const ImageLayoutTransitionInfo& a_Transition);
 
 /**
 * Same as TransitionImageLayout but for multiple images at once
 */
 void TransitionImagesLayout(
     const Command::Buffer::Handle& a_CommandBuffer,
-    const std::vector<ImageLayoutTransitionInfo>& a_Transitions,
-    const ImageLayout& a_OldLayout,
-    const ImageLayout& a_NewLayout);
+    const std::vector<ImageLayoutTransitionInfo>& a_Transitions);
 
+/**
+* @brief Clears the specified image to the specified color
+* Image should be in layout Transfer Dst Optimal
+*/
 void ClearColorImage(
     const Command::Buffer::Handle&  a_CommandBuffer,
     const Image::Handle&            a_Image,
-    const ImageLayout&              a_ImageLayout,
     const ColorValue&               a_Color,
     const std::vector<ImageSubresourceRange>& a_Ranges);
 
@@ -81,10 +86,13 @@ void PushDescriptorSet(
     const Pipeline::Layout::Handle& a_Layout,
     const std::vector<DescriptorSetWrite>& a_Writes);
 
-//Add a secondary Command Buffer to execute
+/**
+* @brief Add a secondary Command Buffer to execute
+*/
 void ExecuteCommandBuffer(
     const Buffer::Handle& a_CommandBuffer,
     const Buffer::Handle& a_SecondaryCommandBuffer);
+
 void PushConstants(
     const Command::Buffer::Handle& a_CommandBuffer,
     const Pipeline::Layout::Handle& a_PipelineLayout,
@@ -168,12 +176,20 @@ void BindIndexBuffer(
     const OCRA::Buffer::Handle&     a_IndexBuffer,
     const uint64_t                  a_Offset,
     const IndexType                 a_IndexType);
-
-//Begin Render Pass recording
+/*
+* @brief Begin Render Pass recording
+*/
 void BeginRenderPass(
     const Command::Buffer::Handle& a_CommandBuffer,
     const RenderPassBeginInfo& a_BeginInfo,
     const SubPassContents& a_SubPassContents);
+
+void BeginRendering(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const RenderingInfo& a_RenderingInfo);
+
+void EndRendering(
+    const Command::Buffer::Handle& a_CommandBuffer);
 
 void NextSubPass(
     const Command::Buffer::Handle& a_CommandBuffer,

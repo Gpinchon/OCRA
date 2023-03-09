@@ -1,11 +1,14 @@
-#include <VK/PhysicalDevice.hpp>
+#include <VK/Device.hpp>
+#include <VK/Enums.hpp>
+#include <VK/Flags.hpp>
 #include <VK/Instance.hpp>
+#include <VK/PhysicalDevice.hpp>
 
 #include <OCRA/Structs.hpp>
 
 namespace OCRA::PhysicalDevice
 {
-static inline auto GetLimits(const VkPhysicalDeviceLimits& a_vkLimits)
+static inline auto GetLimits(const vk::PhysicalDeviceLimits& a_vkLimits)
 {
     PhysicalDeviceLimits limits{};
     memset(&limits, 0, sizeof(limits));
@@ -109,16 +112,16 @@ static inline auto GetLimits(const VkPhysicalDeviceLimits& a_vkLimits)
     limits.maxFramebufferHeight = a_vkLimits.maxFramebufferHeight;
     limits.maxFramebufferLayers = a_vkLimits.maxFramebufferLayers;
     limits.maxColorAttachments = a_vkLimits.maxColorAttachments;
-    limits.framebufferColorSampleCounts   = OCRA::SampleCount(a_vkLimits.framebufferColorSampleCounts + 1);
-    limits.framebufferDepthSampleCounts   = OCRA::SampleCount(a_vkLimits.framebufferDepthSampleCounts + 1);
-    limits.framebufferStencilSampleCounts = OCRA::SampleCount(a_vkLimits.framebufferStencilSampleCounts + 1);
-    limits.framebufferNoAttachmentsSampleCounts = OCRA::SampleCount(a_vkLimits.framebufferNoAttachmentsSampleCounts + 1);
-
-    limits.sampledImageColorSampleCounts   = OCRA::SampleCount(a_vkLimits.sampledImageColorSampleCounts + 1);
-    limits.sampledImageIntegerSampleCounts = OCRA::SampleCount(a_vkLimits.sampledImageIntegerSampleCounts + 1);
-    limits.sampledImageDepthSampleCounts   = OCRA::SampleCount(a_vkLimits.sampledImageDepthSampleCounts + 1);
-    limits.sampledImageStencilSampleCounts = OCRA::SampleCount(a_vkLimits.sampledImageStencilSampleCounts + 1);
-    limits.storageImageSampleCounts        = OCRA::SampleCount(a_vkLimits.storageImageSampleCounts + 1);
+    //limits.framebufferColorSampleCounts   = OCRA::SampleCount(a_vkLimits.framebufferColorSampleCounts + 1);
+    //limits.framebufferDepthSampleCounts   = OCRA::SampleCount(a_vkLimits.framebufferDepthSampleCounts + 1);
+    //limits.framebufferStencilSampleCounts = OCRA::SampleCount(a_vkLimits.framebufferStencilSampleCounts + 1);
+    //limits.framebufferNoAttachmentsSampleCounts = OCRA::SampleCount(a_vkLimits.framebufferNoAttachmentsSampleCounts + 1);
+    //
+    //limits.sampledImageColorSampleCounts   = OCRA::SampleCount(a_vkLimits.sampledImageColorSampleCounts + 1);
+    //limits.sampledImageIntegerSampleCounts = OCRA::SampleCount(a_vkLimits.sampledImageIntegerSampleCounts + 1);
+    //limits.sampledImageDepthSampleCounts   = OCRA::SampleCount(a_vkLimits.sampledImageDepthSampleCounts + 1);
+    //limits.sampledImageStencilSampleCounts = OCRA::SampleCount(a_vkLimits.sampledImageStencilSampleCounts + 1);
+    //limits.storageImageSampleCounts        = OCRA::SampleCount(a_vkLimits.storageImageSampleCounts + 1);
     limits.maxSampleMaskWords = a_vkLimits.maxSampleMaskWords;
 
     limits.timestampComputeAndGraphics = a_vkLimits.timestampComputeAndGraphics;
@@ -156,27 +159,21 @@ static inline auto GetSparseProperties(const VkPhysicalDeviceSparseProperties& a
 
 const MemoryProperties GetMemoryProperties(const Handle& a_PhysicalDevice)
 {
-    VkPhysicalDeviceMemoryProperties p;
-    vkGetPhysicalDeviceMemoryProperties(*a_PhysicalDevice, &p);
+    auto p = a_PhysicalDevice->getMemoryProperties();
     MemoryProperties memoryProperties;
     memoryProperties.memoryHeaps.resize(p.memoryHeapCount);
     for (auto i = 0u; i < p.memoryHeapCount; ++i) {
         const auto& mh = p.memoryHeaps[i];
         auto& omh = memoryProperties.memoryHeaps.at(i);
         omh.size = mh.size;
-        omh.flags |= mh.flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT ? MemoryHeapFlagBits::DeviceLocal : MemoryHeapFlagBits::None;
-        omh.flags |= mh.flags & VK_MEMORY_HEAP_MULTI_INSTANCE_BIT ? MemoryHeapFlagBits::MultiInstance : MemoryHeapFlagBits::None;
+        omh.flags = GetOCMemoryHeapFlags(mh.flags);
     }
     memoryProperties.memoryTypes.resize(p.memoryTypeCount);
     for (auto i = 0u; i < p.memoryTypeCount; ++i) {
         const auto& mt = p.memoryTypes[i];
         auto& omt = memoryProperties.memoryTypes.at(i);
         omt.heapIndex = mt.heapIndex;
-        omt.propertyFlags |= mt.propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT  ? MemoryPropertyFlagBits::DeviceLocal     : MemoryPropertyFlagBits::None;
-        omt.propertyFlags |= mt.propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT  ? MemoryPropertyFlagBits::HostVisible     : MemoryPropertyFlagBits::None;
-        omt.propertyFlags |= mt.propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT ? MemoryPropertyFlagBits::HostCoherent    : MemoryPropertyFlagBits::None;
-        omt.propertyFlags |= mt.propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT   ? MemoryPropertyFlagBits::LazilyAllocated : MemoryPropertyFlagBits::None;
-        omt.propertyFlags |= mt.propertyFlags & VK_MEMORY_PROPERTY_PROTECTED_BIT     ? MemoryPropertyFlagBits::Protected       : MemoryPropertyFlagBits::None;
+        omt.propertyFlags = GetOCMemoryPropertyFlags(mt.propertyFlags);
     }
     return memoryProperties;
 }
@@ -184,26 +181,8 @@ const MemoryProperties GetMemoryProperties(const Handle& a_PhysicalDevice)
 const PhysicalDeviceProperties GetProperties(const Handle& a_PhysicalDevice)
 {
     PhysicalDeviceProperties properties;
-    VkPhysicalDeviceProperties vkProperties{};
-    vkGetPhysicalDeviceProperties(*a_PhysicalDevice, &vkProperties);
-    switch (vkProperties.deviceType)
-    {
-    case VK_PHYSICAL_DEVICE_TYPE_OTHER:
-        properties.deviceType = PhysicalDeviceType::Other;
-        break;
-    case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:
-        properties.deviceType = PhysicalDeviceType::IntegratedGpu;
-        break;
-    case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
-        properties.deviceType = PhysicalDeviceType::DiscreteGpu;
-        break;
-    case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU:
-        properties.deviceType = PhysicalDeviceType::VirtualGpu;
-        break;
-    case VK_PHYSICAL_DEVICE_TYPE_CPU:
-        properties.deviceType = PhysicalDeviceType::Cpu;
-        break;
-    }
+    auto& vkProperties = a_PhysicalDevice->getProperties();
+    properties.deviceType = GetOCPhysicalDeviceType(vkProperties.deviceType);
     switch (vkProperties.vendorID)
     {
     case 0x1002:
@@ -227,12 +206,12 @@ const PhysicalDeviceProperties GetProperties(const Handle& a_PhysicalDevice)
     default:
         break;
     }
-    std::copy(vkProperties.pipelineCacheUUID, vkProperties.pipelineCacheUUID + 16, properties.pipelineCacheUUID.data());
+    std::copy(vkProperties.pipelineCacheUUID.data(), vkProperties.pipelineCacheUUID + 16, properties.pipelineCacheUUID.data());
     properties.deviceID = vkProperties.deviceID;
     properties.vendorID = vkProperties.vendorID;
     properties.apiVersion = vkProperties.apiVersion;
     properties.driverVersion = vkProperties.driverVersion;
-    properties.deviceName = vkProperties.deviceName;
+    properties.deviceName = vkProperties.deviceName.data();
     properties.sparseProperties = GetSparseProperties(vkProperties.sparseProperties);
     properties.limits = GetLimits(vkProperties.limits);
     return properties;
@@ -240,8 +219,7 @@ const PhysicalDeviceProperties GetProperties(const Handle& a_PhysicalDevice)
 
 const PhysicalDeviceFeatures GetFeatures(const Handle& a_PhysicalDevice)
 {
-    VkPhysicalDeviceFeatures vkFeatures{};
-    vkGetPhysicalDeviceFeatures(*a_PhysicalDevice, &vkFeatures);
+    auto vkFeatures = a_PhysicalDevice->getFeatures();
     PhysicalDeviceFeatures features;
     features.robustBufferAccess = vkFeatures.robustBufferAccess;
     features.fullDrawIndexUint32 = vkFeatures.fullDrawIndexUint32;
@@ -303,12 +281,9 @@ const PhysicalDeviceFeatures GetFeatures(const Handle& a_PhysicalDevice)
 
 const std::vector<QueueFamilyProperties> GetQueueFamilyProperties(const Handle& a_PhysicalDevice)
 {
-    uint32_t queueCount = 0;
-    vkGetPhysicalDeviceQueueFamilyProperties(*a_PhysicalDevice, &queueCount, nullptr);
-    std::vector<VkQueueFamilyProperties> vkQueueProperties{ queueCount };
-    std::vector<QueueFamilyProperties>   queueProperties{ queueCount };
-    vkGetPhysicalDeviceQueueFamilyProperties(*a_PhysicalDevice, &queueCount, vkQueueProperties.data());
-    for (auto i = 0u; i < queueCount; ++i) {
+    auto vkQueueProperties = a_PhysicalDevice->getQueueFamilyProperties();
+    std::vector<QueueFamilyProperties>   queueProperties{ vkQueueProperties.size() };
+    for (auto i = 0u; i < queueProperties.size(); ++i) {
         const auto& qp = vkQueueProperties.at(i);
         auto& oqp = queueProperties.at(i);
         oqp.queueCount = qp.queueCount;
@@ -317,43 +292,49 @@ const std::vector<QueueFamilyProperties> GetQueueFamilyProperties(const Handle& 
             qp.minImageTransferGranularity.width,
             qp.minImageTransferGranularity.height,
             qp.minImageTransferGranularity.depth);
-        oqp.queueFlags |= qp.queueFlags & VK_QUEUE_GRAPHICS_BIT       ? QueueFlagsBits::Graphics      : QueueFlagsBits::None;
-        oqp.queueFlags |= qp.queueFlags & VK_QUEUE_COMPUTE_BIT        ? QueueFlagsBits::Compute       : QueueFlagsBits::None;
-        oqp.queueFlags |= qp.queueFlags & VK_QUEUE_TRANSFER_BIT       ? QueueFlagsBits::Transfer      : QueueFlagsBits::None;
-        oqp.queueFlags |= qp.queueFlags & VK_QUEUE_SPARSE_BINDING_BIT ? QueueFlagsBits::SparseBinding : QueueFlagsBits::None;
-        oqp.queueFlags |= qp.queueFlags & VK_QUEUE_PROTECTED_BIT      ? QueueFlagsBits::Protected     : QueueFlagsBits::None;
+        oqp.queueFlags = GetOCQueueFlags(qp.queueFlags);
     }
     return queueProperties;
 }
 
-//const auto GetImageFormatProperties(const Handle& a_PhysicalDevice)
-//{
-//    vkGetPhysicalDeviceImageFormatProperties()
-//}
+Device::Handle CreateDevice(
+    const PhysicalDevice::Handle& a_PhysicalDevice,
+    const CreateDeviceInfo& a_Info,
+    const AllocationCallback* a_Allocator)
+{
+    const std::vector<const char*> extensions{
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+        VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME,
+    };
+    auto transferQueue = a_PhysicalDevice->findQueueFamily(vk::QueueFlagBits::eTransfer);
+    bool foundTransferQueue = false;
+    std::vector<vk::DeviceQueueCreateInfo> vkDeviceQueue;
+    vkDeviceQueue.reserve(a_Info.queueInfos.size());
+    for (const auto& queueInfo : a_Info.queueInfos) {
+        vk::DeviceQueueCreateInfo vkQueueInfo;
+        vkQueueInfo.pQueuePriorities = queueInfo.queuePriorities.data();
+        vkQueueInfo.queueCount = queueInfo.queueCount;
+        vkQueueInfo.queueFamilyIndex = queueInfo.queueFamilyIndex;
+        vkDeviceQueue.push_back(vkQueueInfo);
+        foundTransferQueue |= queueInfo.queueFamilyIndex == transferQueue;
+    }
+
+    vk::DeviceCreateInfo info;
+    info.enabledExtensionCount = extensions.size();
+    info.ppEnabledExtensionNames = extensions.data();
+    //info.pEnabledFeatures = a_Info.enabledFeatures;
+    info.queueCreateInfoCount = vkDeviceQueue.size();
+    info.pQueueCreateInfos = vkDeviceQueue.data();
+    return std::make_shared<Device::Impl>(*a_PhysicalDevice, info, foundTransferQueue);
+}
 
 uint32_t FindQueueFamily(const PhysicalDevice::Handle& a_PhysicalDevice, const QueueFlags& a_QueueFlags)
 {
-    auto& queueProperties = GetQueueFamilyProperties(a_PhysicalDevice);
-    for (auto familyIndex = 0u; familyIndex < queueProperties.size(); ++familyIndex) {
-        //check if a_QueueFlags is a subset of queueFlags
-        if ((queueProperties.at(familyIndex).queueFlags & a_QueueFlags) == a_QueueFlags)
-            return familyIndex;
-    }
-    return std::numeric_limits<uint32_t>::infinity();
+    return a_PhysicalDevice->findQueueFamily(GetVkQueueFlags(a_QueueFlags));
 }
 
 uint32_t FindMemoryType(const PhysicalDevice::Handle& a_PhysicalDevice, const MemoryPropertyFlags& a_MemoryProperties)
 {
-    auto& memoryProperties = PhysicalDevice::GetMemoryProperties(a_PhysicalDevice);
-    for (auto memoryTypeIndex = 0u; memoryTypeIndex < memoryProperties.memoryTypes.size(); ++memoryTypeIndex) {
-        if (memoryProperties.memoryTypes.at(memoryTypeIndex).propertyFlags == a_MemoryProperties)
-            return memoryTypeIndex;
-    }
-    //Couldn't find optimal memory type, take any fitting type
-    for (auto memoryTypeIndex = 0u; memoryTypeIndex < memoryProperties.memoryTypes.size(); ++memoryTypeIndex) {
-        if ((memoryProperties.memoryTypes.at(memoryTypeIndex).propertyFlags & a_MemoryProperties) != 0)
-            return memoryTypeIndex;
-    }
-    return std::numeric_limits<uint32_t>::infinity();
+    return a_PhysicalDevice->findMemoryType(GetVkMemoryPropertyFlags(a_MemoryProperties));
 }
 }

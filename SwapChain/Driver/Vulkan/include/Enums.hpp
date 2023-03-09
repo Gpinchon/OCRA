@@ -11,12 +11,12 @@ static inline auto GetVkPresentMode(const SwapChainPresentMode& a_PresentMode)
 	switch (a_PresentMode)
 	{
 	case SwapChainPresentMode::Immediate:
-		return VkPresentModeKHR::VK_PRESENT_MODE_IMMEDIATE_KHR;
+		return vk::PresentModeKHR::eImmediate;
 	case SwapChainPresentMode::Fifo:
-		return VkPresentModeKHR::VK_PRESENT_MODE_FIFO_KHR;
+		return vk::PresentModeKHR::eFifo;
 	case SwapChainPresentMode::Mailbox:
-		return VkPresentModeKHR::VK_PRESENT_MODE_MAILBOX_KHR;
+		return vk::PresentModeKHR::eMailbox;
 	}
-	return VK_PRESENT_MODE_MAX_ENUM_KHR;
+	return vk::PresentModeKHR(-1);
 }
 }

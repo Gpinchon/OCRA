@@ -1,21 +1,17 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
+#include <vulkan/vulkan_raii.hpp>
 
 namespace OCRA::Image
 {
-struct Impl {
-    Impl(const VkDevice& a_Device, const VkImage& a_Image)
-        : device(a_Device)
-        , image(a_Image)
+struct Impl : vk::raii::Image
+{
+    Impl(const vk::raii::Device& a_Device, const vk::ImageCreateInfo& a_Info)
+        : vk::raii::Image(a_Device, a_Info)
     {}
-    ~Impl() {
-        vkDestroyImage(device, image, nullptr);
-    }
-    operator auto& () const {
-        return image;
-    }
-    const VkDevice device;
-    const VkImage  image;
+    Impl(const vk::raii::Device& a_Device, const VkImage& a_Image)
+        : vk::raii::Image(a_Device, a_Image)
+    {}
+    vk::raii::DeviceMemory memory = nullptr;
 };
 }
