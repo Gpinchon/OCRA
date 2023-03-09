@@ -23,6 +23,7 @@ set(OCRA_SWAPCHAIN_HEADER_LIST
   OCRA/SwapChain/Methods/Device.hpp
   OCRA/SwapChain/Methods/Instance.hpp
   OCRA/SwapChain/Methods/PhysicalDevice.hpp
+  OCRA/SwapChain/Methods/Queue.hpp
   OCRA/SwapChain/Methods/SwapChain.hpp
 )
 

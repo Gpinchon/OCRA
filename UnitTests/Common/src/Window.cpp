@@ -123,7 +123,7 @@ void Window::Update()
 void Window::Present(const Queue::Handle& a_Queue, const Semaphore::Handle& a_WaitSemaphore)
 {
     if (a_WaitSemaphore != nullptr) presentInfo.waitSemaphores = { a_WaitSemaphore };
-    SwapChain::Present(a_Queue, presentInfo);
+    Queue::Present(a_Queue, presentInfo);
 }
 
 Image::Handle Window::AcquireNextImage(

@@ -1,6 +1,6 @@
-#include <SwapChain.hpp>
-#include <Surface.hpp>
-#include <Enums.hpp>
+#include <VK/SwapChain/SwapChain.hpp>
+#include <VK/SwapChain/Surface.hpp>
+#include <VK/SwapChain/Enums.hpp>
 
 #include <VK/Device.hpp>
 #include <VK/Enums.hpp>
@@ -8,7 +8,6 @@
 #include <VK/Flags.hpp>
 #include <VK/Image.hpp>
 #include <VK/Semaphore.hpp>
-#include <VK/Queue.hpp>
 
 #include <OCRA/Core.hpp>
 #include <OCRA/SwapChain.hpp>
@@ -57,32 +56,6 @@ SwapChain::Handle CreateSwapChain(
 
 namespace OCRA::SwapChain
 {
-void Present(
-    const Queue::Handle& a_Queue,
-    const SwapChainPresentInfo& a_PresentInfo)
-{
-    const auto swapChainCount = a_PresentInfo.swapChains.size();
-    std::vector<vk::SwapchainKHR> swapChains(swapChainCount);
-    std::vector<uint32_t> imageIndice(swapChainCount);
-    for (auto i = 0u; i < swapChainCount; ++i) {
-        const auto& swapChain = *a_PresentInfo.swapChains.at(i);
-        swapChains.at(i)  = *swapChain;
-        imageIndice.at(i) = swapChain.imageIndex;
-    }
-    const auto waitSemaphoreCount = a_PresentInfo.waitSemaphores.size();
-    std::vector<vk::Semaphore> waitSemaphores(waitSemaphoreCount);
-    for (auto i = 0u; i < waitSemaphoreCount; ++i) {
-        waitSemaphores.at(i) = **a_PresentInfo.waitSemaphores.at(i);
-    }
-    vk::PresentInfoKHR info{ VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
-    info.swapchainCount = swapChainCount;
-    info.pSwapchains    = swapChains.data();
-    info.pImageIndices  = imageIndice.data();
-    info.waitSemaphoreCount = waitSemaphoreCount;
-    info.pWaitSemaphores    = waitSemaphores.data();
-    a_Queue->presentKHR(info);
-}
-
 std::pair<Image::Handle, uint32_t> GetNextImage(
     const Handle& a_SwapChain,
     const std::chrono::nanoseconds& a_Timeout,

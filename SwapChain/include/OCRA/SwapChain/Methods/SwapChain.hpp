@@ -9,13 +9,6 @@
 namespace OCRA::SwapChain
 {
 /**
-* Presents the current Back Buffer to the Surface
-*/
-void Present(
-    const Queue::Handle& a_Queue,
-    const SwapChainPresentInfo& a_PresentInfo);
-
-/**
 * @return the actual number of images used by the SwapChain
 */
 uint32_t GetImageCount(const Handle& a_SwapChain);
