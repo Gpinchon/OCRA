@@ -2,10 +2,18 @@
 
 #include <bitset>
 
+#define OCRA_FLAG(name, bits)                        \
+struct name : std::bitset<bits> {                    \
+constexpr name(const std::bitset<bits>& a_Value = {})\
+    : std::bitset<bits>(a_Value)                     \
+{}                                                   \
+};
+
 namespace OCRA
 {
-using AccessFlags = std::bitset<17>;
+OCRA_FLAG(AccessFlags, 17);
 namespace AccessFlagBits {
+    constexpr AccessFlags None                          = 0b00000000000000000;
     constexpr AccessFlags IndirectCommandRead           = 0b10000000000000000;
     constexpr AccessFlags IndexRead                     = 0b01000000000000000;
     constexpr AccessFlags VertexAttributeRead           = 0b00100000000000000;
@@ -23,10 +31,8 @@ namespace AccessFlagBits {
     constexpr AccessFlags HostWrite                     = 0b00000000000000100;
     constexpr AccessFlags MemoryRead                    = 0b00000000000000010;
     constexpr AccessFlags MemoryWrite                   = 0b00000000000000001;
-    //VK_VERSION_1_3
-    constexpr AccessFlags None                          = 0b00000000000000000;
 }
-using BufferUsageFlags = std::bitset<10>;
+OCRA_FLAG(BufferUsageFlags, 10);
 namespace BufferUsageFlagBits {
     static BufferUsageFlags None                 = 0b0000000000;
     static BufferUsageFlags TransferSrc          = 0b1000000000;
@@ -40,23 +46,23 @@ namespace BufferUsageFlagBits {
     static BufferUsageFlags IndirectBuffer       = 0b0000000010;
     static BufferUsageFlags ShaderDeviceAddress  = 0b0000000001;// Provided by VK_VERSION_1_2
 }
-using BlendColorMaskFlags = std::bitset<4>;
-namespace BlendColorMaskFlagBits {
-    constexpr BlendColorMaskFlags R = 0b1000;
-    constexpr BlendColorMaskFlags G = 0b0100;
-    constexpr BlendColorMaskFlags B = 0b0010;
-    constexpr BlendColorMaskFlags A = 0b0001;
-    constexpr BlendColorMaskFlags RGBA = 0b1111;
-    constexpr BlendColorMaskFlags None = 0b0000;
+OCRA_FLAG(ColorComponentFlags, 4);
+namespace ColorComponentFlagBits {
+    constexpr ColorComponentFlags None = 0b0000;
+    constexpr ColorComponentFlags R    = 0b1000;
+    constexpr ColorComponentFlags G    = 0b0100;
+    constexpr ColorComponentFlags B    = 0b0010;
+    constexpr ColorComponentFlags A    = 0b0001;
+    constexpr ColorComponentFlags RGBA = 0b1111;
 }
-using CommandBufferUsageFlags = std::bitset<3>;
+OCRA_FLAG(CommandBufferUsageFlags, 3);
 namespace CommandBufferUsageFlagBits {
-    static CommandBufferUsageFlags None = 0b000;
-    static CommandBufferUsageFlags OneTimeSubmit = 0b100;
+    static CommandBufferUsageFlags None               = 0b000;
+    static CommandBufferUsageFlags OneTimeSubmit      = 0b100;
     static CommandBufferUsageFlags RenderPassContinue = 0b010;
-    static CommandBufferUsageFlags SimultaneousUse = 0b001;
+    static CommandBufferUsageFlags SimultaneousUse    = 0b001;
 };
-using CreateBufferFlags = std::bitset<5>;
+OCRA_FLAG(CreateBufferFlags, 5);
 namespace CreateBufferFlagBits {
     static CreateBufferFlags None                       = 0b00000;
     static CreateBufferFlags SparseBinding              = 0b10000;
@@ -65,21 +71,21 @@ namespace CreateBufferFlagBits {
     static CreateBufferFlags Protected                  = 0b00010;// VK_VERSION_1_1
     static CreateBufferFlags DeviceAddressCaptureReplay = 0b00001;// VK_VERSION_1_2
 }
-using CreateCommandPoolFlags = std::bitset<3>;
+OCRA_FLAG(CreateCommandPoolFlags, 3);
 namespace CreateCommandPoolFlagBits {
     static CreateCommandPoolFlags None      = 0b000;
     static CreateCommandPoolFlags Transient = 0b100;
     static CreateCommandPoolFlags Reset     = 0b010; //enables command buffers to be reset to their initial state
     static CreateCommandPoolFlags Protected = 0b001;
 }
-using DependencyFlags = std::bitset<3>;
+OCRA_FLAG(DependencyFlags, 3);
 namespace DependencyFlagBits {
+    constexpr DependencyFlags None        = 0b000;
     constexpr DependencyFlags ByRegion    = 0b001;
     constexpr DependencyFlags ViewLocal   = 0b010;
     constexpr DependencyFlags DeviceGroup = 0b100;
-    constexpr DependencyFlags None        = 0b000;
 }
-using ImageAspectFlags = std::bitset<7>;
+OCRA_FLAG(ImageAspectFlags, 7);
 namespace ImageAspectFlagBits {
     constexpr ImageAspectFlags None     = 0b0000000;
     constexpr ImageAspectFlags Color    = 0b1000000;
@@ -90,8 +96,9 @@ namespace ImageAspectFlagBits {
     constexpr ImageAspectFlags Plane1   = 0b0000010;
     constexpr ImageAspectFlags Plane2   = 0b0000001;
 }
-using ImageUsageFlags = std::bitset<8>;
+OCRA_FLAG(ImageUsageFlags, 8);
 namespace ImageUsageFlagBits {
+    constexpr ImageUsageFlags None                    = 0b00000000;
     constexpr ImageUsageFlags TransferSrc             = 0b10000000;
     constexpr ImageUsageFlags TransferDst             = 0b01000000;
     constexpr ImageUsageFlags Sampled                 = 0b00100000;
@@ -100,15 +107,14 @@ namespace ImageUsageFlagBits {
     constexpr ImageUsageFlags DepthStencilAttachment  = 0b00000100;
     constexpr ImageUsageFlags TransientAttachment     = 0b00000010;
     constexpr ImageUsageFlags InputAttachment         = 0b00000001;
-    constexpr ImageUsageFlags None                    = 0b00000000;
 }
-using MemoryHeapFlags = std::bitset<2>;
+OCRA_FLAG(MemoryHeapFlags, 2);
 namespace MemoryHeapFlagBits {
     static MemoryHeapFlags None             = 0b00;
     static MemoryHeapFlags DeviceLocal      = 0b10;
     static MemoryHeapFlags MultiInstance    = 0b01; //allows for memory mapping
 };
-using MemoryPropertyFlags = std::bitset<6>;
+OCRA_FLAG(MemoryPropertyFlags, 6);
 namespace MemoryPropertyFlagBits {
     static MemoryPropertyFlags None             = 0b000000;
     static MemoryPropertyFlags DeviceLocal      = 0b100000;
@@ -118,44 +124,43 @@ namespace MemoryPropertyFlagBits {
     static MemoryPropertyFlags LazilyAllocated  = 0b000010; //only allows access from device, do not use with HostVisible
     static MemoryPropertyFlags Protected        = 0b000001; //only allows access from device, allows protected queue operations, do not use with HostVisible, HostCoherent or HostCached
 };
-using PipelineStageFlags = std::bitset<32>;
+OCRA_FLAG(PipelineStageFlags, 17);
 namespace PipelineStageFlagBits {
-    constexpr PipelineStageFlags TopOfPipe                    = 0b00000000000000000000000000000001;
-    constexpr PipelineStageFlags DrawIndirect                 = 0b00000000000000000000000000000010;
-    constexpr PipelineStageFlags VertexInput                  = 0b00000000000000000000000000000100;
-    constexpr PipelineStageFlags VertexShader                 = 0b00000000000000000000000000001000;
-    constexpr PipelineStageFlags TessellationControlShader    = 0b00000000000000000000000000010000;
-    constexpr PipelineStageFlags TessellationEvaluationShader = 0b00000000000000000000000000100000;
-    constexpr PipelineStageFlags GeometryShader               = 0b00000000000000000000000001000000;
-    constexpr PipelineStageFlags FragmentShader               = 0b00000000000000000000000010000000;
-    constexpr PipelineStageFlags EarlyFragmentTests           = 0b00000000000000000000000100000000;
-    constexpr PipelineStageFlags LateFragmentTests            = 0b00000000000000000000001000000000;
-    constexpr PipelineStageFlags ColorAttachmentOutput        = 0b00000000000000000000010000000000;
-    constexpr PipelineStageFlags ComputeShader                = 0b00000000000000000000100000000000;
-    constexpr PipelineStageFlags Transfer                     = 0b00000000000000000001000000000000;
-    constexpr PipelineStageFlags BottomOfPipe                 = 0b00000000000000000010000000000000;
-    constexpr PipelineStageFlags Host                         = 0b00000000000000000100000000000000;
-    constexpr PipelineStageFlags AllGraphics                  = 0b00000000000000001000000000000000;
-    constexpr PipelineStageFlags AllCommands                  = 0b00000000000000010000000000000000;
-    //VK 1.3
-    constexpr PipelineStageFlags None                         = 0b00000000000000000000000000000000;
+    constexpr PipelineStageFlags None                         = 0b00000000000000000;
+    constexpr PipelineStageFlags TopOfPipe                    = 0b00000000000000001;
+    constexpr PipelineStageFlags DrawIndirect                 = 0b00000000000000010;
+    constexpr PipelineStageFlags VertexInput                  = 0b00000000000000100;
+    constexpr PipelineStageFlags VertexShader                 = 0b00000000000001000;
+    constexpr PipelineStageFlags TessellationControlShader    = 0b00000000000010000;
+    constexpr PipelineStageFlags TessellationEvaluationShader = 0b00000000000100000;
+    constexpr PipelineStageFlags GeometryShader               = 0b00000000001000000;
+    constexpr PipelineStageFlags FragmentShader               = 0b00000000010000000;
+    constexpr PipelineStageFlags EarlyFragmentTests           = 0b00000000100000000;
+    constexpr PipelineStageFlags LateFragmentTests            = 0b00000001000000000;
+    constexpr PipelineStageFlags ColorAttachmentOutput        = 0b00000010000000000;
+    constexpr PipelineStageFlags ComputeShader                = 0b00000100000000000;
+    constexpr PipelineStageFlags Transfer                     = 0b00001000000000000;
+    constexpr PipelineStageFlags BottomOfPipe                 = 0b00010000000000000;
+    constexpr PipelineStageFlags Host                         = 0b00100000000000000;
+    constexpr PipelineStageFlags AllGraphics                  = 0b01000000000000000;
+    constexpr PipelineStageFlags AllCommands                  = 0b10000000000000000;
 }
-using QueryPipelineStatisticFlags = std::bitset<11>;
+OCRA_FLAG(QueryPipelineStatisticFlags, 11);
 namespace QueryPipelineStatisticFlagBits {
-    static QueryPipelineStatisticFlags None = 0b00000000000;
-    static QueryPipelineStatisticFlags InputAssemblyVertices = 0b10000000000;
-    static QueryPipelineStatisticFlags InputAssemblyPrimitives = 0b01000000000;
-    static QueryPipelineStatisticFlags VertexShaderInvocations = 0b00100000000;
-    static QueryPipelineStatisticFlags GeometryShaderInvocations = 0b00010000000;
-    static QueryPipelineStatisticFlags GeometryShaderPrimitives = 0b00001000000;
-    static QueryPipelineStatisticFlags ClippingInvocations = 0b00000100000;
-    static QueryPipelineStatisticFlags ClippingPrimitives = 0b00000010000;
-    static QueryPipelineStatisticFlags FragmentShaderInvocations = 0b00000001000;
-    static QueryPipelineStatisticFlags TessellationControlShaderPatches = 0b00000000100;
+    static QueryPipelineStatisticFlags None                                    = 0b00000000000;
+    static QueryPipelineStatisticFlags InputAssemblyVertices                   = 0b10000000000;
+    static QueryPipelineStatisticFlags InputAssemblyPrimitives                 = 0b01000000000;
+    static QueryPipelineStatisticFlags VertexShaderInvocations                 = 0b00100000000;
+    static QueryPipelineStatisticFlags GeometryShaderInvocations               = 0b00010000000;
+    static QueryPipelineStatisticFlags GeometryShaderPrimitives                = 0b00001000000;
+    static QueryPipelineStatisticFlags ClippingInvocations                     = 0b00000100000;
+    static QueryPipelineStatisticFlags ClippingPrimitives                      = 0b00000010000;
+    static QueryPipelineStatisticFlags FragmentShaderInvocations               = 0b00000001000;
+    static QueryPipelineStatisticFlags TessellationControlShaderPatches        = 0b00000000100;
     static QueryPipelineStatisticFlags TessellationEvaluationShaderInvocations = 0b00000000010;
-    static QueryPipelineStatisticFlags ComputeShaderInvocations = 0b00000000001;
+    static QueryPipelineStatisticFlags ComputeShaderInvocations                = 0b00000000001;
 }
-using QueueFlags = std::bitset<5>;
+OCRA_FLAG(QueueFlags, 5);
 namespace QueueFlagBits {
     static QueueFlags None          = 0b00000;
     static QueueFlags Graphics      = 0b10000;
@@ -164,24 +169,24 @@ namespace QueueFlagBits {
     static QueueFlags SparseBinding = 0b00010;
     static QueueFlags Protected     = 0b00001;// VK_VERSION_1_1
 }
-using QueryResultFlags = std::bitset<4>;
+OCRA_FLAG(QueryResultFlags, 4);
 namespace QueryResultFlagBits {
-    static QueryResultFlags None = 0b0000;
-    static QueryResultFlags Result64Bits = 0b1000; //result stored in 64 bits
-    static QueryResultFlags Wait = 0b0100; //wait for the query result to be available
+    static QueryResultFlags None             = 0b0000;
+    static QueryResultFlags Result64Bits     = 0b1000; //result stored in 64 bits
+    static QueryResultFlags Wait             = 0b0100; //wait for the query result to be available
     static QueryResultFlags WithAvailability = 0b0010; //the availability status will accompany the results
-    static QueryResultFlags Partial = 0b0001; //specifies that partial result is acceptable
+    static QueryResultFlags Partial          = 0b0001; //specifies that partial result is acceptable
 }
-using ShaderStageFlags = std::bitset<6>;
+OCRA_FLAG(ShaderStageFlags, 6);
 namespace ShaderStageFlagBits {
-    constexpr ShaderStageFlags None = 0b000000;
-    constexpr ShaderStageFlags Vertex = 0b100000;
-    constexpr ShaderStageFlags Geometry = 0b010000;
-    constexpr ShaderStageFlags Fragment = 0b001000;
-    constexpr ShaderStageFlags Compute = 0b000100;
+    constexpr ShaderStageFlags None        = 0b000000;
+    constexpr ShaderStageFlags Vertex      = 0b100000;
+    constexpr ShaderStageFlags Geometry    = 0b010000;
+    constexpr ShaderStageFlags Fragment    = 0b001000;
+    constexpr ShaderStageFlags Compute     = 0b000100;
     constexpr ShaderStageFlags TessControl = 0b000010;
-    constexpr ShaderStageFlags TessEval = 0b000001;
+    constexpr ShaderStageFlags TessEval    = 0b000001;
     constexpr ShaderStageFlags AllGraphics = 0b111000; //Vertex | Geometry | Fragment
-    constexpr ShaderStageFlags All = 0b111111;
+    constexpr ShaderStageFlags All         = 0b111111;
 }
 }

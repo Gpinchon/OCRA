@@ -4,8 +4,8 @@ namespace OCRA
 {
 enum class BlendOp {
     Add,
-    Substract,
-    ReverseSubstract,
+    Subtract,
+    ReverseSubtract,
     Min,
     Max,
     MaxValue

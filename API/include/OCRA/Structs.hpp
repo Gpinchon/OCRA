@@ -227,7 +227,7 @@ struct PipelineColorBlendAttachmentState {
     BlendFactor srcAlphaBlendFactor { BlendFactor::One };
     BlendFactor dstAlphaBlendFactor { BlendFactor::Zero };
     BlendOp alphaBlendOperation { BlendOp::Add };
-    BlendColorMaskFlags colorMask { BlendColorMaskFlagBits::R | BlendColorMaskFlagBits::G | BlendColorMaskFlagBits::B | BlendColorMaskFlagBits::A }; //color mask used for writing to this attachment
+    ColorComponentFlags colorMask { ColorComponentFlagBits::RGBA }; //color mask used for writing to this attachment
 };
 struct PipelineColorBlendState {
     bool logicOpEnable{ false };
