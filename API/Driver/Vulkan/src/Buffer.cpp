@@ -18,9 +18,9 @@ Buffer::Handle CreateBuffer(
     info.queueFamilyIndexCount = a_Info.queueFamilyIndices.size();
     info.pQueueFamilyIndices = a_Info.queueFamilyIndices.data();
     info.size = a_Info.size;
-    info.usage = GetVkBufferUsageFlags(a_Info.usage);
-    info.flags = GetVkBufferCreateFlags(a_Info.flags);
-    info.sharingMode = GetVkSharingMode(a_Info.sharingMode);
+    info.usage = ConvertToVk(a_Info.usage);
+    info.flags = ConvertToVk(a_Info.flags);
+    info.sharingMode = ConvertToVk(a_Info.sharingMode);
     return std::make_shared<Buffer::Impl>(*a_Device, info);
 }
 
@@ -32,7 +32,7 @@ Buffer::Handle AllocateBuffer(
     auto& device = *a_Device;
     Memory::Handle memory;
     vk::MemoryAllocateInfo  vkMemoryInfo;
-    vk::MemoryPropertyFlags vkMemoryFlags = GetVkMemoryPropertyFlags(a_Info.memoryFlags);
+    vk::MemoryPropertyFlags vkMemoryFlags = ConvertToVk(a_Info.memoryFlags);
     auto p = device.physicalDevice.getMemoryProperties();
     vkMemoryInfo.allocationSize = a_Info.size;
     for (auto i = 0u; i < p.memoryTypeCount; ++i) {

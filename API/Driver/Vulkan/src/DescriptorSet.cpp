@@ -30,7 +30,7 @@ void Update(
         vkWrite.dstBinding = write.dstBinding;
         vkWrite.dstArrayElement = write.dstArrayElement;
         vkWrite.descriptorCount = write.dstCount;
-        vkWrite.descriptorType  = GetVkDescriptorType(write.type);
+        vkWrite.descriptorType  = ConvertToVk(write.type);
         if (write.bufferInfo.has_value()) {
             auto& bufferInfo   = write.bufferInfo.value();
             auto& vkBufferInfo = vkWriteBufferInfo.at(i);
@@ -43,8 +43,8 @@ void Update(
             auto& imageInfo   = write.imageInfo.value();
             auto& vkImageInfo = vkWriteImageInfo.at(i);
             vkImageInfo.imageLayout = vk::ImageLayout::eGeneral;
-            vkImageInfo.imageView   = *imageInfo.imageView;
-            vkImageInfo.sampler     = *imageInfo.sampler;
+            vkImageInfo.imageView   = **imageInfo.imageView;
+            vkImageInfo.sampler     = **imageInfo.sampler;
         }
     }
     for (auto i = 0u; i < a_Copies.size(); ++i) {

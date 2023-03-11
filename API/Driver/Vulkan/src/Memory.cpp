@@ -27,7 +27,7 @@ Memory::Handle AllocateMemory(
     auto& device = *a_Device;
     vk::MemoryAllocateInfo info{ VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO };
     info.allocationSize = a_Size;
-    info.memoryTypeIndex = device.physicalDevice.findMemoryType(GetVkMemoryPropertyFlags(a_MemoryFlags));
+    info.memoryTypeIndex = device.physicalDevice.findMemoryType(ConvertToVk(a_MemoryFlags));
     return std::make_shared<Memory::Impl>(device, info);
 }
 }

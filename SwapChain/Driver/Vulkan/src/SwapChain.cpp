@@ -25,12 +25,12 @@ SwapChain::Handle CreateSwapChain(
     info.clipped = a_Info.clipped;
     info.compositeAlpha     = vk::CompositeAlphaFlagBitsKHR::eOpaque;
     info.imageArrayLayers   = a_Info.imageArrayLayers;
-    info.imageColorSpace    = GetVkColorSpace(a_Info.imageColorSpace);
+    info.imageColorSpace    = ConvertToVk(a_Info.imageColorSpace);
     info.imageExtent.height = a_Info.imageExtent.height;
     info.imageExtent.width  = a_Info.imageExtent.width;
-    info.imageFormat        = GetVkFormat(a_Info.imageFormat);
-    info.imageSharingMode   = GetVkSharingMode(a_Info.imageSharingMode);
-    info.imageUsage         = GetVkImageUsage(a_Info.imageUsage);
+    info.imageFormat        = ConvertToVk(a_Info.imageFormat);
+    info.imageSharingMode   = ConvertToVk(a_Info.imageSharingMode);
+    info.imageUsage         = ConvertToVk(a_Info.imageUsage);
     info.minImageCount = a_Info.imageCount;
     info.oldSwapchain = a_Info.oldSwapchain ? **a_Info.oldSwapchain : nullptr;
     info.queueFamilyIndexCount = a_Info.queueFamilyIndices.size();

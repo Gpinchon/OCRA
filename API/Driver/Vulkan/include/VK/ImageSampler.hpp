@@ -1,22 +1,15 @@
 #pragma once
 
-#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan_raii.hpp>
 
 namespace OCRA::Image::Sampler
 {
-struct Impl
+struct Impl : vk::raii::Sampler
 {
-    Impl(const VkDevice& a_Device, const VkSampler& a_Sampler)
-        : device(a_Device)
-        , sampler(a_Sampler)
+    Impl(
+        const vk::raii::Device& a_Device,
+        const vk::SamplerCreateInfo& a_Info)
+        : vk::raii::Sampler(a_Device, a_Info)
     {}
-    ~Impl() {
-        vkDestroySampler(device, sampler, nullptr);
-    }
-    operator auto& () const {
-        return sampler;
-    }
-    const VkDevice  device;
-    const VkSampler sampler;
 };
 }

@@ -51,7 +51,7 @@ void Submit(
         for (const auto& waitInfo : submitInfo.waitSemaphores) {
             vkWaitSemaphores.push_back(**waitInfo.semaphore);
             vkWaitValues.push_back(waitInfo.timelineValue);
-            vkWaitDstFlags.push_back(GetVkPipelineStageFlags(waitInfo.dstStages));
+            vkWaitDstFlags.push_back(ConvertToVk(waitInfo.dstStages));
         }
         vkSubmitInfo.waitSemaphoreCount = vkWaitSemaphores.size();
         vkSubmitInfo.pWaitSemaphores    = vkWaitSemaphores.data();

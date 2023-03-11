@@ -166,14 +166,14 @@ const MemoryProperties GetMemoryProperties(const Handle& a_PhysicalDevice)
         const auto& mh = p.memoryHeaps[i];
         auto& omh = memoryProperties.memoryHeaps.at(i);
         omh.size = mh.size;
-        omh.flags = GetOCMemoryHeapFlags(mh.flags);
+        omh.flags = ConvertFromVk(mh.flags);
     }
     memoryProperties.memoryTypes.resize(p.memoryTypeCount);
     for (auto i = 0u; i < p.memoryTypeCount; ++i) {
         const auto& mt = p.memoryTypes[i];
         auto& omt = memoryProperties.memoryTypes.at(i);
         omt.heapIndex = mt.heapIndex;
-        omt.propertyFlags = GetOCMemoryPropertyFlags(mt.propertyFlags);
+        omt.propertyFlags = ConvertFromVk(mt.propertyFlags);
     }
     return memoryProperties;
 }
@@ -182,7 +182,7 @@ const PhysicalDeviceProperties GetProperties(const Handle& a_PhysicalDevice)
 {
     PhysicalDeviceProperties properties;
     auto& vkProperties = a_PhysicalDevice->getProperties();
-    properties.deviceType = GetOCPhysicalDeviceType(vkProperties.deviceType);
+    properties.deviceType = ConvertFromVk(vkProperties.deviceType);
     switch (vkProperties.vendorID)
     {
     case 0x1002:
@@ -292,7 +292,7 @@ const std::vector<QueueFamilyProperties> GetQueueFamilyProperties(const Handle& 
             qp.minImageTransferGranularity.width,
             qp.minImageTransferGranularity.height,
             qp.minImageTransferGranularity.depth);
-        oqp.queueFlags = GetOCQueueFlags(qp.queueFlags);
+        oqp.queueFlags = ConvertFromVk(qp.queueFlags);
     }
     return queueProperties;
 }
@@ -330,11 +330,11 @@ Device::Handle CreateDevice(
 
 uint32_t FindQueueFamily(const PhysicalDevice::Handle& a_PhysicalDevice, const QueueFlags& a_QueueFlags)
 {
-    return a_PhysicalDevice->findQueueFamily(GetVkQueueFlags(a_QueueFlags));
+    return a_PhysicalDevice->findQueueFamily(ConvertToVk(a_QueueFlags));
 }
 
 uint32_t FindMemoryType(const PhysicalDevice::Handle& a_PhysicalDevice, const MemoryPropertyFlags& a_MemoryProperties)
 {
-    return a_PhysicalDevice->findMemoryType(GetVkMemoryPropertyFlags(a_MemoryProperties));
+    return a_PhysicalDevice->findMemoryType(ConvertToVk(a_MemoryProperties));
 }
 }

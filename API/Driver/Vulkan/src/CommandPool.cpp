@@ -15,7 +15,7 @@ std::vector<Command::Buffer::Handle> AllocateCommandBuffer(
     auto& pool = *a_Pool;
     auto& device = pool.device;
     vk::CommandBufferAllocateInfo info;
-    info.level = GetVkCommandBufferLevel(a_Info.level);
+    info.level = ConvertToVk(a_Info.level);
     info.commandPool = *pool;
     info.commandBufferCount = a_Info.count;
     auto vkBuffers = device.allocateCommandBuffers(info);

@@ -48,15 +48,15 @@ void PipelineBarrier(
     vkMemoryBarriers.reserve(a_MemoryBarriers.size());
     for (const auto& barrier : a_MemoryBarriers) {
         vk::MemoryBarrier vkBarrier;
-        vkBarrier.dstAccessMask = GetVkAccessMaskFlags(barrier.dstAccessMask);
-        vkBarrier.srcAccessMask = GetVkAccessMaskFlags(barrier.srcAccessMask);
+        vkBarrier.dstAccessMask = ConvertToVk(barrier.dstAccessMask);
+        vkBarrier.srcAccessMask = ConvertToVk(barrier.srcAccessMask);
         vkMemoryBarriers.push_back(vkBarrier);
     }
     vkBufferMemoryBarriers.reserve(a_BufferMemoryBarriers.size());
     for (const auto& barrier : a_BufferMemoryBarriers) {
         vk::BufferMemoryBarrier vkBarrier;
-        vkBarrier.dstAccessMask = GetVkAccessMaskFlags(barrier.dstAccessMask);
-        vkBarrier.srcAccessMask = GetVkAccessMaskFlags(barrier.srcAccessMask);
+        vkBarrier.dstAccessMask = ConvertToVk(barrier.dstAccessMask);
+        vkBarrier.srcAccessMask = ConvertToVk(barrier.srcAccessMask);
         vkBarrier.dstQueueFamilyIndex = barrier.dstQueueFamilyIndex;
         vkBarrier.srcQueueFamilyIndex = barrier.srcQueueFamilyIndex;
         vkBarrier.buffer = **barrier.buffer;
@@ -69,11 +69,11 @@ void PipelineBarrier(
         vk::ImageMemoryBarrier vkBarrier;
         vkBarrier.image = **barrier.image;
         vkBarrier.newLayout     = vk::ImageLayout::eTransferDstOptimal;
-        vkBarrier.dstAccessMask = GetVkAccessMaskFlags(barrier.dstAccessMask);
-        vkBarrier.srcAccessMask = GetVkAccessMaskFlags(barrier.srcAccessMask);
+        vkBarrier.dstAccessMask = ConvertToVk(barrier.dstAccessMask);
+        vkBarrier.srcAccessMask = ConvertToVk(barrier.srcAccessMask);
         vkBarrier.dstQueueFamilyIndex = barrier.dstQueueFamilyIndex;
         vkBarrier.srcQueueFamilyIndex = barrier.srcQueueFamilyIndex;
-        vkBarrier.subresourceRange.aspectMask     = GetVkImageAspectFlags(barrier.subRange.aspects);
+        vkBarrier.subresourceRange.aspectMask     = ConvertToVk(barrier.subRange.aspects);
         vkBarrier.subresourceRange.baseArrayLayer = barrier.subRange.baseArrayLayer;
         vkBarrier.subresourceRange.baseMipLevel   = barrier.subRange.baseMipLevel;
         vkBarrier.subresourceRange.layerCount     = barrier.subRange.layerCount;
@@ -81,9 +81,9 @@ void PipelineBarrier(
         vkImageMemoryBarriers.push_back(vkBarrier);
     }
     a_CommandBuffer->pipelineBarrier(
-        GetVkPipelineStageFlags(a_SrcStageMask),
-        GetVkPipelineStageFlags(a_DstStageMask),
-        GetVkDependencyFlags(a_DependencyFlags),
+        ConvertToVk(a_SrcStageMask),
+        ConvertToVk(a_DstStageMask),
+        ConvertToVk(a_DependencyFlags),
         vkMemoryBarriers,
         vkBufferMemoryBarriers,
         vkImageMemoryBarriers);
@@ -100,11 +100,11 @@ void CopyImage(
     {
         auto& copy = a_Regions.at(i);
         auto& vkCopy = vkCopies.at(i);
-        vkCopy.extent = GetVkExtent3D(copy.extent);
-        vkCopy.dstOffset      = GetVkOffset3D(copy.dstOffset);
-        vkCopy.dstSubresource = GetVkImageSubresourceLayers(copy.dstSubresource);
-        vkCopy.srcOffset      = GetVkOffset3D(copy.srcOffset);
-        vkCopy.srcSubresource = GetVkImageSubresourceLayers(copy.srcSubresource);
+        vkCopy.extent = ConvertToVk(copy.extent);
+        vkCopy.dstOffset      = ConvertToVk(copy.dstOffset);
+        vkCopy.dstSubresource = ConvertToVk(copy.dstSubresource);
+        vkCopy.srcOffset      = ConvertToVk(copy.srcOffset);
+        vkCopy.srcSubresource = ConvertToVk(copy.srcSubresource);
     }
     a_CommandBuffer->copyImage(
         **a_SrcImage, vk::ImageLayout::eTransferSrcOptimal,
@@ -126,12 +126,12 @@ void TransitionImagesLayout(
         auto& srcQueueFamily = transition.srcQueueFamilyIndex;
         auto& dstQueueFamily = transition.dstQueueFamilyIndex;
         auto& barrier = barriers.at(i);
-        auto oldLayout = GetVkImageLayout(transition.oldLayout);
-        auto newLayout = GetVkImageLayout(transition.newLayout);
+        auto oldLayout = ConvertToVk(transition.oldLayout);
+        auto newLayout = ConvertToVk(transition.newLayout);
         vkSrcStageFlags |= GetImageTransitionStage(oldLayout);
         vkDstStageFlags |= GetImageTransitionStage(newLayout);
         barrier.image = *image;
-        barrier.subresourceRange = GetVkImageSubresourceRange(subResource);
+        barrier.subresourceRange = ConvertToVk(subResource);
         barrier.oldLayout = oldLayout;
         barrier.newLayout = newLayout;
         barrier.srcQueueFamilyIndex = srcQueueFamily;
@@ -162,7 +162,7 @@ void ClearColorImage(
     static_assert(sizeof(ColorValue) == sizeof(vk::ClearColorValue));
     std::vector<vk::ImageSubresourceRange> vkRanges(a_Ranges.size());
     for (auto i = 0u; i < a_Ranges.size(); ++i)
-        vkRanges.at(i) = GetVkImageSubresourceRange(a_Ranges.at(i));
+        vkRanges.at(i) = ConvertToVk(a_Ranges.at(i));
     a_CommandBuffer->clearColorImage(**a_Image,
         vk::ImageLayout::eTransferDstOptimal,
         reinterpret_cast<const vk::ClearColorValue&>(a_Color),
@@ -194,9 +194,9 @@ void BeginRenderPass(
     {
         auto& clearValue = a_BeginInfo.colorClearValues.at(i);
         auto& vkClearValue = vkClearValues.at(i);
-        vkClearValue.color = GetVkClearColorValue(clearValue);
+        vkClearValue.color = ConvertToVk(clearValue);
     }
-    vkClearValues.back().depthStencil = GetVkClearDepthStencilValue(a_BeginInfo.depthStencilClearValue);
+    vkClearValues.back().depthStencil = ConvertToVk(a_BeginInfo.depthStencilClearValue);
     VkRenderPassBeginInfo vkInfo{ VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
     vkInfo.clearValueCount = vkClearValues.size();
     vkInfo.framebuffer = *a_BeginInfo.framebuffer;
@@ -206,7 +206,7 @@ void BeginRenderPass(
 static inline auto GetVkRenderingAttachmentInfo(const RenderingAttachmentInfo& a_Info) {
     vk::RenderingAttachmentInfo vkInfo;
     //vkInfo.clearValue = GetVkClearValue(a_Info.clearValue);
-    //vkInfo.imageLayout = GetVkImageLayout(a_Info.imageLayout);
+    //vkInfo.imageLayout = ConvertToVk(a_Info.imageLayout);
     //vkInfo.imageView = *a_Info.imageView;
     //vkInfo.loadOp = GetVkAttachmentLoadOp(a_Info.loadOp);
     ////vkInfo.resolveImageLayout
@@ -235,7 +235,7 @@ void BeginRendering(
     vkInfo.flags = {};
     vkInfo.viewMask = 0;
     vkInfo.layerCount = a_Info.layerCount;
-    vkInfo.renderArea = GetVkRect2D(a_Info.area);
+    vkInfo.renderArea = ConvertToVk(a_Info.area);
     vkInfo.pColorAttachments = vkColorAttachments.data();
     vkInfo.pDepthAttachment = &vkDepthAttachment;
     vkInfo.pStencilAttachment = &vkStencilAttachment;

@@ -1,22 +1,20 @@
 #pragma once
 
-#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan_raii.hpp>
+
+#include <OCRA/Handles.hpp>
 
 namespace OCRA::Image::View
 {
-struct Impl
+struct Impl : vk::raii::ImageView
 {
-    Impl(const VkDevice& a_Device, const VkImageView& a_ImageView)
-        : device(a_Device)
-        , imageView(a_ImageView)
+    Impl(
+        const vk::raii::Device& a_Device,
+        const vk::ImageViewCreateInfo& a_Info,
+        const Image::Handle& a_Image)
+        : vk::raii::ImageView(a_Device, a_Info)
+        , image(a_Image)
     {}
-    ~Impl() {
-        vkDestroyImageView(device, imageView, nullptr);
-    }
-    operator auto& () const {
-        return imageView;
-    }
-    const VkDevice    device;
-    const VkImageView imageView;
+    const Image::Handle image;
 };
 }

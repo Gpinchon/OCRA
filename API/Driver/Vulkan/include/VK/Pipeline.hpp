@@ -9,10 +9,9 @@ namespace OCRA::Pipeline
 struct Impl : vk::raii::Pipeline
 {
     Impl(
-        const vk::raii::Device& a_Device,
-        const vk::GraphicsPipelineCreateInfo& a_Info,
+        vk::raii::Pipeline&& a_Pipeline,
         const vk::PipelineBindPoint& a_BindPoint)
-        : vk::raii::Pipeline(a_Device, nullptr, a_Info)
+        : vk::raii::Pipeline(std::move(a_Pipeline))
         , bindPoint(a_BindPoint)
     {}
     const vk::PipelineBindPoint bindPoint;

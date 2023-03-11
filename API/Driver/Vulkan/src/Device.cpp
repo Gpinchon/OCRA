@@ -6,7 +6,9 @@
 #include <VK/Enums.hpp>
 #include <VK/Fence.hpp>
 #include <VK/Flags.hpp>
+#include <VK/GraphicsPipeline.hpp>
 #include <VK/Image.hpp>
+#include <VK/ImageView.hpp>
 #include <VK/PhysicalDevice.hpp>
 #include <VK/Queue.hpp>
 #include <VK/Semaphore.hpp>
@@ -23,7 +25,7 @@ Command::Pool::Handle CreateCommandPool(
 {
     vk::CommandPoolCreateInfo info;
     info.queueFamilyIndex = a_Info.queueFamilyIndex;
-    info.flags = GetVkCommandPoolCreateFlags(a_Info.flags);
+    info.flags = ConvertToVk(a_Info.flags);
     return std::make_shared<Command::Pool::Impl>(*a_Device, info);
 }
 
@@ -35,7 +37,7 @@ Descriptor::Pool::Handle CreateDescriptorPool(const Device::Handle& a_Device, co
     for (const auto& size : a_Info.sizes) {
         vk::DescriptorPoolSize vkSize{};
         vkSize.descriptorCount = size.count;
-        vkSize.type = GetVkDescriptorType(size.type);
+        vkSize.type = ConvertToVk(size.type);
         vkPoolSizes.push_back(vkSize);
     }
     info.flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet | vk::DescriptorPoolCreateFlagBits::eUpdateAfterBind;
@@ -60,8 +62,8 @@ Descriptor::SetLayout::Handle CreateDescriptorSetLayout(
         vk::DescriptorSetLayoutBinding vkBinding{};
         vkBinding.binding = binding.binding;
         vkBinding.descriptorCount = binding.count;
-        vkBinding.descriptorType = GetVkDescriptorType(binding.type);
-        vkBinding.stageFlags = GetVkShaderStage(binding.stageFlags);
+        vkBinding.descriptorType = ConvertToVk(binding.type);
+        vkBinding.stageFlags = ConvertToVk(binding.stageFlags);
         vkBindings.push_back(vkBinding);
     }
     info.bindingCount = vkBindings.size();
@@ -80,6 +82,36 @@ Fence::Handle CreateFence(
     return std::make_shared<Fence::Impl>(device, info);
 }
 
+Pipeline::Handle CreatePipelineGraphics(
+    const Device::Handle& a_Device,
+    const CreatePipelineGraphicsInfo& a_Info)
+{
+    auto& device = *a_Device;
+    vk::PipelineShaderStageCreateInfo        shaderStageCreateInfo;
+    vk::PipelineVertexInputStateCreateInfo   vertexInputStateCreateInfo;
+    vk::PipelineInputAssemblyStateCreateInfo inputAssemblyStateCreateInfo;
+    vk::PipelineTessellationStateCreateInfo  tessellationStateCreateInfo;
+    vk::PipelineViewportStateCreateInfo      viewportStateCreateInfo;
+    vk::PipelineRasterizationStateCreateInfo rasterizationStateCreateInfo;
+    vk::PipelineMultisampleStateCreateInfo   multisampleStateCreateInfo;
+    vk::PipelineDepthStencilStateCreateInfo  depthStencilStateCreateInfo;
+    vk::PipelineColorBlendStateCreateInfo    colorBlendStateCreateInfo;
+    vk::PipelineDynamicStateCreateInfo       dynamicStateCreateInfo;
+    vk::GraphicsPipelineCreateInfo info(
+        {}, a_Info.shaderPipelineState.stages.size(),
+        &shaderStageCreateInfo,
+        &vertexInputStateCreateInfo,
+        &inputAssemblyStateCreateInfo,
+        &tessellationStateCreateInfo,
+        &viewportStateCreateInfo,
+        &rasterizationStateCreateInfo,
+        &multisampleStateCreateInfo,
+        &depthStencilStateCreateInfo,
+        &colorBlendStateCreateInfo,
+        &dynamicStateCreateInfo);
+    return std::make_shared<Pipeline::Graphics::Impl>(device, info);
+}
+
 Image::Handle CreateImage(
     const Device::Handle& a_Device,
     const CreateImageInfo& a_Info)
@@ -87,13 +119,13 @@ Image::Handle CreateImage(
     auto& device = *a_Device;
     vk::ImageCreateInfo vkInfo;
     vkInfo.arrayLayers = a_Info.arrayLayers;
-    vkInfo.extent = GetVkExtent3D(a_Info.extent);
-    vkInfo.usage = GetVkImageUsageFlags(a_Info.usage);
-    vkInfo.format = GetVkFormat(a_Info.format);
-    vkInfo.imageType = GetVkImageType(a_Info.type);
-    vkInfo.initialLayout = GetVkImageLayout(a_Info.initialLayout);
+    vkInfo.extent = ConvertToVk(a_Info.extent);
+    vkInfo.usage = ConvertToVk(a_Info.usage);
+    vkInfo.format = ConvertToVk(a_Info.format);
+    vkInfo.imageType = ConvertToVk(a_Info.type);
+    vkInfo.initialLayout = ConvertToVk(a_Info.initialLayout);
     vkInfo.mipLevels = a_Info.mipLevels;
-    vkInfo.samples = GetVkSampleCount(a_Info.samples);
+    vkInfo.samples = ConvertToVk(a_Info.samples);
     auto image = std::make_shared<Image::Impl>(device, vkInfo);
     vk::DeviceImageMemoryRequirements requirements(&vkInfo);
     auto vkMemoryRequirements = device.getImageMemoryRequirements(&vkInfo).memoryRequirements;
@@ -103,6 +135,22 @@ Image::Handle CreateImage(
     image->memory = device.allocateMemory(vkMemoryInfo);
     image->bindMemory(*image->memory, 0);
     return image;
+}
+
+Image::View::Handle CreateImageView(
+    const Device::Handle& a_Device,
+    const CreateImageViewInfo& a_Info)
+{
+    auto& device = *a_Device;
+    vk::ImageViewCreateFlags flags;
+    vk::ImageViewCreateInfo vkInfo(
+        flags,
+        **a_Info.image,
+        ConvertToVk(a_Info.type),
+        ConvertToVk(a_Info.format),
+        ConvertToVk(a_Info.components),
+        ConvertToVk(a_Info.subRange));
+    return std::make_shared<Image::View::Impl>(device, vkInfo, a_Info.image);
 }
 
 Semaphore::Handle CreateSemaphore(

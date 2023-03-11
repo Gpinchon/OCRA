@@ -76,7 +76,7 @@ struct GraphicsPipelineTestApp : TestApp
         window.OnMaximize = window.OnResize;
         window.OnRestore = window.OnResize;
         window.OnMinimize = [this](const Window&, const uint32_t, const uint32_t) { render = false; };
-        const auto queueFamily = PhysicalDevice::FindQueueFamily(physicalDevice, QueueFlagsBits::Graphics);
+        const auto queueFamily = PhysicalDevice::FindQueueFamily(physicalDevice, QueueFlagBits::Graphics);
         queue = Device::GetQueue(device, queueFamily, 0); //Get first available queue
         commandPool = CreateCommandPool(device, queueFamily);
         //renderPass = CreateRenderPass();

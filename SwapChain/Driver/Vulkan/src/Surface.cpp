@@ -43,8 +43,8 @@ std::vector<SurfaceFormat> GetSurfaceFormats(
     for (auto i = 0u; i < vkFormats.size(); ++i) {
         auto& format = formats.at(i);
         auto& vkFormat = vkFormats.at(i);
-        format.colorSpace = GetOCColorSpace(vkFormat.colorSpace);
-        format.format     = GetOCFormat(vkFormat.format);
+        format.colorSpace = ConvertFromVk(vkFormat.colorSpace);
+        format.format     = ConvertFromVk(vkFormat.format);
     }
     return formats;
 }
