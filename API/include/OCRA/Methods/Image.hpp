@@ -12,9 +12,9 @@
 
 namespace OCRA::Image {
 /**
-* @return the byte size of a pixel for this format
+* @return the byte size of the texture
 */
-size_t GetPixelSize(const Format&);
+size_t GetDataSize(const Image::Handle& a_Image);
 
 /**
 * @brief Copies the specified buffer to the specified image.

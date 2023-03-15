@@ -45,7 +45,7 @@ PBRMaterial::PBRMaterial(
 {
     //Fill texture with white
     auto& texture = static_cast<const Texture2D&>(GetTexture(0));
-    const auto textureSize = texture.GetWidth() * texture.GetHeight() * Image::GetPixelSize(texture.GetImageInfo().format);
+    const auto textureSize = Image::GetDataSize(texture.GetImage());
     CreateBufferInfo bufferInfo;
     bufferInfo.size = textureSize;
     bufferInfo.usage = BufferUsageFlagBits::TransferSrc;

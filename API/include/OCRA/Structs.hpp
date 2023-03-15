@@ -89,29 +89,33 @@ struct SubPassDescription {
     AttachmentReference              stencilAttachment{};
 };
 union ColorValue {
-    ColorValue() = default;
-    ColorValue(float a_R, float a_G, float a_B, float a_A) {
+    constexpr ColorValue() noexcept = default;
+    constexpr ColorValue(float a_R, float a_G, float a_B, float a_A) noexcept {
         float32[0] = a_R;
         float32[1] = a_G;
         float32[2] = a_B;
         float32[3] = a_A;
     }
-    ColorValue(int32_t a_R, int32_t a_G, int32_t a_B, int32_t a_A) {
+    constexpr ColorValue(int32_t a_R, int32_t a_G, int32_t a_B, int32_t a_A) noexcept {
         int32[0] = a_R;
         int32[1] = a_G;
         int32[2] = a_B;
         int32[3] = a_A;
     }
-    ColorValue(uint32_t a_R, uint32_t a_G, uint32_t a_B, uint32_t a_A) {
+    constexpr ColorValue(uint32_t a_R, uint32_t a_G, uint32_t a_B, uint32_t a_A) noexcept {
         uint32[0] = a_R;
         uint32[1] = a_G;
         uint32[2] = a_B;
         uint32[3] = a_A;
     }
-    float    float32[4]{ 0, 0, 0, 0 };
-    int32_t  int32[4];
+    int32_t  int32[4]{ 0, 0, 0, 0 };
     uint32_t uint32[4];
+    float    float32[4];
 };
+constexpr auto TransparentBlack = ColorValue{ 0, 0, 0, 0 };
+constexpr auto OpaqueBlack = ColorValue{ 0, 0, 0, 1 };
+constexpr auto OpaqueWhite = ColorValue{ 1, 1, 1, 1 };
+
 struct DepthStencilValue {
     float    depth{ 0 };
     uint32_t stencil{ 0 };
@@ -147,13 +151,6 @@ struct DepthRange {
 
 using Offset2D = iVec2;
 using Offset3D = iVec3;
-
-struct SamplerBorderColor {
-    float R { 0 }, G { 0 }, B { 0 }, A { 0 };
-};
-constexpr SamplerBorderColor TransparentBlack = SamplerBorderColor { 0, 0, 0, 0 };
-constexpr SamplerBorderColor OpaqueBlack = SamplerBorderColor { 0, 0, 0, 1 };
-constexpr SamplerBorderColor OpaqueWhite = SamplerBorderColor { 1, 1, 1, 1 };
 
 struct Rect2D
 {
@@ -718,7 +715,7 @@ struct CreateRenderPassInfo {
 struct CreateImageSamplerInfo {
     Filter minFilter{ Filter::Linear };
     Filter magFilter{ Filter::Linear };
-    Filter mipmapMode{ Filter::Linear };
+    Filter mipmapMode{ Filter::Linear }; //must be Linear or Nearest
     SamplerAddressMode addressModeU{ SamplerAddressMode::Repeat };
     SamplerAddressMode addressModeV{ SamplerAddressMode::Repeat };
     SamplerAddressMode addressModeW{ SamplerAddressMode::Repeat };
@@ -729,7 +726,7 @@ struct CreateImageSamplerInfo {
     CompareOp compareOp{ CompareOp::Unknown };
     float minLod{ 0 };
     float maxLod{ 1000 };
-    SamplerBorderColor borderColor{ TransparentBlack };
+    Vec4 borderColor;
 };
 struct CreateSemaphoreInfo {
     SemaphoreType type{ SemaphoreType::Unknown };

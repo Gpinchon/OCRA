@@ -164,13 +164,13 @@ struct GraphicsPipelineTestApp : TestApp
         graphicsPipelineInfo.viewPortState.viewPorts = { viewport };
         graphicsPipelineInfo.viewPortState.scissors = { scissor };
 
+        graphicsPipelineInfo.dynamicState.dynamicStates = { DynamicState::VertexInput };
+
         //graphicsPipelineInfo.renderPass = renderPass;
         graphicsPipelineInfo.rasterizationState.cullMode = CullMode::None;
 
         graphicsPipelineInfo.layout = mesh.GetPipelineLayout();
         graphicsPipelineInfo.inputAssemblyState = mesh.GetInputAssembly();
-        graphicsPipelineInfo.vertexInputState.attributeDescriptions = mesh.GetVertexBuffer().GetAttribsDescriptions();
-        graphicsPipelineInfo.vertexInputState.bindingDescriptions   = mesh.GetVertexBuffer().GetBindingDescriptions();
         graphicsPipelineInfo.shaderPipelineState.stages = mesh.GetShaderStages();
 
         graphicsPipelineInfo.subPass = 0;

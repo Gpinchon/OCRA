@@ -9,6 +9,7 @@
 #include <VK/GraphicsPipeline.hpp>
 #include <VK/GraphicsPipelineStates.hpp>
 #include <VK/Image.hpp>
+#include <VK/ImageSampler.hpp>
 #include <VK/ImageView.hpp>
 #include <VK/PhysicalDevice.hpp>
 #include <VK/Queue.hpp>
@@ -99,14 +100,42 @@ Image::Handle CreateImage(
     vkInfo.mipLevels = a_Info.mipLevels;
     vkInfo.samples = ConvertToVk(a_Info.samples);
     auto image = std::make_shared<Image::Impl>(device, vkInfo);
-    vk::DeviceImageMemoryRequirements requirements(&vkInfo);
-    auto vkMemoryRequirements = device.getImageMemoryRequirements(&vkInfo).memoryRequirements;
     vk::MemoryAllocateInfo vkMemoryInfo;
-    vkMemoryInfo.allocationSize = vkMemoryRequirements.size;
+    vkMemoryInfo.allocationSize = image->getMemoryRequirements().size;
     vkMemoryInfo.memoryTypeIndex = device.physicalDevice.findMemoryType(vk::MemoryPropertyFlagBits::eDeviceLocal);
     image->memory = device.allocateMemory(vkMemoryInfo);
     image->bindMemory(*image->memory, 0);
     return image;
+}
+
+Image::Sampler::Handle CreateImageSampler(
+    const Device::Handle& a_Device,
+    const CreateImageSamplerInfo& a_Info)
+{
+    vk::SamplerCustomBorderColorCreateInfoEXT borderColor(
+        vk::ClearColorValue(
+            a_Info.borderColor.r,
+            a_Info.borderColor.g,
+            a_Info.borderColor.b,
+            a_Info.borderColor.a));
+    vk::SamplerCreateInfo info({},
+        ConvertToVk(a_Info.magFilter),
+        ConvertToVk(a_Info.minFilter),
+        a_Info.mipmapMode == Filter::Linear ? vk::SamplerMipmapMode::eLinear : vk::SamplerMipmapMode::eNearest,
+        ConvertToVk(a_Info.addressModeU),
+        ConvertToVk(a_Info.addressModeV), 
+        ConvertToVk(a_Info.addressModeW),
+        a_Info.mipLodBias,
+        a_Info.anisotropyEnable,
+        a_Info.maxAnisotropy,
+        a_Info.compareEnable,
+        ConvertToVk(a_Info.compareOp),
+        a_Info.minLod,
+        a_Info.maxLod,
+        vk::BorderColor::eFloatCustomEXT,
+        false, //Because OGL always uses normalized
+        &borderColor);
+    return std::make_shared<Image::Sampler::Impl>(*a_Device, info);
 }
 
 Image::View::Handle CreateImageView(

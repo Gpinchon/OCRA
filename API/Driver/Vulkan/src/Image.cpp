@@ -101,4 +101,9 @@ void CopyImageToBuffer(
     }
     device.transferQueue.waitIdle();
 }
+size_t GetDataSize(const Image::Handle& a_Image)
+{
+    auto requirements = a_Image->getMemoryRequirements();
+    return requirements.size;
+}
 }

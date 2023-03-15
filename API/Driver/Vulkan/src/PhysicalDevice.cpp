@@ -305,6 +305,8 @@ Device::Handle CreateDevice(
     const std::vector<const char*> extensions{
         VK_KHR_SWAPCHAIN_EXTENSION_NAME,
         VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME,
+        VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
+        VK_EXT_VERTEX_INPUT_DYNAMIC_STATE_EXTENSION_NAME
     };
     auto transferQueue = a_PhysicalDevice->findQueueFamily(vk::QueueFlagBits::eTransfer);
     bool foundTransferQueue = false;
@@ -318,13 +320,14 @@ Device::Handle CreateDevice(
         vkDeviceQueue.push_back(vkQueueInfo);
         foundTransferQueue |= queueInfo.queueFamilyIndex == transferQueue;
     }
-
+    vk::PhysicalDeviceCustomBorderColorFeaturesEXT customBorder(true, true);
     vk::DeviceCreateInfo info;
     info.enabledExtensionCount = extensions.size();
     info.ppEnabledExtensionNames = extensions.data();
     //info.pEnabledFeatures = a_Info.enabledFeatures;
     info.queueCreateInfoCount = vkDeviceQueue.size();
     info.pQueueCreateInfos = vkDeviceQueue.data();
+    info.pNext = &customBorder;
     return std::make_shared<Device::Impl>(*a_PhysicalDevice, info, foundTransferQueue);
 }
 

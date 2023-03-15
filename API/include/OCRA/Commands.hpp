@@ -176,6 +176,12 @@ void BindIndexBuffer(
     const OCRA::Buffer::Handle&     a_IndexBuffer,
     const uint64_t                  a_Offset,
     const IndexType                 a_IndexType);
+
+void SetVertexInput(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const std::vector<VertexAttributeDescription>& a_Attribs,
+    const std::vector<VertexBindingDescription>&   a_Bindings);
+ 
 /*
 * @brief Begin Render Pass recording
 */

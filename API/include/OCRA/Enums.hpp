@@ -87,6 +87,7 @@ enum class FenceStatus {
 enum class Filter {
     Nearest,
     Linear,
+    Cubic,
     MaxValue
 };
 enum class Format {
@@ -309,6 +310,7 @@ enum class DynamicState {
     RasterizerDiscardEnable,
     DepthBiasEnable,
     PrimitiveRestartEnable,
+    VertexInput,
     MaxValue
 };
 enum class PolygonMode {

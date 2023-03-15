@@ -314,8 +314,20 @@ static inline auto ConvertToVk(const DynamicState& a_State) {
         return vk::DynamicState::eDepthBiasEnable;
     case DynamicState::PrimitiveRestartEnable:
         return vk::DynamicState::ePrimitiveRestartEnable;
+    case DynamicState::VertexInput:
+        return vk::DynamicState::eVertexInputEXT;
     }
     return vk::DynamicState(-1);
+}
+static inline auto ConvertToVk(const Filter& a_Filter) {
+    switch (a_Filter)
+    {
+    case Filter::Nearest:
+        vk::Filter::eNearest;
+    case Filter::Linear:
+        vk::Filter::eLinear;
+    }
+    return vk::Filter(-1);
 }
 static inline auto ConvertToVk(const LoadOp& a_LoadOp) {
     switch (a_LoadOp)
@@ -722,6 +734,20 @@ static inline auto ConvertToVk(const SampleCount& a_Count) {
         return vk::SampleCountFlagBits::e64;
     }
     return vk::SampleCountFlagBits(-1);
+}
+static inline auto ConvertToVk(const SamplerAddressMode& a_Mode) {
+    switch (a_Mode)
+    {
+    case SamplerAddressMode::Repeat:
+        return vk::SamplerAddressMode::eRepeat;
+    case SamplerAddressMode::MirroredRepeat:
+        return vk::SamplerAddressMode::eMirroredRepeat;
+    case SamplerAddressMode::ClampToEdge:
+        return vk::SamplerAddressMode::eClampToEdge;
+    case SamplerAddressMode::ClampToBorder:
+        return vk::SamplerAddressMode::eClampToBorder;
+    }
+    return vk::SamplerAddressMode(-1);
 }
 static inline auto ConvertToVk(const SharingMode& a_SharingMode) {
     switch (a_SharingMode)

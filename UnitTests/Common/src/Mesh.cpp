@@ -53,6 +53,9 @@ Mesh::Mesh(const Device::Handle& a_Device, const VertexBuffer& a_VertexBuffer, c
 void Mesh::Draw(const Command::Buffer::Handle& a_CommandBuffer) {
     Command::PushDescriptorSet(a_CommandBuffer, PipelineBindingPoint::Graphics, layout, projectionMatrix.GetWriteOperations());
     Command::PushDescriptorSet(a_CommandBuffer, PipelineBindingPoint::Graphics, layout, material.GetWriteOperations());
+    Command::SetVertexInput(a_CommandBuffer,
+        GetVertexBuffer().GetAttribsDescriptions(),
+        GetVertexBuffer().GetBindingDescriptions());
     Command::BindVertexBuffers(a_CommandBuffer, 0, { GetVertexBuffer().GetBuffer() }, { 0 });
     Command::Draw(a_CommandBuffer, GetVertexBuffer().GetVertexNbr(), 1, 0, 0);
 }

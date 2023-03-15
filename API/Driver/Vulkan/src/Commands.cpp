@@ -19,14 +19,14 @@ namespace OCRA::Command
 {
 static inline auto GetVkRenderingAttachmentInfo(const RenderingAttachmentInfo& a_Info) {
     vk::RenderingAttachmentInfo vkInfo;
-    //vkInfo.clearValue = GetVkClearValue(a_Info.clearValue);
-    //vkInfo.imageLayout = ConvertToVk(a_Info.imageLayout);
-    //vkInfo.imageView = *a_Info.imageView;
-    //vkInfo.loadOp = GetVkAttachmentLoadOp(a_Info.loadOp);
-    ////vkInfo.resolveImageLayout
-    ////vkInfo.resolveImageView
-    ////vkInfo.resolveImageLayout
-    //vkInfo.storeOp = GetVkAttachmentStoreOp(a_Info.storeOp);
+    vkInfo.clearValue = ConvertToVk(a_Info.clearValue);
+    vkInfo.imageLayout = ConvertToVk(a_Info.imageLayout);
+    vkInfo.imageView = **a_Info.imageView;
+    vkInfo.loadOp = ConvertToVk(a_Info.loadOp);
+    //vkInfo.resolveImageLayout
+    //vkInfo.resolveImageView
+    //vkInfo.resolveImageLayout
+    vkInfo.storeOp = ConvertToVk(a_Info.storeOp);
     return vkInfo;
 }
 
@@ -61,7 +61,7 @@ void BeginRenderPass(
     const RenderPassBeginInfo& a_BeginInfo,
     const SubPassContents& a_SubPassContents)
 {
-    std::vector<VkClearValue> vkClearValues(a_BeginInfo.colorClearValues.size() + 1);
+    std::vector<vk::ClearValue> vkClearValues(a_BeginInfo.colorClearValues.size() + 1);
     for (auto i = 0u; i < a_BeginInfo.colorClearValues.size(); ++i)
     {
         auto& clearValue = a_BeginInfo.colorClearValues.at(i);
@@ -69,7 +69,7 @@ void BeginRenderPass(
         vkClearValue.color = ConvertToVk(clearValue);
     }
     vkClearValues.back().depthStencil = ConvertToVk(a_BeginInfo.depthStencilClearValue);
-    VkRenderPassBeginInfo vkInfo{ VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
+    vk::RenderPassBeginInfo vkInfo;
     vkInfo.clearValueCount = vkClearValues.size();
     vkInfo.framebuffer = *a_BeginInfo.framebuffer;
     vkInfo.pClearValues = vkClearValues.data();
@@ -208,6 +208,31 @@ void PipelineBarrier(
         vkMemoryBarriers,
         vkBufferMemoryBarriers,
         vkImageMemoryBarriers);
+}
+
+void SetVertexInput(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const std::vector<VertexAttributeDescription>& a_Attribs,
+    const std::vector<VertexBindingDescription>& a_Bindings)
+{
+    std::vector<vk::VertexInputAttributeDescription2EXT> attribs(a_Attribs.size());
+    std::vector<vk::VertexInputBindingDescription2EXT>   bindings(a_Bindings.size());
+    std::transform(a_Attribs.begin(), a_Attribs.end(),
+        attribs.begin(), [](auto& attrib) {
+            return vk::VertexInputAttributeDescription2EXT(
+                attrib.location,
+                attrib.binding,
+                ConvertToVk(attrib.format),
+                attrib.offset);
+        });
+    std::transform(a_Bindings.begin(), a_Bindings.end(),
+        bindings.begin(), [](auto& binding) {
+            return vk::VertexInputBindingDescription2EXT(
+                binding.binding,
+                binding.stride,
+                ConvertToVk(binding.inputRate));
+        });
+    a_CommandBuffer->setVertexInputEXT(bindings, attribs);
 }
 
 void TransitionImagesLayout(
