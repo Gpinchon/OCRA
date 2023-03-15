@@ -1,3 +1,4 @@
+#include <VK/Assert.hpp>
 #include <VK/Queue.hpp>
 #include <VK/Semaphore.hpp>
 #include <VK/SwapChain/SwapChain.hpp>
@@ -30,6 +31,6 @@ void Present(
     info.pImageIndices  = imageIndice.data();
     info.waitSemaphoreCount = waitSemaphoreCount;
     info.pWaitSemaphores    = waitSemaphores.data();
-    a_Queue->presentKHR(info);
+    VK_INVOKE(a_Queue->presentKHR(info));
 }
 }

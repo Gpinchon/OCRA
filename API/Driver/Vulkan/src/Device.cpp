@@ -7,11 +7,13 @@
 #include <VK/Fence.hpp>
 #include <VK/Flags.hpp>
 #include <VK/GraphicsPipeline.hpp>
+#include <VK/GraphicsPipelineStates.hpp>
 #include <VK/Image.hpp>
 #include <VK/ImageView.hpp>
 #include <VK/PhysicalDevice.hpp>
 #include <VK/Queue.hpp>
 #include <VK/Semaphore.hpp>
+#include <VK/ShaderModule.hpp>
 #include <VK/Structs.hpp>
 
 #include <OCRA/Core.hpp>
@@ -82,36 +84,6 @@ Fence::Handle CreateFence(
     return std::make_shared<Fence::Impl>(device, info);
 }
 
-Pipeline::Handle CreatePipelineGraphics(
-    const Device::Handle& a_Device,
-    const CreatePipelineGraphicsInfo& a_Info)
-{
-    auto& device = *a_Device;
-    vk::PipelineShaderStageCreateInfo        shaderStageCreateInfo;
-    vk::PipelineVertexInputStateCreateInfo   vertexInputStateCreateInfo;
-    vk::PipelineInputAssemblyStateCreateInfo inputAssemblyStateCreateInfo;
-    vk::PipelineTessellationStateCreateInfo  tessellationStateCreateInfo;
-    vk::PipelineViewportStateCreateInfo      viewportStateCreateInfo;
-    vk::PipelineRasterizationStateCreateInfo rasterizationStateCreateInfo;
-    vk::PipelineMultisampleStateCreateInfo   multisampleStateCreateInfo;
-    vk::PipelineDepthStencilStateCreateInfo  depthStencilStateCreateInfo;
-    vk::PipelineColorBlendStateCreateInfo    colorBlendStateCreateInfo;
-    vk::PipelineDynamicStateCreateInfo       dynamicStateCreateInfo;
-    vk::GraphicsPipelineCreateInfo info(
-        {}, a_Info.shaderPipelineState.stages.size(),
-        &shaderStageCreateInfo,
-        &vertexInputStateCreateInfo,
-        &inputAssemblyStateCreateInfo,
-        &tessellationStateCreateInfo,
-        &viewportStateCreateInfo,
-        &rasterizationStateCreateInfo,
-        &multisampleStateCreateInfo,
-        &depthStencilStateCreateInfo,
-        &colorBlendStateCreateInfo,
-        &dynamicStateCreateInfo);
-    return std::make_shared<Pipeline::Graphics::Impl>(device, info);
-}
-
 Image::Handle CreateImage(
     const Device::Handle& a_Device,
     const CreateImageInfo& a_Info)
@@ -153,6 +125,65 @@ Image::View::Handle CreateImageView(
     return std::make_shared<Image::View::Impl>(device, vkInfo, a_Info.image);
 }
 
+Pipeline::Handle CreatePipelineGraphics(
+    const Device::Handle& a_Device,
+    const CreatePipelineGraphicsInfo& a_Info)
+{
+    auto& device = *a_Device;
+    
+    IntermediateShaderState                     shaderStage(a_Info.shaderPipelineState);
+    IntermediateVertexInputState                vertexInputState(a_Info.vertexInputState);
+    vk::PipelineInputAssemblyStateCreateInfo    inputAssemblyStateCreateInfo({},
+        ConvertToVk(a_Info.inputAssemblyState.topology),
+        a_Info.inputAssemblyState.primitiveRestartEnable);
+    vk::PipelineTessellationStateCreateInfo     tessellationStateCreateInfo({},
+        a_Info.tessellationState.patchControlPoints);
+    IntermediateViewportState                   viewportState(a_Info.viewPortState);
+    vk::PipelineRasterizationStateCreateInfo    rasterizationStateCreateInfo({},
+        a_Info.rasterizationState.depthClampEnable,
+        a_Info.rasterizationState.rasterizerDiscardEnable,
+        ConvertToVk(a_Info.rasterizationState.polygonMode),
+        ConvertToVk(a_Info.rasterizationState.cullMode),
+        ConvertToVk(a_Info.rasterizationState.frontFace),
+        a_Info.rasterizationState.depthBiasEnable,
+        a_Info.rasterizationState.depthBiasConstantFactor,
+        a_Info.rasterizationState.depthBiasClamp,
+        a_Info.rasterizationState.depthBiasSlopeFactor,
+        a_Info.rasterizationState.lineWidth);
+    vk::PipelineMultisampleStateCreateInfo      multisampleStateCreateInfo({},
+        ConvertToVk(a_Info.multisampleState.rasterizationSamples),
+        a_Info.multisampleState.sampleShadingEnable,
+        a_Info.multisampleState.minSampleShading,
+        a_Info.multisampleState.sampleMasks.data(),
+        a_Info.multisampleState.alphaToCoverageEnable,
+        a_Info.multisampleState.alphaToOneEnable);
+    vk::PipelineDepthStencilStateCreateInfo     depthStencilStateCreateInfo({},
+        a_Info.depthStencilState.depthTestEnable,
+        a_Info.depthStencilState.depthWriteEnable,
+        ConvertToVk(a_Info.depthStencilState.depthCompareOp),
+        a_Info.depthStencilState.depthBoundsTestEnable,
+        a_Info.depthStencilState.stencilTestEnable,
+        ConvertToVk(a_Info.depthStencilState.frontStencilOpState),
+        ConvertToVk(a_Info.depthStencilState.backStencilOpState),
+        a_Info.depthStencilState.depthBounds.min,
+        a_Info.depthStencilState.depthBounds.max);
+    IntermediateColorBlendState                 colorBlendState(a_Info.colorBlendState);
+    IntermediateDynamicState                    dynamicState(a_Info.dynamicState);
+
+    vk::GraphicsPipelineCreateInfo info({},
+        shaderStage.size(), shaderStage.data(),
+        vertexInputState.data(),
+        &inputAssemblyStateCreateInfo,
+        &tessellationStateCreateInfo,
+        viewportState.data(),
+        &rasterizationStateCreateInfo,
+        &multisampleStateCreateInfo,
+        &depthStencilStateCreateInfo,
+        colorBlendState.data(),
+        dynamicState.data());
+    return std::make_shared<Pipeline::Graphics::Impl>(device, info);
+}
+
 Semaphore::Handle CreateSemaphore(
     const Device::Handle& a_Device,
     const CreateSemaphoreInfo& a_Info,
@@ -164,6 +195,14 @@ Semaphore::Handle CreateSemaphore(
     semaphoreType.initialValue = a_Info.initialValue;
     info.pNext = &semaphoreType;
     return std::make_shared<Semaphore::Impl>(*a_Device, info);
+}
+
+Shader::Module::Handle CreateShaderModule(
+    const Device::Handle& a_Device,
+    const CreateShaderModuleInfo& a_Info)
+{
+    return std::make_shared<Shader::Module::Impl>(
+        *a_Device, vk::ShaderModuleCreateInfo({}, a_Info.code));
 }
 
 Queue::Handle GetQueue(

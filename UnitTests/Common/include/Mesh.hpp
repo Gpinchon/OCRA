@@ -9,9 +9,6 @@
 
 #include <vector>
 
-OCRA_DECLARE_HANDLE(OCRA::PhysicalDevice);
-OCRA_DECLARE_HANDLE(OCRA::Device);
-
 namespace OCRA {
 struct Traverser {
     PipelineViewPortState viewPort{};
@@ -31,7 +28,7 @@ public:
     }
 
     auto& GetVertexShader() const { return vertexShader; }
-    void SetVertexShader(const Shader::Stage::Handle& a_Shader) { vertexShader = a_Shader; }
+    void SetVertexShader(const PipelineShaderStage& a_Shader) { vertexShader = a_Shader; }
 
     auto& GetPipelineLayout() const { return layout; }
     auto& GetVertexBuffer() const { return vertexBuffer; }
@@ -39,7 +36,7 @@ public:
     auto& GetDescriptorSets() const { return descriptorSets; }
     auto& GetDescriptorSetLayouts() const { return descriptorSetLayouts; }
     auto& GetDescriptorSetLayoutBindings() const { return descriptorSetLayoutBindings; }
-    std::vector<Shader::Stage::Handle> GetShaderStages() const {
+    std::vector<PipelineShaderStage> GetShaderStages() const {
         return { material.GetFragmentShader(), GetVertexShader() };
     }
 
@@ -58,7 +55,7 @@ public:
 private:
     OCRA::Device::Handle     device;
     Pipeline::Layout::Handle layout;
-    Shader::Stage::Handle    vertexShader;
+    PipelineShaderStage    vertexShader;
     PipelineInputAssemblyState inputAssembly;
     Material                material;
     VertexBuffer            vertexBuffer;

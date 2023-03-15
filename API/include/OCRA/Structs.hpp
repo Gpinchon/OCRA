@@ -275,31 +275,48 @@ struct PipelineRasterizationState {
     CullMode cullMode { CullMode::Back };
     FrontFace frontFace { FrontFace::CounterClockwise };
 };
-struct PipelineShaderPipelineState {
-    std::vector<Shader::Stage::Handle> stages;
+struct ShaderSpecializationMapEntry {
+    uint32_t    constantID;
+    uint32_t    offset;
+    size_t      size;
 };
+struct ShaderSpecializationInfo {
+    std::vector<ShaderSpecializationMapEntry> mapEntries;
+    std::vector<uint8_t> data;
+};
+struct PipelineShaderStage {
+    ShaderStageFlags stage{ ShaderStageFlagBits::None }; //must be a single stage
+    Shader::Module::Handle module; //the spir-v module
+    std::string entryPoint{ "" }; //entry point name
+    ShaderSpecializationInfo specializationInfo;
+};
+struct PipelineShaderPipelineState {
+    std::vector<PipelineShaderStage> stages;
+};
+
 struct PipelineTessellationState {
     uint32_t patchControlPoints { 0 };
 };
-struct PipelineVertexAttributeDescription {
-    struct Format {
-        uint8_t size{ 0 }; //Number of components per vertex
-        VertexType type{ VertexType::None }; //Type of data of each components
-        bool normalized{ false };
-    } format;
+struct VertexAttributeFormat {
+    uint8_t    size{ 0 }; //Number of components per vertex
+    VertexType type{ VertexType::None }; //Type of data of each components
+    bool       normalized{ false };
+};
+struct VertexAttributeDescription {
+    VertexAttributeFormat format;
     uint32_t offset{ 0 }; //(Relative offset) the distance between elements in the buffer
-    uint8_t binding{ 0 }; //The binding number this attribute takes its data from
+    uint8_t  binding{ 0 }; //The binding number this attribute takes its data from
     uint32_t location{ 0 }; //Location in the shader for this attribute
 };
-struct PipelineVertexBindingDescription {
+struct VertexBindingDescription {
     uint32_t binding{ 0 }; //index inside the BindVertexBuffers Command
     uint32_t stride{ 0 }; //byte stride
     VertexInputRate inputRate{ VertexInputRate::Vertex }; //is the data divided by vertex or by instance ?
 };
 struct PipelineVertexInputState {
     uint32_t primitiveRestartIndex{ 0 };
-    std::vector<PipelineVertexAttributeDescription> attributeDescriptions;
-    std::vector<PipelineVertexBindingDescription> bindingDescriptions;
+    std::vector<VertexAttributeDescription> attributeDescriptions;
+    std::vector<VertexBindingDescription>   bindingDescriptions;
 };
 struct PipelineViewPortState {
     std::vector<ViewPort> viewPorts{};
@@ -404,16 +421,6 @@ struct ImageLayoutTransitionInfo {
     ImageLayout           newLayout{ ImageLayout::Undefined };
     uint32_t    srcQueueFamilyIndex{ IgnoreQueueFamily };
     uint32_t    dstQueueFamilyIndex{ IgnoreQueueFamily };
-};
-
-struct ShaderSpecializationMapEntry {
-    uint32_t    constantID;
-    uint32_t    offset;
-    size_t      size;
-};
-struct ShaderSpecializationInfo {
-    std::vector<ShaderSpecializationMapEntry> mapEntries;
-    std::vector<uint8_t> data;
 };
 
 struct RenderingAttachmentInfo {
@@ -730,12 +737,6 @@ struct CreateSemaphoreInfo {
 };
 struct CreateShaderModuleInfo {
     std::vector<uint32_t> code;
-};
-struct CreateShaderStageInfo {
-    ShaderStageFlags stage{ ShaderStageFlagBits::None }; //must be a single stage
-    Shader::Module::Handle module; //the spir-v module
-    std::string entryPoint{ "" }; //entry point name
-    ShaderSpecializationInfo specializationInfo;
 };
 
 struct AllocateCommandBufferInfo {

@@ -8,14 +8,14 @@ struct DefaultVertex {
     Vec3 color;
     Vec2 uv;
     static auto GetBindingDescriptions() {
-        std::vector<PipelineVertexBindingDescription> bindings(1);
+        std::vector<VertexBindingDescription> bindings(1);
         bindings.at(0).binding = 0;
         bindings.at(0).stride = sizeof(DefaultVertex);
         bindings.at(0).inputRate = VertexInputRate::Vertex;
         return bindings;
     }
     static auto GetAttributeDescription() {
-        std::vector<PipelineVertexAttributeDescription> attribs(3);
+        std::vector<VertexAttributeDescription> attribs(3);
         attribs.at(0).binding = 0;
         attribs.at(0).location = 0;
         attribs.at(0).format.size = decltype(pos)::length();
@@ -79,7 +79,7 @@ private:
     const size_t vertexSize{ 0 };
     const Memory::Handle memory;
     const Buffer::Handle buffer;
-    const std::vector<PipelineVertexBindingDescription>   bindings;
-    const std::vector<PipelineVertexAttributeDescription> attribs;
+    const std::vector<VertexBindingDescription>   bindings;
+    const std::vector<VertexAttributeDescription> attribs;
 };
 }

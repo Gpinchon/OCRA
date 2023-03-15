@@ -1,3 +1,4 @@
+#include <VK/Assert.hpp>
 #include <VK/Instance.hpp>
 #include <VK/PhysicalDevice.hpp>
 
@@ -20,9 +21,9 @@ const std::vector<const char*> validationLayers = {
 };
 bool CheckValidationLayerSupport() {
     uint32_t layerCount;
-    vk::enumerateInstanceLayerProperties(&layerCount, nullptr);
+    VK_INVOKE(vk::enumerateInstanceLayerProperties(&layerCount, nullptr));
     std::vector<vk::LayerProperties> availableLayers(layerCount);
-    vk::enumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+    VK_INVOKE(vk::enumerateInstanceLayerProperties(&layerCount, availableLayers.data()));
     for (const char* layerName : validationLayers) {
         bool layerFound = false;
         for (const auto& layerProperties : availableLayers) {

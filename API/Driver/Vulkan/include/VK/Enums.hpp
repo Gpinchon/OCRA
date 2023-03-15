@@ -227,6 +227,96 @@ static inline auto ConvertToVk(const BlendOp& a_BlendOp) {
     }
     return vk::BlendOp(-1);
 }
+static inline auto ConvertToVk(const CompareOp& a_Op) {
+    switch (a_Op)
+    {
+    case CompareOp::Never:
+        return vk::CompareOp::eNever;
+    case CompareOp::Less:
+        return vk::CompareOp::eLess;
+    case CompareOp::Equal:
+        return vk::CompareOp::eEqual;
+    case CompareOp::LessOrEqual:
+        return vk::CompareOp::eLessOrEqual;
+    case CompareOp::Greater:
+        return vk::CompareOp::eGreater;
+    case CompareOp::NotEqual:
+        return vk::CompareOp::eNotEqual;
+    case CompareOp::GreaterOrEqual:
+        return vk::CompareOp::eGreaterOrEqual;
+    case CompareOp::Always:
+        return vk::CompareOp::eAlways;
+    }
+    return vk::CompareOp(-1);
+}
+static inline auto ConvertToVk(const CullMode& a_Mode) {
+    switch (a_Mode)
+    {
+    case CullMode::None:
+        return vk::CullModeFlagBits::eNone;
+    case CullMode::Front:
+        return vk::CullModeFlagBits::eFront;
+    case CullMode::Back:
+        return vk::CullModeFlagBits::eBack;
+    case CullMode::FrontAndBack:
+        return vk::CullModeFlagBits::eFrontAndBack;
+    }
+    return vk::CullModeFlagBits{};
+}
+static inline auto ConvertToVk(const DynamicState& a_State) {
+    switch (a_State)
+    {
+    case DynamicState::Viewport:
+        return vk::DynamicState::eViewport;
+    case DynamicState::Scissor:
+        return vk::DynamicState::eScissor;
+    case DynamicState::LineWidth:
+        return vk::DynamicState::eLineWidth;
+    case DynamicState::DepthBias:
+        return vk::DynamicState::eDepthBias;
+    case DynamicState::BlendConstants:
+        return vk::DynamicState::eBlendConstants;
+    case DynamicState::DepthBounds:
+        return vk::DynamicState::eDepthBounds;
+    case DynamicState::StencilCompareMask:
+        return vk::DynamicState::eStencilCompareMask;
+    case DynamicState::StencilWriteMask:
+        return vk::DynamicState::eStencilWriteMask;
+    case DynamicState::StencilReference:
+        return vk::DynamicState::eStencilReference;
+    case DynamicState::CullMode:
+        return vk::DynamicState::eCullMode;
+    case DynamicState::FrontFace:
+        return vk::DynamicState::eFrontFace;
+    case DynamicState::PrimitiveTopology:
+        return vk::DynamicState::ePrimitiveTopology;
+    case DynamicState::ViewportWithCount:
+        return vk::DynamicState::eViewportWithCount;
+    case DynamicState::ScissorWithCount:
+        return vk::DynamicState::eScissorWithCount;
+    case DynamicState::VertexInputBindingStride:
+        return vk::DynamicState::eVertexInputBindingStride;
+    case DynamicState::DepthTestEnable:
+        return vk::DynamicState::eDepthTestEnable;
+    case DynamicState::DepthWriteEnable:
+        return vk::DynamicState::eDepthWriteEnable;
+    case DynamicState::DepthBoundsTestEnable:
+        return vk::DynamicState::eDepthBoundsTestEnable;
+    case DynamicState::DepthCompareOP:
+        return vk::DynamicState::eDepthCompareOp;
+    case DynamicState::StencilTestEnable:
+        return vk::DynamicState::eStencilTestEnable;
+    case DynamicState::StencilOP:
+        return vk::DynamicState::eStencilOp;
+    case DynamicState::RasterizerDiscardEnable:
+        return vk::DynamicState::eRasterizerDiscardEnable;
+    case DynamicState::DepthBiasEnable:
+        return vk::DynamicState::eDepthBiasEnable;
+    case DynamicState::PrimitiveRestartEnable:
+        return vk::DynamicState::ePrimitiveRestartEnable;
+    }
+    return vk::DynamicState(-1);
+}
 static inline auto ConvertToVk(const LoadOp& a_LoadOp) {
     switch (a_LoadOp)
     {
@@ -238,6 +328,44 @@ static inline auto ConvertToVk(const LoadOp& a_LoadOp) {
         return vk::AttachmentLoadOp::eClear;
     }
     return vk::AttachmentLoadOp(-1);
+}
+static inline auto ConvertToVk(const LogicOp& a_Op) {
+    switch (a_Op)
+    {
+    case LogicOp::Clear:
+        return vk::LogicOp::eClear;
+    case LogicOp::And:
+        return vk::LogicOp::eAnd;
+    case LogicOp::AndReverse:
+        return vk::LogicOp::eAndReverse;
+    case LogicOp::Copy:
+        return vk::LogicOp::eCopy;
+    case LogicOp::AndInverted:
+        return vk::LogicOp::eAndInverted;
+    case LogicOp::NoOp:
+        return vk::LogicOp::eNoOp;
+    case LogicOp::Xor:
+        return vk::LogicOp::eXor;
+    case LogicOp::Or:
+        return vk::LogicOp::eOr;
+    case LogicOp::Nor:
+        return vk::LogicOp::eNor;
+    case LogicOp::Equivalent:
+        return vk::LogicOp::eEquivalent;
+    case LogicOp::Invert:
+        return vk::LogicOp::eInvert;
+    case LogicOp::OrReverse:
+        return vk::LogicOp::eOrReverse;
+    case LogicOp::CopyInverted:
+        return vk::LogicOp::eCopyInverted;
+    case LogicOp::OrInverted:
+        return vk::LogicOp::eOrInverted;
+    case LogicOp::Nand:
+        return vk::LogicOp::eNand;
+    case LogicOp::Set:
+        return vk::LogicOp::eSet;
+    }
+    return vk::LogicOp(-1);
 }
 static inline auto ConvertToVk(const StoreOp& a_StoreOp) {
     switch (a_StoreOp)
@@ -320,6 +448,16 @@ static inline auto ConvertToVk(const Swizzle& a_Swizzle) {
         return vk::ComponentSwizzle::eA;
     }
     return vk::ComponentSwizzle(-1);
+}
+static inline auto ConvertToVk(const FrontFace& a_Face) {
+    switch (a_Face)
+    {
+    case FrontFace::Clockwise:
+        return vk::FrontFace::eClockwise;
+    case FrontFace::CounterClockwise:
+        return vk::FrontFace::eCounterClockwise;
+    }
+    return vk::FrontFace(-1);
 }
 static inline auto ConvertToVk(const Format& a_Format) {
     switch (a_Format)
@@ -511,18 +649,59 @@ static inline auto ConvertToVk(const ImageViewType& a_Type) {
     }
     return vk::ImageViewType(-1);
 }
+static inline auto ConvertToVk(const PolygonMode& a_Mode) {
+    switch (a_Mode)
+    {
+    case PolygonMode::Fill:
+        return vk::PolygonMode::eFill;
+    case PolygonMode::Line:
+        return vk::PolygonMode::eLine;
+    case PolygonMode::Point:
+        return vk::PolygonMode::ePoint;
+    }
+    return vk::PolygonMode(-1);
+}
 static inline auto ConvertToVk(const PipelineBindingPoint& a_BindingPoint)
 {
     switch (a_BindingPoint)
     {
     case PipelineBindingPoint::Graphics:
-        return VK_PIPELINE_BIND_POINT_GRAPHICS;
+        return vk::PipelineBindPoint::eGraphics;
     case PipelineBindingPoint::Compute:
-        return VK_PIPELINE_BIND_POINT_COMPUTE;
+        return vk::PipelineBindPoint::eCompute;
     case PipelineBindingPoint::RayTracing:
-        return VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR;
+        return vk::PipelineBindPoint::eRayTracingKHR;
     }
-    return VK_PIPELINE_BIND_POINT_MAX_ENUM;
+    return vk::PipelineBindPoint(-1);
+}
+static inline auto ConvertToVk(const PrimitiveTopology& a_Topology)
+{
+    switch (a_Topology)
+    {
+    case PrimitiveTopology::PointList:
+        return vk::PrimitiveTopology::ePointList;
+    case PrimitiveTopology::LineList:
+        return vk::PrimitiveTopology::eLineList;
+    case PrimitiveTopology::LineStrip:
+        return vk::PrimitiveTopology::eLineStrip;
+    case PrimitiveTopology::TriangleList:
+        return vk::PrimitiveTopology::eTriangleList;
+    case PrimitiveTopology::TriangleStrip:
+        return vk::PrimitiveTopology::eTriangleStrip;
+    case PrimitiveTopology::TriangleFan:
+        return vk::PrimitiveTopology::eTriangleFan;
+    case PrimitiveTopology::LineListWithAdjacency:
+        return vk::PrimitiveTopology::eLineListWithAdjacency;
+    case PrimitiveTopology::LineStripWithAdjacency:
+        return vk::PrimitiveTopology::eLineStripWithAdjacency;
+    case PrimitiveTopology::TriangleListWithAdjacency:
+        return vk::PrimitiveTopology::eTriangleListWithAdjacency;
+    case PrimitiveTopology::TriangleStripWithAdjacency:
+        return vk::PrimitiveTopology::eTriangleStripWithAdjacency;
+    case PrimitiveTopology::PatchList:
+        return vk::PrimitiveTopology::ePatchList;
+    }
+    return vk::PrimitiveTopology(-1);
 }
 static inline auto ConvertToVk(const SampleCount& a_Count) {
     switch (a_Count)
@@ -553,5 +732,37 @@ static inline auto ConvertToVk(const SharingMode& a_SharingMode) {
         return vk::SharingMode::eConcurrent;
     }
     return vk::SharingMode(-1);
+}
+static inline auto ConvertToVk(const StencilOp& a_Op) {
+    switch (a_Op)
+    {
+    case StencilOp::Keep:
+        return vk::StencilOp::eKeep;
+    case StencilOp::Zero:
+        return vk::StencilOp::eZero;
+    case StencilOp::Replace:
+        return vk::StencilOp::eReplace;
+    case StencilOp::IncrementAndClamp:
+        return vk::StencilOp::eIncrementAndClamp;
+    case StencilOp::DecrementAndClamp:
+        return vk::StencilOp::eDecrementAndClamp;
+    case StencilOp::Invert:
+        return vk::StencilOp::eInvert;
+    case StencilOp::IncrementAndWrap:
+        return vk::StencilOp::eIncrementAndWrap;
+    case StencilOp::DecrementAndWrap:
+        return vk::StencilOp::eDecrementAndWrap;
+    }
+    return vk::StencilOp(-1);
+}
+static inline auto ConvertToVk(const VertexInputRate& a_InputRate) {
+    switch (a_InputRate)
+    {
+    case VertexInputRate::Vertex:
+        return vk::VertexInputRate::eVertex;
+    case VertexInputRate::Instance:
+        return vk::VertexInputRate::eInstance;
+    }
+    return vk::VertexInputRate(-1);
 }
 }

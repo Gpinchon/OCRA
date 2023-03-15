@@ -1,9 +1,12 @@
 #include <VK/Buffer.hpp>
+#include <VK/DescriptorSet.hpp>
+#include <VK/PipelineLayout.hpp>
 #include <VK/CommandBuffer.hpp>
 #include <VK/Enums.hpp>
 #include <VK/Flags.hpp>
 #include <VK/FrameBuffer.hpp>
 #include <VK/Image.hpp>
+#include <VK/ImageSampler.hpp>
 #include <VK/ImageView.hpp>
 #include <VK/Pipeline.hpp>
 #include <VK/Structs.hpp>
@@ -14,6 +17,88 @@
 
 namespace OCRA::Command
 {
+static inline auto GetVkRenderingAttachmentInfo(const RenderingAttachmentInfo& a_Info) {
+    vk::RenderingAttachmentInfo vkInfo;
+    //vkInfo.clearValue = GetVkClearValue(a_Info.clearValue);
+    //vkInfo.imageLayout = ConvertToVk(a_Info.imageLayout);
+    //vkInfo.imageView = *a_Info.imageView;
+    //vkInfo.loadOp = GetVkAttachmentLoadOp(a_Info.loadOp);
+    ////vkInfo.resolveImageLayout
+    ////vkInfo.resolveImageView
+    ////vkInfo.resolveImageLayout
+    //vkInfo.storeOp = GetVkAttachmentStoreOp(a_Info.storeOp);
+    return vkInfo;
+}
+
+void BeginRendering(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const RenderingInfo& a_Info)
+{
+    std::vector<vk::RenderingAttachmentInfo> vkColorAttachments(a_Info.colorAttachments.size());
+    vk::RenderingAttachmentInfo vkDepthAttachment;
+    vk::RenderingAttachmentInfo vkStencilAttachment;
+    for (auto i = 0u; i < vkColorAttachments.size(); ++i) {
+        vkColorAttachments.at(i) = GetVkRenderingAttachmentInfo(a_Info.colorAttachments.at(i));
+    }
+    vkDepthAttachment = GetVkRenderingAttachmentInfo(a_Info.depthAttachment);
+    vkStencilAttachment = GetVkRenderingAttachmentInfo(a_Info.stencilAttachment);
+    vk::RenderingInfo vkInfo;
+    vkInfo.colorAttachmentCount = vkColorAttachments.size();
+    //vkInfo.flags = GetVkRenderingFlags(a_Info.flags);
+    //vkInfo.viewMask = a_Info.viewMask;
+    vkInfo.flags = {};
+    vkInfo.viewMask = 0;
+    vkInfo.layerCount = a_Info.layerCount;
+    vkInfo.renderArea = ConvertToVk(a_Info.area);
+    vkInfo.pColorAttachments = vkColorAttachments.data();
+    vkInfo.pDepthAttachment = &vkDepthAttachment;
+    vkInfo.pStencilAttachment = &vkStencilAttachment;
+    a_CommandBuffer->beginRendering(vkInfo);
+}
+
+void BeginRenderPass(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const RenderPassBeginInfo& a_BeginInfo,
+    const SubPassContents& a_SubPassContents)
+{
+    std::vector<VkClearValue> vkClearValues(a_BeginInfo.colorClearValues.size() + 1);
+    for (auto i = 0u; i < a_BeginInfo.colorClearValues.size(); ++i)
+    {
+        auto& clearValue = a_BeginInfo.colorClearValues.at(i);
+        auto& vkClearValue = vkClearValues.at(i);
+        vkClearValue.color = ConvertToVk(clearValue);
+    }
+    vkClearValues.back().depthStencil = ConvertToVk(a_BeginInfo.depthStencilClearValue);
+    VkRenderPassBeginInfo vkInfo{ VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
+    vkInfo.clearValueCount = vkClearValues.size();
+    vkInfo.framebuffer = *a_BeginInfo.framebuffer;
+    vkInfo.pClearValues = vkClearValues.data();
+}
+
+void BindPipeline(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const Pipeline::Handle& a_Pipeline)
+{
+    auto& pipeline = *a_Pipeline;
+    a_CommandBuffer->bindPipeline(vk::PipelineBindPoint(pipeline.bindPoint), *pipeline);
+}
+
+void ClearColorImage(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const Image::Handle& a_Image,
+    const ColorValue& a_Color,
+    const std::vector<ImageSubresourceRange>& a_Ranges)
+{
+    static_assert(sizeof(ColorValue) == sizeof(vk::ClearColorValue));
+    std::vector<vk::ImageSubresourceRange> vkRanges(a_Ranges.size());
+    for (auto i = 0u; i < a_Ranges.size(); ++i)
+        vkRanges.at(i) = ConvertToVk(a_Ranges.at(i));
+    a_CommandBuffer->clearColorImage(**a_Image,
+        vk::ImageLayout::eTransferDstOptimal,
+        reinterpret_cast<const vk::ClearColorValue&>(a_Color),
+        vkRanges);
+}
+
 void CopyBuffer(
     const Command::Buffer::Handle& a_CommandBuffer,
     const OCRA::Buffer::Handle& a_SrcBuffer,
@@ -32,61 +117,6 @@ void CopyBuffer(
         vkRegions.push_back(vkRegion);
     }
     a_CommandBuffer->copyBuffer(*srcBuffer, *dstBuffer, vkRegions);
-}
-void PipelineBarrier(
-    const Buffer::Handle&     a_CommandBuffer,
-    const PipelineStageFlags& a_SrcStageMask,
-    const PipelineStageFlags& a_DstStageMask,
-    const DependencyFlags&    a_DependencyFlags,
-    const std::vector<MemoryBarrier>&       a_MemoryBarriers,
-    const std::vector<BufferMemoryBarrier>& a_BufferMemoryBarriers,
-    const std::vector<ImageMemoryBarrier>&  a_ImageMemoryBarriers)
-{
-    std::vector<vk::MemoryBarrier>       vkMemoryBarriers;
-    std::vector<vk::BufferMemoryBarrier> vkBufferMemoryBarriers;
-    std::vector<vk::ImageMemoryBarrier>  vkImageMemoryBarriers;
-    vkMemoryBarriers.reserve(a_MemoryBarriers.size());
-    for (const auto& barrier : a_MemoryBarriers) {
-        vk::MemoryBarrier vkBarrier;
-        vkBarrier.dstAccessMask = ConvertToVk(barrier.dstAccessMask);
-        vkBarrier.srcAccessMask = ConvertToVk(barrier.srcAccessMask);
-        vkMemoryBarriers.push_back(vkBarrier);
-    }
-    vkBufferMemoryBarriers.reserve(a_BufferMemoryBarriers.size());
-    for (const auto& barrier : a_BufferMemoryBarriers) {
-        vk::BufferMemoryBarrier vkBarrier;
-        vkBarrier.dstAccessMask = ConvertToVk(barrier.dstAccessMask);
-        vkBarrier.srcAccessMask = ConvertToVk(barrier.srcAccessMask);
-        vkBarrier.dstQueueFamilyIndex = barrier.dstQueueFamilyIndex;
-        vkBarrier.srcQueueFamilyIndex = barrier.srcQueueFamilyIndex;
-        vkBarrier.buffer = **barrier.buffer;
-        vkBarrier.offset = barrier.offset;
-        vkBarrier.size   = barrier.size;
-        vkBufferMemoryBarriers.push_back(vkBarrier);
-    }
-    vkImageMemoryBarriers.reserve(a_ImageMemoryBarriers.size());
-    for (const auto& barrier : a_ImageMemoryBarriers) {
-        vk::ImageMemoryBarrier vkBarrier;
-        vkBarrier.image = **barrier.image;
-        vkBarrier.newLayout     = vk::ImageLayout::eTransferDstOptimal;
-        vkBarrier.dstAccessMask = ConvertToVk(barrier.dstAccessMask);
-        vkBarrier.srcAccessMask = ConvertToVk(barrier.srcAccessMask);
-        vkBarrier.dstQueueFamilyIndex = barrier.dstQueueFamilyIndex;
-        vkBarrier.srcQueueFamilyIndex = barrier.srcQueueFamilyIndex;
-        vkBarrier.subresourceRange.aspectMask     = ConvertToVk(barrier.subRange.aspects);
-        vkBarrier.subresourceRange.baseArrayLayer = barrier.subRange.baseArrayLayer;
-        vkBarrier.subresourceRange.baseMipLevel   = barrier.subRange.baseMipLevel;
-        vkBarrier.subresourceRange.layerCount     = barrier.subRange.layerCount;
-        vkBarrier.subresourceRange.levelCount     = barrier.subRange.levelCount;
-        vkImageMemoryBarriers.push_back(vkBarrier);
-    }
-    a_CommandBuffer->pipelineBarrier(
-        ConvertToVk(a_SrcStageMask),
-        ConvertToVk(a_DstStageMask),
-        ConvertToVk(a_DependencyFlags),
-        vkMemoryBarriers,
-        vkBufferMemoryBarriers,
-        vkImageMemoryBarriers);
 }
 
 void CopyImage(
@@ -110,6 +140,74 @@ void CopyImage(
         **a_SrcImage, vk::ImageLayout::eTransferSrcOptimal,
         **a_DstImage, vk::ImageLayout::eTransferDstOptimal,
         vkCopies);
+}
+
+void EndRendering(const Command::Buffer::Handle& a_CommandBuffer)
+{
+    a_CommandBuffer->endRendering();
+}
+
+void ExecuteCommandBuffer(
+    const Buffer::Handle& a_CommandBuffer,
+    const Buffer::Handle& a_SecondaryCommandBuffer)
+{
+    a_CommandBuffer->executeCommands({ **a_SecondaryCommandBuffer });
+}
+
+void PipelineBarrier(
+    const Buffer::Handle& a_CommandBuffer,
+    const PipelineStageFlags& a_SrcStageMask,
+    const PipelineStageFlags& a_DstStageMask,
+    const DependencyFlags& a_DependencyFlags,
+    const std::vector<MemoryBarrier>& a_MemoryBarriers,
+    const std::vector<BufferMemoryBarrier>& a_BufferMemoryBarriers,
+    const std::vector<ImageMemoryBarrier>& a_ImageMemoryBarriers)
+{
+    std::vector<vk::MemoryBarrier>       vkMemoryBarriers;
+    std::vector<vk::BufferMemoryBarrier> vkBufferMemoryBarriers;
+    std::vector<vk::ImageMemoryBarrier>  vkImageMemoryBarriers;
+    vkMemoryBarriers.reserve(a_MemoryBarriers.size());
+    for (const auto& barrier : a_MemoryBarriers) {
+        vk::MemoryBarrier vkBarrier;
+        vkBarrier.dstAccessMask = ConvertToVk(barrier.dstAccessMask);
+        vkBarrier.srcAccessMask = ConvertToVk(barrier.srcAccessMask);
+        vkMemoryBarriers.push_back(vkBarrier);
+    }
+    vkBufferMemoryBarriers.reserve(a_BufferMemoryBarriers.size());
+    for (const auto& barrier : a_BufferMemoryBarriers) {
+        vk::BufferMemoryBarrier vkBarrier;
+        vkBarrier.dstAccessMask = ConvertToVk(barrier.dstAccessMask);
+        vkBarrier.srcAccessMask = ConvertToVk(barrier.srcAccessMask);
+        vkBarrier.dstQueueFamilyIndex = barrier.dstQueueFamilyIndex;
+        vkBarrier.srcQueueFamilyIndex = barrier.srcQueueFamilyIndex;
+        vkBarrier.buffer = **barrier.buffer;
+        vkBarrier.offset = barrier.offset;
+        vkBarrier.size = barrier.size;
+        vkBufferMemoryBarriers.push_back(vkBarrier);
+    }
+    vkImageMemoryBarriers.reserve(a_ImageMemoryBarriers.size());
+    for (const auto& barrier : a_ImageMemoryBarriers) {
+        vk::ImageMemoryBarrier vkBarrier;
+        vkBarrier.image = **barrier.image;
+        vkBarrier.newLayout = vk::ImageLayout::eTransferDstOptimal;
+        vkBarrier.dstAccessMask = ConvertToVk(barrier.dstAccessMask);
+        vkBarrier.srcAccessMask = ConvertToVk(barrier.srcAccessMask);
+        vkBarrier.dstQueueFamilyIndex = barrier.dstQueueFamilyIndex;
+        vkBarrier.srcQueueFamilyIndex = barrier.srcQueueFamilyIndex;
+        vkBarrier.subresourceRange.aspectMask = ConvertToVk(barrier.subRange.aspects);
+        vkBarrier.subresourceRange.baseArrayLayer = barrier.subRange.baseArrayLayer;
+        vkBarrier.subresourceRange.baseMipLevel = barrier.subRange.baseMipLevel;
+        vkBarrier.subresourceRange.layerCount = barrier.subRange.layerCount;
+        vkBarrier.subresourceRange.levelCount = barrier.subRange.levelCount;
+        vkImageMemoryBarriers.push_back(vkBarrier);
+    }
+    a_CommandBuffer->pipelineBarrier(
+        ConvertToVk(a_SrcStageMask),
+        ConvertToVk(a_DstStageMask),
+        ConvertToVk(a_DependencyFlags),
+        vkMemoryBarriers,
+        vkBufferMemoryBarriers,
+        vkImageMemoryBarriers);
 }
 
 void TransitionImagesLayout(
@@ -153,97 +251,50 @@ void TransitionImageLayout(
         a_CommandBuffer, { a_Transition });
 }
 
-void ClearColorImage(
+void PushDescriptorSet(
     const Command::Buffer::Handle& a_CommandBuffer,
-    const Image::Handle& a_Image,
-    const ColorValue& a_Color,
-    const std::vector<ImageSubresourceRange>& a_Ranges)
+    const PipelineBindingPoint& a_PipelineBindPoint,
+    const Pipeline::Layout::Handle& a_Layout,
+    const std::vector<DescriptorSetWrite>& a_Writes)
 {
-    static_assert(sizeof(ColorValue) == sizeof(vk::ClearColorValue));
-    std::vector<vk::ImageSubresourceRange> vkRanges(a_Ranges.size());
-    for (auto i = 0u; i < a_Ranges.size(); ++i)
-        vkRanges.at(i) = ConvertToVk(a_Ranges.at(i));
-    a_CommandBuffer->clearColorImage(**a_Image,
-        vk::ImageLayout::eTransferDstOptimal,
-        reinterpret_cast<const vk::ClearColorValue&>(a_Color),
-        vkRanges);
-}
+    std::vector<vk::WriteDescriptorSet>  vkWriteInfos(a_Writes.size());
+    
+    std::vector<vk::DescriptorImageInfo>  vkImageInfos(a_Writes.size());
+    std::vector<vk::DescriptorBufferInfo> vkBufferInfos(a_Writes.size());
 
-void ExecuteCommandBuffer(
-    const Buffer::Handle& a_CommandBuffer,
-    const Buffer::Handle& a_SecondaryCommandBuffer)
-{
-    a_CommandBuffer->executeCommands({ **a_SecondaryCommandBuffer });
-}
+    for (auto i = 0u; i < vkWriteInfos.size(); ++i) {
+        auto& writeInfo = a_Writes.at(i);
+        auto& vkWriteInfo = vkWriteInfos.at(i);
 
-void BindPipeline(
-    const Command::Buffer::Handle& a_CommandBuffer,
-    const Pipeline::Handle& a_Pipeline)
-{
-    auto& pipeline = *a_Pipeline;
-    a_CommandBuffer->bindPipeline(vk::PipelineBindPoint(pipeline.bindPoint), *pipeline);
-}
+        if (writeInfo.imageInfo.has_value()) {
+            auto& info = writeInfo.imageInfo.value();
+            auto& vkInfo = vkImageInfos.at(i);
+            vkInfo = vk::DescriptorImageInfo(
+                **info.sampler,
+                **info.imageView,
+                ConvertToVk(info.imageLayout));
+            vkWriteInfo.pImageInfo = &vkInfo;
+        }
 
-void BeginRenderPass(
-    const Command::Buffer::Handle& a_CommandBuffer,
-    const RenderPassBeginInfo& a_BeginInfo,
-    const SubPassContents& a_SubPassContents)
-{
-    std::vector<VkClearValue> vkClearValues(a_BeginInfo.colorClearValues.size() + 1);
-    for (auto i = 0u; i < a_BeginInfo.colorClearValues.size(); ++i)
-    {
-        auto& clearValue = a_BeginInfo.colorClearValues.at(i);
-        auto& vkClearValue = vkClearValues.at(i);
-        vkClearValue.color = ConvertToVk(clearValue);
+        if (writeInfo.bufferInfo.has_value()) {
+            auto& info = writeInfo.bufferInfo.value();
+            auto& vkInfo = vkBufferInfos.at(i);
+            vkInfo = vk::DescriptorBufferInfo(
+                **info.buffer,
+                info.offset,
+                info.range);
+            vkWriteInfo.pBufferInfo = &vkInfo;
+        }
+
+        vkWriteInfo.descriptorCount = writeInfo.dstCount;
+        vkWriteInfo.descriptorType  = ConvertToVk(writeInfo.type);
+        vkWriteInfo.dstArrayElement = writeInfo.dstArrayElement;
+        vkWriteInfo.dstBinding      = writeInfo.dstBinding;
+        vkWriteInfo.dstSet          = **writeInfo.dstSet;
     }
-    vkClearValues.back().depthStencil = ConvertToVk(a_BeginInfo.depthStencilClearValue);
-    VkRenderPassBeginInfo vkInfo{ VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
-    vkInfo.clearValueCount = vkClearValues.size();
-    vkInfo.framebuffer = *a_BeginInfo.framebuffer;
-    vkInfo.pClearValues = vkClearValues.data();
-}
-
-static inline auto GetVkRenderingAttachmentInfo(const RenderingAttachmentInfo& a_Info) {
-    vk::RenderingAttachmentInfo vkInfo;
-    //vkInfo.clearValue = GetVkClearValue(a_Info.clearValue);
-    //vkInfo.imageLayout = ConvertToVk(a_Info.imageLayout);
-    //vkInfo.imageView = *a_Info.imageView;
-    //vkInfo.loadOp = GetVkAttachmentLoadOp(a_Info.loadOp);
-    ////vkInfo.resolveImageLayout
-    ////vkInfo.resolveImageView
-    ////vkInfo.resolveImageLayout
-    //vkInfo.storeOp = GetVkAttachmentStoreOp(a_Info.storeOp);
-    return vkInfo;
-}
-
-void BeginRendering(
-    const Command::Buffer::Handle& a_CommandBuffer,
-    const RenderingInfo& a_Info)
-{
-    std::vector<vk::RenderingAttachmentInfo> vkColorAttachments(a_Info.colorAttachments.size());
-    vk::RenderingAttachmentInfo vkDepthAttachment;
-    vk::RenderingAttachmentInfo vkStencilAttachment;
-    for (auto i = 0u; i < vkColorAttachments.size(); ++i) {
-        vkColorAttachments.at(i) = GetVkRenderingAttachmentInfo(a_Info.colorAttachments.at(i));
-    }
-    vkDepthAttachment = GetVkRenderingAttachmentInfo(a_Info.depthAttachment);
-    vkStencilAttachment = GetVkRenderingAttachmentInfo(a_Info.stencilAttachment);
-    vk::RenderingInfo vkInfo;
-    vkInfo.colorAttachmentCount = vkColorAttachments.size();
-    //vkInfo.flags = GetVkRenderingFlags(a_Info.flags);
-    //vkInfo.viewMask = a_Info.viewMask;
-    vkInfo.flags = {};
-    vkInfo.viewMask = 0;
-    vkInfo.layerCount = a_Info.layerCount;
-    vkInfo.renderArea = ConvertToVk(a_Info.area);
-    vkInfo.pColorAttachments = vkColorAttachments.data();
-    vkInfo.pDepthAttachment = &vkDepthAttachment;
-    vkInfo.pStencilAttachment = &vkStencilAttachment;
-    a_CommandBuffer->beginRendering(vkInfo);
-}
-
-void EndRendering(const Command::Buffer::Handle& a_CommandBuffer)
-{
-    a_CommandBuffer->endRendering();
+    a_CommandBuffer->pushDescriptorSetKHR(
+        ConvertToVk(a_PipelineBindPoint),
+        **a_Layout,
+        0, vkWriteInfos);
 }
 }

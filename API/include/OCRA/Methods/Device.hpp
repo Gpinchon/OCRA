@@ -101,10 +101,6 @@ Shader::Module::Handle CreateShaderModule(
     const Device::Handle& a_Device,
     const CreateShaderModuleInfo& a_Info);
 
-Shader::Stage::Handle CreateShaderStage(
-    const Device::Handle& a_Device,
-    const CreateShaderStageInfo& a_Info);
-
 /**
 * @brief on OpenGL, there is only one queue
 * @return the handle to a que of specified Family.

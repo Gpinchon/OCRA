@@ -25,6 +25,7 @@ set(OCRA_IMPL_INCLUDE_DIR
 )
 
 set(OCRA_IMPL_HEADER_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Assert.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Buffer.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/CommandBuffer.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/CommandPool.hpp
@@ -36,15 +37,18 @@ set(OCRA_IMPL_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Fence.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Flags.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/GraphicsPipeline.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/GraphicsPipelineStates.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Image.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/ImageSampler.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/ImageView.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Instance.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Memory.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Pipeline.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/PipelineLayout.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/PhysicalDevice.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Queue.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Semaphore.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/ShaderModule.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Structs.hpp
 )
 

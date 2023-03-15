@@ -1,16 +1,11 @@
 #pragma once
 
-#include <OCRA/Handle.hpp>
+#include <OCRA/OCRA.hpp>
 
 #include <UniformTexture.hpp>
 #include <UniformBuffer.hpp>
 
 #include <vector>
-
-OCRA_DECLARE_HANDLE(OCRA::PhysicalDevice);
-OCRA_DECLARE_HANDLE(OCRA::Device);
-OCRA_DECLARE_HANDLE(OCRA::Descriptor::Pool);
-OCRA_DECLARE_HANDLE(OCRA::Shader::Stage);
 
 namespace OCRA {
 class Material
@@ -21,7 +16,7 @@ public:
         const Device::Handle& a_Device,
         const Parameters& a_Parameters,
         const std::vector<Texture>& a_Textures = {},
-        const Shader::Stage::Handle& a_Shader = {})
+        const PipelineShaderStage& a_Shader = {})
         : parameters(a_Device, 1, Parameters{})
         , fragmentShader(a_Shader)
     {
@@ -78,7 +73,7 @@ public:
     }
 
 private:
-    Shader::Stage::Handle       fragmentShader;
+    PipelineShaderStage         fragmentShader;
     UniformBuffer               parameters;
     std::vector<UniformTexture> textures;
     std::vector<DescriptorSetLayoutBinding> descriptorLayoutBindings;

@@ -3,12 +3,8 @@
 #include <OCRA/ShaderCompiler/Compiler.hpp>
 #include <OCRA/ShaderCompiler/Shader.hpp>
 
-OCRA_DECLARE_WEAK_HANDLE(OCRA::Shader::Stage);
-
 namespace OCRA {
 auto DefaultVertexShader(const Device::Handle& a_Device) {
-    static Shader::Stage::WeakHandle shaderStage;
-    if (!shaderStage.expired()) return shaderStage.lock();
     const auto compiler = ShaderCompiler::Create();
     ShaderCompiler::Shader::Info shaderInfo;
     shaderInfo.type = ShaderCompiler::Shader::Type::Vertex;
@@ -33,13 +29,11 @@ auto DefaultVertexShader(const Device::Handle& a_Device) {
     CreateShaderModuleInfo shaderModuleInfo;
     shaderModuleInfo.code = ShaderCompiler::Shader::Compile(vertexShader);
     const auto shaderModule = CreateShaderModule(a_Device, shaderModuleInfo);
-    CreateShaderStageInfo shaderStageInfo;
+    PipelineShaderStage shaderStageInfo;
     shaderStageInfo.entryPoint = "main";
     shaderStageInfo.stage = ShaderStageFlagBits::Vertex;
     shaderStageInfo.module = shaderModule;
-    auto shaderStageHandle = CreateShaderStage(a_Device, shaderStageInfo);
-    shaderStage = shaderStageHandle;
-    return shaderStageHandle;
+    return shaderStageInfo;
 }
 Mesh::Mesh(const Device::Handle& a_Device, const VertexBuffer& a_VertexBuffer, const Material& a_Material)
     : device(a_Device)
