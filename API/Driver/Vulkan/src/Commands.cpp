@@ -83,6 +83,20 @@ void BindPipeline(
     a_CommandBuffer->bindPipeline(vk::PipelineBindPoint(pipeline.bindPoint), *pipeline);
 }
 
+void BindVertexBuffers(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const uint32_t                              a_FirstBinding,
+    const std::vector<OCRA::Buffer::Handle>& a_VertexBuffers,
+    const std::vector<uint64_t>& a_Offsets)
+{
+    std::vector<vk::Buffer> buffers(a_VertexBuffers.size());
+    std::transform(a_VertexBuffers.begin(), a_VertexBuffers.end(),
+        buffers.begin(), [](const auto& buffer) {
+            return **buffer;
+        });
+    a_CommandBuffer->bindVertexBuffers(a_FirstBinding, buffers, a_Offsets);
+}
+
 void ClearColorImage(
     const Command::Buffer::Handle& a_CommandBuffer,
     const Image::Handle& a_Image,
@@ -140,6 +154,18 @@ void CopyImage(
         **a_SrcImage, vk::ImageLayout::eTransferSrcOptimal,
         **a_DstImage, vk::ImageLayout::eTransferDstOptimal,
         vkCopies);
+}
+
+void Draw(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const uint32_t a_VertexCount,
+    const uint32_t a_InstanceCount,
+    const uint32_t a_FirstVertex,
+    const uint32_t a_FirstInstance)
+{
+    a_CommandBuffer->draw(
+        a_VertexCount, a_InstanceCount,
+        a_FirstVertex, a_FirstInstance);
 }
 
 void EndRendering(const Command::Buffer::Handle& a_CommandBuffer)

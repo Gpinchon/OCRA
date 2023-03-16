@@ -323,9 +323,9 @@ static inline auto ConvertToVk(const Filter& a_Filter) {
     switch (a_Filter)
     {
     case Filter::Nearest:
-        vk::Filter::eNearest;
+        return vk::Filter::eNearest;
     case Filter::Linear:
-        vk::Filter::eLinear;
+        return vk::Filter::eLinear;
     }
     return vk::Filter(-1);
 }

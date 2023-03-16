@@ -306,7 +306,8 @@ Device::Handle CreateDevice(
         VK_KHR_SWAPCHAIN_EXTENSION_NAME,
         VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME,
         VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
-        VK_EXT_VERTEX_INPUT_DYNAMIC_STATE_EXTENSION_NAME
+        VK_EXT_VERTEX_INPUT_DYNAMIC_STATE_EXTENSION_NAME,
+        VK_EXT_CUSTOM_BORDER_COLOR_EXTENSION_NAME
     };
     auto transferQueue = a_PhysicalDevice->findQueueFamily(vk::QueueFlagBits::eTransfer);
     bool foundTransferQueue = false;

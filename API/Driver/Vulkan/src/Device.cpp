@@ -12,6 +12,7 @@
 #include <VK/ImageSampler.hpp>
 #include <VK/ImageView.hpp>
 #include <VK/PhysicalDevice.hpp>
+#include <VK/PipelineLayout.hpp>
 #include <VK/Queue.hpp>
 #include <VK/Semaphore.hpp>
 #include <VK/ShaderModule.hpp>
@@ -211,6 +212,17 @@ Pipeline::Handle CreatePipelineGraphics(
         colorBlendState.data(),
         dynamicState.data());
     return std::make_shared<Pipeline::Graphics::Impl>(device, info);
+}
+
+Pipeline::Layout::Handle CreatePipelineLayout(
+    const Device::Handle&           a_Device,
+    const CreatePipelineLayoutInfo& a_Info,
+    const AllocationCallback*       a_Allocator)
+{
+    std::vector<vk::DescriptorSetLayout> layouts(a_Info.setLayouts.size());
+    std::vector<vk::PushConstantRange>   pushConstants(a_Info.pushConstants.size());
+    vk::PipelineLayoutCreateInfo info({}, layouts, pushConstants);
+    return std::make_shared<Pipeline::Layout::Impl>(*a_Device, info);
 }
 
 Semaphore::Handle CreateSemaphore(

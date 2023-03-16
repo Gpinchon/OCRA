@@ -662,7 +662,7 @@ struct CreateDeviceInfo {
 };
 struct CreateImageInfo {
     ImageType           type{ ImageType::Unknown };
-    ImageLayout         initialLayout{ ImageLayout::General };
+    ImageLayout         initialLayout{ ImageLayout::Undefined };
     ImageUsageFlags     usage{ ImageUsageFlagBits::None }; //Specifies how the image will be used
     SampleCount         samples{ SampleCount::Count1 };
     Format              format{ Format::Unknown };
@@ -723,7 +723,7 @@ struct CreateImageSamplerInfo {
     bool anisotropyEnable{ false };
     float maxAnisotropy{ 0 };
     bool compareEnable{ false };
-    CompareOp compareOp{ CompareOp::Unknown };
+    CompareOp compareOp{ CompareOp::Less };
     float minLod{ 0 };
     float maxLod{ 1000 };
     Vec4 borderColor;

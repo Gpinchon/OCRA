@@ -121,6 +121,7 @@ void Draw(
     const uint32_t a_InstanceCount,
     const uint32_t a_FirstVertex,
     const uint32_t a_FirstInstance);
+
 void DrawIndexed(
     const Command::Buffer::Handle& a_CommandBuffer,
     const uint32_t a_IndexCount,

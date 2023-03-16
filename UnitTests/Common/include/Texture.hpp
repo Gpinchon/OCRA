@@ -10,10 +10,12 @@ public:
         : device(a_Device)
         , sampler(CreateImageSampler(device, samplerInfo))
     {
+        imageInfo.usage = ImageUsageFlagBits::Sampled;
         imageInfo.type = a_Type;
         imageInfo.format = a_Format;
         imageInfo.extent = { a_X, a_Y, a_Z };
         imageInfo.mipLevels = a_MipLevels;
+        imageInfo.arrayLayers = 1;
         image = CreateImage(device, imageInfo);
     }
     auto& GetSampler() const { return sampler; }
@@ -65,6 +67,8 @@ public:
         imageViewInfo.image = GetImage();
         imageViewInfo.type = ImageViewType::View2D;
         imageViewInfo.format = a_Format;
+        imageViewInfo.subRange.aspects = ImageAspectFlagBits::Color;
+        imageViewInfo.subRange.levelCount = 1;
         SetImageViewInfo(imageViewInfo);
     }
     auto GetWidth() const { return GetImageInfo().extent.width; };
