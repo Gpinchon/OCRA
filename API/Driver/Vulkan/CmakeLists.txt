@@ -2,54 +2,117 @@ cmake_minimum_required(VERSION 3.19)
 cmake_policy(SET CMP0074 NEW)
 project(OCRA-API-Implementation LANGUAGES CXX)
 
-find_package(Vulkan REQUIRED)
-
-set(
-  OCRA_GL_SHADER_SUBPASSINPUT_OFFSET 16
-  CACHE STRING "OpenGL Subpass input emulation offset"
-)
-
-set(
-  OCRA_GL_SHADER_PUSHCONSTANT_BINDING 64
-  CACHE STRING "OpenGL Push Constant emulation binding"
-)
-
-add_definitions(
-  -DOCRA_GL_SHADER_SUBPASSINPUT_OFFSET=${OCRA_GL_SHADER_SUBPASSINPUT_OFFSET}
-  -DOCRA_GL_SHADER_PUSHCONSTANT_BINDING=${OCRA_GL_SHADER_PUSHCONSTANT_BINDING}
-)
-
 set(OCRA_IMPL_INCLUDE_DIR
   ${CMAKE_CURRENT_SOURCE_DIR}/include
   CACHE INTERNAL ""
 )
 
+find_package(Vulkan)
+
+if (NOT Vulkan_FOUND)
+  message("Vulkan SDK not installed, fetching minimal dependencies")
+
+  option(UPDATE_DEPS "Run update_deps.py for user" OFF)
+
+  #Fetch Vulkan-Headers
+  FetchContent_Declare(
+    VK_HEADERS
+    GIT_REPOSITORY  https://github.com/KhronosGroup/Vulkan-Headers.git
+    GIT_TAG         v1.3.244
+  )
+  if (NOT vk_headers_POPULATED)
+    FetchContent_Populate(VK_HEADERS)
+  endif (NOT vk_headers_POPULATED)
+  execute_process(COMMAND cmake -S ${vk_headers_SOURCE_DIR} -B ${vk_headers_BINARY_DIR})
+  execute_process(COMMAND cmake --install ${vk_headers_BINARY_DIR} --prefix ${vk_headers_BINARY_DIR}/install)
+  list(APPEND CMAKE_PREFIX_PATH ${vk_headers_BINARY_DIR}/install/)
+  find_package(VulkanHeaders REQUIRED CONFIG QUIET)
+  message("Vulkan-Headers fetched to ${vk_headers_SOURCE_DIR}")
+
+  #Fetch Vulkan-Loader
+  FetchContent_Declare(
+    VK_LOADER
+    GIT_REPOSITORY  https://github.com/KhronosGroup/Vulkan-Loader.git
+    GIT_TAG         v1.3.244
+  )
+  FetchContent_MakeAvailable(VK_LOADER)
+  set_subdirectory_folder("3rdparty/Vulkan-Loader" ${vk_loader_SOURCE_DIR})
+  message("Vulkan-Loader fetched to ${vk_loader_SOURCE_DIR}")
+
+  #Fetch SPIRV-Headers
+  FetchContent_Declare(
+    SPIRV_HEADERS
+    GIT_REPOSITORY  https://github.com/KhronosGroup/SPIRV-Headers.git
+    GIT_TAG         main
+  )
+  if (NOT spirv_headers_POPULATED)
+    FetchContent_Populate(SPIRV_HEADERS)
+  endif (NOT spirv_headers_POPULATED)
+  execute_process(COMMAND cmake -S ${spirv_headers_SOURCE_DIR} -B ${spirv_headers_BINARY_DIR})
+  execute_process(COMMAND cmake --install ${spirv_headers_BINARY_DIR} --config Release --prefix ${spirv_headers_BINARY_DIR}/install)
+  list(APPEND CMAKE_PREFIX_PATH ${spirv_headers_BINARY_DIR}/install/)
+  message("SPV-Headers fetched to ${spirv_headers_SOURCE_DIR}")
+
+  #Fetch SPV-Tools
+  FetchContent_Declare(
+    SPIRV_TOOLS
+    GIT_REPOSITORY  https://github.com/KhronosGroup/SPIRV-Tools.git
+    GIT_TAG         v2023.1
+  )
+  if (NOT spirv_tools_POPULATED)
+    FetchContent_Populate(SPIRV_TOOLS)
+  endif (NOT spirv_tools_POPULATED)
+  execute_process(COMMAND cmake -D SPIRV-Headers_SOURCE_DIR=${spirv_headers_SOURCE_DIR} -S ${spirv_tools_SOURCE_DIR} -B ${spirv_tools_BINARY_DIR})
+  execute_process(COMMAND cmake --build ${spirv_tools_BINARY_DIR} --config Release)
+  execute_process(COMMAND cmake --install ${spirv_tools_BINARY_DIR} --config Release --prefix ${spirv_tools_BINARY_DIR}/install)
+  list(APPEND CMAKE_PREFIX_PATH ${spirv_tools_BINARY_DIR}/install/)
+  message("SPV-Headers fetched to ${spirv_tools_SOURCE_DIR}")
+
+  #Fetch Vulkan-ValidationLayers
+  FetchContent_Declare(
+    VK_LAYERS
+    GIT_REPOSITORY  https://github.com/KhronosGroup/Vulkan-ValidationLayers.git
+    GIT_TAG         v1.3.244
+  )
+  if (NOT vk_layers_POPULATED)
+    FetchContent_Populate(VK_LAYERS)
+  endif (NOT vk_layers_POPULATED)
+  execute_process(COMMAND cmake "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}" -S ${vk_layers_SOURCE_DIR} -B ${vk_layers_BINARY_DIR})
+  execute_process(COMMAND cmake --build ${vk_layers_BINARY_DIR} --config Release)
+  execute_process(COMMAND cmake --install ${vk_layers_BINARY_DIR} --config Release --prefix ${vk_layers_BINARY_DIR}/install)
+  message("Vulkan-ValidationLayers fetched to ${vk_layers_SOURCE_DIR}")
+
+  set(VK_LIBS vulkan Vulkan::Headers VkLayer_khronos_validation)
+else (NOT Vulkan_FOUND)
+  set(VK_LIBS ${VK_LIBS} Vulkan::Vulkan)
+endif (NOT Vulkan_FOUND)
+
 set(OCRA_IMPL_HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Assert.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Buffer.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/CommandBuffer.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/CommandPool.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/DescriptorPool.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/DescriptorSet.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/DescriptorSetLayout.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Device.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Enums.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Fence.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Flags.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/GraphicsPipeline.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/GraphicsPipelineStates.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Image.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/ImageSampler.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/ImageView.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Instance.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Memory.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Pipeline.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/PipelineLayout.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/PhysicalDevice.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Queue.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Semaphore.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/ShaderModule.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/Structs.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/VK/Assert.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/VK/Buffer.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/VK/CommandBuffer.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/VK/CommandPool.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/VK/DescriptorPool.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/VK/DescriptorSet.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/VK/DescriptorSetLayout.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/VK/Device.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/VK/Enums.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/VK/Fence.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/VK/Flags.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/VK/GraphicsPipeline.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/VK/GraphicsPipelineStates.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/VK/Image.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/VK/ImageSampler.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/VK/ImageView.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/VK/Instance.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/VK/Memory.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/VK/Pipeline.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/VK/PipelineLayout.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/VK/PhysicalDevice.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/VK/Queue.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/VK/Semaphore.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/VK/ShaderModule.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/VK/Structs.hpp
 )
 
 set(OCRA_IMPL_SOURCE_FILES
@@ -90,7 +153,7 @@ set_target_properties(
 
 target_link_libraries(OCRA-API-Implementation PUBLIC
   OCRA::API::Interface
-  Vulkan::Vulkan
+  ${VK_LIBS}
 )
 
 if (MSVC_IDE)

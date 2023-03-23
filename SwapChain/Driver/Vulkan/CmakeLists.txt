@@ -6,8 +6,6 @@ if (NOT OCRA_API_IMPL STREQUAL "Vulkan")
   message(FATAL_ERROR "OCRA_API_IMPL MUST be Vulkan, currently : ${OCRA_API_IMPL}")
 endif()
 
-find_package(Vulkan REQUIRED)
-
 set(OCRA_IMPL_SWAPCHAIN_HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/SwapChain/Enums.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/VK/SwapChain/Surface.hpp
@@ -38,7 +36,7 @@ set_target_properties(
   PROPERTIES FOLDER "SwapChain"
 )
 
-target_link_libraries(OCRA-SwapChain-Implementation PUBLIC OCRA-API-Implementation OCRA-SwapChain-Interface Vulkan::Vulkan)
+target_link_libraries(OCRA-SwapChain-Implementation PUBLIC OCRA-API-Implementation OCRA-SwapChain-Interface)
 
 if (MSVC_IDE)
   set(CMAKE_DEBUG_POSTFIX "d")

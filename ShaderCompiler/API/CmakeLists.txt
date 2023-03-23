@@ -9,22 +9,11 @@ set(CMAKE_CXX_FLAGS_RELEASE "-Ox")
 
 include(FetchContent)
 
-# Fetch SPIRV_TOOLS
-FetchContent_Declare(
-    SPIRV_HEADERS
-    GIT_REPOSITORY  https://github.com/KhronosGroup/SPIRV-Headers.git
-    GIT_TAG         4995a2f2723c401eb0ea3e10c81298906bf1422b
-)
-option(SPIRV_HEADERS_SKIP_EXAMPLES "Skip building examples" ON)
-option(SPIRV_HEADERS_SKIP_INSTALL "Skip install" ON)
-FetchContent_MakeAvailable(SPIRV_HEADERS)
-set_subdirectory_folder("3rdparty/SPIRV-Headers" ${spirv_headers_SOURCE_DIR})
-
 # Fetch GOOGLE_TEST
 FetchContent_Declare(
     GOOGLE_TEST
     GIT_REPOSITORY  https://github.com/google/googletest.git
-    GIT_TAG         25dcdc7e8bfac8967f20fb2c0a628f5cf442188d
+    GIT_TAG         v1.13.0
 )
 option(INSTALL_GTEST "Install Google Test" OFF)
 FetchContent_MakeAvailable(GOOGLE_TEST)
@@ -35,16 +24,36 @@ set_subdirectory_folder("3rdparty/GoogleTest" ${google_test_SOURCE_DIR})
 FetchContent_Declare(
   GLSLANG
   GIT_REPOSITORY  https://github.com/KhronosGroup/glslang.git
+  GIT_TAG         sdk-1.3.239.0
 )
 option(SKIP_GLSLANG_INSTALL "Skip Installation" ON)
 FetchContent_MakeAvailable(GLSLANG)
 set_subdirectory_folder("3rdparty/GLSLang" ${glslang_SOURCE_DIR})
 # Fetch GLSLANG
 
+find_package(SPIRV-Headers CONFIG QUIET)
+
+if (NOT TARGET SPIRV-Headers::SPIRV-Headers)
+  #Fetch SPIRV-Headers
+  FetchContent_Declare(
+    SPIRV_HEADERS
+    GIT_REPOSITORY  https://github.com/KhronosGroup/SPIRV-Headers.git
+    GIT_TAG         main
+  )
+  if (NOT spirv_headers_POPULATED)
+    FetchContent_Populate(SPIRV_HEADERS)
+  endif (NOT spirv_headers_POPULATED)
+  execute_process(COMMAND cmake -S ${spirv_headers_SOURCE_DIR} -B ${spirv_headers_BINARY_DIR})
+  execute_process(COMMAND cmake --install ${spirv_headers_BINARY_DIR} --config Release --prefix ${spirv_headers_BINARY_DIR}/install)
+  list(APPEND CMAKE_PREFIX_PATH ${spirv_headers_BINARY_DIR}/install/)
+  message("SPV-Headers fetched to ${spirv_headers_SOURCE_DIR}")
+endif(NOT TARGET SPIRV-Headers::SPIRV-Headers)
+
 # Fetch SPIRV_CROSS
 FetchContent_Declare(
   SPIRV_CROSS
   GIT_REPOSITORY  https://github.com/KhronosGroup/SPIRV-Cross.git
+  GIT_TAG         sdk-1.3.239.0
 )
 option(SPIRV_CROSS_SKIP_INSTALL "Skip SPIRV-Cross Installation" ON)
 option(SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS "Instead of throwing exceptions assert" OFF)
