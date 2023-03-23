@@ -1,17 +1,18 @@
+#include <OCRA/Core.hpp>
+
 #include <VK/Assert.hpp>
 #include <VK/Instance.hpp>
 #include <VK/PhysicalDevice.hpp>
 
-#include <OCRA/Core.hpp>
-
 #include <stdexcept>
 
 #include <vulkan/vulkan_raii.hpp>
-
 #ifdef _WIN32
-  #include <Windows.h>
-  #include <vulkan/vulkan_win32.h>
+#include <Windows.h>
+#include <vulkan/vulkan_win32.h>
 #endif
+
+#include <iostream>
 
 namespace OCRA
 {
@@ -27,6 +28,7 @@ bool CheckValidationLayerSupport() {
     for (const char* layerName : validationLayers) {
         bool layerFound = false;
         for (const auto& layerProperties : availableLayers) {
+            std::cout << layerProperties.layerName.data() << std::endl;
             if (strcmp(layerName, layerProperties.layerName) == 0) {
                 layerFound = true;
                 break;

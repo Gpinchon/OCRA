@@ -61,10 +61,10 @@ struct CompileColorBlendState {
                 attachment.alphaBlendOperation);
             glColorMaski(
                 attachment.index,
-                BlendColorMaskFlagBits::None != (attachment.colorMask & BlendColorMaskFlagBits::R),
-                BlendColorMaskFlagBits::None != (attachment.colorMask & BlendColorMaskFlagBits::G),
-                BlendColorMaskFlagBits::None != (attachment.colorMask & BlendColorMaskFlagBits::B),
-                BlendColorMaskFlagBits::None != (attachment.colorMask & BlendColorMaskFlagBits::A));
+                ColorComponentFlagBits::None != (attachment.colorMask & ColorComponentFlagBits::R),
+                ColorComponentFlagBits::None != (attachment.colorMask & ColorComponentFlagBits::G),
+                ColorComponentFlagBits::None != (attachment.colorMask & ColorComponentFlagBits::B),
+                ColorComponentFlagBits::None != (attachment.colorMask & ColorComponentFlagBits::A));
         }
     }
     const bool logicOpEnable;

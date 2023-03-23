@@ -16,6 +16,14 @@
 #include <list>
 #include <algorithm>
 
+//Damn you Windows !
+#ifdef near
+#undef near
+#endif
+#ifdef far
+#undef far
+#endif
+
 namespace OCRA
 {
 //Use this to ignore timeout and wait indefinitely

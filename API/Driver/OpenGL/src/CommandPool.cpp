@@ -38,17 +38,19 @@ struct Impl
     Device::WeakHandle device;
 };
 
-std::vector<Buffer::Handle> AllocateCommandBuffer(const AllocateCommandBufferInfo& a_Info)
+std::vector<Command::Buffer::Handle> AllocateCommandBuffer(
+    const Command::Pool::Handle& a_Pool,
+    const AllocateCommandBufferInfo& a_Info)
 {
     std::vector<Buffer::Handle> commandBuffers;
     commandBuffers.reserve(a_Info.count);
-    auto& memoryResource = a_Info.pool->memoryResource;
+    auto& memoryResource = a_Pool->memoryResource;
     auto allocator = std::pmr::polymorphic_allocator<Buffer::Impl>(&memoryResource);
 #ifdef _DEBUG
-    auto& allocated = a_Info.pool->allocated;
+    auto& allocated = a_Pool->allocated;
 #endif
     for (auto i = 0u; i < a_Info.count; ++i) {
-        auto buffer = std::allocate_shared<Buffer::Impl>(allocator, a_Info.pool->device.lock(), a_Info.level, &memoryResource);
+        auto buffer = std::allocate_shared<Buffer::Impl>(allocator, a_Pool->device.lock(), a_Info.level, &memoryResource);
         commandBuffers.push_back(buffer);
 #ifdef _DEBUG
         allocated.push_back(buffer);

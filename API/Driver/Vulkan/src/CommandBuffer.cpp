@@ -1,7 +1,7 @@
+#include <OCRA/Structs.hpp>
+
 #include <VK/CommandBuffer.hpp>
 #include <VK/Flags.hpp>
-
-#include <OCRA/Structs.hpp>
 
 namespace OCRA::Command::Buffer
 {

@@ -16,7 +16,7 @@ struct Queue
 {
     Queue() {
         properties.queueCount = 1;
-        properties.queueFlags = QueueFlagsBits::Graphics | QueueFlagsBits::Compute | QueueFlagsBits::Transfer | QueueFlagsBits::SparseBinding;
+        properties.queueFlags = QueueFlagBits::Graphics | QueueFlagBits::Compute | QueueFlagBits::Transfer | QueueFlagBits::SparseBinding;
         properties.minImageTransferGranularity = { 1, 1, 1 }; //Queues supporting graphics and/or compute operations must report (1,1,1)
     };
     inline void PushCommand(const Command& a_Command, const bool& a_Synchronous) {

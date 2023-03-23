@@ -47,14 +47,16 @@ struct Impl
 #endif
 };
 
-Set::Handle AllocateSet(const AllocateDescriptorSetInfo& a_Info)
+Set::Handle AllocateSet(
+    const Handle& a_Pool,
+    const AllocateDescriptorSetInfo& a_Info)
 {
     size_t bindingCount = 0;
     const auto& bindings = a_Info.layout->bindings;
     for (auto& binding : bindings) {
         bindingCount += binding.count;
     }
-    auto& memoryResource = a_Info.pool->memory_resource;
+    auto& memoryResource = a_Pool->memory_resource;
     auto set = std::allocate_shared<Set::Impl>(std::pmr::polymorphic_allocator<Set::Impl>(&memoryResource), &memoryResource);
     set->bindings.reserve(bindingCount);
     for (auto& binding : bindings) {
@@ -63,7 +65,7 @@ Set::Handle AllocateSet(const AllocateDescriptorSetInfo& a_Info)
         }
     }
 #ifdef _DEBUG
-    auto& allocated = a_Info.pool->allocated;
+    auto& allocated = a_Pool->allocated;
     allocated.push_back(set);
     //cleanup while we're at it
     allocated.erase(std::remove_if(allocated.begin(), allocated.end(), [](auto& allocated) { return allocated.expired(); }), allocated.end());

@@ -35,9 +35,9 @@ static inline auto GetGLBlendOp(const BlendOp& a_Operation)
     switch (a_Operation) {
     case BlendOp::Add:
         return GL_FUNC_ADD;
-    case BlendOp::Substract:
+    case BlendOp::Subtract:
         return GL_FUNC_SUBTRACT;
-    case BlendOp::ReverseSubstract:
+    case BlendOp::ReverseSubtract:
         return GL_FUNC_REVERSE_SUBTRACT;
     case BlendOp::Min:
         return GL_MIN;

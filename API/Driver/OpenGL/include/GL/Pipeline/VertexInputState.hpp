@@ -26,7 +26,7 @@ struct CompileVertexInputState
     ~CompileVertexInputState();
     void operator()(Command::Buffer::ExecutionState&) const;
     const uint32_t primitiveRestartIndex;
-    const std::vector<PipelineVertexBindingDescription> bindingDescriptions;
+    const std::vector<VertexBindingDescription> bindingDescriptions;
     const Device::WeakHandle device;
     mutable uint32_t handle{ 0 };
 };

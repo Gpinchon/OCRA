@@ -1,8 +1,8 @@
+#include <OCRA/Core.hpp>
+
 #include <VK/CommandBuffer.hpp>
 #include <VK/CommandPool.hpp>
 #include <VK/Enums.hpp>
-
-#include <OCRA/Core.hpp>
 
 #include <vector>
 

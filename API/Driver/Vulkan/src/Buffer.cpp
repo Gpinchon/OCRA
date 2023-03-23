@@ -1,11 +1,11 @@
+#include <OCRA/OCRA.hpp>
+
 #include <VK/Device.hpp>
 #include <VK/Buffer.hpp>
 #include <VK/Flags.hpp>
 #include <VK/Memory.hpp>
 #include <VK/Enums.hpp>
 #include <VK/Flags.hpp>
-
-#include <OCRA/OCRA.hpp>
 
 namespace OCRA::Device
 {

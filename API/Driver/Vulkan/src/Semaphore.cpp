@@ -1,7 +1,7 @@
+#include <OCRA/Structs.hpp>
+
 #include <VK/Semaphore.hpp>
 #include <VK/Device.hpp>
-
-#include <OCRA/Structs.hpp>
 
 #include <chrono>
 

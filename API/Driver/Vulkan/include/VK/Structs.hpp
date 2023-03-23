@@ -1,9 +1,12 @@
 #pragma once
 
+#include <OCRA/Structs.hpp>
+
 #include <VK/Enums.hpp>
 #include <VK/Flags.hpp>
 
-#include <OCRA/Structs.hpp>
+#undef near
+#undef far
 
 namespace OCRA
 {

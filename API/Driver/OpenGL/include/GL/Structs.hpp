@@ -23,7 +23,7 @@ struct GLAttachmentState {
     GLenum srcAlphaBlendFactor;
     GLenum dstAlphaBlendFactor;
     GLenum alphaBlendOperation;
-    BlendColorMaskFlags colorMask; //color mask used for writing to this attachment
+    ColorComponentFlags colorMask; //color mask used for writing to this attachment
     const uint8_t index{ 0 };
 };
 

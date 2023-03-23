@@ -1,3 +1,5 @@
+#include <OCRA/Core.hpp>
+
 #include <VK/CommandBuffer.hpp>
 #include <VK/CommandPool.hpp>
 #include <VK/DescriptorPool.hpp>
@@ -18,7 +20,7 @@
 #include <VK/ShaderModule.hpp>
 #include <VK/Structs.hpp>
 
-#include <OCRA/Core.hpp>
+#undef CreateSemaphore
 
 namespace OCRA::Device
 {

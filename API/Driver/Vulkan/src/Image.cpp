@@ -1,3 +1,5 @@
+#include <OCRA/OCRA.hpp>
+
 #include <VK/Buffer.hpp>
 #include <VK/Device.hpp>
 #include <VK/Enums.hpp>
@@ -5,8 +7,6 @@
 #include <VK/Image.hpp>
 #include <VK/PhysicalDevice.hpp>
 #include <VK/Structs.hpp>
-
-#include <OCRA/OCRA.hpp>
 
 namespace OCRA::Image
 {

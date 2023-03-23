@@ -1,3 +1,5 @@
+#include <OCRA/Core.hpp>
+
 #include <VK/Buffer.hpp>
 #include <VK/DescriptorSet.hpp>
 #include <VK/PipelineLayout.hpp>
@@ -10,8 +12,6 @@
 #include <VK/ImageView.hpp>
 #include <VK/Pipeline.hpp>
 #include <VK/Structs.hpp>
-
-#include <OCRA/Core.hpp>
 
 #include <vulkan/vulkan.h>
 

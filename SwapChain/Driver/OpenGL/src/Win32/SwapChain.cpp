@@ -93,6 +93,7 @@ Impl::Impl(const Device::Handle& a_Device, const CreateSwapChainInfo& a_Info)
         hglrc = win32SwapChain->hglrc;
         presentShader.swap(win32SwapChain->presentShader);
         win32SwapChain->Retire();
+        win32SwapChain.reset();
     }
     else {
         hdc = GetDC(HWND(a_Info.surface->hwnd));

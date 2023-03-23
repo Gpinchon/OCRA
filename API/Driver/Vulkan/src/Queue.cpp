@@ -1,11 +1,11 @@
+#include <OCRA/Core.hpp>
+
 #include <VK/CommandBuffer.hpp>
 #include <VK/Device.hpp>
 #include <VK/Fence.hpp>
 #include <VK/Queue.hpp>
 #include <VK/Semaphore.hpp>
 #include <VK/Flags.hpp>
-
-#include <OCRA/Core.hpp>
 
 namespace OCRA::Queue
 {

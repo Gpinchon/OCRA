@@ -1,11 +1,11 @@
+#include <OCRA/Structs.hpp>
+
 #include <VK/Buffer.hpp>
 #include <VK/DescriptorSet.hpp>
 #include <VK/Device.hpp>
 #include <VK/Enums.hpp>
 #include <VK/ImageSampler.hpp>
 #include <VK/ImageView.hpp>
-
-#include <OCRA/Structs.hpp>
 
 namespace OCRA::Descriptor::Set
 {

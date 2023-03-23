@@ -1,10 +1,10 @@
+#include <OCRA/Structs.hpp>
+
 #include <VK/Device.hpp>
 #include <VK/Enums.hpp>
 #include <VK/Flags.hpp>
 #include <VK/Instance.hpp>
 #include <VK/PhysicalDevice.hpp>
-
-#include <OCRA/Structs.hpp>
 
 namespace OCRA::PhysicalDevice
 {

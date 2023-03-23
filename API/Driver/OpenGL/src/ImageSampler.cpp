@@ -27,7 +27,7 @@ static inline auto CreateGLImageSampler(const Device::Handle& a_Device, const Cr
         if (a_Info.compareEnable) glSamplerParameteri(handle, GL_TEXTURE_COMPARE_FUNC, GetGLOperation(a_Info.compareOp));
         glSamplerParameterf(handle, GL_TEXTURE_MIN_LOD, a_Info.minLod);
         glSamplerParameterf(handle, GL_TEXTURE_MAX_LOD, a_Info.maxLod);
-        glSamplerParameterfv(handle, GL_TEXTURE_BORDER_COLOR, &a_Info.borderColor.R);
+        glSamplerParameterfv(handle, GL_TEXTURE_BORDER_COLOR, a_Info.borderColor.value);
     }, true);
     return handle;
 }

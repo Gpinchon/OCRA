@@ -1,10 +1,10 @@
 #pragma once
 
+#include <OCRA/Core.hpp>
+
 #include <VK/ShaderModule.hpp>
 #include <VK/Structs.hpp>
 #include <VK/Enums.hpp>
-
-#include <OCRA/Core.hpp>
 
 #include <vulkan/vulkan_raii.hpp>
 

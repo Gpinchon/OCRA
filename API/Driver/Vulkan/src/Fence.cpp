@@ -1,7 +1,7 @@
+#include <OCRA/Core.hpp>
+
 #include <VK/Device.hpp>
 #include <VK/Fence.hpp>
-
-#include <OCRA/Core.hpp>
 
 #include <chrono>
 
