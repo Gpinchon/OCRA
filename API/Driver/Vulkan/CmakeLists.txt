@@ -51,6 +51,7 @@ if (NOT Vulkan_FOUND)
   execute_process(COMMAND cmake -S ${spirv_headers_SOURCE_DIR} -B ${spirv_headers_BINARY_DIR})
   execute_process(COMMAND cmake --install ${spirv_headers_BINARY_DIR} --config Release --prefix ${spirv_headers_BINARY_DIR}/install)
   list(APPEND CMAKE_PREFIX_PATH ${spirv_headers_BINARY_DIR}/install/)
+  find_package(SPIRV-Headers REQUIRED CONFIG QUIET)
   message("SPV-Headers fetched to ${spirv_headers_SOURCE_DIR}")
 
   #Fetch SPV-Tools
@@ -66,7 +67,8 @@ if (NOT Vulkan_FOUND)
   execute_process(COMMAND cmake --build ${spirv_tools_BINARY_DIR} --config Release)
   execute_process(COMMAND cmake --install ${spirv_tools_BINARY_DIR} --config Release --prefix ${spirv_tools_BINARY_DIR}/install)
   list(APPEND CMAKE_PREFIX_PATH ${spirv_tools_BINARY_DIR}/install/)
-  message("SPV-Headers fetched to ${spirv_tools_SOURCE_DIR}")
+  find_package(SPIRV-Tools REQUIRED CONFIG QUIET)
+  message("SPV-Tools fetched to ${spirv_tools_SOURCE_DIR}")
 
   #Fetch Vulkan-ValidationLayers
   FetchContent_Declare(
@@ -81,10 +83,11 @@ if (NOT Vulkan_FOUND)
   execute_process(COMMAND cmake --build ${vk_layers_BINARY_DIR} --config Release)
   execute_process(COMMAND cmake --install ${vk_layers_BINARY_DIR} --config Release --prefix ${vk_layers_BINARY_DIR}/install)
   message("Vulkan-ValidationLayers fetched to ${vk_layers_SOURCE_DIR}")
+  message("TODO : Find a way to use VkLayer_khronos_validation we just compiled")
 
-  set(VK_LIBS vulkan Vulkan::Headers VkLayer_khronos_validation)
+  set(VK_LIBS vulkan Vulkan::Headers)
 else (NOT Vulkan_FOUND)
-  set(VK_LIBS ${VK_LIBS} Vulkan::Vulkan)
+  set(VK_LIBS Vulkan::Vulkan)
 endif (NOT Vulkan_FOUND)
 
 set(OCRA_IMPL_HEADER_FILES

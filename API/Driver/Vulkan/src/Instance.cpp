@@ -17,6 +17,15 @@
 namespace OCRA
 {
 #ifdef _DEBUG
+void PrintAvailableLayers() {
+    uint32_t layerCount;
+    VK_INVOKE(vk::enumerateInstanceLayerProperties(&layerCount, nullptr));
+    std::vector<vk::LayerProperties> availableLayers(layerCount);
+    VK_INVOKE(vk::enumerateInstanceLayerProperties(&layerCount, availableLayers.data()));
+    for (const auto& layerProperties : availableLayers) {
+        std::cout << layerProperties.layerName.data() << '\n';
+    }
+}
 const std::vector<const char*> validationLayers = {
     "VK_LAYER_KHRONOS_validation"
 };
@@ -28,7 +37,6 @@ bool CheckValidationLayerSupport() {
     for (const char* layerName : validationLayers) {
         bool layerFound = false;
         for (const auto& layerProperties : availableLayers) {
-            std::cout << layerProperties.layerName.data() << std::endl;
             if (strcmp(layerName, layerProperties.layerName) == 0) {
                 layerFound = true;
                 break;
@@ -63,9 +71,15 @@ Instance::Handle CreateInstance(
     info.enabledExtensionCount = extensions.size();
     info.ppEnabledExtensionNames = extensions.data();
 #ifdef _DEBUG
-    if (!CheckValidationLayerSupport())  throw std::runtime_error("Validation layers unavailable");
-    info.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
-    info.ppEnabledLayerNames = validationLayers.data();
+    if (!CheckValidationLayerSupport()) {
+        std::cerr << "!!! VK_LAYER_KHRONOS_validation NOT SUPPORTED !!!\n";
+        std::cerr << "Available layers : \n";
+        PrintAvailableLayers();
+    }
+    else {
+        info.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+        info.ppEnabledLayerNames = validationLayers.data();
+    }
 #endif
     return std::make_shared<Instance::Impl>(context, info);
 }

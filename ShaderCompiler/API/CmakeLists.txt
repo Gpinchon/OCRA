@@ -46,6 +46,7 @@ if (NOT TARGET SPIRV-Headers::SPIRV-Headers)
   execute_process(COMMAND cmake -S ${spirv_headers_SOURCE_DIR} -B ${spirv_headers_BINARY_DIR})
   execute_process(COMMAND cmake --install ${spirv_headers_BINARY_DIR} --config Release --prefix ${spirv_headers_BINARY_DIR}/install)
   list(APPEND CMAKE_PREFIX_PATH ${spirv_headers_BINARY_DIR}/install/)
+  find_package(SPIRV-Headers REQUIRED CONFIG QUIET)
   message("SPV-Headers fetched to ${spirv_headers_SOURCE_DIR}")
 endif(NOT TARGET SPIRV-Headers::SPIRV-Headers)
 
