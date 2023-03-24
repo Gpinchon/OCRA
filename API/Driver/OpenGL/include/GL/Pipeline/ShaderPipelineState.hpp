@@ -8,6 +8,8 @@
 
 #include <OCRA/Core.hpp>
 
+#include <GL/ShaderStage.hpp>
+
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
 
 namespace OCRA::Command::Buffer {
@@ -23,6 +25,7 @@ struct CompileShaderPipelineState {
     void operator()(Command::Buffer::ExecutionState&) const;
     const Device::WeakHandle device;
     const PipelineShaderPipelineState& info;
+    std::vector<Shader::Stage> shaderStages;
     mutable uint32_t handle{ 0 };
 };
 }

@@ -50,7 +50,7 @@ struct IndexBufferBinding : VertexInputBinding {
 struct RenderPass
 {
     void Reset() {
-        renderPass.reset();
+        //renderPass.reset();
         framebuffer.reset();
         renderArea = {};
         colorClearValues.clear();
@@ -59,7 +59,8 @@ struct RenderPass
         vertexInputBindings.clear();
         indexBufferBinding = {};
     }
-    OCRA::RenderPass::Handle        renderPass;
+    //OCRA::RenderPass::Handle        renderPass;
+    RenderingInfo                   renderingInfo;
     FrameBuffer::Handle             framebuffer;
     Rect2D                          renderArea;
     std::vector<ColorValue>         colorClearValues;
@@ -97,7 +98,7 @@ struct ExecutionState {
     }
     void Reset() {
         once = false;
-        subpassIndex = uint32_t(-1);
+        //subpassIndex = uint32_t(-1);
         primitiveTopology = GL_NONE;
         renderPass.Reset();
         dynamicStates = {};
@@ -108,7 +109,7 @@ struct ExecutionState {
     }
 
     bool                once{ false };
-    uint32_t            subpassIndex{ uint32_t(-1) };
+    //uint32_t            subpassIndex{ uint32_t(-1) };
     GLenum              primitiveTopology{ GL_NONE };
     RenderPass          renderPass{};
     DynamicStates       dynamicStates{};

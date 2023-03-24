@@ -15,15 +15,7 @@
 
 #include <stdexcept>
 
-namespace OCRA::Device
-{
-Shader::Stage::Handle CreateShaderStage(const Device::Handle& a_Device, const CreateShaderStageInfo& a_Info)
-{
-    return std::make_shared<Shader::Stage::Impl>(a_Device, a_Info);
-}
-}
-
-namespace OCRA::Shader::Stage {
+namespace OCRA::Shader {
 static inline auto GetGLStageBits(const ShaderStageFlags& a_Stage)
 {
     uint32_t shaderStages = 0;
@@ -86,7 +78,7 @@ static inline auto CreateShaderProgram(const Device::Handle& a_Device)
     return handle;
 }
 
-Impl::Impl(const Device::Handle& a_Device, const CreateShaderStageInfo& a_Info)
+Stage::Stage(const Device::Handle& a_Device, const PipelineShaderStage& a_Info)
     : device(a_Device)
     , handle(CreateShaderProgram(a_Device))
     , stage(GetGLStage(a_Info.stage))
@@ -120,7 +112,7 @@ Impl::Impl(const Device::Handle& a_Device, const CreateShaderStageInfo& a_Info)
     }, true);
 }
 
-Impl::~Impl()
+Stage::~Stage()
 {
     device.lock()->PushCommand([handle = handle] {
         glDeleteProgram(handle);

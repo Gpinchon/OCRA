@@ -137,20 +137,20 @@ struct GraphicsPipelineTestApp : TestApp
             firstLoop = false;
         }
     }
-    RenderPass::Handle CreateRenderPass()
-    {
-        SubPassDescription subPassDescription{};
-        AttachmentReference attachmentRef{};
-        attachmentRef.location = 0;
-        subPassDescription.colorAttachments = { attachmentRef };
-        CreateRenderPassInfo renderPassInfo{};
-        AttachmentDescription colorAttachment;
-        colorAttachment.loadOp  = LoadOp::Clear; //clear the attachment 0 on begin
-        colorAttachment.storeOp = StoreOp::Store; //write the result to attachment 0
-        renderPassInfo.colorAttachments = { colorAttachment };
-        renderPassInfo.subPasses = { subPassDescription };
-        return Device::CreateRenderPass(device, renderPassInfo);
-    }
+    //RenderPass::Handle CreateRenderPass()
+    //{
+    //    SubPassDescription subPassDescription{};
+    //    AttachmentReference attachmentRef{};
+    //    attachmentRef.location = 0;
+    //    subPassDescription.colorAttachments = { attachmentRef };
+    //    CreateRenderPassInfo renderPassInfo{};
+    //    AttachmentDescription colorAttachment;
+    //    colorAttachment.loadOp  = LoadOp::Clear; //clear the attachment 0 on begin
+    //    colorAttachment.storeOp = StoreOp::Store; //write the result to attachment 0
+    //    renderPassInfo.colorAttachments = { colorAttachment };
+    //    renderPassInfo.subPasses = { subPassDescription };
+    //    return Device::CreateRenderPass(device, renderPassInfo);
+    //}
     void CreateGraphicsPipeline()
     {
         ViewPort viewport;
@@ -210,7 +210,7 @@ struct GraphicsPipelineTestApp : TestApp
     {
         CommandBufferBeginInfo bufferBeginInfo{};
         bufferBeginInfo.flags = CommandBufferUsageFlagBits::None;
-        bufferBeginInfo.inheritanceInfo.emplace();
+        //bufferBeginInfo.inheritanceInfo.emplace();
         Command::Buffer::Reset(drawCommandBuffer);
         //RenderPassBeginInfo renderPassBeginInfo{};
         //renderPassBeginInfo.renderPass = renderPass;

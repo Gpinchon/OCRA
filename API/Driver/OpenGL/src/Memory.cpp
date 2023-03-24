@@ -14,26 +14,30 @@ Memory::Handle AllocateMemory(const Device::Handle& a_Device, const AllocateMemo
 {
     return std::make_shared<Memory::Impl>(a_Device, a_Info);
 }
+Memory::Handle AllocateMemory(
+    const Handle& a_Device,
+    const size_t  a_Size,
+    const MemoryPropertyFlags& a_MemoryFlags)
+{
+    return std::make_shared<Memory::Impl>(a_Device, a_Size, a_MemoryFlags);
+}
 }
 
 namespace OCRA::Memory
 {
-Impl::Impl(const Device::Handle& a_Device, const AllocateMemoryInfo& a_Info)
+Impl::Impl(const Device::Handle& a_Device, const size_t& a_Size, const MemoryPropertyFlags& a_Flags)
     : device(a_Device)
-    , size(a_Info.size)
+    , size(a_Size)
 {
-    const auto physicalDevice = a_Device->physicalDevice.lock();
-    const auto& memoryProperties = physicalDevice->memoryProperties;
-    const auto& memoryTypeFlags = memoryProperties.memoryTypes.at(a_Info.memoryTypeIndex).propertyFlags;
     GLbitfield  allocationFlags{ 0 };
-    if ((memoryTypeFlags & MemoryPropertyFlagBits::HostCached) != 0) {
+    if ((a_Flags & MemoryPropertyFlagBits::HostCached) != 0) {
         allocationFlags |= GL_CLIENT_STORAGE_BIT;
     }
-    if ((memoryTypeFlags & MemoryPropertyFlagBits::HostVisible) != 0) {
+    if ((a_Flags & MemoryPropertyFlagBits::HostVisible) != 0) {
         allocationFlags |= GL_MAP_READ_BIT | GL_MAP_WRITE_BIT;
         mapFlags |= GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_MAP_FLUSH_EXPLICIT_BIT;
     }
-    if ((memoryTypeFlags & MemoryPropertyFlagBits::HostCoherent) != 0) {
+    if ((a_Flags & MemoryPropertyFlagBits::HostCoherent) != 0) {
         allocationFlags |= GL_MAP_COHERENT_BIT | GL_MAP_PERSISTENT_BIT;
         mapFlags |= GL_MAP_COHERENT_BIT;
     }
@@ -44,8 +48,11 @@ Impl::Impl(const Device::Handle& a_Device, const AllocateMemoryInfo& a_Info)
             size,
             nullptr,
             allocationFlags);
-    }, true);
+        }, true);
 }
+Impl::Impl(const Device::Handle& a_Device, const AllocateMemoryInfo& a_Info)
+    : Impl(a_Device, a_Info.size, a_Device->physicalDevice.lock()->memoryProperties.memoryTypes.at(a_Info.memoryTypeIndex).propertyFlags)
+{}
 Impl::~Impl()
 {
     device.lock()->PushCommand([handle = handle] {

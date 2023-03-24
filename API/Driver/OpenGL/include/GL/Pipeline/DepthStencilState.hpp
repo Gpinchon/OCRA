@@ -39,8 +39,8 @@ struct GLStencilOp {
         if (!a_IgnoreMask) glStencilMaskSeparate(a_Face, a_GLOpState.writeMask);
     }
     void operator()(Command::Buffer::ExecutionState& a_ExecutionState) const {
-        const auto& renderPass = a_ExecutionState.renderPass.renderPass;
-        const auto ignoreStencilMask = renderPass != nullptr && renderPass->info.depthAttachment.storeOp == StoreOp::DontCare;
+        const auto& storeOp = a_ExecutionState.renderPass.renderingInfo.stencilAttachment.storeOp;
+        const auto ignoreStencilMask = storeOp == StoreOp::DontCare;
         if (dynamicStencilOp) {
             Apply(
                 face,
@@ -81,8 +81,8 @@ struct CompileDepthStencilState
         const auto bStencilTestEnable = dynamicStencilTestEnable ? a_ExecutionState.dynamicStates.stencilTestEnable : stencilTestEnable;
         bDepthTestEnable ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
         bDepthBoundsTestEnable ? glEnable(GL_DEPTH_BOUNDS_TEST_EXT) : glDisable(GL_DEPTH_BOUNDS_TEST_EXT);
-        const auto& renderPass = a_ExecutionState.renderPass.renderPass;
-        const auto ignoreDepthMask = renderPass != nullptr && renderPass->info.depthAttachment.storeOp == StoreOp::DontCare;
+        const auto& storeOp = a_ExecutionState.renderPass.renderingInfo.depthAttachment.storeOp;
+        const auto ignoreDepthMask = storeOp == StoreOp::DontCare;
         if (!ignoreDepthMask) glDepthMask(bDepthWriteEnable);
         glDepthFunc(eDepthCompareOp);
         bStencilTestEnable  ? glEnable(GL_STENCIL_TEST) : glDisable(GL_STENCIL_TEST);

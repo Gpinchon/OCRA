@@ -102,6 +102,30 @@ struct BindVBOCommand : CommandI {
     uint32_t firstBinding;
     std::pmr::vector<std::pair<uint64_t, OCRA::Buffer::Handle>> buffers;
 };
+
+struct SetVertexInputCommand : CommandI {
+    SetVertexInputCommand(
+        std::pmr::memory_resource* a_MemoryResource,
+        const std::vector<VertexAttributeDescription>& a_Attribs,
+        const std::vector<VertexBindingDescription>& a_Bindings)
+        : attribs(a_Attribs.begin(), a_Attribs.end(), a_MemoryResource)
+        , bindings(a_Bindings.begin(), a_Bindings.end(), a_MemoryResource)
+    {
+        //for (const auto& attrib : a_Attribs) {
+        //    attrib.
+        //}
+    }
+    virtual void operator()(Buffer::ExecutionState& a_ExecutionState) override {
+        a_ExecutionState.renderPass.vertexInputBindings.resize(buffers.size());
+        for (auto index = 0u; index < buffers.size(); ++index) {
+            const auto binding = firstBinding + index;
+            a_ExecutionState.renderPass.vertexInputBindings.at(binding).offset = buffers.at(index).first;
+            a_ExecutionState.renderPass.vertexInputBindings.at(binding).buffer = buffers.at(index).second;
+        }
+    }
+    std::pmr::vector<VertexAttributeDescription> attribs;
+    std::pmr::vector<VertexBindingDescription> bindings;
+};
 }
 
 namespace OCRA::Command {
@@ -167,5 +191,13 @@ void BindVertexBuffers(
         a_Buffers.size(),
         a_Offsets.data(),
         a_Buffers.data());
+}
+
+void SetVertexInput(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const std::vector<VertexAttributeDescription>& a_Attribs,
+    const std::vector<VertexBindingDescription>& a_Bindings)
+{
+
 }
 }

@@ -355,12 +355,12 @@ static inline auto GetGLMinFilter(const Filter& a_Filter, const Filter& a_Mipmap
         throw std::runtime_error("Unknown Filter Mode");
     }
 }
-inline auto IsCompressedFormat(const Format& format)
+static inline auto IsCompressedFormat(const Format& format)
 {
     return format == Format::S3TC_DXT5_RGBA
         || format == Format::S3TC_DXT5_SRGBA;
 }
-inline auto GetGLSizedFormat(const Format& format)
+static inline auto GetGLSizedFormat(const Format& format)
 {
     switch (format) {
     case Format::Uint8_Normalized_R:
@@ -383,7 +383,6 @@ inline auto GetGLSizedFormat(const Format& format)
         return GL_RGB8_SNORM;
     case Format::Int8_Normalized_RGBA:
         return GL_RGBA8_SNORM;
-
     case Format::Uint8_R:
         return GL_R8UI;
     case Format::Uint8_RG:
@@ -482,7 +481,7 @@ inline auto GetGLSizedFormat(const Format& format)
         throw std::runtime_error("Unknow Image Format");
     }
 }
-inline auto GetGLDataFormat(const Format& format)
+static inline auto GetGLDataFormat(const Format& format)
 {
     switch (format) {
     case Format::Uint8_Normalized_R:
@@ -560,7 +559,7 @@ inline auto GetGLDataFormat(const Format& format)
         throw std::runtime_error("Unknow Image Format");
     }
 }
-inline auto GetGLClearColorType(const Format& a_Format)
+static inline auto GetGLClearColorType(const Format& a_Format)
 {
     switch (a_Format) {
     case Format::Uint8_Normalized_R:
@@ -620,7 +619,7 @@ inline auto GetGLClearColorType(const Format& a_Format)
         throw std::runtime_error("Incorrect Image Format");
     }
 }
-inline auto GetGLDataType(const Format& a_Format)
+static inline auto GetGLDataType(const Format& a_Format)
 {
     switch (a_Format) {
     case Format::Uint8_Normalized_R:
@@ -697,7 +696,7 @@ inline auto GetGLDataType(const Format& a_Format)
         throw std::runtime_error("Unknow Image Format");
     }
 }
-inline auto GetRedSize(const Format& format)
+static inline auto GetRedSize(const Format& format)
 {
     switch (format) {
     case Format::Uint8_Normalized_R:
@@ -755,7 +754,7 @@ inline auto GetRedSize(const Format& format)
         return 0;
     }
 }
-inline auto GetGreenSize(const Format& format)
+static inline auto GetGreenSize(const Format& format)
 {
     switch (format) {
     case Format::Uint8_Normalized_RG:
@@ -801,7 +800,7 @@ inline auto GetGreenSize(const Format& format)
         return 0;
     }
 }
-inline auto GetBlueSize(const Format& format)
+static inline auto GetBlueSize(const Format& format)
 {
     switch (format) {
     case Format::Uint8_Normalized_RGB:
@@ -835,7 +834,7 @@ inline auto GetBlueSize(const Format& format)
         return 0;
     }
 }
-inline auto GetAlphaSize(const Format& format)
+static inline auto GetAlphaSize(const Format& format)
 {
     switch (format) {
     case Format::Uint8_Normalized_RGBA:
@@ -857,7 +856,7 @@ inline auto GetAlphaSize(const Format& format)
         return 0;
     }
 }
-inline auto GetDepthSize(const Format& format)
+static inline auto GetDepthSize(const Format& format)
 {
     switch (format) {
     case Format::Uint16_Normalized_Depth:
@@ -871,7 +870,7 @@ inline auto GetDepthSize(const Format& format)
         return 0;
     }
 }
-inline auto GetStencilSize(const Format& format)
+static inline auto GetStencilSize(const Format& format)
 {
     switch (format) {
     case Format::Uint24_Normalized_Depth_Uint8_Stencil:
@@ -881,5 +880,12 @@ inline auto GetStencilSize(const Format& format)
     default:
         return 0;
     }
+}
+static inline auto GetPixelSize(const Format& a_Format)
+{
+    return
+        GetRedSize(a_Format) + GetGreenSize(a_Format) +
+        GetRedSize(a_Format) + GetAlphaSize(a_Format) +
+        GetDepthSize(a_Format) + GetStencilSize(a_Format);
 }
 }

@@ -8,6 +8,7 @@ namespace OCRA::Memory
 {
 struct Impl
 {
+    Impl(const Device::Handle& a_Device, const size_t& a_Size, const MemoryPropertyFlags& a_Flags);
     Impl(const Device::Handle& a_Device, const AllocateMemoryInfo& a_Info);
     ~Impl();
     const Device::WeakHandle device;

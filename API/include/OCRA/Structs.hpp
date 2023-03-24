@@ -132,7 +132,7 @@ union ClearValue {
     ClearValue() {};
     ClearValue(const ColorValue& a_Value) : color(a_Value) {}
     ClearValue(const DepthStencilValue& a_Value) : depthStencil(a_Value) {}
-    ColorValue        color;
+    ColorValue        color{ TransparentBlack };
     DepthStencilValue depthStencil;
 };
 struct ComponentMapping {
@@ -328,11 +328,11 @@ struct PipelineViewPortState {
     std::vector<Rect2D>   scissors{};
 };
 
-struct CommandBufferInheritanceInfo {
-    OCRA::RenderPass::Handle renderPass;
-    uint32_t                 subpass;
-    FrameBuffer::Handle      framebuffer;
-};
+//struct CommandBufferInheritanceInfo {
+//    OCRA::RenderPass::Handle renderPass;
+//    uint32_t                 subpass;
+//    FrameBuffer::Handle      framebuffer;
+//};
 
 struct BufferCopyRegion
 {
@@ -633,16 +633,16 @@ struct PhysicalDeviceFeatures {
 struct CommandBufferBeginInfo
 {
     CommandBufferUsageFlags flags{ CommandBufferUsageFlagBits::None };
-    std::optional<CommandBufferInheritanceInfo> inheritanceInfo; //must be valid if this command buffer is secondary
+    //std::optional<CommandBufferInheritanceInfo> inheritanceInfo; //must be valid if this command buffer is secondary
 };
-struct RenderPassBeginInfo
-{
-    RenderPass::Handle      renderPass{ 0 };
-    FrameBuffer::Handle     framebuffer{ 0 };
-    Rect2D                  renderArea{ 0, 0, 0, 0 }; //defines the area that this RenderPass is gonna render to
-    std::vector<ColorValue> colorClearValues;         //defines the values to be used to clear color buffers, must be the same size as colorAttachments member of RenderPass
-    DepthStencilValue       depthStencilClearValue;   //defines the values to be used to clear the depth/stencil buffer
-};
+//struct RenderPassBeginInfo
+//{
+//    RenderPass::Handle      renderPass{ 0 };
+//    FrameBuffer::Handle     framebuffer{ 0 };
+//    Rect2D                  renderArea{ 0, 0, 0, 0 }; //defines the area that this RenderPass is gonna render to
+//    std::vector<ColorValue> colorClearValues;         //defines the values to be used to clear color buffers, must be the same size as colorAttachments member of RenderPass
+//    DepthStencilValue       depthStencilClearValue;   //defines the values to be used to clear the depth/stencil buffer
+//};
 
 struct CreateBufferInfo {
     CreateBufferFlags       flags{ CreateBufferFlagBits::None };;
@@ -690,7 +690,7 @@ struct CreateInstanceInfo
     ApplicationInfo applicationInfo;
 };
 struct CreateFrameBufferInfo {
-    RenderPass::Handle               renderPass;
+    //RenderPass::Handle               renderPass;
     std::vector<Image::View::Handle> attachments; //Image View handles
     Extent<3, uint16_t>              extent; //default FB extent
 };
@@ -706,7 +706,7 @@ struct CreatePipelineGraphicsInfo { //describes a graphics pipeline with each st
     PipelineViewPortState       viewPortState{};
     PipelineDynamicState        dynamicState{};
     Pipeline::Layout::Handle    layout{};
-    RenderPass::Handle          renderPass{}; //the RenderPass this Graphics Pipeline will be used with
+    //RenderPass::Handle          renderPass{}; //the RenderPass this Graphics Pipeline will be used with
     uint8_t                     subPass{ 0 }; //the subPass to "start" with inside the RenderPass
 };
 struct CreatePipelineLayoutInfo

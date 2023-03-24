@@ -85,7 +85,7 @@ Impl::Impl(const Device::Handle& a_Device, const CreateSwapChainInfo& a_Info)
     , presentMode(a_Info.presentMode)
     , images(CreateImages(a_Device, a_Info))
 {
-    const auto pixelSize = Image::GetPixelSize(a_Info.imageFormat);
+    const auto pixelSize = GetPixelSize(a_Info.imageFormat);
     auto win32SwapChain = a_Info.oldSwapchain;
     if (win32SwapChain != nullptr && !win32SwapChain->retired) {
         win32SwapChain->workerThread.Wait();
@@ -263,12 +263,11 @@ uint32_t GetImageCount(const Handle& a_SwapChain)
     return a_SwapChain->images.size();
 }
 
-Image::Handle GetNextImage(
+std::pair<Image::Handle, uint32_t> GetNextImage(
     const Handle& a_SwapChain,
     const std::chrono::nanoseconds& a_Timeout,
     const Semaphore::Handle& a_Semaphore,
-    const Fence::Handle& a_Fence,
-    uint32_t& out_ImageIndex)
+    const Fence::Handle& a_Fence)
 {
     a_SwapChain->device.lock()->PushCommand([semaphore = a_Semaphore, fence = a_Fence] {
         if (semaphore != nullptr) {
@@ -277,20 +276,12 @@ Image::Handle GetNextImage(
         }
         if (fence != nullptr) fence->Signal();
     }, false);
-    out_ImageIndex = a_SwapChain->backBufferIndex;
-    return a_SwapChain->images.at(out_ImageIndex);
+    return { a_SwapChain->images.at(a_SwapChain->backBufferIndex), a_SwapChain->backBufferIndex };
+}
 }
 
-Image::Handle GetNextImage(
-    const Handle& a_SwapChain,
-    const std::chrono::nanoseconds& a_Timeout,
-    const Semaphore::Handle& a_Semaphore,
-    const Fence::Handle& a_Fence)
+namespace OCRA::Queue
 {
-    uint32_t imageIndex = 0;
-    return GetNextImage(a_SwapChain, a_Timeout, a_Semaphore, a_Fence, imageIndex);
-}
-
 void Present(const Queue::Handle& a_Queue, const SwapChainPresentInfo& a_PresentInfo)
 {
     a_Queue->PushCommand([a_PresentInfo] {
@@ -298,7 +289,7 @@ void Present(const Queue::Handle& a_Queue, const SwapChainPresentInfo& a_Present
             OCRA_ASSERT(semaphore->type == SemaphoreType::Binary && "Cannot wait on Timeline Semaphores when presenting");
             std::static_pointer_cast<Semaphore::Binary>(semaphore)->Wait();
         }
-        }, false);
+    }, false);
     for (const auto& swapChain : a_PresentInfo.swapChains)
         swapChain->Present(a_Queue);
 }

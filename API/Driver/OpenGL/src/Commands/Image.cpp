@@ -17,8 +17,8 @@ struct CopyImageCommand : CommandI {
     virtual void operator()(Buffer::ExecutionState&) {
         for (const auto& copy : regions) {
             glCopyImageSubData(
-                srcImage->handle, srcImage->target, copy.srcSubresource.level, copy.srcOffset.x, copy.srcOffset.y, copy.srcOffset.z,
-                dstImage->handle, dstImage->target, copy.dstSubresource.level, copy.dstOffset.x, copy.dstOffset.y, copy.dstOffset.z,
+                srcImage->handle, srcImage->target, copy.srcSubresource.mipLevel, copy.srcOffset.x, copy.srcOffset.y, copy.srcOffset.z,
+                dstImage->handle, dstImage->target, copy.dstSubresource.mipLevel, copy.dstOffset.x, copy.dstOffset.y, copy.dstOffset.z,
                 copy.extent.width, copy.extent.height, copy.extent.depth);
         }
     }
@@ -120,14 +120,23 @@ void GenerateMipMap(
 }
 
 void ClearColorImage(
-    const Command::Buffer::Handle& a_CommandBuffer,
-    const Image::Handle&           a_Image,
-    const ImageLayout&             a_ImageLayout,
-    const ColorValue&              a_Color,
+    const Command::Buffer::Handle&  a_CommandBuffer,
+    const Image::Handle&            a_Image,
+    const ColorValue&               a_Color,
     const std::vector<ImageSubresourceRange>& a_Ranges)
 {
     a_CommandBuffer->PushCommand<ClearColorImageCommand>(
         a_CommandBuffer->memoryResource, a_Image, a_Color,
         a_Ranges.size(), a_Ranges.data());
 }
+
+void TransitionImageLayout(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const ImageLayoutTransitionInfo& a_Transition)
+{}
+
+void TransitionImagesLayout(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const std::vector<ImageLayoutTransitionInfo>& a_Transitions)
+{}
 }

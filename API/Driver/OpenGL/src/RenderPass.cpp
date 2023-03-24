@@ -9,13 +9,13 @@
 
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
 
-namespace OCRA::Device
-{
-RenderPass::Handle CreateRenderPass(const Device::Handle& a_Device, const CreateRenderPassInfo& a_Info)
-{
-    return std::make_shared<RenderPass::Impl>(a_Device, a_Info);
-}
-}
+//namespace OCRA::Device
+//{
+//RenderPass::Handle CreateRenderPass(const Device::Handle& a_Device, const CreateRenderPassInfo& a_Info)
+//{
+//    return std::make_shared<RenderPass::Impl>(a_Device, a_Info);
+//}
+//}
 
 namespace OCRA::RenderPass
 {
@@ -92,7 +92,7 @@ void Impl::BeginRenderPass(const Command::Buffer::ExecutionState& a_ExecutionSta
 
 void Impl::BeginSubPass(const Command::Buffer::ExecutionState& a_ExecutionState) const
 {
-    subPasses.at(a_ExecutionState.subpassIndex).Begin();
+    //subPasses.at(a_ExecutionState.subpassIndex).Begin();
     ApplyClearOps(a_ExecutionState);
 }
 

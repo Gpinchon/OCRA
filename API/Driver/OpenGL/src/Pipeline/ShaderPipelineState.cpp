@@ -1,7 +1,7 @@
 #include <GL/Device.hpp>
 #include <GL/ExecutionState.hpp>
 #include <GL/Pipeline/ShaderPipelineState.hpp>
-#include <GL/ShaderStage.hpp>
+#include <GL/ShaderModule.hpp>
 
 #include <GL/glew.h>
 
@@ -13,10 +13,13 @@ CompileShaderPipelineState::CompileShaderPipelineState(
     : device(a_Device)
     , info(a_Info)
 {
+    shaderStages.reserve(info.stages.size());
     a_Device->PushCommand([this, info = a_Info] {
         glGenProgramPipelines(1, &handle);
         for (const auto& stage : info.stages) {
-            glUseProgramStages(handle, stage->stageBits, stage->handle);
+            shaderStages.push_back({ device.lock(), stage });
+            const auto& shaderStage = shaderStages.back();
+            glUseProgramStages(handle, shaderStage.stageBits, shaderStage.handle);
         }
     }, true);
 }

@@ -25,7 +25,7 @@ void CheckValidCopy(const ImageBufferCopy& a_Copy, const Image::Handle& a_Image)
     OCRA_ASSERT(a_Copy.imageOffset.x + a_Copy.imageExtent.width <= a_Image->info.extent.width);
     OCRA_ASSERT(a_Copy.imageOffset.y + a_Copy.imageExtent.height <= a_Image->info.extent.height);
     OCRA_ASSERT(a_Copy.imageOffset.z + a_Copy.imageExtent.depth <= a_Image->info.extent.depth);
-    OCRA_ASSERT(a_Copy.imageSubresource.level <= a_Image->info.mipLevels);
+    OCRA_ASSERT(a_Copy.imageSubresource.mipLevel <= a_Image->info.mipLevels);
 }
 static inline auto CreateTexture(const Device::Handle& a_Device)
 {
@@ -68,7 +68,7 @@ struct Texture : Impl {
 void Texture<true>::Download(const ImageBufferCopy& a_Copy, const size_t& a_MemoryOffset) {
     glGetCompressedTextureSubImage(
         handle,
-        a_Copy.imageSubresource.level,
+        a_Copy.imageSubresource.mipLevel,
         a_Copy.imageOffset.x,
         a_Copy.imageOffset.y,
         a_Copy.imageOffset.z,
@@ -83,7 +83,7 @@ void Texture<true>::Download(const ImageBufferCopy& a_Copy, const size_t& a_Memo
 void Texture<false>::Download(const ImageBufferCopy& a_Copy, const size_t& a_MemoryOffset) {
     glGetTextureSubImage(
         handle,
-        a_Copy.imageSubresource.level,
+        a_Copy.imageSubresource.mipLevel,
         a_Copy.imageOffset.x,
         a_Copy.imageOffset.y,
         a_Copy.imageOffset.z,
@@ -126,7 +126,7 @@ void Texture1D<true>::Upload(const ImageBufferCopy& a_Copy, const size_t& a_Memo
     Bind();//initialize texture object
     glCompressedTexSubImage1D(
         target,
-        a_Copy.imageSubresource.level,
+        a_Copy.imageSubresource.mipLevel,
         a_Copy.imageOffset.x,
         a_Copy.imageExtent.width,
         internalFormat,
@@ -141,7 +141,7 @@ void Texture1D<false>::Upload(const ImageBufferCopy& a_Copy, const size_t& a_Mem
     Bind();//initialize texture object
     glTexSubImage1D(
         target,
-        a_Copy.imageSubresource.level,
+        a_Copy.imageSubresource.mipLevel,
         a_Copy.imageOffset.x,
         a_Copy.imageExtent.width,
         dataFormat,
@@ -186,7 +186,7 @@ void Texture2D<true>::Upload(const ImageBufferCopy& a_Copy, const size_t& a_Memo
     Bind();//initialize texture object
     glCompressedTexSubImage2D(
         target,
-        a_Copy.imageSubresource.level,
+        a_Copy.imageSubresource.mipLevel,
         a_Copy.imageOffset.x,
         a_Copy.imageOffset.y,
         a_Copy.imageExtent.width,
@@ -203,7 +203,7 @@ void Texture2D<false>::Upload(const ImageBufferCopy& a_Copy, const size_t& a_Mem
     Bind();//initialize texture object
     glTexSubImage2D(
         target,
-        a_Copy.imageSubresource.level,
+        a_Copy.imageSubresource.mipLevel,
         a_Copy.imageOffset.x,
         a_Copy.imageOffset.y,
         a_Copy.imageExtent.width,
@@ -252,7 +252,7 @@ void Texture3D<true>::Upload(const ImageBufferCopy& a_Copy, const size_t& a_Memo
     Bind();//initialize texture object
     glCompressedTexSubImage3D(
         target,
-        a_Copy.imageSubresource.level,
+        a_Copy.imageSubresource.mipLevel,
         a_Copy.imageOffset.x,
         a_Copy.imageOffset.y,
         a_Copy.imageOffset.z,
@@ -271,7 +271,7 @@ void Texture3D<false>::Upload(const ImageBufferCopy& a_Copy, const size_t& a_Mem
     Bind();//initialize texture object
     glTexSubImage3D(
         target,
-        a_Copy.imageSubresource.level,
+        a_Copy.imageSubresource.mipLevel,
         a_Copy.imageOffset.x,
         a_Copy.imageOffset.y,
         a_Copy.imageOffset.z,
@@ -347,12 +347,12 @@ void GenerateMipMap(
         glGenerateTextureMipmap(image->handle);
     }, false);
 }
-size_t GetPixelSize(const Format& a_Format)
+
+size_t GetDataSize(const Image::Handle& a_Image)
 {
-    return
-        GetRedSize(a_Format) + GetGreenSize(a_Format) +
-        GetRedSize(a_Format) + GetAlphaSize(a_Format) +
-        GetDepthSize(a_Format) + GetStencilSize(a_Format);
+    const auto& info = a_Image->info;
+    return GetPixelSize(info.format) *
+        info.extent.width * info.extent.height * info.extent.depth;
 }
 }
 
