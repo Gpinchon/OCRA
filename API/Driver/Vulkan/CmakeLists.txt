@@ -83,7 +83,8 @@ if (NOT Vulkan_FOUND)
   execute_process(COMMAND cmake --build ${vk_layers_BINARY_DIR} --config Release)
   execute_process(COMMAND cmake --install ${vk_layers_BINARY_DIR} --config Release --prefix ${vk_layers_BINARY_DIR}/install)
   message("Vulkan-ValidationLayers fetched to ${vk_layers_SOURCE_DIR}")
-  message("TODO : Find a way to use VkLayer_khronos_validation we just compiled")
+
+  set(OCRA_DEBUGGER_ENV "VK_LAYER_PATH=${vk_layers_BINARY_DIR}/install/bin" CACHE STRING "The debugging environment")
 
   set(VK_LIBS vulkan Vulkan::Headers)
 else (NOT Vulkan_FOUND)
