@@ -14,14 +14,14 @@ CompileShaderPipelineState::CompileShaderPipelineState(
     , info(a_Info)
 {
     shaderStages.reserve(info.stages.size());
-    a_Device->PushCommand([this, info = a_Info] {
+    a_Device->PushCommand([this, a_Device, info = a_Info] {
         glGenProgramPipelines(1, &handle);
         for (const auto& stage : info.stages) {
-            shaderStages.push_back({ device.lock(), stage });
+            shaderStages.push_back({ a_Device, stage });
             const auto& shaderStage = shaderStages.back();
             glUseProgramStages(handle, shaderStage.stageBits, shaderStage.handle);
         }
-    }, true);
+    }, false);
 }
 CompileShaderPipelineState::CompileShaderPipelineState(const CompileShaderPipelineState& a_Other)
     : device(a_Other.device)

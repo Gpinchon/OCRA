@@ -3,10 +3,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <GL/CommandBuffer.hpp>
-
 #include <GL/Common/Assert.hpp>
+#include <GL/Device.hpp>
 #include <GL/RenderPass.hpp>
 #include <GL/FrameBuffer.hpp>
+
+#include <iostream>
 
 namespace OCRA::Command {
 //struct BeginRenderPassCommand : CommandI {
@@ -52,14 +54,14 @@ namespace OCRA::Command {
 static inline void ClearAttachment(const RenderingAttachmentInfo& attachment, const Rect2D& area)
 {
     if (attachment.loadOp != LoadOp::Clear || !attachment.imageView) return;
+    auto format = GetGLDataFormat(attachment.imageView->info.format);
     auto type = GetGLClearColorType(attachment.imageView->info.format);
     glClearTexSubImage(
         attachment.imageView->handle,
         0,
         area.offset.x,     area.offset.y, 0,
-        area.extent.width, area.extent.height, 0,
-        attachment.imageView->format,
-        type, &attachment.clearValue.color);
+        area.extent.width, area.extent.height, 1,
+        format, type, &attachment.clearValue);
 }
 static inline void BindAttachment(const RenderingAttachmentInfo& attachment, GLenum attachmentPoint)
 {
@@ -71,8 +73,10 @@ static inline void BindAttachment(const RenderingAttachmentInfo& attachment, GLe
 struct BeginRenderingCommand : CommandI {
     BeginRenderingCommand(
         std::pmr::memory_resource* a_MemoryResource,
+        const Device::Handle& a_Device,
         const RenderingInfo& a_RenderingInfo)
-        : info(a_RenderingInfo)
+        : device(a_Device)
+        , info(a_RenderingInfo)
         , drawBuffers(a_MemoryResource)
     {
         drawBuffers.reserve(info.colorAttachments.size());
@@ -82,23 +86,34 @@ struct BeginRenderingCommand : CommandI {
                 drawBuffers.push_back(GL_COLOR_ATTACHMENT0 + i);
             }
         }
+        a_Device->PushCommand([this]() {
+            glCreateFramebuffers(1, &handle);
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, handle);
+            for (auto i = 0u; i < info.colorAttachments.size(); ++i) {
+                const auto& attachment = info.colorAttachments.at(i);
+                BindAttachment(attachment, GL_COLOR_ATTACHMENT0 + i);
+            }
+            BindAttachment(info.depthAttachment, GL_DEPTH_ATTACHMENT);
+            BindAttachment(info.stencilAttachment, GL_STENCIL_ATTACHMENT);
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+        }, true);
     }
     virtual void operator()(Buffer::ExecutionState& a_ExecutionState) {
         for (auto i = 0u; i < info.colorAttachments.size(); ++i) {
             const auto& attachment = info.colorAttachments.at(i);
             ClearAttachment(attachment, info.area);
-            BindAttachment(attachment, GL_COLOR_ATTACHMENT0 + i);
         }
         ClearAttachment(info.depthAttachment, info.area);
-        BindAttachment(info.depthAttachment, GL_DEPTH_ATTACHMENT);
         ClearAttachment(info.stencilAttachment, info.area);
-        BindAttachment(info.stencilAttachment, GL_STENCIL_ATTACHMENT);
         glViewport(
             info.area.offset.x, info.area.offset.y,
             info.area.extent.width, info.area.extent.height);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, handle);
         glDrawBuffers(drawBuffers.size(), drawBuffers.data());
     }
+    const Device::WeakHandle device;
     const RenderingInfo info;
+    uint32_t handle = 0;
     std::pmr::vector<GLenum> drawBuffers;
 };
 }
@@ -109,7 +124,9 @@ void BeginRendering(
     const RenderingInfo& a_RenderingInfo)
 {
     a_CommandBuffer->PushCommand<BeginRenderingCommand>(
-        a_CommandBuffer->memoryResource, a_RenderingInfo);
+        a_CommandBuffer->memoryResource,
+        a_CommandBuffer->device.lock(),
+        a_RenderingInfo);
 }
 
 void EndRendering(

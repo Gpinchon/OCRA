@@ -69,18 +69,9 @@ static inline auto CheckShaderCompilation(GLuint a_Shader)
     return true;
 }
 
-static inline auto CreateShaderProgram(const Device::Handle& a_Device)
-{
-    uint32_t handle = 0;
-    a_Device->PushCommand([&handle] {
-        handle = glCreateProgram();
-    }, true);
-    return handle;
-}
-
 Stage::Stage(const Device::Handle& a_Device, const PipelineShaderStage& a_Info)
     : device(a_Device)
-    , handle(CreateShaderProgram(a_Device))
+    , handle(glCreateProgram())
     , stage(GetGLStage(a_Info.stage))
     , stageBits(GetGLStageBits(a_Info.stage))
 {
@@ -96,25 +87,23 @@ Stage::Stage(const Device::Handle& a_Device, const PipelineShaderStage& a_Info)
         constantValue.push_back(value);
         constantIndex.push_back(entry.constantID);
     }
-    a_Device->PushCommand([this, a_Info, &constantIndex = constantIndex, &constantValue = constantIndex] {
-        const auto shader = glCreateShader(stage);
-        glProgramParameteri(handle, GL_PROGRAM_SEPARABLE, GL_TRUE);
-        OCRA_ASSERT(GLEW_ARB_gl_spirv);
-        glShaderBinary(1, &shader, GL_SHADER_BINARY_FORMAT_SPIR_V, a_Info.module->data(), sizeof(a_Info.module->front()) * a_Info.module->size());
-        glSpecializeShader(shader, a_Info.entryPoint.c_str(), constantIndex.size(), constantIndex.data(), constantValue.data());
-        if (CheckShaderCompilation(shader)) //compilation is successful
-        {
-            glAttachShader(handle, shader);
-            glLinkProgram(handle);
-            glDetachShader(handle, shader);
-        }
-        glDeleteShader(shader);
-    }, true);
+    const auto shader = glCreateShader(stage);
+    glProgramParameteri(handle, GL_PROGRAM_SEPARABLE, GL_TRUE);
+    OCRA_ASSERT(GLEW_ARB_gl_spirv);
+    glShaderBinary(1, &shader, GL_SHADER_BINARY_FORMAT_SPIR_V, a_Info.module->data(), sizeof(a_Info.module->front()) * a_Info.module->size());
+    glSpecializeShader(shader, a_Info.entryPoint.c_str(), constantIndex.size(), constantIndex.data(), constantValue.data());
+    if (CheckShaderCompilation(shader)) //compilation is successful
+    {
+        glAttachShader(handle, shader);
+        glLinkProgram(handle);
+        glDetachShader(handle, shader);
+    }
+    glDeleteShader(shader);
 }
 
 Stage::~Stage()
 {
-    device.lock()->PushCommand([handle = handle] {
+    if (handle != 0) device.lock()->PushCommand([handle = handle] {
         glDeleteProgram(handle);
     }, false);
 }

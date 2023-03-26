@@ -12,9 +12,11 @@ CompileVertexInputState::CompileVertexInputState(
     const PipelineVertexInputState& a_Info,
     const PipelineDynamicState& a_DynamicState)
     : device(a_Device)
+    , applyVertexInputs(!a_DynamicState.Contains(DynamicState::VertexInput))
     , primitiveRestartIndex(a_Info.primitiveRestartIndex)
     , bindingDescriptions(a_Info.bindingDescriptions)
 {
+    if (!applyVertexInputs) return;
     a_Device->PushCommand([this, &a_Info] {
         glGenVertexArrays(1, &handle);
         glBindVertexArray(handle);
@@ -43,6 +45,7 @@ CompileVertexInputState::CompileVertexInputState(
 
 CompileVertexInputState::CompileVertexInputState(const CompileVertexInputState& a_Other)
     : device(a_Other.device)
+    , applyVertexInputs(a_Other.applyVertexInputs)
     , primitiveRestartIndex(a_Other.primitiveRestartIndex)
     , bindingDescriptions(a_Other.bindingDescriptions)
     , handle(std::exchange(a_Other.handle, 0))
@@ -59,24 +62,8 @@ CompileVertexInputState::~CompileVertexInputState()
 void CompileVertexInputState::operator()(Command::Buffer::ExecutionState& a_ExecutionState) const
 {
     glPrimitiveRestartIndex(primitiveRestartIndex);
-    glBindVertexArray(handle);
-    for (const auto& bindingDescription : bindingDescriptions) {
-        const auto& vertexInput = a_ExecutionState.renderPass.vertexInputBindings.at(bindingDescription.binding);
-        const auto& vertexBuffer = vertexInput.buffer;
-        if (vertexBuffer == nullptr) {
-            glBindVertexBuffer(
-                bindingDescription.binding,
-                0, 0,
-                bindingDescription.stride);
-        }
-        else {
-            const auto& vertexMemory = vertexBuffer->memoryBinding;
-            glBindVertexBuffer(
-                bindingDescription.binding,
-                vertexMemory.memory->handle,
-                vertexInput.offset,
-                bindingDescription.stride);
-        }
-    }
+    if (!applyVertexInputs) return;
+    a_ExecutionState.renderPass.vertexArray = handle;
+    a_ExecutionState.renderPass.vertexInputBindings = bindingDescriptions;
 }
 }

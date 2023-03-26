@@ -4,6 +4,7 @@
 
 #include <GL/CommandBuffer.hpp>
 #include <GL/CommandInterface.hpp>
+#include <GL/Device.hpp>
 #include <GL/Enums.hpp>
 #include <GL/ExecutionState.hpp>
 
@@ -92,11 +93,11 @@ struct BindVBOCommand : CommandI {
         }
     }
     virtual void operator()(Buffer::ExecutionState& a_ExecutionState) override {
-        a_ExecutionState.renderPass.vertexInputBindings.resize(buffers.size());
+        a_ExecutionState.renderPass.vertexBufferBindings.resize(buffers.size());
         for (auto index = 0u; index < buffers.size(); ++index) {
             const auto binding = firstBinding + index;
-            a_ExecutionState.renderPass.vertexInputBindings.at(binding).offset = buffers.at(index).first;
-            a_ExecutionState.renderPass.vertexInputBindings.at(binding).buffer = buffers.at(index).second;
+            a_ExecutionState.renderPass.vertexBufferBindings.at(binding).offset = buffers.at(index).first;
+            a_ExecutionState.renderPass.vertexBufferBindings.at(binding).buffer = buffers.at(index).second;
         }
     }
     uint32_t firstBinding;
@@ -106,23 +107,49 @@ struct BindVBOCommand : CommandI {
 struct SetVertexInputCommand : CommandI {
     SetVertexInputCommand(
         std::pmr::memory_resource* a_MemoryResource,
+        const Device::Handle& a_Device,
         const std::vector<VertexAttributeDescription>& a_Attribs,
         const std::vector<VertexBindingDescription>& a_Bindings)
         : attribs(a_Attribs.begin(), a_Attribs.end(), a_MemoryResource)
         , bindings(a_Bindings.begin(), a_Bindings.end(), a_MemoryResource)
+        , device(a_Device)
     {
-        //for (const auto& attrib : a_Attribs) {
-        //    attrib.
-        //}
+        a_Device->PushCommand([this] {
+            glGenVertexArrays(1, &handle);
+            glBindVertexArray(handle);
+            for (const auto& attribute : attribs) {
+                glEnableVertexAttribArray(attribute.location);
+                glVertexAttribFormat(
+                    attribute.location,
+                    attribute.format.size,
+                    GetGLVertexType(attribute.format.type),
+                    attribute.format.normalized,
+                    attribute.offset);
+                glVertexAttribBinding(
+                    attribute.location,
+                    attribute.binding);
+            }
+            for (const auto& description : bindings) {
+                //Is this binding divided by instance or by vertex ?
+                const auto divideByInstance = description.inputRate == VertexInputRate::Instance;
+                glVertexBindingDivisor(
+                    description.binding,
+                    divideByInstance ? 1 : 0);
+            }
+            glBindVertexArray(0);
+        }, true);
+    }
+    ~SetVertexInputCommand() {
+        device.lock()->PushCommand([handle = handle]() {
+            glDeleteVertexArrays(1, &handle);
+        }, false);
     }
     virtual void operator()(Buffer::ExecutionState& a_ExecutionState) override {
-        a_ExecutionState.renderPass.vertexInputBindings.resize(buffers.size());
-        for (auto index = 0u; index < buffers.size(); ++index) {
-            const auto binding = firstBinding + index;
-            a_ExecutionState.renderPass.vertexInputBindings.at(binding).offset = buffers.at(index).first;
-            a_ExecutionState.renderPass.vertexInputBindings.at(binding).buffer = buffers.at(index).second;
-        }
+        a_ExecutionState.renderPass.vertexArray = handle;
+        a_ExecutionState.renderPass.vertexInputBindings = { bindings.begin(), bindings.end() };
     }
+    uint32_t handle = 0;
+    Device::WeakHandle device;
     std::pmr::vector<VertexAttributeDescription> attribs;
     std::pmr::vector<VertexBindingDescription> bindings;
 };
@@ -198,6 +225,9 @@ void SetVertexInput(
     const std::vector<VertexAttributeDescription>& a_Attribs,
     const std::vector<VertexBindingDescription>& a_Bindings)
 {
-
+    a_CommandBuffer->PushCommand<SetVertexInputCommand>(
+        a_CommandBuffer->memoryResource,
+        a_CommandBuffer->device.lock(),
+        a_Attribs, a_Bindings);
 }
 }

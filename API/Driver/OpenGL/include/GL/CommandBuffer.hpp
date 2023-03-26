@@ -62,7 +62,8 @@ struct CommandStorage
 struct Impl
 {
     Impl(const Device::Handle& a_Device, const CommandBufferLevel a_Level, std::pmr::memory_resource* a_MemoryResource)
-        : level(a_Level)
+        : device(a_Device)
+        , level(a_Level)
         , pushConstants(a_Device)
         , memoryResource(a_MemoryResource)
     {}
@@ -83,6 +84,7 @@ struct Impl
         auto command = new(commandStorage) C(std::forward<Args>(a_Args)...);
         commands.push_back({ command, memoryResource });
     }
+    const Device::WeakHandle device;
     const CommandBufferLevel level;
     CommandBufferState      state{ CommandBufferState::Initial };
     CommandBufferUsageFlags usageFlags;

@@ -25,6 +25,7 @@ struct CompileVertexInputState
     CompileVertexInputState(const CompileVertexInputState& a_Other);
     ~CompileVertexInputState();
     void operator()(Command::Buffer::ExecutionState&) const;
+    const bool applyVertexInputs;
     const uint32_t primitiveRestartIndex;
     const std::vector<VertexBindingDescription> bindingDescriptions;
     const Device::WeakHandle device;

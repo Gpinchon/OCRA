@@ -23,8 +23,8 @@ struct Stage {
     Stage(const Stage& a_Other) = delete;
     ~Stage();
     Device::WeakHandle device;
-    uint32_t handle;
-    uint32_t stage;
-    uint32_t stageBits;
+    uint32_t handle = 0;
+    uint32_t stage = 0;
+    uint32_t stageBits = 0;
 };
 }

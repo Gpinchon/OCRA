@@ -302,7 +302,6 @@ struct GraphicsPipelineTestApp : TestApp
 int main()
 {
     int ret = 0;
-    //basic setup as usual
     GraphicsPipelineTestApp testApp;
     testApp.window.Show();
     testApp.window.SetSwapChainImageNbr(SwapChainImageNbr);

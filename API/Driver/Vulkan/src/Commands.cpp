@@ -56,24 +56,24 @@ void BeginRendering(
     a_CommandBuffer->beginRendering(vkInfo);
 }
 
-void BeginRenderPass(
-    const Command::Buffer::Handle& a_CommandBuffer,
-    const RenderPassBeginInfo& a_BeginInfo,
-    const SubPassContents& a_SubPassContents)
-{
-    std::vector<vk::ClearValue> vkClearValues(a_BeginInfo.colorClearValues.size() + 1);
-    for (auto i = 0u; i < a_BeginInfo.colorClearValues.size(); ++i)
-    {
-        auto& clearValue = a_BeginInfo.colorClearValues.at(i);
-        auto& vkClearValue = vkClearValues.at(i);
-        vkClearValue.color = ConvertToVk(clearValue);
-    }
-    vkClearValues.back().depthStencil = ConvertToVk(a_BeginInfo.depthStencilClearValue);
-    vk::RenderPassBeginInfo vkInfo;
-    vkInfo.clearValueCount = vkClearValues.size();
-    vkInfo.framebuffer = *a_BeginInfo.framebuffer;
-    vkInfo.pClearValues = vkClearValues.data();
-}
+//void BeginRenderPass(
+//    const Command::Buffer::Handle& a_CommandBuffer,
+//    const RenderPassBeginInfo& a_BeginInfo,
+//    const SubPassContents& a_SubPassContents)
+//{
+//    std::vector<vk::ClearValue> vkClearValues(a_BeginInfo.colorClearValues.size() + 1);
+//    for (auto i = 0u; i < a_BeginInfo.colorClearValues.size(); ++i)
+//    {
+//        auto& clearValue = a_BeginInfo.colorClearValues.at(i);
+//        auto& vkClearValue = vkClearValues.at(i);
+//        vkClearValue.color = ConvertToVk(clearValue);
+//    }
+//    vkClearValues.back().depthStencil = ConvertToVk(a_BeginInfo.depthStencilClearValue);
+//    vk::RenderPassBeginInfo vkInfo;
+//    vkInfo.clearValueCount = vkClearValues.size();
+//    vkInfo.framebuffer = *a_BeginInfo.framebuffer;
+//    vkInfo.pClearValues = vkClearValues.data();
+//}
 
 void BindPipeline(
     const Command::Buffer::Handle& a_CommandBuffer,

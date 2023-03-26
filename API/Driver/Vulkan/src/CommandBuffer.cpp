@@ -10,12 +10,12 @@ void Begin(const Handle& a_CommandBuffer,
 {
     vk::CommandBufferBeginInfo info;
     info.flags = ConvertToVk(a_BeginInfo.flags);
-    if (a_BeginInfo.inheritanceInfo.has_value()) {
-        vk::CommandBufferInheritanceInfo inheritanceInfo;
-        //inheritanceInfo.framebuffer = *a_BeginInfo.inheritanceInfo->framebuffer;
-        //inheritanceInfo.renderPass  = *a_BeginInfo.inheritanceInfo->renderPass;
-        info.pInheritanceInfo = &inheritanceInfo;
-    }
+    //if (a_BeginInfo.inheritanceInfo.has_value()) {
+    //    vk::CommandBufferInheritanceInfo inheritanceInfo;
+    //    //inheritanceInfo.framebuffer = *a_BeginInfo.inheritanceInfo->framebuffer;
+    //    //inheritanceInfo.renderPass  = *a_BeginInfo.inheritanceInfo->renderPass;
+    //    info.pInheritanceInfo = &inheritanceInfo;
+    //}
     a_CommandBuffer->begin(info);
 }
 

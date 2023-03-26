@@ -38,12 +38,12 @@ struct DynamicStates {
     GLenum                  frontFace{ GL_CCW };
 };
 
-struct VertexInputBinding {
+struct VertexBufferBinding {
     OCRA::Buffer::Handle    buffer{ 0 };
     uint64_t                offset{ 0 };
 };
 
-struct IndexBufferBinding : VertexInputBinding {
+struct IndexBufferBinding : VertexBufferBinding {
     GLenum type{ GL_NONE };
 };
 
@@ -51,23 +51,27 @@ struct RenderPass
 {
     void Reset() {
         //renderPass.reset();
-        framebuffer.reset();
+        //framebuffer.reset();
+        vertexArray = 0;
+        vertexInputBindings.clear();
+        indexBufferBinding = {};
+
         renderArea = {};
         colorClearValues.clear();
         depthClearValue = 0;
         stencilClearValue = 0;
-        vertexInputBindings.clear();
-        indexBufferBinding = {};
     }
     //OCRA::RenderPass::Handle        renderPass;
+    uint32_t                        vertexArray;
     RenderingInfo                   renderingInfo;
-    FrameBuffer::Handle             framebuffer;
+    std::vector<VertexBindingDescription> vertexInputBindings;
+    std::vector<VertexBufferBinding> vertexBufferBindings;
+    IndexBufferBinding               indexBufferBinding;
+    //FrameBuffer::Handle             framebuffer;
     Rect2D                          renderArea;
     std::vector<ColorValue>         colorClearValues;
     float                           depthClearValue{ 0 };
     int32_t                         stencilClearValue{ 0 };
-    std::vector<VertexInputBinding> vertexInputBindings;
-    IndexBufferBinding              indexBufferBinding;
 };
 
 using PushDescriptorSet = std::vector<Descriptor::Binding>;
