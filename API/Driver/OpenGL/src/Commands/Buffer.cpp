@@ -137,7 +137,7 @@ struct SetVertexInputCommand : CommandI {
                     divideByInstance ? 1 : 0);
             }
             glBindVertexArray(0);
-        }, true);
+        }, false);
     }
     ~SetVertexInputCommand() {
         device.lock()->PushCommand([handle = handle]() {

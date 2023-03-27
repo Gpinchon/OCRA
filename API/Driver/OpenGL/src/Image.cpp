@@ -27,23 +27,19 @@ void CheckValidCopy(const ImageBufferCopy& a_Copy, const Image::Handle& a_Image)
     OCRA_ASSERT(a_Copy.imageOffset.z + a_Copy.imageExtent.depth <= a_Image->info.extent.depth);
     OCRA_ASSERT(a_Copy.imageSubresource.mipLevel <= a_Image->info.mipLevels);
 }
-static inline auto CreateTexture(const Device::Handle& a_Device)
-{
-    uint32_t handle = 0;
-    a_Device->PushCommand([&handle] {
-        glGenTextures(1, &handle);
-    }, true);
-    return handle;
-}
 Impl::Impl(const Device::Handle& a_Device, const CreateImageInfo& a_Info, const uint32_t a_Target)
     : device(a_Device)
     , info(a_Info)
     , internalFormat(GetGLSizedFormat(a_Info.format))
     , dataFormat(GetGLDataFormat(a_Info.format))
     , dataType(GetGLDataType(a_Info.format))
-    , handle(CreateTexture(a_Device))
     , target(a_Target)
-{}
+{
+    a_Device->PushCommand([this] {
+        glCreateTextures(target, 1, &handle);
+        //glGenTextures(1, &handle);
+    }, false);
+}
 Impl::~Impl() {
     device.lock()->PushCommand([handle = handle] {
         glDeleteTextures(1, &handle);
@@ -104,14 +100,12 @@ struct Texture1D : Texture<Compressed>
     {
         if (info.samples == SampleCount::Count1) {
             device.lock()->PushCommand([this] {
-                Bind(); //initialize texture object
-                glTexStorage1D(
-                    target,
+                glTextureStorage1D(
+                    handle,
                     info.mipLevels,
                     internalFormat,
                     info.extent.width);
-                Unbind(); //unbind texture
-            }, true);
+            }, false);
         }
         else throw std::runtime_error("Cannot create multisampled 1D textures");
     }
@@ -123,31 +117,27 @@ struct Texture1D : Texture<Compressed>
 //compressed
 void Texture1D<true>::Upload(const ImageBufferCopy& a_Copy, const size_t& a_MemoryOffset)
 {
-    Bind();//initialize texture object
-    glCompressedTexSubImage1D(
-        target,
+    glCompressedTextureSubImage1D(
+        handle,
         a_Copy.imageSubresource.mipLevel,
         a_Copy.imageOffset.x,
         a_Copy.imageExtent.width,
         internalFormat,
         a_Copy.bufferRowLength * a_Copy.bufferImageHeight,
         BUFFER_OFFSET(a_Copy.bufferOffset + a_MemoryOffset));
-    Unbind();
 }
 
 //uncompressed
 void Texture1D<false>::Upload(const ImageBufferCopy& a_Copy, const size_t& a_MemoryOffset)
 {
-    Bind();//initialize texture object
-    glTexSubImage1D(
-        target,
+    glTextureSubImage1D(
+        handle,
         a_Copy.imageSubresource.mipLevel,
         a_Copy.imageOffset.x,
         a_Copy.imageExtent.width,
         dataFormat,
         dataType,
         BUFFER_OFFSET(a_Copy.bufferOffset + a_MemoryOffset));
-    Unbind();
 }
 
 template <bool Compressed>
@@ -157,23 +147,21 @@ struct Texture2D : Texture<Compressed>
     : Texture<Compressed>(a_Device, a_Info, a_Info.samples == SampleCount::Count1 ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE)
     {
         device.lock()->PushCommand([this] {
-            Bind();//initialize texture object
             if (info.samples == SampleCount::Count1)
-                glTexStorage2D(
-                    target,
+                glTextureStorage2D(
+                    handle,
                     info.mipLevels,
                     internalFormat,
                     info.extent.width,
                     info.extent.height);
-            else glTexStorage2DMultisample(
-                target,
+            else glTextureStorage2DMultisample(
+                handle,
                 uint32_t(info.samples),
                 internalFormat,
                 info.extent.width,
                 info.extent.height,
                 info.fixedSampleLocations);
-            Unbind();
-        }, true);
+        }, false);
     }
     Texture2D(const Device::Handle& a_Device, const CreateImageInfo& a_Info, bool a_Empty)
     : Texture<Compressed>(a_Device, a_Info, a_Info.samples == SampleCount::Count1 ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE) {}
@@ -183,9 +171,8 @@ struct Texture2D : Texture<Compressed>
 //compressed
 void Texture2D<true>::Upload(const ImageBufferCopy& a_Copy, const size_t& a_MemoryOffset)
 {
-    Bind();//initialize texture object
-    glCompressedTexSubImage2D(
-        target,
+    glCompressedTextureSubImage2D(
+        handle,
         a_Copy.imageSubresource.mipLevel,
         a_Copy.imageOffset.x,
         a_Copy.imageOffset.y,
@@ -194,15 +181,13 @@ void Texture2D<true>::Upload(const ImageBufferCopy& a_Copy, const size_t& a_Memo
         internalFormat,
         a_Copy.bufferRowLength * a_Copy.bufferImageHeight,
         BUFFER_OFFSET(a_Copy.bufferOffset + a_MemoryOffset));
-    Unbind();
 }
 
 //uncompressed
 void Texture2D<false>::Upload(const ImageBufferCopy& a_Copy, const size_t& a_MemoryOffset)
 {
-    Bind();//initialize texture object
-    glTexSubImage2D(
-        target,
+    glTextureSubImage2D(
+        handle,
         a_Copy.imageSubresource.mipLevel,
         a_Copy.imageOffset.x,
         a_Copy.imageOffset.y,
@@ -211,7 +196,6 @@ void Texture2D<false>::Upload(const ImageBufferCopy& a_Copy, const size_t& a_Mem
         dataFormat,
         dataType,
         BUFFER_OFFSET(a_Copy.bufferOffset + a_MemoryOffset));
-    Unbind();
 }
 
 template <bool Compressed>
@@ -221,17 +205,16 @@ struct Texture3D : Texture<Compressed>
     : Texture<Compressed>(a_Device, a_Info, a_Info.samples == SampleCount::Count1 ? GL_TEXTURE_2D_ARRAY : GL_TEXTURE_2D_MULTISAMPLE_ARRAY)
     {
         device.lock()->PushCommand([this] {
-            Bind();//initialize texture object
             if (info.samples == SampleCount::Count1)
-                glTexStorage3D(
-                    target,
+                glTextureStorage3D(
+                    handle,
                     info.mipLevels,
                     internalFormat,
                     info.extent.width,
                     info.extent.height,
                     info.extent.depth);
-            else glTexStorage3DMultisample(
-                target,
+            else glTextureStorage3DMultisample(
+                handle,
                 uint32_t(info.samples),
                 info.mipLevels,
                 internalFormat,
@@ -239,7 +222,7 @@ struct Texture3D : Texture<Compressed>
                 info.extent.height,
                 info.fixedSampleLocations);
             Unbind();
-        }, true);
+        }, false);
     }
     Texture3D(const Device::Handle& a_Device, const CreateImageInfo& a_Info, bool a_Empty)
     : Texture<Compressed>(a_Device, a_Info, a_Info.samples == SampleCount::Count1 ? GL_TEXTURE_2D_ARRAY : GL_TEXTURE_2D_MULTISAMPLE_ARRAY) {}
@@ -249,9 +232,8 @@ struct Texture3D : Texture<Compressed>
 //compressed
 void Texture3D<true>::Upload(const ImageBufferCopy& a_Copy, const size_t& a_MemoryOffset)
 {
-    Bind();//initialize texture object
-    glCompressedTexSubImage3D(
-        target,
+    glCompressedTextureSubImage3D(
+        handle,
         a_Copy.imageSubresource.mipLevel,
         a_Copy.imageOffset.x,
         a_Copy.imageOffset.y,
@@ -262,15 +244,13 @@ void Texture3D<true>::Upload(const ImageBufferCopy& a_Copy, const size_t& a_Memo
         internalFormat,
         a_Copy.bufferRowLength * a_Copy.bufferImageHeight,
         BUFFER_OFFSET(a_Copy.bufferOffset + a_MemoryOffset));
-    Unbind();
 }
 
 //uncompressed
 void Texture3D<false>::Upload(const ImageBufferCopy& a_Copy, const size_t& a_MemoryOffset)
 {
-    Bind();//initialize texture object
-    glTexSubImage3D(
-        target,
+    glTextureSubImage3D(
+        handle,
         a_Copy.imageSubresource.mipLevel,
         a_Copy.imageOffset.x,
         a_Copy.imageOffset.y,
@@ -281,7 +261,6 @@ void Texture3D<false>::Upload(const ImageBufferCopy& a_Copy, const size_t& a_Mem
         dataFormat,
         dataType,
         BUFFER_OFFSET(a_Copy.bufferOffset + a_MemoryOffset));
-    Unbind();
 }
 
 Handle CreateEmpty(const Device::Handle& a_Device, const CreateImageInfo& a_Info)

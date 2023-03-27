@@ -22,8 +22,8 @@ struct Impl
     const uint32_t internalFormat;
     const uint32_t dataType;
     const uint32_t dataFormat;
-    const uint32_t handle;
     const uint32_t target;
+    uint32_t handle;
 };
 /**
 * @brief creates an empty image with no storage

@@ -48,7 +48,7 @@ Impl::Impl(const Device::Handle& a_Device, const size_t& a_Size, const MemoryPro
             size,
             nullptr,
             allocationFlags);
-        }, true);
+    }, false);
 }
 Impl::Impl(const Device::Handle& a_Device, const AllocateMemoryInfo& a_Info)
     : Impl(a_Device, a_Info.size, a_Device->physicalDevice.lock()->memoryProperties.memoryTypes.at(a_Info.memoryTypeIndex).propertyFlags)
@@ -58,7 +58,6 @@ Impl::~Impl()
     device.lock()->PushCommand([handle = handle] {
         glDeleteBuffers(1, &handle);
     }, false);
-    
 }
 
 void* Map(const MemoryMappedRange& a_MemoryRange)

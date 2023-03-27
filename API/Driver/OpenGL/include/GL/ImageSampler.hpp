@@ -9,7 +9,7 @@ struct Impl {
     Impl(const Device::Handle& a_Device, const CreateImageSamplerInfo& a_Info);
     ~Impl();
     const Device::WeakHandle device;
-    const uint32_t handle;
     const CreateImageSamplerInfo info;
+    uint32_t handle;
 }; 
 }

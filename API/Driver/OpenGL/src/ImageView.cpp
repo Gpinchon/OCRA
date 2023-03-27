@@ -28,36 +28,30 @@ Image::View::Handle CreateImageView(const Device::Handle& a_Device, const Create
 }
 
 namespace OCRA::Image::View {
-
-static inline auto CreateImageView(const Device::Handle& a_Device, const CreateImageViewInfo& a_Info)
-{
-    uint32_t handle = 0;
-    a_Device->PushCommand([&handle, a_Device, a_Info] {
-        glGenTextures(1, &handle);
-        glTextureView(
-            handle,
-            GetGLImageViewType(a_Info.type),
-            a_Info.image->handle,
-            GetGLSizedFormat(a_Info.format),
-            a_Info.subRange.baseMipLevel,
-            a_Info.subRange.levelCount,
-            a_Info.subRange.baseArrayLayer,
-            a_Info.subRange.layerCount);
-        auto swizzleMask = GLSwizzleMask(a_Info.components);
-        glTextureParameteriv(
-            handle,
-            GL_TEXTURE_SWIZZLE_RGBA,
-            (GLint*)&swizzleMask);
-        }, true);
-    return handle;
-}
 Impl::Impl(const Device::Handle& a_Device, const CreateImageViewInfo& a_Info)
     : device(a_Device)
     , info(a_Info)
     , target(GetGLImageViewType(info.type))
     , format(GetGLSizedFormat(a_Info.format))
-    , handle(View::CreateImageView(a_Device, a_Info))
-{}
+{
+    a_Device->PushCommand([this] {
+        glGenTextures(1, &handle);
+        glTextureView(
+            handle,
+            GetGLImageViewType(info.type),
+            info.image->handle,
+            GetGLSizedFormat(info.format),
+            info.subRange.baseMipLevel,
+            info.subRange.levelCount,
+            info.subRange.baseArrayLayer,
+            info.subRange.layerCount);
+        auto swizzleMask = GLSwizzleMask(info.components);
+        glTextureParameteriv(
+            handle,
+            GL_TEXTURE_SWIZZLE_RGBA,
+            (GLint*)&swizzleMask);
+    }, false);
+}
 Impl::~Impl()
 {
     device.lock()->PushCommand([handle = handle] {

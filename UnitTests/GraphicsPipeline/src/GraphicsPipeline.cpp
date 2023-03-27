@@ -151,7 +151,6 @@ struct GraphicsPipelineTestApp : TestApp
 
         graphicsPipelineInfo.dynamicState.dynamicStates = { DynamicState::VertexInput };
 
-        //graphicsPipelineInfo.renderPass = renderPass;
         graphicsPipelineInfo.rasterizationState.cullMode = CullMode::None;
 
         graphicsPipelineInfo.layout = mesh.GetPipelineLayout();
