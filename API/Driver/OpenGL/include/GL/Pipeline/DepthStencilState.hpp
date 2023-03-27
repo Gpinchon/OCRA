@@ -10,7 +10,6 @@
 
 #include <GL/ExecutionState.hpp>
 #include <GL/Enums.hpp>
-#include <GL/RenderPass.hpp>
 
 #include <GL/glew.h>
 
@@ -23,8 +22,7 @@ struct GLStencilOp {
     {}
     static inline void Apply(
         const GLenum& a_Face,
-        const GLStencilOpState& a_GLOpState,
-        const bool a_IgnoreMask)
+        const GLStencilOpState& a_GLOpState)
     {
         glStencilOpSeparate(
             a_Face,
@@ -36,18 +34,15 @@ struct GLStencilOp {
             a_GLOpState.compareOp,
             a_GLOpState.reference,
             a_GLOpState.compareMask);
-        if (!a_IgnoreMask) glStencilMaskSeparate(a_Face, a_GLOpState.writeMask);
+        glStencilMaskSeparate(a_Face, a_GLOpState.writeMask);
     }
     void operator()(Command::Buffer::ExecutionState& a_ExecutionState) const {
-        const auto& storeOp = a_ExecutionState.renderPass.renderingInfo.stencilAttachment.storeOp;
-        const auto ignoreStencilMask = storeOp == StoreOp::DontCare;
         if (dynamicStencilOp) {
             Apply(
                 face,
-                face == GL_BACK ? a_ExecutionState.dynamicStates.backStencilOP : a_ExecutionState.dynamicStates.frontStencilOP,
-                ignoreStencilMask);
+                face == GL_BACK ? a_ExecutionState.dynamicStates.backStencilOP : a_ExecutionState.dynamicStates.frontStencilOP);
         }
-        else Apply(face, opstate, ignoreStencilMask);
+        else Apply(face, opstate);
     }
     const GLenum face;
     const bool dynamicStencilOp;
@@ -81,9 +76,7 @@ struct CompileDepthStencilState
         const auto bStencilTestEnable = dynamicStencilTestEnable ? a_ExecutionState.dynamicStates.stencilTestEnable : stencilTestEnable;
         bDepthTestEnable ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
         bDepthBoundsTestEnable ? glEnable(GL_DEPTH_BOUNDS_TEST_EXT) : glDisable(GL_DEPTH_BOUNDS_TEST_EXT);
-        const auto& storeOp = a_ExecutionState.renderPass.renderingInfo.depthAttachment.storeOp;
-        const auto ignoreDepthMask = storeOp == StoreOp::DontCare;
-        if (!ignoreDepthMask) glDepthMask(bDepthWriteEnable);
+        glDepthMask(bDepthWriteEnable);
         glDepthFunc(eDepthCompareOp);
         bStencilTestEnable  ? glEnable(GL_STENCIL_TEST) : glDisable(GL_STENCIL_TEST);
         front(a_ExecutionState);

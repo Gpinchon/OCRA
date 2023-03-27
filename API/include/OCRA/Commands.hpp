@@ -182,19 +182,6 @@ void SetVertexInput(
     const Command::Buffer::Handle& a_CommandBuffer,
     const std::vector<VertexAttributeDescription>& a_Attribs,
     const std::vector<VertexBindingDescription>&   a_Bindings);
- 
-/*
-* @brief Begin Render Pass recording
-*/
-//void BeginRenderPass(
-//    const Command::Buffer::Handle& a_CommandBuffer,
-//    const RenderPassBeginInfo& a_BeginInfo,
-//    const SubPassContents& a_SubPassContents);
-//void NextSubPass(
-//    const Command::Buffer::Handle& a_CommandBuffer,
-//    const SubPassContents& a_SubPassContents);
-//End Render Pass recording
-//void EndRenderPass(const Command::Buffer::Handle& a_CommandBuffer);
 
 void BeginRendering(
     const Command::Buffer::Handle& a_CommandBuffer,

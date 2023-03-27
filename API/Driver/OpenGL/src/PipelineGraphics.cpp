@@ -18,14 +18,11 @@
 #include <GL/Pipeline/TessellationState.hpp>
 #include <GL/Pipeline/ViewPortState.hpp>
 #include <GL/Pipeline/VertexInputState.hpp>
-#include <GL/RenderPass.hpp>
 
 namespace OCRA::Pipeline::Graphics {
 struct Impl : Pipeline::Impl {
     Impl::Impl(const Device::Handle& a_Device, const CreatePipelineGraphicsInfo& a_Info);
     virtual void Impl::Apply(Command::Buffer::ExecutionState& a_ExecutionState) const override;
-    //const uint32_t                      subPass;
-    //const RenderPass::Handle            renderPass;
     const CompileColorBlendState      colorBlendState;
     const CompileDepthStencilState    depthStencilState;
     const CompileInputAssemblyState   inputAssemblyState;
@@ -39,8 +36,6 @@ struct Impl : Pipeline::Impl {
 
 Impl::Impl(const Device::Handle& a_Device, const CreatePipelineGraphicsInfo& a_Info)
     : Pipeline::Impl(PipelineBindingPoint::Graphics, a_Info.layout)
-    //, renderPass(a_Info.renderPass)
-    //, subPass(a_Info.subPass)
     , colorBlendState(a_Device, a_Info.colorBlendState, a_Info.dynamicState)
     , depthStencilState(a_Device, a_Info.depthStencilState, a_Info.dynamicState)
     , inputAssemblyState(a_Device, a_Info.inputAssemblyState, a_Info.dynamicState)
@@ -53,11 +48,6 @@ Impl::Impl(const Device::Handle& a_Device, const CreatePipelineGraphicsInfo& a_I
 {}
 
 void Impl::Apply(Command::Buffer::ExecutionState& a_ExecutionState) const {
-    //OCRA_ASSERT(renderPass == a_ExecutionState.renderPass.renderPass);
-    //if (a_ExecutionState.subpassIndex != subPass) {
-    //    a_ExecutionState.subpassIndex = subPass;
-    //    a_ExecutionState.renderPass.renderPass->BeginSubPass(a_ExecutionState);
-    //}
     const auto& lastPipeline = std::static_pointer_cast<Impl>(a_ExecutionState.lastPipelineState.at(size_t(PipelineBindingPoint::Graphics)).pipeline);
     if (lastPipeline.get() == this) return; //we did not change states set
     if (lastPipeline == nullptr) { //first graphics pipeline on this command buffer, just apply the states

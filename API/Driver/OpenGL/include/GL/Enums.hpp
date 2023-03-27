@@ -120,11 +120,7 @@ inline GLenum GetGLSwizzle(const Swizzle& a_Swizzle, const GLenum& a_SwizzleComp
     switch (a_Swizzle)
     {
     case Swizzle::Identity:
-        if (a_SwizzleComponent == GL_TEXTURE_SWIZZLE_R) return GL_RED;
-        else if (a_SwizzleComponent == GL_TEXTURE_SWIZZLE_G) return GL_GREEN;
-        else if (a_SwizzleComponent == GL_TEXTURE_SWIZZLE_B) return GL_BLUE;
-        else if (a_SwizzleComponent == GL_TEXTURE_SWIZZLE_A) return GL_ALPHA;
-        break;
+        return a_SwizzleComponent;
     case Swizzle::Zero:
         return GL_ZERO;
     case Swizzle::One:

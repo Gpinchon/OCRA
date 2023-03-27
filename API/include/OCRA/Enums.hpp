@@ -341,6 +341,11 @@ enum class QueryType {
     TimeStamp,
     MaxValue
 };
+enum class ResolveMode {
+    None,
+    Average,   //equivalent to linear
+    SampleZero //equivalent to nearest
+};
 enum class SampleCount {
     Count1 = 1,
     Count2 = 2,
@@ -373,10 +378,6 @@ enum class StoreOp {
     DontCare, //Nothing is stored
     Store,    //Values from the Fragment Shader are written
     MaxValue
-};
-enum class SubPassContents {
-    Inline,
-    SecondaryCommandBuffers
 };
 enum class PhysicalDeviceType {
     Other = 0,

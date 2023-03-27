@@ -17,10 +17,10 @@ CompileVertexInputState::CompileVertexInputState(
     , bindingDescriptions(a_Info.bindingDescriptions)
 {
     if (!applyVertexInputs) return;
-    a_Device->PushCommand([this, &a_Info] {
+    a_Device->PushCommand([this, attributeDescriptions = a_Info.attributeDescriptions] {
         glGenVertexArrays(1, &handle);
         glBindVertexArray(handle);
-        for (const auto& attribute : a_Info.attributeDescriptions) {
+        for (const auto& attribute : attributeDescriptions) {
             glEnableVertexAttribArray(attribute.location);
             glVertexAttribFormat(
                 attribute.location,
@@ -32,7 +32,7 @@ CompileVertexInputState::CompileVertexInputState(
                 attribute.location,
                 attribute.binding);
         }
-        for (const auto& description : a_Info.bindingDescriptions) {
+        for (const auto& description : bindingDescriptions) {
             //Is this binding divided by instance or by vertex ?
             const auto divideByInstance = description.inputRate == VertexInputRate::Instance;
             glVertexBindingDivisor(
@@ -40,7 +40,7 @@ CompileVertexInputState::CompileVertexInputState(
                 divideByInstance ? 1 : 0);
         }
         glBindVertexArray(0);
-    }, true);
+    }, false);
 }
 
 CompileVertexInputState::CompileVertexInputState(const CompileVertexInputState& a_Other)

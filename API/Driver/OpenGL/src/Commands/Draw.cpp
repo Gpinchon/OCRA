@@ -37,6 +37,7 @@ struct DrawBase : CommandI {
     {}
     virtual void operator()(Buffer::ExecutionState& a_ExecutionState) override {
         pushConstants.Bind();
+        ApplyPipelineStates(a_ExecutionState);
         glBindVertexArray(a_ExecutionState.renderPass.vertexArray);
         for (const auto& bindingDescription : a_ExecutionState.renderPass.vertexInputBindings) {
             const auto& vertexInput = a_ExecutionState.renderPass.vertexBufferBindings.at(bindingDescription.binding);
@@ -56,7 +57,7 @@ struct DrawBase : CommandI {
                     bindingDescription.stride);
             }
         }
-        ApplyPipelineStates(a_ExecutionState);
+        
     }
     OCRA::PushConstants& pushConstants;
 };

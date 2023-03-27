@@ -75,10 +75,10 @@ struct GLStencilOpState {
 
 struct GLSwizzleMask {
     GLSwizzleMask(const ComponentMapping& a_Mapping)
-        : r(GetGLSwizzle(a_Mapping.r, GL_TEXTURE_SWIZZLE_R))
-        , g(GetGLSwizzle(a_Mapping.g, GL_TEXTURE_SWIZZLE_G))
-        , b(GetGLSwizzle(a_Mapping.b, GL_TEXTURE_SWIZZLE_B))
-        , a(GetGLSwizzle(a_Mapping.a, GL_TEXTURE_SWIZZLE_A))
+        : r(GetGLSwizzle(a_Mapping.r, GL_RED))
+        , g(GetGLSwizzle(a_Mapping.g, GL_GREEN))
+        , b(GetGLSwizzle(a_Mapping.b, GL_BLUE))
+        , a(GetGLSwizzle(a_Mapping.a, GL_ALPHA))
     {}
     const GLenum r;
     const GLenum g;

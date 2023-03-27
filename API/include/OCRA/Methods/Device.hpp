@@ -54,15 +54,6 @@ Fence::Handle CreateFence(
     const FenceStatus& a_DefaultStatus = FenceStatus::Unsignaled,
     const AllocationCallback* a_Allocator = nullptr);
 
-/**
- * Creates a framebuffer with the specified attachments.
- * In case of no attachments, an empty FB with size CreateFrameBufferInfo::extent will be created.
- */
-FrameBuffer::Handle CreateFrameBuffer(
-    const Handle& a_Device,
-    const CreateFrameBufferInfo& a_Info,
-    const AllocationCallback* a_Allocator = nullptr);
-
 Image::Handle CreateImage(
     const Device::Handle& a_Device,
     const CreateImageInfo& a_Info);
@@ -87,10 +78,6 @@ Pipeline::Layout::Handle CreatePipelineLayout(
 Handle CreateQueryPool(
     const Device::Handle& a_Device,
     const CreateQueryPoolInfo& a_Info);
-
-//RenderPass::Handle CreateRenderPass(
-//    const Handle& a_Device,
-//    const CreateRenderPassInfo& a_Info);
 
 Semaphore::Handle CreateSemaphore(
     const Device::Handle& a_Device,

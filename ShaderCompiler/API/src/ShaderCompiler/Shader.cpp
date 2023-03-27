@@ -91,13 +91,7 @@ std::vector<uint32_t> Impl::Compile()
         glsl.set_common_options(options);
         const auto resources = glsl.get_shader_resources();
         for (const auto& res : resources.subpass_inputs) {
-            auto set        = glsl.get_decoration(res.id, spv::DecorationDescriptorSet);
-            auto binding    = glsl.get_decoration(res.id, spv::DecorationBinding);
-            auto inputIndex = glsl.get_decoration(res.id, spv::DecorationInputAttachmentIndex);
-            assert(set == 0 && "Descriptor set unsupported, use set 0");
-            assert(glsl.has_decoration(res.id, spv::DecorationBinding) && "Binding required");
-            glsl.set_decoration(res.id, spv::DecorationBinding,  OCRA_GL_SHADER_SUBPASSINPUT_OFFSET + inputIndex + binding);
-            glsl.set_decoration(res.id, spv::DecorationLocation, OCRA_GL_SHADER_SUBPASSINPUT_OFFSET + inputIndex + binding);
+            throw std::runtime_error("Subpass inputs not supported");
         }
         for (const auto& res : resources.uniform_buffers) {
             auto set     = glsl.get_decoration(res.id, spv::DecorationDescriptorSet);

@@ -29,13 +29,6 @@ namespace OCRA
 //Use this to ignore timeout and wait indefinitely
 static constexpr auto IgnoreTimeout = (std::chrono::nanoseconds::max)();
 static constexpr auto IgnoreQueueFamily = (std::numeric_limits<uint32_t>::max)();
-struct AttachmentDescription {
-    LoadOp  loadOp{ LoadOp::DontCare };   //determines what to do with the buffer before rendering
-    StoreOp storeOp{ StoreOp::DontCare }; //determines what to do with the buffer after rendering
-};
-struct AttachmentReference {
-    int8_t  location{ -1 }; //location of the output, -1 means none
-};
 struct ApplicationInfo {
     std::string name;
     uint32_t    applicationVersion{ 0 };
@@ -90,12 +83,6 @@ struct DescriptorSetCopy
     uint32_t count{ 0 };
 };
 
-struct SubPassDescription {
-    PipelineBindingPoint             pipelineBindingPoint{ PipelineBindingPoint::Unknown };
-    std::vector<AttachmentReference> colorAttachments{};
-    AttachmentReference              depthAttachment{};
-    AttachmentReference              stencilAttachment{};
-};
 union ColorValue {
     constexpr ColorValue() noexcept = default;
     constexpr ColorValue(float a_R, float a_G, float a_B, float a_A) noexcept {
@@ -328,12 +315,6 @@ struct PipelineViewPortState {
     std::vector<Rect2D>   scissors{};
 };
 
-//struct CommandBufferInheritanceInfo {
-//    OCRA::RenderPass::Handle renderPass;
-//    uint32_t                 subpass;
-//    FrameBuffer::Handle      framebuffer;
-//};
-
 struct BufferCopyRegion
 {
     uint64_t readOffset{ 0 }, writeOffset{ 0 }, size{ 0 };
@@ -430,16 +411,19 @@ struct ImageLayoutTransitionInfo {
 
 struct RenderingAttachmentInfo {
     Image::View::Handle imageView;
+    Image::View::Handle imageViewResolve;
     ImageLayout imageLayout{ ImageLayout::Undefined };
-    //TODO support multisample
-    LoadOp  loadOp{ LoadOp::DontCare };
-    StoreOp storeOp{ StoreOp::DontCare };
-    ClearValue clearValue;
+    ImageLayout imageLayoutResolve{ ImageLayout::Undefined };
+    bool        resolve = false; //resolve multisampling ?
+    LoadOp      loadOp{ LoadOp::DontCare };
+    StoreOp     storeOp{ StoreOp::DontCare };
+    ClearValue  clearValue;
 };
 
 struct RenderingInfo {
     Rect2D area;
     uint32_t layerCount{ 0 };
+    ResolveMode resolveMode{ ResolveMode::None };
     std::vector<RenderingAttachmentInfo> colorAttachments;
     RenderingAttachmentInfo depthAttachment;
     RenderingAttachmentInfo stencilAttachment;
@@ -633,16 +617,7 @@ struct PhysicalDeviceFeatures {
 struct CommandBufferBeginInfo
 {
     CommandBufferUsageFlags flags{ CommandBufferUsageFlagBits::None };
-    //std::optional<CommandBufferInheritanceInfo> inheritanceInfo; //must be valid if this command buffer is secondary
 };
-//struct RenderPassBeginInfo
-//{
-//    RenderPass::Handle      renderPass{ 0 };
-//    FrameBuffer::Handle     framebuffer{ 0 };
-//    Rect2D                  renderArea{ 0, 0, 0, 0 }; //defines the area that this RenderPass is gonna render to
-//    std::vector<ColorValue> colorClearValues;         //defines the values to be used to clear color buffers, must be the same size as colorAttachments member of RenderPass
-//    DepthStencilValue       depthStencilClearValue;   //defines the values to be used to clear the depth/stencil buffer
-//};
 
 struct CreateBufferInfo {
     CreateBufferFlags       flags{ CreateBufferFlagBits::None };;
@@ -690,7 +665,6 @@ struct CreateInstanceInfo
     ApplicationInfo applicationInfo;
 };
 struct CreateFrameBufferInfo {
-    //RenderPass::Handle               renderPass;
     std::vector<Image::View::Handle> attachments; //Image View handles
     Extent<3, uint16_t>              extent; //default FB extent
 };
@@ -706,20 +680,13 @@ struct CreatePipelineGraphicsInfo { //describes a graphics pipeline with each st
     PipelineViewPortState       viewPortState{};
     PipelineDynamicState        dynamicState{};
     Pipeline::Layout::Handle    layout{};
-    //RenderPass::Handle          renderPass{}; //the RenderPass this Graphics Pipeline will be used with
-    uint8_t                     subPass{ 0 }; //the subPass to "start" with inside the RenderPass
 };
 struct CreatePipelineLayoutInfo
 {
     std::vector<Descriptor::SetLayout::Handle>  setLayouts;
     std::vector<PushConstantRange>              pushConstants;
 };
-struct CreateRenderPassInfo {
-    std::vector<SubPassDescription>    subPasses;
-    std::vector<AttachmentDescription> colorAttachments;
-    AttachmentDescription              depthAttachment;
-    AttachmentDescription              stencilAttachment;
-};
+
 struct CreateImageSamplerInfo {
     Filter minFilter{ Filter::Linear };
     Filter magFilter{ Filter::Linear };

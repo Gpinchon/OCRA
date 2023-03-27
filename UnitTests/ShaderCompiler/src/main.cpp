@@ -1,6 +1,8 @@
 #include <OCRA/ShaderCompiler/Compiler.hpp>
 #include <OCRA/ShaderCompiler/Shader.hpp>
 
+#include <iostream>
+
 using namespace OCRA;
 
 int main()
@@ -89,6 +91,7 @@ int main()
         const auto shader = ShaderCompiler::Shader::Create(compiler, shaderInfo);
         ret |= ShaderCompiler::Shader::Compile(shader).empty() ? -1 : 0;
     }
+    try
     {
         ShaderCompiler::Shader::Info shaderInfo;
         shaderInfo.type = ShaderCompiler::Shader::Type::Fragment;
@@ -104,6 +107,9 @@ int main()
         };
         const auto shader = ShaderCompiler::Shader::Create(compiler, shaderInfo);
         ret |= ShaderCompiler::Shader::Compile(shader).empty() ? -1 : 0;
+    }
+    catch (std::exception& e) {
+        std::cout << e.what() << std::endl;
     }
     {
         ShaderCompiler::Shader::Info shaderInfo;

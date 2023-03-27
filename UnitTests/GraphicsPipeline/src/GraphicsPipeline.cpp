@@ -79,7 +79,6 @@ struct GraphicsPipelineTestApp : TestApp
         const auto queueFamily = PhysicalDevice::FindQueueFamily(physicalDevice, QueueFlagBits::Graphics);
         queue = Device::GetQueue(device, queueFamily, 0); //Get first available queue
         commandPool = CreateCommandPool(device, queueFamily);
-        //renderPass = CreateRenderPass();
         imageAcquisitionFence = CreateFence(device);
         mainCommandBuffer = CreateCommandBuffer(commandPool, CommandBufferLevel::Primary);
         drawCommandBuffer = CreateCommandBuffer(commandPool, CommandBufferLevel::Secondary);
@@ -137,20 +136,6 @@ struct GraphicsPipelineTestApp : TestApp
             firstLoop = false;
         }
     }
-    //RenderPass::Handle CreateRenderPass()
-    //{
-    //    SubPassDescription subPassDescription{};
-    //    AttachmentReference attachmentRef{};
-    //    attachmentRef.location = 0;
-    //    subPassDescription.colorAttachments = { attachmentRef };
-    //    CreateRenderPassInfo renderPassInfo{};
-    //    AttachmentDescription colorAttachment;
-    //    colorAttachment.loadOp  = LoadOp::Clear; //clear the attachment 0 on begin
-    //    colorAttachment.storeOp = StoreOp::Store; //write the result to attachment 0
-    //    renderPassInfo.colorAttachments = { colorAttachment };
-    //    renderPassInfo.subPasses = { subPassDescription };
-    //    return Device::CreateRenderPass(device, renderPassInfo);
-    //}
     void CreateGraphicsPipeline()
     {
         ViewPort viewport;
@@ -173,7 +158,6 @@ struct GraphicsPipelineTestApp : TestApp
         graphicsPipelineInfo.inputAssemblyState = mesh.GetInputAssembly();
         graphicsPipelineInfo.shaderPipelineState.stages = mesh.GetShaderStages();
 
-        graphicsPipelineInfo.subPass = 0;
         //Everything else is left by default for now
         graphicsPipeline = CreatePipelineGraphics(device, graphicsPipelineInfo);
     }
@@ -196,28 +180,13 @@ struct GraphicsPipelineTestApp : TestApp
             imageViewInfo.subRange.layerCount = 1;
             frameBufferImageView = CreateImageView(device, imageViewInfo);
         }
-        {
-            //CreateFrameBufferInfo frameBufferInfo{};
-            //frameBufferInfo.attachments.push_back(frameBufferImageView);
-            //frameBufferInfo.extent.depth = 1;
-            //frameBufferInfo.extent.width = window.GetExtent().width;
-            //frameBufferInfo.extent.height = window.GetExtent().height;
-            //frameBufferInfo.renderPass = renderPass;
-            //frameBuffer = Device::CreateFrameBuffer(device, frameBufferInfo);
-        }
     }
     void RecordDrawCommandBuffer()
     {
         CommandBufferBeginInfo bufferBeginInfo{};
         bufferBeginInfo.flags = CommandBufferUsageFlagBits::None;
-        //bufferBeginInfo.inheritanceInfo.emplace();
         Command::Buffer::Reset(drawCommandBuffer);
-        //RenderPassBeginInfo renderPassBeginInfo{};
-        //renderPassBeginInfo.renderPass = renderPass;
-        //renderPassBeginInfo.framebuffer = frameBuffer;
-        //renderPassBeginInfo.renderArea.offset = { 0, 0 };
-        //renderPassBeginInfo.renderArea.extent = window.GetExtent();
-        //renderPassBeginInfo.colorClearValues.push_back(ColorValue(0.9529f, 0.6235f, 0.0941f, 1.f));
+
         RenderingAttachmentInfo renderingAttachment{};
         renderingAttachment.clearValue  = ColorValue(0.9529f, 0.6235f, 0.0941f, 1.f);
         renderingAttachment.imageView   = frameBufferImageView;
@@ -231,14 +200,12 @@ struct GraphicsPipelineTestApp : TestApp
         renderingInfo.layerCount = 1;
 
         Command::Buffer::Begin(drawCommandBuffer, bufferBeginInfo);
-        //Command::BeginRenderPass(drawCommandBuffer, renderPassBeginInfo, SubPassContents::Inline);
         Command::BeginRendering(drawCommandBuffer, renderingInfo);
         {
             Command::BindPipeline(drawCommandBuffer, graphicsPipeline);
             mesh.Draw(drawCommandBuffer);
         }
         Command::EndRendering(drawCommandBuffer);
-        //Command::EndRenderPass(drawCommandBuffer);
         Command::Buffer::End(drawCommandBuffer);
     }
     void UpdateMeshColor(const double a_Delta)
@@ -277,7 +244,6 @@ struct GraphicsPipelineTestApp : TestApp
     Window                   window;
     Image::Handle            swapChainImage;
     
-    //FrameBuffer::Handle      frameBuffer;
     Image::Handle            frameBufferImage;
     Image::View::Handle      frameBufferImageView;
 
@@ -288,8 +254,6 @@ struct GraphicsPipelineTestApp : TestApp
             { { -0.5f,  0.5f, 0.f }, { 0.0f, 0.0f, 1.0f }, { 1.f, 1.f }}
         }),
         PBRMaterial(physicalDevice, device) };
-
-    //RenderPass::Handle       renderPass;
     Pipeline::Handle         graphicsPipeline;
     Command::Pool::Handle    commandPool;
     Command::Buffer::Handle  mainCommandBuffer;

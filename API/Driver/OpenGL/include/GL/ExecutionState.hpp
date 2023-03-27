@@ -50,28 +50,27 @@ struct IndexBufferBinding : VertexBufferBinding {
 struct RenderPass
 {
     void Reset() {
-        //renderPass.reset();
-        //framebuffer.reset();
+        area = {};
+        resolveMode = ResolveMode::None;
+        frameBuffer = 0;
+        frameBufferResolve = 0;
         vertexArray = 0;
+        drawAttachments.clear();
+        resolveAttachments.clear();
         vertexInputBindings.clear();
+        vertexBufferBindings.clear();
         indexBufferBinding = {};
-
-        renderArea = {};
-        colorClearValues.clear();
-        depthClearValue = 0;
-        stencilClearValue = 0;
     }
-    //OCRA::RenderPass::Handle        renderPass;
-    uint32_t                        vertexArray;
-    RenderingInfo                   renderingInfo;
+    Rect2D                                area;
+    ResolveMode                           resolveMode = ResolveMode::None;
+    uint32_t                              frameBuffer = 0;
+    uint32_t                              frameBufferResolve = 0;
+    uint32_t                              vertexArray = 0;
+    std::vector<GLenum>                   drawAttachments;
+    std::vector<GLenum>                   resolveAttachments;
     std::vector<VertexBindingDescription> vertexInputBindings;
-    std::vector<VertexBufferBinding> vertexBufferBindings;
-    IndexBufferBinding               indexBufferBinding;
-    //FrameBuffer::Handle             framebuffer;
-    Rect2D                          renderArea;
-    std::vector<ColorValue>         colorClearValues;
-    float                           depthClearValue{ 0 };
-    int32_t                         stencilClearValue{ 0 };
+    std::vector<VertexBufferBinding>      vertexBufferBindings;
+    IndexBufferBinding                    indexBufferBinding;
 };
 
 using PushDescriptorSet = std::vector<Descriptor::Binding>;
@@ -85,6 +84,7 @@ struct PipelineState {
         descriptorDynamicOffset = 0;
         descriptorSet.reset();
         pushDescriptorSet.clear();
+        
     }
     Pipeline::Handle        pipeline;
     Descriptor::Set::Handle descriptorSet;
@@ -102,7 +102,6 @@ struct ExecutionState {
     }
     void Reset() {
         once = false;
-        //subpassIndex = uint32_t(-1);
         primitiveTopology = GL_NONE;
         renderPass.Reset();
         dynamicStates = {};
@@ -113,7 +112,6 @@ struct ExecutionState {
     }
 
     bool                once{ false };
-    //uint32_t            subpassIndex{ uint32_t(-1) };
     GLenum              primitiveTopology{ GL_NONE };
     RenderPass          renderPass{};
     DynamicStates       dynamicStates{};

@@ -52,12 +52,8 @@ void OCRA::Command::Buffer::Impl::Begin(const CommandBufferBeginInfo& a_BeginInf
     state = CommandBufferState::Recording;
     usageFlags = a_BeginInfo.flags;
     if (level == CommandBufferLevel::Secondary) {
-        //auto& inheritanceInfo = a_BeginInfo.inheritanceInfo.value(); //should throw if empty
         if ((usageFlags & CommandBufferUsageFlagBits::RenderPassContinue) != 0)
         {
-            //executionState.subpassIndex = inheritanceInfo.subpass;
-            //executionState.renderPass.renderPass = inheritanceInfo.renderPass;
-            //executionState.renderPass.framebuffer = inheritanceInfo.framebuffer;
         }
     }
 }

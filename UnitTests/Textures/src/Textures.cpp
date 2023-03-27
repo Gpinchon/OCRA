@@ -21,22 +21,20 @@ Texture2D CreateTexture(const PhysicalDevice::Handle& a_PhysicalDevice, const De
 {
     auto& device = a_Device;
     auto& physicalDevice = a_PhysicalDevice;
-    Texture2D texture(a_Device, Image::Format::Uint8_Normalized_RGBA, 640, 480, 1);
-    const auto textureSize = texture.GetWidth() * texture.GetHeight() * Image::GetPixelSize(texture.GetImageInfo().format);
-    Buffer::Info bufferInfo;
-    bufferInfo.size = textureSize;
-    bufferInfo.usage = Buffer::UsageFlagBits::TransferSrc;
-    auto textureTransferBuffer = Buffer::Create(device, bufferInfo);
-    auto textureTransferMemory = AllocateMemory(
-        physicalDevice, device,
-        bufferInfo.size,
-        PhysicalDevice::MemoryPropertyFlagBits::HostVisible);
-    Buffer::BindMemory(device, textureTransferBuffer, textureTransferMemory, 0);
-    Memory::MappedRange range;
+    Texture2D texture(a_Device, Format::Uint8_Normalized_RGBA, 640, 480, 1);
+    const auto textureSize = Image::GetDataSize(texture.GetImage());
+    AllocateBufferInfo bufferInfo;
+    bufferInfo.bufferFlags = CreateBufferFlagBits::None;
+    bufferInfo.bufferUsage = BufferUsageFlagBits::TransferDst | BufferUsageFlagBits::TransferSrc;
+    bufferInfo.memoryFlags = MemoryPropertyFlagBits::HostVisible;
+    bufferInfo.size = Image::GetDataSize(texture.GetImage());
+    auto textureTransferBuffer = Device::AllocateBuffer(device, bufferInfo);
+    auto textureTransferMemory = Buffer::GetMemory(textureTransferBuffer);
+    MemoryMappedRange range;
     range.memory = textureTransferMemory;
     range.length = textureSize;
     range.offset = 0;
-    auto bufferPtr = (Vec<4, uint8_t>*)Memory::Map(device, range);
+    auto bufferPtr = (Vec<4, uint8_t>*)Memory::Map(range);
     iVec2 iResolution = { texture.GetWidth(), texture.GetHeight() };
     for (uint32_t x = 0; x < texture.GetWidth(); ++x) {
         for (uint32_t y = 0; y < texture.GetHeight(); ++y) {
@@ -80,10 +78,10 @@ Texture2D CreateTexture(const PhysicalDevice::Handle& a_PhysicalDevice, const De
             bufferPtr[index].a = 255;
         }
     }
-    Memory::Unmap(device, textureTransferMemory);
-    Image::BufferCopy bufferCopy;
+    Memory::Unmap(textureTransferMemory);
+    ImageBufferCopy bufferCopy;
     bufferCopy.imageExtent = texture.GetImageInfo().extent;
-    Image::CopyBufferToImage(device, textureTransferBuffer, texture.GetImage(), { bufferCopy });
+    Image::CopyBufferToImage(textureTransferBuffer, texture.GetImage(), { bufferCopy });
     return texture;
 }
 
@@ -106,14 +104,13 @@ struct TexturesTestApp : TestApp
         window.OnMaximize = window.OnResize;
         window.OnRestore = window.OnResize;
         window.OnMinimize = [this](const Window&, const uint32_t, const uint32_t) { render = false; };
-        const auto queueFamily = FindQueueFamily(physicalDevice, PhysicalDevice::QueueFlagsBits::Graphics);
+        const auto queueFamily = FindQueueFamily(physicalDevice, QueueFlagBits::Graphics);
         queue = Device::GetQueue(device, queueFamily, 0); //Get first available queue
-        imageAcquisitionFence = Fence::Create(device);
+        imageAcquisitionFence = CreateFence(device);
         commandPool = CreateCommandPool(device, queueFamily);
-        mainCommandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Primary);
-        drawCommandBuffer = CreateCommandBuffer(device, commandPool, Command::Pool::AllocateInfo::Level::Secondary);
-        drawSemaphore = Semaphore::Create(device, { Semaphore::Type::Binary, 0 });
-        CreateRenderPass();
+        mainCommandBuffer = CreateCommandBuffer(commandPool, CommandBufferLevel::Primary);
+        drawCommandBuffer = CreateCommandBuffer(commandPool, CommandBufferLevel::Secondary);
+        drawSemaphore = CreateSemaphore(device, { SemaphoreType::Binary, 0 });
         CreateShaderStages();
     }
     void Loop()
@@ -127,13 +124,16 @@ struct TexturesTestApp : TestApp
             if (window.IsClosing()) break;
 
             swapChainImage = window.AcquireNextImage(std::chrono::nanoseconds(15000000), nullptr, imageAcquisitionFence);
-            render = Fence::WaitFor(device, imageAcquisitionFence, std::chrono::nanoseconds(15000000));
-            Fence::Reset(device, { imageAcquisitionFence });
+            render = Fence::WaitFor(imageAcquisitionFence, std::chrono::nanoseconds(15000000));
+            Fence::Reset({ imageAcquisitionFence });
             if (!render) continue;
 
             textureUniform.Update();
             RecordMainCommandBuffer();
-            SubmitCommandBuffer(queue, mainCommandBuffer, nullptr, drawSemaphore);
+            QueueSubmitInfo submitInfo;
+            submitInfo.commandBuffers   = { mainCommandBuffer };
+            submitInfo.signalSemaphores = { { drawSemaphore } };
+            Queue::Submit(queue, { submitInfo });
             window.Present(queue, drawSemaphore);
             fpsCounter.EndFrame();
 
@@ -160,14 +160,14 @@ struct TexturesTestApp : TestApp
                 "}                                                              \n"
             };
             const auto vertexShader = ShaderCompiler::Shader::Create(compiler, shaderInfo);
-            Shader::Module::Info shaderModuleInfo;
+            CreateShaderModuleInfo shaderModuleInfo;
             shaderModuleInfo.code = ShaderCompiler::Shader::Compile(vertexShader);
-            const auto shaderModule = Shader::Module::Create(device, shaderModuleInfo);
-            Shader::Stage::Info shaderStageInfo;
-            shaderStageInfo.entryPoint = "main";
-            shaderStageInfo.stage = Shader::Stage::StageFlagBits::Vertex;
-            shaderStageInfo.module = shaderModule;
-            shaderStages.push_back(Shader::Stage::Create(device, shaderStageInfo));
+            PipelineShaderStage shaderStage;
+            shaderStage.entryPoint = "main";
+            shaderStage.module = Device::CreateShaderModule(device, shaderModuleInfo);
+            shaderStage.specializationInfo = {};
+            shaderStage.stage = ShaderStageFlagBits::Vertex;
+            shaderStages.push_back(shaderStage);
         }
         {
             ShaderCompiler::Shader::Info shaderInfo;
@@ -184,45 +184,35 @@ struct TexturesTestApp : TestApp
                 "}                                                    \n"
             };
             const auto fragmentShader = ShaderCompiler::Shader::Create(compiler, shaderInfo);
-            Shader::Module::Info shaderModuleInfo;
+            CreateShaderModuleInfo shaderModuleInfo;
             shaderModuleInfo.code = ShaderCompiler::Shader::Compile(fragmentShader);
-            const auto shaderModule = Shader::Module::Create(device, shaderModuleInfo);
-            Shader::Stage::Info shaderStageInfo;
-            shaderStageInfo.entryPoint = "main";
-            shaderStageInfo.stage = Shader::Stage::StageFlagBits::Fragment;
-            shaderStageInfo.module = shaderModule;
-            shaderStages.push_back(Shader::Stage::Create(device, shaderStageInfo));
+            PipelineShaderStage shaderStage;
+            shaderStage.entryPoint = "main";
+            shaderStage.module = Device::CreateShaderModule(device, shaderModuleInfo);
+            shaderStage.specializationInfo = {};
+            shaderStage.stage = ShaderStageFlagBits::Fragment;
+            shaderStages.push_back(shaderStage);
         }
     }
     void CreateFrameBuffer()
     {
         {
-            Image::Info imageInfo;
-            imageInfo.type = Image::Type::Image2D;
+            CreateImageInfo imageInfo;
+            imageInfo.type = ImageType::Image2D;
             imageInfo.extent.width = window.GetExtent().width;
             imageInfo.extent.height = window.GetExtent().height;
             imageInfo.extent.depth = 1;
-            imageInfo.format = Image::Format::Uint8_Normalized_RGBA;
+            imageInfo.format = Format::Uint8_Normalized_RGBA;
             imageInfo.mipLevels = 1;
-            frameBufferImage = Image::Create(device, imageInfo);
+            frameBufferImage = CreateImage(device, imageInfo);
         }
-        Image::View::Handle imageView{};
         {
-            Image::View::Info imageViewInfo;
+            CreateImageViewInfo imageViewInfo;
             imageViewInfo.image = frameBufferImage;
-            imageViewInfo.format = Image::Format::Uint8_Normalized_RGBA;
-            imageViewInfo.type = Image::View::Type::View2D;
+            imageViewInfo.format = Format::Uint8_Normalized_RGBA;
+            imageViewInfo.type = ImageViewType::View2D;
             imageViewInfo.subRange.layerCount = 1;
-            imageView = Image::View::Create(device, imageViewInfo);
-        }
-        {
-            FrameBuffer::Info frameBufferInfo{};
-            frameBufferInfo.attachments.push_back(imageView);
-            frameBufferInfo.extent.depth = 1;
-            frameBufferInfo.extent.width = window.GetExtent().width;
-            frameBufferInfo.extent.height = window.GetExtent().height;
-            frameBufferInfo.renderPass = renderPass;
-            frameBuffer = FrameBuffer::Create(device, frameBufferInfo);
+            frameBufferImageView = CreateImageView(device, imageViewInfo);
         }
     }
     void CreateGraphicsPipeline()
@@ -235,63 +225,41 @@ struct TexturesTestApp : TestApp
         scissor.offset = { 0, 0 };
         scissor.extent = window.GetExtent();
         {
-            Pipeline::Layout::Info layoutInfo;
-            Descriptor::SetLayout::Info descriptorInfo;
+            CreatePipelineLayoutInfo layoutInfo;
+            CreateDescriptorSetLayoutInfo descriptorInfo;
             descriptorInfo.bindings = textureUniform.GetDescriptorSetLayoutBindings();
-            layoutInfo.setLayouts.push_back(Descriptor::SetLayout::Create(device, descriptorInfo));
-            graphicsPipelineLayout = Pipeline::Layout::Create(device, layoutInfo);
+            layoutInfo.setLayouts.push_back(CreateDescriptorSetLayout(device, descriptorInfo));
+            graphicsPipelineLayout = CreatePipelineLayout(device, layoutInfo);
         }
-        Pipeline::ColorBlendState::AttachmentState colorBlend0;
+        PipelineColorBlendState;
+        PipelineColorBlendAttachmentState colorBlend0;
         colorBlend0.enable = true;
-        Pipeline::Graphics::Info graphicsPipelineInfo;
+        CreatePipelineGraphicsInfo graphicsPipelineInfo;
         graphicsPipelineInfo.layout = graphicsPipelineLayout;
         graphicsPipelineInfo.colorBlendState.attachments.resize(1);
         graphicsPipelineInfo.colorBlendState.attachments.front() = colorBlend0;
-        graphicsPipelineInfo.rasterizationState.cullMode = Pipeline::RasterizationState::CullMode::None;
-        graphicsPipelineInfo.inputAssemblyState.topology = Primitive::Topology::TriangleList;
+        graphicsPipelineInfo.rasterizationState.cullMode = CullMode::None;
+        graphicsPipelineInfo.inputAssemblyState.topology = PrimitiveTopology::TriangleList;
         graphicsPipelineInfo.inputAssemblyState.primitiveRestartEnable = false;
         graphicsPipelineInfo.viewPortState.viewPorts = { viewport };
         graphicsPipelineInfo.viewPortState.scissors = { scissor };
         graphicsPipelineInfo.vertexInputState.attributeDescriptions = {}; //empty attributes
         graphicsPipelineInfo.vertexInputState.bindingDescriptions = {}; //empty bindings
         graphicsPipelineInfo.shaderPipelineState.stages = shaderStages;
-        graphicsPipelineInfo.renderPass = renderPass;
-        graphicsPipelineInfo.subPass = 0;
         //Everything else is left by default for now
-        graphicsPipeline = Pipeline::Graphics::Create(device, graphicsPipelineInfo);
-    }
-    void CreateRenderPass()
-    {
-        RenderPass::SubPassDescription subPassDescription{};
-        RenderPass::AttachmentReference attachmentRef{};
-        attachmentRef.location = 0;
-        subPassDescription.colorAttachments = { attachmentRef };
-        RenderPass::Info renderPassInfo{};
-        RenderPass::AttachmentDescription colorAttachment;
-        colorAttachment.loadOp = RenderPass::LoadOperation::Clear; //clear the attachment 0 on begin
-        colorAttachment.storeOp = RenderPass::StoreOperation::Store; //write the result to attachment 0
-        renderPassInfo.colorAttachments = { colorAttachment };
-        renderPassInfo.subPasses = { subPassDescription };
-        renderPass = RenderPass::Create(device, renderPassInfo);
+        graphicsPipeline = CreatePipelineGraphics(device, graphicsPipelineInfo);
     }
     void RecordMainCommandBuffer()
     {
-        Command::Buffer::BeginInfo bufferBeginInfo;
-        bufferBeginInfo.flags = Command::Buffer::UsageFlagBits::None;
+        CommandBufferBeginInfo bufferBeginInfo;
+        bufferBeginInfo.flags = CommandBufferUsageFlagBits::None;
         Command::Buffer::Reset(mainCommandBuffer);
         Command::Buffer::Begin(mainCommandBuffer, bufferBeginInfo);
-        //clear background
-        {
-            ColorValue clearColor{ 0.f, 0.f, 0.f, 1.f };
-            Image::Subresource::Range range{};
-            range.levelCount = 1;
-            Command::ClearColorImage(mainCommandBuffer, swapChainImage, Image::Layout::Unknown, clearColor, { range });
-        }
         //draw quad
         Command::ExecuteCommandBuffer(mainCommandBuffer, drawCommandBuffer);
         //copy result to swapchain
         {
-            Image::Copy imageCopy;
+            ImageCopy imageCopy;
             imageCopy.extent.width = window.GetExtent().width;
             imageCopy.extent.height = window.GetExtent().height;
             imageCopy.extent.depth = 1;
@@ -306,24 +274,31 @@ struct TexturesTestApp : TestApp
     void RecordDrawCommandBuffer()
     {
         textureUniform.Update();
-        Command::Buffer::BeginInfo bufferBeginInfo{};
-        bufferBeginInfo.flags = Command::Buffer::UsageFlagBits::None;
-        bufferBeginInfo.inheritanceInfo.emplace();
+        CommandBufferBeginInfo bufferBeginInfo{};
+        bufferBeginInfo.flags = CommandBufferUsageFlagBits::None;
         Command::Buffer::Reset(drawCommandBuffer);
-        Command::RenderPassBeginInfo renderPassBeginInfo{};
-        renderPassBeginInfo.renderPass = renderPass;
-        renderPassBeginInfo.framebuffer = frameBuffer;
-        renderPassBeginInfo.renderArea.offset = { 0, 0 };
-        renderPassBeginInfo.renderArea.extent = window.GetExtent();
-        renderPassBeginInfo.colorClearValues.push_back(ColorValue(0.9529f, 0.6235f, 0.0941f, 1.f));
+
+        RenderingAttachmentInfo attachmentInfo;
+        attachmentInfo.clearValue = ColorValue(0.9529f, 0.6235f, 0.0941f, 1.f);
+        attachmentInfo.imageView = frameBufferImageView;
+        attachmentInfo.imageLayout = ImageLayout::General;
+        attachmentInfo.loadOp = LoadOp::Clear;
+        attachmentInfo.storeOp = StoreOp::Store;
+
+        RenderingInfo renderingInfo;
+        renderingInfo.area.offset = { 0, 0 };
+        renderingInfo.area.extent = window.GetExtent();
+        renderingInfo.colorAttachments.push_back(attachmentInfo);
+        renderingInfo.layerCount = 1;
+
         Command::Buffer::Begin(drawCommandBuffer, bufferBeginInfo);
-        Command::BeginRenderPass(drawCommandBuffer, renderPassBeginInfo, Command::SubPassContents::Inline);
+        Command::BeginRendering(drawCommandBuffer, renderingInfo);
         {
-            Command::BindPipeline(drawCommandBuffer, Pipeline::BindingPoint::Graphics, graphicsPipeline);
-            Command::PushDescriptorSet(drawCommandBuffer, Pipeline::BindingPoint::Graphics, graphicsPipelineLayout, textureUniform.GetWriteOperations());
+            Command::BindPipeline(drawCommandBuffer, graphicsPipeline);
+            Command::PushDescriptorSet(drawCommandBuffer, PipelineBindingPoint::Graphics, graphicsPipelineLayout, textureUniform.GetWriteOperations());
             Command::Draw(drawCommandBuffer, 3, 1, 0, 0);
         }
-        Command::EndRenderPass(drawCommandBuffer);
+        Command::EndRendering(drawCommandBuffer);
         Command::Buffer::End(drawCommandBuffer);
     }
     bool                    render{ false };
@@ -336,15 +311,13 @@ struct TexturesTestApp : TestApp
     Semaphore::Handle drawSemaphore;
     Fence::Handle    imageAcquisitionFence;
 
-    FrameBuffer::Handle      frameBuffer;
     Image::Handle            frameBufferImage;
-
-    RenderPass::Handle       renderPass;
+    Image::View::Handle      frameBufferImageView;
     
     Pipeline::Handle         graphicsPipeline;
     Pipeline::Layout::Handle graphicsPipelineLayout;
 
-    std::vector<Shader::Stage::Handle>   shaderStages;
+    std::vector<PipelineShaderStage>   shaderStages;
 
     UniformTexture              textureUniform{ device, 1, CreateTexture(physicalDevice, device) };
 
