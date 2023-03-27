@@ -26,10 +26,6 @@ struct Impl
     uint32_t handle;
 };
 /**
-* @brief creates an empty image with no storage
-*/
-Handle CreateEmpty(const Device::Handle& a_Device, const CreateImageInfo& a_Info);
-/**
 * @brief checks if the specified copy operation is valid for this image
 */
 void CheckValidCopy(const ImageBufferCopy& a_Copy, const Image::Handle& a_Image);

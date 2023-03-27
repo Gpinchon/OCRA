@@ -37,7 +37,6 @@ Impl::Impl(const Device::Handle& a_Device, const CreateImageInfo& a_Info, const 
 {
     a_Device->PushCommand([this] {
         glCreateTextures(target, 1, &handle);
-        //glGenTextures(1, &handle);
     }, false);
 }
 Impl::~Impl() {
@@ -109,8 +108,6 @@ struct Texture1D : Texture<Compressed>
         }
         else throw std::runtime_error("Cannot create multisampled 1D textures");
     }
-    Texture1D(const Device::Handle& a_Device, const CreateImageInfo& a_Info, bool a_Empty)
-        : Texture<Compressed>(a_Device, a_Info, GL_TEXTURE_1D) {}
     virtual void Upload(const ImageBufferCopy& a_Copy, const size_t& a_MemoryOffset) override;
 };
 
@@ -163,8 +160,6 @@ struct Texture2D : Texture<Compressed>
                 info.fixedSampleLocations);
         }, false);
     }
-    Texture2D(const Device::Handle& a_Device, const CreateImageInfo& a_Info, bool a_Empty)
-    : Texture<Compressed>(a_Device, a_Info, a_Info.samples == SampleCount::Count1 ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE) {}
     virtual void Upload(const ImageBufferCopy& a_Copy, const size_t& a_MemoryOffset) override;
 };
 
@@ -224,8 +219,6 @@ struct Texture3D : Texture<Compressed>
             Unbind();
         }, false);
     }
-    Texture3D(const Device::Handle& a_Device, const CreateImageInfo& a_Info, bool a_Empty)
-    : Texture<Compressed>(a_Device, a_Info, a_Info.samples == SampleCount::Count1 ? GL_TEXTURE_2D_ARRAY : GL_TEXTURE_2D_MULTISAMPLE_ARRAY) {}
     virtual void Upload(const ImageBufferCopy& a_Copy, const size_t& a_MemoryOffset) override;
 };
 
@@ -261,29 +254,6 @@ void Texture3D<false>::Upload(const ImageBufferCopy& a_Copy, const size_t& a_Mem
         dataFormat,
         dataType,
         BUFFER_OFFSET(a_Copy.bufferOffset + a_MemoryOffset));
-}
-
-Handle CreateEmpty(const Device::Handle& a_Device, const CreateImageInfo& a_Info)
-{
-    Impl* impl;
-    const auto isCompressed = IsCompressedFormat(a_Info.format);
-    switch (a_Info.type)
-    {
-    case ImageType::Image1D:
-        if (isCompressed) impl = new Texture1D<true>(a_Device, a_Info);
-        else impl = new Texture1D<false>(a_Device, a_Info, true);
-        break;
-    case ImageType::Image2D:
-        if (isCompressed) impl = new Texture2D<true>(a_Device, a_Info);
-        else impl = new Texture2D<false>(a_Device, a_Info, true);
-        break;
-    case ImageType::Image3D:
-        if (isCompressed) impl = new Texture3D<true>(a_Device, a_Info);
-        else impl = new Texture3D<false>(a_Device, a_Info, true);
-        break;
-    default: throw std::runtime_error("Unknown Image Type");
-    }
-    return Handle(impl);
 }
 
 void CopyBufferToImage(
