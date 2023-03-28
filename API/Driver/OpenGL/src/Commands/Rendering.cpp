@@ -93,18 +93,8 @@ struct BeginRenderingCommand : CommandI {
     }
     virtual void operator()(Buffer::ExecutionState& a_ExecutionState) override {
         auto& renderPass = a_ExecutionState.renderPass;
-        
         renderPass.flags = flags;
-        if ((flags & RenderingFlagBits::Resuming) != 0) {
-            FB = renderPass.frameBuffer;
-            FBResolve = renderPass.frameBufferResolve;
-            area = renderPass.area;
-            drawAttachments = { renderPass.drawAttachments.begin(), renderPass.drawAttachments.end() };
-            resolveAttachments = { renderPass.resolveAttachments.begin(), renderPass.resolveAttachments.end() };
-            resolveMode = renderPass.resolveMode;
-            return;
-        }
-        else {
+        if ((flags & RenderingFlagBits::Resuming) == 0) {
             renderPass.frameBuffer = FB;
             renderPass.frameBufferResolve = FBResolve;
             renderPass.area = area;
@@ -118,11 +108,11 @@ struct BeginRenderingCommand : CommandI {
             ClearAttachment(depthAttachment, area);
             ClearAttachment(stencilAttachment, area);
         }
-        OCRA_ASSERT(FB != 0 && "Invalid Render pass : No FrameBuffer bound");
+        OCRA_ASSERT(renderPass.frameBuffer != 0 && "Invalid Render pass : No FrameBuffer bound");
         glScissor(
-            area.offset.x, area.offset.y,
-            area.extent.width, area.extent.height);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, FB);
+            renderPass.area.offset.x, renderPass.area.offset.y,
+            renderPass.area.extent.width, renderPass.area.extent.height);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, renderPass.frameBuffer);
         
     }
     const Device::WeakHandle device;
