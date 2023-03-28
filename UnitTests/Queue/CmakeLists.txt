@@ -9,6 +9,11 @@ add_executable(OCRA-UnitTests-Queue
 target_include_directories(OCRA-UnitTests-Queue PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
+if(MSVC_IDE)
+  set_property(TARGET OCRA-UnitTests-Queue PROPERTY
+    VS_DEBUGGER_ENVIRONMENT "${OCRA_DEBUGGER_ENV}")
+endif()
+
 target_link_libraries(OCRA-UnitTests-Queue OCRA-UnitTests-Lib-Common OCRA::API::Interface OCRA::API::Implementation)
 
 if(MSVC_IDE)
