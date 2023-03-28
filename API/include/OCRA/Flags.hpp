@@ -177,6 +177,13 @@ namespace QueryResultFlagBits {
     static QueryResultFlags WithAvailability = 0b0010; //the availability status will accompany the results
     static QueryResultFlags Partial          = 0b0001; //specifies that partial result is acceptable
 }
+OCRA_FLAG(RenderingFlags, 3);
+namespace RenderingFlagBits {
+    static RenderingFlags None                   = 0b000;
+    static RenderingFlags SecondaryCommandBuffer = 0b000;
+    static RenderingFlags Suspending             = 0b000;
+    static RenderingFlags Resuming               = 0b000;
+}
 OCRA_FLAG(ShaderStageFlags, 6);
 namespace ShaderStageFlagBits {
     constexpr ShaderStageFlags None        = 0b000000;

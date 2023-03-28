@@ -421,6 +421,7 @@ struct RenderingAttachmentInfo {
 };
 
 struct RenderingInfo {
+    RenderingFlags flags;
     Rect2D area;
     uint32_t layerCount{ 0 };
     ResolveMode resolveMode{ ResolveMode::None };

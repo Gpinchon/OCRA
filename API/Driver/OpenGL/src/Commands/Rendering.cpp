@@ -32,6 +32,7 @@ struct BeginRenderingCommand : CommandI {
         const Device::Handle& a_Device,
         const RenderingInfo& a_Info)
         : device(a_Device)
+        , flags(a_Info.flags)
         , area(a_Info.area)
         , layerCount(a_Info.layerCount)
         , colorAttachments(a_Info.colorAttachments.begin(), a_Info.colorAttachments.end(), a_MemoryResource)
@@ -40,6 +41,7 @@ struct BeginRenderingCommand : CommandI {
         , resolveMode(a_Info.resolveMode)
         , resolveAttachments(a_MemoryResource)
     {
+        if ((flags & RenderingFlagBits::Resuming) != 0) return;
         a_Device->PushCommand([this]() {
             glCreateFramebuffers(1, &FB);
             glNamedFramebufferParameteri(FB, GL_FRAMEBUFFER_DEFAULT_WIDTH, area.extent.width);
@@ -82,33 +84,55 @@ struct BeginRenderingCommand : CommandI {
             OCRA_ASSERT(glCheckNamedFramebufferStatusEXT(FB, GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
         }, false);
     }
+    ~BeginRenderingCommand() {
+        device.lock()->PushCommand([FB = FB, FBR = FBResolve] {
+            //If this crashes, check your Begin/End sequences
+            glDeleteFramebuffers(1, &FB);
+            glDeleteFramebuffers(1, &FBR);
+        }, false);
+    }
     virtual void operator()(Buffer::ExecutionState& a_ExecutionState) override {
-        for (auto i = 0u; i < colorAttachments.size(); ++i) {
-            const auto& attachment = colorAttachments.at(i);
-            ClearAttachment(attachment, area);
+        auto& renderPass = a_ExecutionState.renderPass;
+        
+        renderPass.flags = flags;
+        if ((flags & RenderingFlagBits::Resuming) != 0) {
+            FB = renderPass.frameBuffer;
+            FBResolve = renderPass.frameBufferResolve;
+            area = renderPass.area;
+            drawAttachments = { renderPass.drawAttachments.begin(), renderPass.drawAttachments.end() };
+            resolveAttachments = { renderPass.resolveAttachments.begin(), renderPass.resolveAttachments.end() };
+            resolveMode = renderPass.resolveMode;
+            return;
         }
-        ClearAttachment(depthAttachment, area);
-        ClearAttachment(stencilAttachment, area);
+        else {
+            renderPass.frameBuffer = FB;
+            renderPass.frameBufferResolve = FBResolve;
+            renderPass.area = area;
+            renderPass.drawAttachments = { drawAttachments.begin(), drawAttachments.end() };
+            renderPass.resolveAttachments = { resolveAttachments.begin(), resolveAttachments.end() };
+            renderPass.resolveMode = resolveMode;
+            for (auto i = 0u; i < colorAttachments.size(); ++i) {
+                const auto& attachment = colorAttachments.at(i);
+                ClearAttachment(attachment, area);
+            }
+            ClearAttachment(depthAttachment, area);
+            ClearAttachment(stencilAttachment, area);
+        }
+        OCRA_ASSERT(FB != 0 && "Invalid Render pass : No FrameBuffer bound");
         glScissor(
             area.offset.x, area.offset.y,
             area.extent.width, area.extent.height);
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, FB);
-        if (resolveMode != ResolveMode::None) {
-            a_ExecutionState.renderPass.frameBuffer = FB;
-            a_ExecutionState.renderPass.frameBufferResolve = FBResolve;
-            a_ExecutionState.renderPass.area = area;
-            a_ExecutionState.renderPass.drawAttachments = { drawAttachments.begin(), drawAttachments.end() };
-            a_ExecutionState.renderPass.resolveAttachments = { resolveAttachments.begin(), resolveAttachments.end() };
-            a_ExecutionState.renderPass.resolveMode = resolveMode;
-        }
+        
     }
     const Device::WeakHandle device;
-    const Rect2D   area;
-    const uint32_t layerCount;
-    const std::pmr::vector<RenderingAttachmentInfo> colorAttachments;
-    const RenderingAttachmentInfo depthAttachment;
-    const RenderingAttachmentInfo stencilAttachment;
-    const ResolveMode resolveMode;
+    RenderingFlags     flags;
+    Rect2D             area;
+    uint32_t           layerCount;
+    std::pmr::vector<RenderingAttachmentInfo> colorAttachments;
+    RenderingAttachmentInfo depthAttachment;
+    RenderingAttachmentInfo stencilAttachment;
+    ResolveMode resolveMode;
     std::pmr::vector<GLenum> drawAttachments;
     std::pmr::vector<GLenum> resolveAttachments;
     uint32_t FB = 0, FBResolve = 0;
@@ -116,8 +140,11 @@ struct BeginRenderingCommand : CommandI {
 
 struct EndRenderingCommand : CommandI {
     virtual void operator()(Buffer::ExecutionState& a_ExecutionState) override {
-        const auto& renderPass = a_ExecutionState.renderPass;
+        auto& renderPass = a_ExecutionState.renderPass;
+        OCRA_ASSERT(renderPass.frameBuffer != 0 && "Invalid Render pass : No FrameBuffer bound");
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+        //Resolve & cleanup only if the pass is not being paused
+        if ((renderPass.flags & RenderingFlagBits::Suspending) != 0) return;
         if (renderPass.resolveMode != ResolveMode::None) {
             const auto& area = renderPass.area;
             for (auto& attachment : renderPass.resolveAttachments) {
@@ -140,6 +167,12 @@ struct EndRenderingCommand : CommandI {
             glNamedFramebufferReadBuffer(renderPass.frameBuffer, GL_NONE);
             glNamedFramebufferDrawBuffers(renderPass.frameBuffer, renderPass.drawAttachments.size(), renderPass.drawAttachments.data());
         }
+        renderPass.frameBuffer = 0;
+        renderPass.frameBufferResolve = 0;
+        renderPass.area = {};
+        renderPass.drawAttachments.clear();
+        renderPass.resolveAttachments.clear();
+        renderPass.resolveMode = ResolveMode::None;
     }
 };
 

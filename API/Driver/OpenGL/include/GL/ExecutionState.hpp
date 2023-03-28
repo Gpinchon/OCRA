@@ -50,6 +50,7 @@ struct IndexBufferBinding : VertexBufferBinding {
 struct RenderPass
 {
     void Reset() {
+        flags = RenderingFlagBits::None;
         area = {};
         resolveMode = ResolveMode::None;
         frameBuffer = 0;
@@ -61,6 +62,7 @@ struct RenderPass
         vertexBufferBindings.clear();
         indexBufferBinding = {};
     }
+    RenderingFlags                        flags;
     Rect2D                                area;
     ResolveMode                           resolveMode = ResolveMode::None;
     uint32_t                              frameBuffer = 0;
