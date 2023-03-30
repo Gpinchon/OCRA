@@ -409,12 +409,16 @@ struct ImageLayoutTransitionInfo {
     uint32_t    dstQueueFamilyIndex{ IgnoreQueueFamily };
 };
 
+/**
+* imageViewResolve : if RenderingInfo::resolveMode is not None & this is not nullptr, this attachment will be resolved
+* loadOp : if this is Clear, this attachment will be cleared using clearValue
+* storeOp : if this is Store, this attachment will be used for rendering
+*/
 struct RenderingAttachmentInfo {
-    Image::View::Handle imageView;
+    Image::View::Handle imageView; 
     Image::View::Handle imageViewResolve;
     ImageLayout imageLayout{ ImageLayout::Undefined };
     ImageLayout imageLayoutResolve{ ImageLayout::Undefined };
-    bool        resolve = false; //resolve multisampling ?
     LoadOp      loadOp{ LoadOp::DontCare };
     StoreOp     storeOp{ StoreOp::DontCare };
     ClearValue  clearValue;

@@ -61,7 +61,7 @@ struct BeginRenderingCommand : CommandI {
                     BindAttachment(attachment.imageView, FB, GL_COLOR_ATTACHMENT0 + i);
                 if (resolveMode != ResolveMode::None) {
                     drawAttachments.push_back(GL_COLOR_ATTACHMENT0 + i);
-                    if (attachment.resolve) {
+                    if (attachment.imageViewResolve) {
                         BindAttachment(attachment.imageViewResolve, FBResolve, GL_COLOR_ATTACHMENT0 + i);
                         resolveAttachments.push_back(GL_COLOR_ATTACHMENT0 + i);
                     }
@@ -69,19 +69,20 @@ struct BeginRenderingCommand : CommandI {
             }
             if (depthAttachment.storeOp == StoreOp::Store) {
                 BindAttachment(depthAttachment.imageView, FB, GL_DEPTH_ATTACHMENT);
-                if (resolveMode != ResolveMode::None && depthAttachment.resolve) {
+                if (resolveMode != ResolveMode::None && depthAttachment.imageViewResolve) {
                     BindAttachment(depthAttachment.imageViewResolve, FBResolve, GL_DEPTH_ATTACHMENT);
                     resolveAttachments.push_back(GL_DEPTH_BUFFER_BIT);
                 }
             }
             if (stencilAttachment.storeOp == StoreOp::Store) {
                 BindAttachment(stencilAttachment.imageView, FB, GL_STENCIL_ATTACHMENT);
-                if (resolveMode != ResolveMode::None && stencilAttachment.resolve) {
+                if (resolveMode != ResolveMode::None && stencilAttachment.imageViewResolve) {
                     BindAttachment(stencilAttachment.imageViewResolve, FBResolve, GL_STENCIL_ATTACHMENT);
                     resolveAttachments.push_back(GL_STENCIL_BUFFER_BIT);
                 }
             }
             OCRA_ASSERT(glCheckNamedFramebufferStatusEXT(FB, GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+            OCRA_ASSERT(glCheckNamedFramebufferStatusEXT(FBResolve, GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
         }, false);
     }
     ~BeginRenderingCommand() {
@@ -136,6 +137,7 @@ struct EndRenderingCommand : CommandI {
         //Resolve & cleanup only if the pass is not being paused
         if ((renderPass.flags & RenderingFlagBits::Suspending) != 0) return;
         if (renderPass.resolveMode != ResolveMode::None) {
+            OCRA_ASSERT(renderPass.frameBufferResolve != 0 && "Invalid Render pass : No resolve FrameBuffer bound");
             const auto& area = renderPass.area;
             for (auto& attachment : renderPass.resolveAttachments) {
                 GLenum filter = GL_NONE;
@@ -143,8 +145,10 @@ struct EndRenderingCommand : CommandI {
                 if (attachment == GL_DEPTH_ATTACHMENT) filter = GL_DEPTH_BUFFER_BIT;
                 else if (attachment == GL_STENCIL_ATTACHMENT) filter = GL_STENCIL_BUFFER_BIT;
                 else filter = GL_COLOR_BUFFER_BIT;
-                glNamedFramebufferReadBuffer(renderPass.frameBuffer, attachment);
-                glNamedFramebufferDrawBuffer(renderPass.frameBufferResolve, attachment);
+                if (attachment != GL_DEPTH_ATTACHMENT && attachment != GL_STENCIL_ATTACHMENT) {
+                    glNamedFramebufferReadBuffer(renderPass.frameBuffer, attachment);
+                    glNamedFramebufferDrawBuffer(renderPass.frameBufferResolve, attachment);
+                }
                 glBlitNamedFramebuffer(
                     renderPass.frameBuffer,
                     renderPass.frameBufferResolve,

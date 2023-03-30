@@ -180,9 +180,9 @@ namespace QueryResultFlagBits {
 OCRA_FLAG(RenderingFlags, 3);
 namespace RenderingFlagBits {
     static RenderingFlags None                   = 0b000;
-    static RenderingFlags SecondaryCommandBuffer = 0b000;
-    static RenderingFlags Suspending             = 0b000;
-    static RenderingFlags Resuming               = 0b000;
+    static RenderingFlags SecondaryCommandBuffer = 0b000; //the content of this renderpass is in a secondary command buffer
+    static RenderingFlags Suspending             = 0b000; //this render pass will be suspended on EndRendering
+    static RenderingFlags Resuming               = 0b000; //we are resuming a suspended render pass
 }
 OCRA_FLAG(ShaderStageFlags, 6);
 namespace ShaderStageFlagBits {
