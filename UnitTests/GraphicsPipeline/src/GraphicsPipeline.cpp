@@ -9,6 +9,8 @@
 using namespace OCRA;
 constexpr auto VSync = false;
 constexpr auto SwapChainImageNbr = 3;
+constexpr auto Width = 256;
+constexpr auto Height = 256;
 
 Vec3 HSVtoRGB(float fH, float fS, float fV) {
     float fC = fV * fS; // Chroma
@@ -63,7 +65,7 @@ struct GraphicsPipelineTestApp : TestApp
 {
     GraphicsPipelineTestApp()
         : TestApp("Test_GraphicsPipeline")
-        , window(Window(instance, physicalDevice, device, name, 1280, 720))
+        , window(Window(instance, physicalDevice, device, name, Width, Height))
     {
         window.OnResize = [this](const Window&, const uint32_t a_Width, const uint32_t a_Height) {
             render = a_Width > 0 && a_Height > 0;
