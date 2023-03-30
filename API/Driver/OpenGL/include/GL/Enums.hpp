@@ -8,24 +8,24 @@
 
 namespace OCRA
 {
-static inline auto GetGLImageViewType(const ImageViewType& a_Type)
+static inline auto GetGLImageViewType(const ImageViewType& a_Type, const bool& a_Multisample)
 {
     switch (a_Type)
     {
     case ImageViewType::View1D:
-        return GL_TEXTURE_1D;
+        return a_Multisample ? GL_NONE : GL_TEXTURE_1D;
     case ImageViewType::View2D:
-        return GL_TEXTURE_2D;
+        return a_Multisample ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
     case ImageViewType::View3D:
-        return GL_TEXTURE_3D;
+        return a_Multisample ? GL_NONE : GL_TEXTURE_3D;
     case ImageViewType::ViewCube:
-        return GL_TEXTURE_CUBE_MAP;
+        return a_Multisample ? GL_NONE : GL_TEXTURE_CUBE_MAP;
     case ImageViewType::View1DArray:
-        return GL_TEXTURE_1D_ARRAY;
+        return a_Multisample ? GL_NONE : GL_TEXTURE_1D_ARRAY;
     case ImageViewType::View2DArray:
-        return GL_TEXTURE_2D_ARRAY;
+        return a_Multisample ? GL_TEXTURE_2D_MULTISAMPLE_ARRAY : GL_TEXTURE_2D_ARRAY;
     case ImageViewType::ViewCubeArray:
-        return GL_TEXTURE_CUBE_MAP_ARRAY;
+        return a_Multisample ? GL_NONE : GL_TEXTURE_CUBE_MAP_ARRAY;
     default:
         throw std::runtime_error("Unknown Image View Type");
     }

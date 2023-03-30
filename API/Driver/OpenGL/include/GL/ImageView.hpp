@@ -19,6 +19,6 @@ struct Impl {
     const CreateImageViewInfo info;
     const uint32_t target;
     const uint32_t format;
-    uint32_t handle;
+    uint32_t handle = 0;
 };
 }

@@ -31,14 +31,14 @@ namespace OCRA::Image::View {
 Impl::Impl(const Device::Handle& a_Device, const CreateImageViewInfo& a_Info)
     : device(a_Device)
     , info(a_Info)
-    , target(GetGLImageViewType(info.type))
+    , target(GetGLImageViewType(info.type, int(a_Info.image->info.samples) > 1))
     , format(GetGLSizedFormat(a_Info.format))
 {
     a_Device->PushCommand([this] {
         glGenTextures(1, &handle);
         glTextureView(
             handle,
-            GetGLImageViewType(info.type),
+            target,
             info.image->handle,
             GetGLSizedFormat(info.format),
             info.subRange.baseMipLevel,
