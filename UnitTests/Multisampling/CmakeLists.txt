@@ -1,0 +1,29 @@
+cmake_minimum_required(VERSION 3.19)
+cmake_policy(SET CMP0074 NEW)
+
+set(OCRA_TEST_GRAPHICS_PIPELINE_SOURCE_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Multisampling.cpp)
+add_executable(OCRA-UnitTests-Multisampling
+  ${OCRA_TEST_GRAPHICS_PIPELINE_SOURCE_FILES})
+target_include_directories(OCRA-UnitTests-Multisampling PRIVATE
+  "${CMAKE_CURRENT_SOURCE_DIR}/include")
+
+if(MSVC_IDE)
+  set_property(TARGET OCRA-UnitTests-Multisampling PROPERTY
+    VS_DEBUGGER_ENVIRONMENT "${OCRA_DEBUGGER_ENV}")
+endif()
+
+target_link_libraries(OCRA-UnitTests-Multisampling
+  OCRA-UnitTests-Lib-Common
+  OCRA-UnitTests-Lib-Window
+  OCRA-UnitTests-Lib-Mesh
+  OCRA::API::Interface
+  OCRA::API::Implementation
+  OCRA::SwapChain::Interface
+  OCRA::SwapChain::Implementation)
+
+if(MSVC_IDE)
+  # Run macro
+  GroupSources(src)
+  GroupSources(include)
+endif()
