@@ -51,7 +51,7 @@ PBRMaterial::PBRMaterial(
     bufferInfo.usage = BufferUsageFlagBits::TransferSrc;
     auto textureTransferBuffer = CreateBuffer(a_Device, bufferInfo);
     auto textureTransferMemory = AllocateMemory(a_Device,
-        bufferInfo.size, MemoryPropertyFlagBits::HostVisible);
+        Buffer::GetSizeRequirement(textureTransferBuffer), MemoryPropertyFlagBits::HostVisible);
     Buffer::BindMemory(textureTransferBuffer, textureTransferMemory, 0);
     MemoryMappedRange range;
     range.memory = textureTransferMemory;

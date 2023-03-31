@@ -30,19 +30,6 @@ Buffer::Handle AllocateBuffer(
     const AllocationCallback* a_Allocator)
 {
     auto& device = *a_Device;
-    Memory::Handle memory;
-    vk::MemoryAllocateInfo  vkMemoryInfo;
-    vk::MemoryPropertyFlags vkMemoryFlags = ConvertToVk(a_Info.memoryFlags);
-    auto p = device.physicalDevice.getMemoryProperties();
-    vkMemoryInfo.allocationSize = a_Info.size;
-    for (auto i = 0u; i < p.memoryTypeCount; ++i) {
-        const auto& mt = p.memoryTypes[i];
-        if ((mt.propertyFlags & vkMemoryFlags)) {
-            vkMemoryInfo.memoryTypeIndex = i;
-            memory = std::make_shared<Memory::Impl>(device, vkMemoryInfo);
-            break;
-        }
-    }
     CreateBufferInfo bufferInfo;
     bufferInfo.usage = a_Info.bufferUsage;
     bufferInfo.flags = a_Info.bufferFlags;
@@ -50,6 +37,21 @@ Buffer::Handle AllocateBuffer(
     bufferInfo.sharingMode = a_Info.sharingMode;
     bufferInfo.queueFamilyIndices = a_Info.queueFamilyIndices;
     auto buffer = CreateBuffer(a_Device, bufferInfo, a_Allocator);
+    Memory::Handle memory;
+    {
+        vk::MemoryAllocateInfo  vkMemoryInfo;
+        vk::MemoryPropertyFlags vkMemoryFlags = ConvertToVk(a_Info.memoryFlags);
+        auto p = device.physicalDevice.getMemoryProperties();
+        vkMemoryInfo.allocationSize = Buffer::GetSizeRequirement(buffer);
+        for (auto i = 0u; i < p.memoryTypeCount; ++i) {
+            const auto& mt = p.memoryTypes[i];
+            if ((mt.propertyFlags & vkMemoryFlags)) {
+                vkMemoryInfo.memoryTypeIndex = i;
+                memory = std::make_shared<Memory::Impl>(device, vkMemoryInfo);
+                break;
+            }
+        }
+    }
     BindMemory(buffer, memory, 0);
     return buffer;
 }
@@ -66,6 +68,11 @@ void BindMemory(
     auto& memory = *a_Memory;
     buffer.memory = a_Memory;
     buffer.bindMemory(*memory, a_MemoryOffset);
+}
+size_t GetSizeRequirement(
+    const Handle& a_Buffer)
+{
+    return a_Buffer->getMemoryRequirements().size;
 }
 Memory::Handle GetMemory(const Handle& a_Buffer)
 {

@@ -14,6 +14,12 @@ void BindMemory(
     const size_t&           a_MemoryOffset);
 
 /**
+* @return the required size for Memory
+*/
+size_t GetSizeRequirement(
+    const Handle&           a_Buffer);
+
+/**
 * @return the memory bound to the specified buffer
 */
 Memory::Handle GetMemory(const Handle& a_Buffer);

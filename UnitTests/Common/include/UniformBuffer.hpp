@@ -58,12 +58,14 @@ inline UniformBuffer::UniformBuffer(const Device::Handle& a_Device, const uint32
     , data(sizeof(T))
 {
     Set(a_DefaultValue);
-    memory = AllocateMemory(a_Device, GetDataSize(), MemoryPropertyFlagBits::HostVisible);
-    CreateBufferInfo bufferInfo{};
+    AllocateBufferInfo bufferInfo;
+    bufferInfo.bufferFlags = CreateBufferFlagBits::None;
+    bufferInfo.bufferUsage = BufferUsageFlagBits::UniformBuffer;
+    bufferInfo.memoryFlags = MemoryPropertyFlagBits::HostVisible;
+    bufferInfo.queueFamilyIndices = { 0 };
+    bufferInfo.sharingMode = SharingMode::Exclusive;
     bufferInfo.size = GetDataSize();
-    bufferInfo.usage = BufferUsageFlagBits::UniformBuffer;
-    bufferInfo.queueFamilyIndices.push_back(0);
-    buffer = CreateBuffer(a_Device, bufferInfo);
-    Buffer::BindMemory(buffer, memory, 0);
+    buffer = Device::AllocateBuffer(a_Device, bufferInfo);
+    memory = Buffer::GetMemory(buffer);
 }
 }
