@@ -75,6 +75,7 @@ PBRMaterial::PBRMaterial(
     bufferCopy.imageExtent.width  = texture.GetWidth();
     bufferCopy.imageExtent.height = texture.GetHeight();
     bufferCopy.imageExtent.depth  = 1;
+    bufferCopy.imageSubresource.aspects = ImageAspectFlagBits::Color;
     bufferCopy.imageSubresource.mipLevel = 0;
     Image::CopyBufferToImage(textureTransferBuffer, texture.GetImage(), { bufferCopy });
 }

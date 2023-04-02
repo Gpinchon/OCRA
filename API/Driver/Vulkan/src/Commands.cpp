@@ -303,9 +303,8 @@ void TransitionImageLayout(
 }
 
 void PushDescriptorSet(
-    const Command::Buffer::Handle& a_CommandBuffer,
-    const PipelineBindingPoint& a_PipelineBindPoint,
-    const Pipeline::Layout::Handle& a_Layout,
+    const Command::Buffer::Handle&         a_CommandBuffer,
+    const Pipeline::Handle&                a_Pipeline,
     const std::vector<DescriptorSetWrite>& a_Writes)
 {
     std::vector<vk::WriteDescriptorSet>  vkWriteInfos(a_Writes.size());
@@ -344,8 +343,8 @@ void PushDescriptorSet(
         vkWriteInfo.dstSet          = **writeInfo.dstSet;
     }
     a_CommandBuffer->pushDescriptorSetKHR(
-        ConvertToVk(a_PipelineBindPoint),
-        **a_Layout,
+        a_Pipeline->bindPoint,
+        a_Pipeline->layout,
         0, vkWriteInfos);
 }
 }

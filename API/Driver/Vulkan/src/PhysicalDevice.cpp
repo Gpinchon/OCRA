@@ -309,26 +309,32 @@ Device::Handle CreateDevice(
         VK_EXT_VERTEX_INPUT_DYNAMIC_STATE_EXTENSION_NAME,
         VK_EXT_CUSTOM_BORDER_COLOR_EXTENSION_NAME
     };
+    std::vector<vk::DeviceQueueCreateInfo> queues;
+    const std::vector<const char*> layers{};
     auto transferQueue = a_PhysicalDevice->findQueueFamily(vk::QueueFlagBits::eTransfer);
     bool foundTransferQueue = false;
-    std::vector<vk::DeviceQueueCreateInfo> vkDeviceQueue;
-    vkDeviceQueue.reserve(a_Info.queueInfos.size());
+    
+    queues.reserve(a_Info.queueInfos.size());
     for (const auto& queueInfo : a_Info.queueInfos) {
         vk::DeviceQueueCreateInfo vkQueueInfo;
         vkQueueInfo.pQueuePriorities = queueInfo.queuePriorities.data();
         vkQueueInfo.queueCount = queueInfo.queueCount;
         vkQueueInfo.queueFamilyIndex = queueInfo.queueFamilyIndex;
-        vkDeviceQueue.push_back(vkQueueInfo);
+        queues.push_back(vkQueueInfo);
         foundTransferQueue |= queueInfo.queueFamilyIndex == transferQueue;
     }
+    vk::PhysicalDeviceFeatures enabledFeatures;
+    enabledFeatures.depthClamp = true;
     vk::PhysicalDeviceCustomBorderColorFeaturesEXT customBorder(true, true);
-    vk::DeviceCreateInfo info;
-    info.enabledExtensionCount = extensions.size();
-    info.ppEnabledExtensionNames = extensions.data();
-    //info.pEnabledFeatures = a_Info.enabledFeatures;
-    info.queueCreateInfoCount = vkDeviceQueue.size();
-    info.pQueueCreateInfos = vkDeviceQueue.data();
-    info.pNext = &customBorder;
+    vk::PhysicalDeviceDynamicRenderingFeaturesKHR dynamicRenderingFeature(true, &customBorder);
+    vk::PhysicalDeviceVertexInputDynamicStateFeaturesEXT dynamicVertexInputFeature(true, &dynamicRenderingFeature);
+    vk::DeviceCreateInfo info(
+        vk::DeviceCreateFlags{},
+        queues,
+        layers,
+        extensions,
+        &enabledFeatures,
+        &dynamicVertexInputFeature);
     return std::make_shared<Device::Impl>(*a_PhysicalDevice, info, foundTransferQueue);
 }
 

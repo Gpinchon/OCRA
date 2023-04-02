@@ -10,7 +10,7 @@ public:
         : device(a_Device)
         , sampler(CreateImageSampler(device, samplerInfo))
     {
-        imageInfo.usage = ImageUsageFlagBits::Sampled;
+        imageInfo.usage = ImageUsageFlagBits::Sampled | ImageUsageFlagBits::TransferDst;
         imageInfo.type = a_Type;
         imageInfo.format = a_Format;
         imageInfo.extent = { a_X, a_Y, a_Z };

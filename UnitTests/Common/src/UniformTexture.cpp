@@ -8,7 +8,7 @@ void UniformTexture::Update()
     DescriptorSetWrite writeOp;
     setImageInfo.imageView = texture.GetImageView();
     setImageInfo.sampler = texture.GetSampler();
-    writeOp.type = DescriptorType::SampledImage;
+    writeOp.type = DescriptorType::ImageSampler;
     writeOp.imageInfo = setImageInfo;
     writeOp.dstBinding = GetDescriptorSetLayoutBindings().front().binding;
     SetWriteOperations({ writeOp });
@@ -17,9 +17,10 @@ void UniformTexture::Update()
 
 DescriptorSetLayoutBinding UniformTexture::CreateSetLayoutBinding(const uint32_t a_Binding) {
     DescriptorSetLayoutBinding binding;
-    binding.binding = a_Binding;
-    binding.count = 1;
-    binding.type = DescriptorType::SampledImage;
+    binding.binding    = a_Binding;
+    binding.count      = 1;
+    binding.type       = DescriptorType::ImageSampler;
+    binding.stageFlags = ShaderStageFlagBits::All;
     return binding;
 }
 }

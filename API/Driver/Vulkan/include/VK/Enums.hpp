@@ -394,6 +394,8 @@ static inline auto ConvertToVk(const DescriptorType& a_Type) {
     {
     case DescriptorType::SampledImage:
         return vk::DescriptorType::eSampledImage;
+    case DescriptorType::ImageSampler:
+        return vk::DescriptorType::eCombinedImageSampler;
     case DescriptorType::StorageImage:
         return vk::DescriptorType::eStorageImage;
     case DescriptorType::UniformTexelBuffer:
@@ -474,6 +476,8 @@ static inline auto ConvertToVk(const FrontFace& a_Face) {
 static inline auto ConvertToVk(const Format& a_Format) {
     switch (a_Format)
     {
+    case Format::Unknown:
+        return vk::Format::eUndefined;
     case Format::Uint8_Normalized_R:
         return vk::Format::eR8Unorm;
     case Format::Uint8_Normalized_RG:

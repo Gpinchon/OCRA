@@ -22,16 +22,13 @@ void DescriptorTest(const PhysicalDevice::Handle& a_PhysicalDevice, const Device
     poolInfo.maxSets = DESCRIPTOR_COUNT;
     poolInfo.sizes.push_back({ DescriptorType::UniformBuffer, DESCRIPTOR_COUNT });
     auto descriptorPool = CreateDescriptorPool(a_Device, poolInfo);
-    CreateDescriptorSetLayoutInfo layoutInfo;
     DescriptorSetLayoutBinding bindingLayout;
     bindingLayout.binding = 0;
     bindingLayout.count = 1;
     bindingLayout.type = DescriptorType::UniformBuffer;
     bindingLayout.stageFlags = ShaderStageFlagBits::AllGraphics;
-    layoutInfo.bindings.push_back(bindingLayout);
-    auto descriptorLayout = CreateDescriptorSetLayout(a_Device, layoutInfo);
     AllocateDescriptorSetInfo allocateInfo;
-    allocateInfo.layout = descriptorLayout;
+    allocateInfo.bindings = { bindingLayout };
 
     for (int j = 0; j < TEST_COUNT; ++j)
     {

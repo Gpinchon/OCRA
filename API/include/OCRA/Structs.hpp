@@ -179,11 +179,11 @@ struct ImageSubresourceLayers {
     uint32_t            layerCount     = 1;
 };
 struct ImageSubresourceRange {
-    ImageAspectFlags      aspects{ ImageAspectFlagBits::None };
-    uint32_t              baseMipLevel{ 0 };
-    uint32_t              levelCount{ 1000 };
-    uint32_t              baseArrayLayer{ 0 };
-    uint32_t              layerCount{ 1 };
+    ImageAspectFlags      aspects        = ImageAspectFlagBits::None;
+    uint32_t              baseMipLevel   = 0;
+    uint32_t              levelCount     = 1;
+    uint32_t              baseArrayLayer = 0;
+    uint32_t              layerCount     = 1;
 };
 struct ImageBufferCopy {
     uint64_t bufferOffset{ 0 };
@@ -201,6 +201,11 @@ struct ImageCopy {
     Extent3D               extent{};
 };
 
+struct PipelineRenderingInfo {
+    std::vector<Format> colorAttachmentFormats; //The formats of the color attachments
+    Format depthAttachmentFormat   = Format::Unknown; //The format of the depth attachments
+    Format stencilAttachmentFormat = Format::Unknown; //The format of the stencil attachments
+};
 struct PipelineStencilOpState {
     StencilOp failOp { StencilOp::Keep }; //the operation to be realized when stencil test FAILS
     StencilOp passOp { StencilOp::Keep }; //the operation to be realized when stencil test PASSES
@@ -210,7 +215,6 @@ struct PipelineStencilOpState {
     uint32_t writeMask { 1 }; //a mask that is ANDed with the stencil value about to be written to the buffer
     uint32_t reference { 0 }; //the reference value used in comparison.
 };
-
 struct PipelineColorBlendAttachmentState {
     bool enable { false }; //is blending enabled ?
     BlendFactor srcColorBlendFactor { BlendFactor::One };
@@ -641,10 +645,6 @@ struct CreateDescriptorPoolInfo
     uint32_t maxSets = 0;
     std::vector<DescriptorPoolSize> sizes;//the types the allocated descriptors can contain
 };
-struct CreateDescriptorSetLayoutInfo
-{
-    std::vector<DescriptorSetLayoutBinding> bindings; //the bindings of this descriptor, must be compatible with Pool::Info::sizes
-};
 struct CreateDeviceInfo {
     std::vector<QueueInfo> queueInfos;
 };
@@ -684,12 +684,15 @@ struct CreatePipelineGraphicsInfo { //describes a graphics pipeline with each st
     PipelineVertexInputState    vertexInputState{};
     PipelineViewPortState       viewPortState{};
     PipelineDynamicState        dynamicState{};
-    Pipeline::Layout::Handle    layout{};
+    PipelineRenderingInfo       renderingInfo{};
+    //Pipeline::Layout::Handle    layout{};
+    std::vector<DescriptorSetLayoutBinding> bindings; //the bindings of this pipeline, must be compatible with Pool::Info::sizes
+    std::vector<PushConstantRange>          pushConstants;
 };
 struct CreatePipelineLayoutInfo
 {
-    std::vector<Descriptor::SetLayout::Handle>  setLayouts;
-    std::vector<PushConstantRange>              pushConstants;
+    std::vector<DescriptorSetLayoutBinding> bindings; //the bindings of this pipeline, must be compatible with Pool::Info::sizes
+    std::vector<PushConstantRange>          pushConstants;
 };
 
 struct CreateImageSamplerInfo {
@@ -721,7 +724,7 @@ struct AllocateCommandBufferInfo {
     uint32_t              count{ 0 };
 };
 struct AllocateDescriptorSetInfo {
-    Descriptor::SetLayout::Handle layout;
+    std::vector<DescriptorSetLayoutBinding> bindings;//the bindings of this descriptor set, must be compatible with Pool::Info::sizes
 };
 struct AllocateMemoryInfo {
     size_t   size{ 0 };

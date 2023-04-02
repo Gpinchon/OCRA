@@ -17,13 +17,19 @@ public:
         const Parameters& a_Parameters,
         const std::vector<Texture>& a_Textures = {},
         const PipelineShaderStage& a_Shader = {})
-        : parameters(a_Device, 1, Parameters{})
+        : parameters(a_Device, 1, ShaderStageFlagBits::All, Parameters{})
         , fragmentShader(a_Shader)
     {
         uint32_t binding = 1;
         for (auto& texture : a_Textures)
             textures.push_back(UniformTexture(a_Device, ++binding, texture));
-        
+        descriptorLayoutBindings = parameters.GetDescriptorSetLayoutBindings();
+        for (const auto& texture : textures) {
+            auto& textureBinding = texture.GetDescriptorSetLayoutBindings();
+            descriptorLayoutBindings.insert(
+                descriptorLayoutBindings.end(),
+                textureBinding.begin(), textureBinding.end());
+        }
     }
 
     template<typename Parameters>

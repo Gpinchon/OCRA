@@ -39,20 +39,28 @@ Mesh::Mesh(const Device::Handle& a_Device, const VertexBuffer& a_VertexBuffer, c
     : device(a_Device)
     , material(a_Material)
     , vertexBuffer(a_VertexBuffer)
-    , projectionMatrix(a_Device, 0, Mat4x4{})
+    , projectionMatrix(a_Device, 0, ShaderStageFlagBits::All, Mat4x4{})
     , vertexShader(DefaultVertexShader(a_Device))
 {
+    auto& bindingProjMat = projectionMatrix.GetDescriptorSetLayoutBindings();
+    auto& bindingMaterial = material.GetDescriptorLayoutBindings();
+    descriptorSetLayoutBindings = bindingProjMat;
+    descriptorSetLayoutBindings.insert(
+        descriptorSetLayoutBindings.end(),
+        bindingMaterial.begin(), bindingMaterial.end());
+    AllocateDescriptorSetInfo descriptorSetInfo;
     CreatePipelineLayoutInfo layoutInfo;
-    layoutInfo.setLayouts = GetDescriptorSetLayouts();
-    layout = CreatePipelineLayout(device, layoutInfo);
+    layoutInfo.bindings = descriptorSetLayoutBindings;
+    //layout = CreatePipelineLayout(device, layoutInfo);
 
     inputAssembly.topology = PrimitiveTopology::TriangleList;
     inputAssembly.primitiveRestartEnable = false;
 }
 
-void Mesh::Draw(const Command::Buffer::Handle& a_CommandBuffer) {
-    Command::PushDescriptorSet(a_CommandBuffer, PipelineBindingPoint::Graphics, layout, projectionMatrix.GetWriteOperations());
-    Command::PushDescriptorSet(a_CommandBuffer, PipelineBindingPoint::Graphics, layout, material.GetWriteOperations());
+void Mesh::Draw(const Command::Buffer::Handle& a_CommandBuffer, const Pipeline::Handle& a_Pipeline)
+{
+    Command::PushDescriptorSet(a_CommandBuffer, a_Pipeline, projectionMatrix.GetWriteOperations());
+    Command::PushDescriptorSet(a_CommandBuffer, a_Pipeline, material.GetWriteOperations());
     Command::SetVertexInput(a_CommandBuffer,
         GetVertexBuffer().GetAttribsDescriptions(),
         GetVertexBuffer().GetBindingDescriptions());

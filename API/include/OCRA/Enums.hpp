@@ -67,6 +67,7 @@ enum class CullMode {
 enum class DescriptorType {
     Unknown = -1,
     SampledImage,
+    ImageSampler,
     StorageImage,
     UniformTexelBuffer,
     StorageTexelBuffer,

@@ -20,7 +20,7 @@ namespace OCRA {
 class UniformBuffer : public Uniform {
 public:
     template<typename T>
-    UniformBuffer(const Device::Handle& a_Device, const uint32_t& a_Binding, const T& a_DefaultValue);
+    UniformBuffer(const Device::Handle& a_Device, const uint32_t& a_Binding, const ShaderStageFlags& a_Stage, const T& a_DefaultValue);
     virtual void Update() override;
     inline auto GetDataSize() const {
         return data.size();
@@ -38,11 +38,12 @@ public:
     }
 
 private:
-    inline static DescriptorSetLayoutBinding CreateSetLayoutBinding(const uint32_t a_Binding) {
+    inline static DescriptorSetLayoutBinding CreateSetLayoutBinding(const uint32_t a_Binding, const ShaderStageFlags& a_ShaderStages) {
         DescriptorSetLayoutBinding binding;
-        binding.binding = a_Binding;
-        binding.count = 1;
-        binding.type = DescriptorType::UniformBuffer;
+        binding.binding    = a_Binding;
+        binding.count      = 1;
+        binding.type       = DescriptorType::UniformBuffer;
+        binding.stageFlags = a_ShaderStages;
         return binding;
     }
     bool dirtyDescriptorSet{ true };
@@ -53,8 +54,8 @@ private:
 };
 
 template<typename T>
-inline UniformBuffer::UniformBuffer(const Device::Handle& a_Device, const uint32_t& a_Binding, const T& a_DefaultValue)
-    : Uniform(a_Device, { CreateSetLayoutBinding(a_Binding) })
+inline UniformBuffer::UniformBuffer(const Device::Handle& a_Device, const uint32_t& a_Binding, const ShaderStageFlags& a_Stages, const T& a_DefaultValue)
+    : Uniform(a_Device, { CreateSetLayoutBinding(a_Binding, a_Stages) })
     , data(sizeof(T))
 {
     Set(a_DefaultValue);

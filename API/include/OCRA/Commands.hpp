@@ -20,8 +20,7 @@ void BindPipeline(
 */
 void BindDescriptorSet(
     const Command::Buffer::Handle&  a_CommandBuffer,
-    const PipelineBindingPoint&     a_BindingPoint,
-    const Pipeline::Layout::Handle& a_PipelineLayout,
+    const Pipeline::Handle&         a_Pipeline,
     const Descriptor::Set::Handle&  a_Descriptor,
     const uint32_t                  a_DynamicOffset);
 
@@ -79,11 +78,11 @@ void ClearColorImage(
 
 /**
 * @brief Pushes the specified descriptor to the command buffer's bindings
+* using the a_Pipeline's BindingPoint & Layout
 */
 void PushDescriptorSet(
     const Command::Buffer::Handle&  a_CommandBuffer,
-    const PipelineBindingPoint&     a_PipelineBindPoint,
-    const Pipeline::Layout::Handle& a_Layout,
+    const Pipeline::Handle&         a_Pipeline,
     const std::vector<DescriptorSetWrite>& a_Writes);
 
 /**
@@ -95,9 +94,9 @@ void ExecuteCommandBuffer(
 
 void PushConstants(
     const Command::Buffer::Handle& a_CommandBuffer,
-    const Pipeline::Layout::Handle& a_PipelineLayout,
-    const uint8_t a_Offset,
-    const std::vector<std::byte>& a_Data);
+    const Pipeline::Handle&        a_Pipeline,
+    const uint8_t                  a_Offset,
+    const std::vector<std::byte>&  a_Data);
     
 void SetScissor(
     const Command::Buffer::Handle&  a_CommandBuffer,

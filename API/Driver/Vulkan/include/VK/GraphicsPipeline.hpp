@@ -12,8 +12,9 @@ struct Impl : Pipeline::Impl
 {
     Impl(
         const vk::raii::Device& a_Device,
+        const vk::raii::PipelineCache& a_Cache,
         const vk::GraphicsPipelineCreateInfo& a_Info)
-        : OCRA::Pipeline::Impl(a_Device.createGraphicsPipeline(nullptr, a_Info), vk::PipelineBindPoint::eGraphics)
+        : OCRA::Pipeline::Impl(a_Device.createGraphicsPipeline(a_Cache, a_Info), vk::PipelineBindPoint::eGraphics, a_Info.layout)
     {}
 };
 }

@@ -53,29 +53,29 @@ Descriptor::Pool::Handle CreateDescriptorPool(const Device::Handle& a_Device, co
     return std::make_shared<Descriptor::Pool::Impl>(*a_Device, info);
 }
 
-Descriptor::SetLayout::Handle CreateDescriptorSetLayout(
-    const Device::Handle& a_Device,
-    const CreateDescriptorSetLayoutInfo& a_Info,
-    const AllocationCallback* a_Allocator = nullptr)
-{
-    auto& device = *a_Device;
-    vk::DescriptorSetLayout setLayout = nullptr;
-    vk::DescriptorSetLayoutCreateInfo info;
-    std::vector<vk::DescriptorSetLayoutBinding> vkBindings;
-    vkBindings.reserve(a_Info.bindings.size());
-    for (const auto& binding : a_Info.bindings)
-    {
-        vk::DescriptorSetLayoutBinding vkBinding{};
-        vkBinding.binding = binding.binding;
-        vkBinding.descriptorCount = binding.count;
-        vkBinding.descriptorType = ConvertToVk(binding.type);
-        vkBinding.stageFlags = ConvertToVk(binding.stageFlags);
-        vkBindings.push_back(vkBinding);
-    }
-    info.bindingCount = vkBindings.size();
-    info.pBindings = vkBindings.data();
-    return std::make_shared<Descriptor::SetLayout::Impl>(device, info);
-}
+//Descriptor::SetLayout::Handle CreateDescriptorSetLayout(
+//    const Device::Handle& a_Device,
+//    const CreateDescriptorSetLayoutInfo& a_Info,
+//    const AllocationCallback* a_Allocator = nullptr)
+//{
+//    auto& device = *a_Device;
+//    vk::DescriptorSetLayout setLayout = nullptr;
+//    vk::DescriptorSetLayoutCreateInfo info;
+//    std::vector<vk::DescriptorSetLayoutBinding> vkBindings;
+//    vkBindings.reserve(a_Info.bindings.size());
+//    for (const auto& binding : a_Info.bindings)
+//    {
+//        vk::DescriptorSetLayoutBinding vkBinding{};
+//        vkBinding.binding = binding.binding;
+//        vkBinding.descriptorCount = binding.count;
+//        vkBinding.descriptorType = ConvertToVk(binding.type);
+//        vkBinding.stageFlags = ConvertToVk(binding.stageFlags);
+//        vkBindings.push_back(vkBinding);
+//    }
+//    info.bindingCount = vkBindings.size();
+//    info.pBindings = vkBindings.data();
+//    return std::make_shared<Descriptor::SetLayout::Impl>(device, info);
+//}
 
 Fence::Handle CreateFence(
     const Device::Handle& a_Device,
@@ -162,7 +162,6 @@ Pipeline::Handle CreatePipelineGraphics(
     const CreatePipelineGraphicsInfo& a_Info)
 {
     auto& device = *a_Device;
-    
     IntermediateShaderState                     shaderStage(a_Info.shaderPipelineState);
     IntermediateVertexInputState                vertexInputState(a_Info.vertexInputState);
     vk::PipelineInputAssemblyStateCreateInfo    inputAssemblyStateCreateInfo({},
@@ -213,19 +212,46 @@ Pipeline::Handle CreatePipelineGraphics(
         &depthStencilStateCreateInfo,
         colorBlendState.data(),
         dynamicState.data());
-    return std::make_shared<Pipeline::Graphics::Impl>(device, info);
+    std::vector<vk::DescriptorSetLayoutBinding> bindings(a_Info.bindings.size());
+    std::vector<vk::PushConstantRange> pushConstantRanges(a_Info.pushConstants.size());
+    std::transform(a_Info.bindings.begin(), a_Info.bindings.end(),
+        bindings.begin(), [](const auto& a_Binding) { return ConvertToVk(a_Binding); });
+    std::transform(a_Info.pushConstants.begin(), a_Info.pushConstants.end(),
+        pushConstantRanges.begin(), [](const auto& a_Range) { return ConvertToVk(a_Range); });
+    info.setLayout(device.GetOrCreatePipelineLayout(
+        a_Device->GetOrCreateDescriptorSetLayout(bindings),
+        pushConstantRanges));
+    std::vector<vk::Format> colorAttachments(a_Info.renderingInfo.colorAttachmentFormats.size());
+    for (auto i = 0u; i < colorAttachments.size(); ++i) {
+        colorAttachments.at(i) = ConvertToVk(a_Info.renderingInfo.colorAttachmentFormats.at(i));
+    }
+    vk::PipelineRenderingCreateInfo renderingInfo(
+        0,
+        colorAttachments,
+        ConvertToVk(a_Info.renderingInfo.depthAttachmentFormat),
+        ConvertToVk(a_Info.renderingInfo.stencilAttachmentFormat));
+    info.setPNext(&renderingInfo);
+    return std::make_shared<Pipeline::Graphics::Impl>(device, device.pipelineCache, info);
 }
 
-Pipeline::Layout::Handle CreatePipelineLayout(
-    const Device::Handle&           a_Device,
-    const CreatePipelineLayoutInfo& a_Info,
-    const AllocationCallback*       a_Allocator)
-{
-    std::vector<vk::DescriptorSetLayout> layouts(a_Info.setLayouts.size());
-    std::vector<vk::PushConstantRange>   pushConstants(a_Info.pushConstants.size());
-    vk::PipelineLayoutCreateInfo info({}, layouts, pushConstants);
-    return std::make_shared<Pipeline::Layout::Impl>(*a_Device, info);
-}
+//Pipeline::Layout::Handle CreatePipelineLayout(
+//    const Device::Handle&           a_Device,
+//    const CreatePipelineLayoutInfo& a_Info,
+//    const AllocationCallback*       a_Allocator)
+//{
+//    std::vector<vk::DescriptorSetLayoutBinding> bindings(a_Info.bindings.size());
+//    std::transform(
+//        a_Info.bindings.begin(), a_Info.bindings.end(),
+//        bindings.begin(), [](const auto& binding) { return ConvertToVk(binding); });
+//    std::vector<vk::DescriptorSetLayout> layouts{ a_Device->GetOrCreateDescriptorSetLayout(bindings) };
+//    std::vector<vk::PushConstantRange>   pushConstants(a_Info.pushConstants.size());
+//    std::transform(a_Info.pushConstants.begin(), a_Info.pushConstants.end(),
+//        pushConstants.begin(), [](const auto& ptr) { return ConvertToVk(ptr); });
+//    vk::PipelineLayoutCreateInfo info({}, layouts, pushConstants);
+//    //return a_Device->GetOrCreatePipelineLayout(layouts, pushConstants);
+//
+//    return std::make_shared<Pipeline::Layout::Impl>(*a_Device, info);
+//}
 
 Semaphore::Handle CreateSemaphore(
     const Device::Handle& a_Device,

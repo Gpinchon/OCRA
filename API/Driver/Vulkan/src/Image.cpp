@@ -1,6 +1,7 @@
 #include <OCRA/OCRA.hpp>
 
 #include <VK/Buffer.hpp>
+#include <VK/CommandBuffer.hpp>
 #include <VK/Device.hpp>
 #include <VK/Enums.hpp>
 #include <VK/Flags.hpp>
@@ -29,28 +30,39 @@ void CopyBufferToImage(
         vkCopy.imageOffset = ConvertToVk(ocCopy.imageOffset);
         vkCopy.imageSubresource = ConvertToVk(ocCopy.imageSubresource);
     }
-    vk::raii::CommandBuffer transferCommandBuffer = nullptr;
+
+    Command::Buffer::Handle transferCommandBuffer;
     {
         vk::CommandBufferAllocateInfo commandBufferInfo;
         commandBufferInfo.commandBufferCount = 1;
         commandBufferInfo.commandPool = *device.transferCommandPool;
         commandBufferInfo.level = vk::CommandBufferLevel::ePrimary;
-        transferCommandBuffer = std::move(device.allocateCommandBuffers(commandBufferInfo).front());
+        transferCommandBuffer = std::make_shared<Command::Buffer::Impl>(std::move(device.allocateCommandBuffers(commandBufferInfo).front()));
     }
     {
         vk::CommandBufferBeginInfo cmdBufferBeginInfo;
         cmdBufferBeginInfo.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
-        transferCommandBuffer.begin(cmdBufferBeginInfo);
-        transferCommandBuffer.copyBufferToImage(
+        transferCommandBuffer->begin(cmdBufferBeginInfo);
+        {
+            ImageSubresourceRange range{};
+            range.aspects = ImageAspectFlagBits::Color;
+            range.levelCount = 1;
+            range.layerCount = 1;
+            Command::TransitionImageLayout(
+                transferCommandBuffer, { a_DstImage, range,
+                ImageLayout::Undefined,
+                ImageLayout::TransferDstOptimal });
+        }
+        transferCommandBuffer->copyBufferToImage(
             *srcBuffer,
             *dstImage, vk::ImageLayout::eTransferDstOptimal,
             vkCopies);
-        transferCommandBuffer.end();
+        transferCommandBuffer->end();
     }
     {
         vk::SubmitInfo submitInfo;
         submitInfo.setCommandBufferCount(1);
-        submitInfo.setPCommandBuffers(&*transferCommandBuffer);
+        submitInfo.setPCommandBuffers(&**transferCommandBuffer);
         device.transferQueue.submit({ submitInfo }, nullptr);
     }
     device.transferQueue.waitIdle();

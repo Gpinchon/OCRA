@@ -41,11 +41,6 @@ Descriptor::Pool::Handle CreateDescriptorPool(
     const CreateDescriptorPoolInfo& a_Info,
     const AllocationCallback* a_Allocator = nullptr);
 
-Descriptor::SetLayout::Handle CreateDescriptorSetLayout(
-    const Device::Handle& a_Device,
-    const CreateDescriptorSetLayoutInfo& a_Info,
-    const AllocationCallback* a_Allocator = nullptr);
-
 /**
 * @brief Creates a Fence with the specified default status (optional)
 */
@@ -70,10 +65,10 @@ Pipeline::Handle CreatePipelineGraphics(
     const Device::Handle& a_Device,
     const CreatePipelineGraphicsInfo& a_Info);
 
-Pipeline::Layout::Handle CreatePipelineLayout(
-    const Device::Handle& a_Device,
-    const CreatePipelineLayoutInfo& a_Info,
-    const AllocationCallback* a_Allocator = nullptr);
+//Pipeline::Layout::Handle CreatePipelineLayout(
+//    const Device::Handle& a_Device,
+//    const CreatePipelineLayoutInfo& a_Info,
+//    const AllocationCallback* a_Allocator = nullptr);
 
 Handle CreateQueryPool(
     const Device::Handle& a_Device,

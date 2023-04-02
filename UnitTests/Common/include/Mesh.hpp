@@ -30,12 +30,15 @@ public:
     auto& GetVertexShader() const { return vertexShader; }
     void SetVertexShader(const PipelineShaderStage& a_Shader) { vertexShader = a_Shader; }
 
-    auto& GetPipelineLayout() const { return layout; }
     auto& GetVertexBuffer() const { return vertexBuffer; }
     auto& GetMaterial() { return material; }
     auto& GetDescriptorSets() const { return descriptorSets; }
-    auto& GetDescriptorSetLayouts() const { return descriptorSetLayouts; }
-    auto& GetDescriptorSetLayoutBindings() const { return descriptorSetLayoutBindings; }
+    auto GetDescriptorSetLayouts() const { return descriptorSetLayouts; }
+    auto& GetDescriptorSetLayoutBindings() const {
+        
+        
+        return descriptorSetLayoutBindings;
+    }
     std::vector<PipelineShaderStage> GetShaderStages() const {
         return { material.GetFragmentShader(), GetVertexShader() };
     }
@@ -50,15 +53,14 @@ public:
         projectionMatrix.Update();
     }
 
-    void Draw(const Command::Buffer::Handle& a_CommandBuffer);
+    void Draw(const Command::Buffer::Handle& a_CommandBuffer, const Pipeline::Handle& a_Pipeline);
 
 private:
     OCRA::Device::Handle     device;
-    Pipeline::Layout::Handle layout;
-    PipelineShaderStage    vertexShader;
+    PipelineShaderStage      vertexShader;
     PipelineInputAssemblyState inputAssembly;
-    Material                material;
     VertexBuffer            vertexBuffer;
+    Material                material;
     UniformBuffer           projectionMatrix;
     std::vector<Descriptor::Set::Handle>        descriptorSets;
     std::vector<Descriptor::SetLayout::Handle>  descriptorSetLayouts;

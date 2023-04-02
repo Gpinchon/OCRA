@@ -21,6 +21,7 @@ size_t GetDataSize(const Image::Handle& a_Image);
 * This command is asynchronous, meaning that you have to synchronize
 * it if you wanna read from the Image's memory.
 * You can force sync by using WaitIdle.
+* After this function, the image should be in layout TransferDst
 */
 void CopyBufferToImage(
     const OCRA::Buffer::Handle& a_SrcBuffer,

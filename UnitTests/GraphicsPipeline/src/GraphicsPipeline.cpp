@@ -155,9 +155,12 @@ struct GraphicsPipelineTestApp : TestApp
 
         graphicsPipelineInfo.rasterizationState.cullMode = CullMode::None;
 
-        graphicsPipelineInfo.layout = mesh.GetPipelineLayout();
+        //graphicsPipelineInfo.layout = mesh.GetPipelineLayout();
+        graphicsPipelineInfo.bindings = mesh.GetDescriptorSetLayoutBindings();
         graphicsPipelineInfo.inputAssemblyState = mesh.GetInputAssembly();
         graphicsPipelineInfo.shaderPipelineState.stages = mesh.GetShaderStages();
+
+        graphicsPipelineInfo.renderingInfo.colorAttachmentFormats = { Format::Uint8_Normalized_RGBA };
 
         //Everything else is left by default for now
         graphicsPipeline = CreatePipelineGraphics(device, graphicsPipelineInfo);
@@ -166,9 +169,12 @@ struct GraphicsPipelineTestApp : TestApp
     {
         {
             CreateImageInfo imageInfo;
+            imageInfo.usage = ImageUsageFlagBits::ColorAttachment;
             imageInfo.type = ImageType::Image2D;
-            imageInfo.extent.width = window.GetExtent().width;
+            imageInfo.extent.width  = window.GetExtent().width;
             imageInfo.extent.height = window.GetExtent().height;
+            imageInfo.extent.depth  = 1;
+            imageInfo.arrayLayers = 1;
             imageInfo.format = Format::Uint8_Normalized_RGBA;
             imageInfo.mipLevels = 1;
             frameBufferImage = CreateImage(device, imageInfo);
@@ -179,6 +185,7 @@ struct GraphicsPipelineTestApp : TestApp
             imageViewInfo.format = Format::Uint8_Normalized_RGBA;
             imageViewInfo.type = ImageViewType::View2D;
             imageViewInfo.subRange.layerCount = 1;
+            imageViewInfo.subRange.aspects = ImageAspectFlagBits::Color;
             frameBufferImageView = CreateImageView(device, imageViewInfo);
         }
     }
@@ -204,7 +211,7 @@ struct GraphicsPipelineTestApp : TestApp
         Command::BeginRendering(drawCommandBuffer, renderingInfo);
         {
             Command::BindPipeline(drawCommandBuffer, graphicsPipeline);
-            mesh.Draw(drawCommandBuffer);
+            mesh.Draw(drawCommandBuffer, graphicsPipeline);
         }
         Command::EndRendering(drawCommandBuffer);
         Command::Buffer::End(drawCommandBuffer);

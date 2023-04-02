@@ -10,11 +10,11 @@ namespace OCRA::Descriptor::Pool
 {
 struct Impl : vk::raii::DescriptorPool
 {
-    Impl(const Device::Impl& a_Device, const vk::DescriptorPoolCreateInfo& a_Info)
+    Impl(Device::Impl& a_Device, const vk::DescriptorPoolCreateInfo& a_Info)
         : vk::raii::DescriptorPool(a_Device, a_Info)
         , device(a_Device)
     {}
-    const Device::Impl& device;
+    Device::Impl& device;
     std::pmr::unsynchronized_pool_resource memoryResource;
 };
 }
