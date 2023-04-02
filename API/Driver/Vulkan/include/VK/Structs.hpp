@@ -10,22 +10,29 @@
 
 namespace OCRA
 {
-static inline vk::ClearColorValue ConvertToVk(const ColorValue& a_ClearValue) {
+static inline auto ConvertToVk(const ColorValue& a_ClearValue) {
     return reinterpret_cast<const vk::ClearColorValue&>(a_ClearValue);
 }
-static inline vk::ClearDepthStencilValue ConvertToVk(const DepthStencilValue& a_ClearValue) {
+static inline auto ConvertToVk(const DepthStencilValue& a_ClearValue) {
     return reinterpret_cast<const vk::ClearDepthStencilValue&>(a_ClearValue);
 }
-static inline vk::ClearValue ConvertToVk(const ClearValue& a_ClearValue) {
+static inline auto ConvertToVk(const ClearValue& a_ClearValue) {
     return reinterpret_cast<const vk::ClearValue&>(a_ClearValue);
 }
-static inline vk::ComponentMapping ConvertToVk(const ComponentMapping& a_Mapping) {
+static inline auto ConvertToVk(const ComponentMapping& a_Mapping) {
     return vk::ComponentMapping(
         ConvertToVk(a_Mapping.r),
         ConvertToVk(a_Mapping.g),
         ConvertToVk(a_Mapping.b),
         ConvertToVk(a_Mapping.a)
     );
+}
+static inline auto ConvertToVk(const DescriptorSetLayoutBinding& a_Binding) {
+    return vk::DescriptorSetLayoutBinding(
+        a_Binding.binding,
+        ConvertToVk(a_Binding.type),
+        a_Binding.count,
+        ConvertToVk(a_Binding.stageFlags));
 }
 template <typename T>
 static inline auto ConvertToVk(const Extent<2, T>& a_Extent) {
@@ -98,6 +105,11 @@ static inline auto ConvertToVk(const PipelineColorBlendAttachmentState& a_State)
         ConvertToVk(a_State.srcColorBlendFactor), ConvertToVk(a_State.dstColorBlendFactor), ConvertToVk(a_State.colorBlendOperation),
         ConvertToVk(a_State.srcAlphaBlendFactor), ConvertToVk(a_State.dstAlphaBlendFactor), ConvertToVk(a_State.alphaBlendOperation),
         ConvertToVk(a_State.colorMask));
+}
+static inline auto ConvertToVk(const PushConstantRange& a_Range) {
+    return vk::PushConstantRange(
+        ConvertToVk(a_Range.stage),
+        a_Range.offset, a_Range.size);
 }
 template<VertexType Type>
 constexpr static inline vk::Format ConvertToVk(const uint8_t&, const bool&);
