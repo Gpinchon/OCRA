@@ -27,7 +27,7 @@ void PrintAvailableLayers() {
     }
 }
 const std::vector<const char*> validationLayers = {
-    "VK_LAYER_KHRONOS_validation"
+    "VK_LAYER_KHRONOS_validation",
 };
 bool CheckValidationLayerSupport() {
     uint32_t layerCount;
@@ -57,7 +57,10 @@ Instance::Handle CreateInstance(
 #ifdef _WIN32
         VK_KHR_WIN32_SURFACE_EXTENSION_NAME,
 #endif
-        VK_KHR_SURFACE_EXTENSION_NAME
+        VK_KHR_SURFACE_EXTENSION_NAME,
+#ifdef _DEBUG
+        VK_EXT_DEBUG_REPORT_EXTENSION_NAME,
+#endif
     };
     static vk::raii::Context context;
     vk::InstanceCreateInfo info;

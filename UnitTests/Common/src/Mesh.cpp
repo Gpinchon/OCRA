@@ -55,8 +55,6 @@ Mesh::Mesh(const Device::Handle& a_Device, const VertexBuffer& a_VertexBuffer, c
     AllocateDescriptorSetInfo descriptorSetInfo;
     CreatePipelineLayoutInfo layoutInfo;
     layoutInfo.bindings = descriptorSetLayoutBindings;
-    //layout = CreatePipelineLayout(device, layoutInfo);
-
     inputAssembly.topology = PrimitiveTopology::TriangleList;
     inputAssembly.primitiveRestartEnable = false;
 }

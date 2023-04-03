@@ -151,6 +151,8 @@ struct GraphicsPipelineTestApp : TestApp
         graphicsPipelineInfo.viewPortState.viewPorts = { viewport };
         graphicsPipelineInfo.viewPortState.scissors = { scissor };
 
+        graphicsPipelineInfo.colorBlendState.attachments = { PipelineColorBlendAttachmentState{} };
+
         graphicsPipelineInfo.dynamicState.dynamicStates = { DynamicState::VertexInput };
 
         graphicsPipelineInfo.rasterizationState.cullMode = CullMode::None;

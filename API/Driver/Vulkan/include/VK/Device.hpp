@@ -26,7 +26,7 @@ struct DescriptorSetLayoutCache {
         vk::DescriptorSetLayoutCreateInfo info({}, a_Bindings);
         layouts.resize(layouts.size() + 1);
         auto& storage = layouts.back();
-        storage.layout = a_Device.createDescriptorSetLayout(info);
+        storage.layout = std::move(a_Device.createDescriptorSetLayout(info));
         storage.bindings = a_Bindings;
         return *storage.layout;
     }
@@ -56,7 +56,7 @@ struct PipelineLayoutCache {
         vk::PipelineLayoutCreateInfo info({}, a_Layout, a_PushConstants);
         layouts.resize(layouts.size() + 1);
         auto& storage = layouts.back();
-        storage.layout           = a_Device.createPipelineLayout(info);
+        storage.layout           = std::move(a_Device.createPipelineLayout(info));
         storage.descriptorLayout = a_Layout;
         storage.pushConstants    = a_PushConstants;
         return *storage.layout;

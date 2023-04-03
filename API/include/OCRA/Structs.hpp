@@ -685,7 +685,6 @@ struct CreatePipelineGraphicsInfo { //describes a graphics pipeline with each st
     PipelineViewPortState       viewPortState{};
     PipelineDynamicState        dynamicState{};
     PipelineRenderingInfo       renderingInfo{};
-    //Pipeline::Layout::Handle    layout{};
     std::vector<DescriptorSetLayoutBinding> bindings; //the bindings of this pipeline, must be compatible with Pool::Info::sizes
     std::vector<PushConstantRange>          pushConstants;
 };

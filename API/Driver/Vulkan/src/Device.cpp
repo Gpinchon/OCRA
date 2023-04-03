@@ -1,5 +1,6 @@
 #include <OCRA/Core.hpp>
 
+#include <VK/Assert.hpp>
 #include <VK/CommandBuffer.hpp>
 #include <VK/CommandPool.hpp>
 #include <VK/DescriptorPool.hpp>
@@ -19,6 +20,7 @@
 #include <VK/Semaphore.hpp>
 #include <VK/ShaderModule.hpp>
 #include <VK/Structs.hpp>
+#include <iostream>
 
 #undef CreateSemaphore
 
@@ -161,6 +163,9 @@ Pipeline::Handle CreatePipelineGraphics(
     const Device::Handle& a_Device,
     const CreatePipelineGraphicsInfo& a_Info)
 {
+    //IF THIS CRASHES, IT MIGHT BE BECAUSE PipelineColorBlendState ATTACHMENTS DOESN'T MATCH PipelineRenderingInfo ATTACHMENTS
+    OCRA_ASSERT(a_Info.renderingInfo.colorAttachmentFormats.size() == a_Info.colorBlendState.attachments.size());
+
     auto& device = *a_Device;
     IntermediateShaderState                     shaderStage(a_Info.shaderPipelineState);
     IntermediateVertexInputState                vertexInputState(a_Info.vertexInputState);
@@ -200,6 +205,25 @@ Pipeline::Handle CreatePipelineGraphics(
         a_Info.depthStencilState.depthBounds.max);
     IntermediateColorBlendState                 colorBlendState(a_Info.colorBlendState);
     IntermediateDynamicState                    dynamicState(a_Info.dynamicState);
+    std::vector<vk::Format> colorAttachments(a_Info.renderingInfo.colorAttachmentFormats.size());
+    std::transform(a_Info.renderingInfo.colorAttachmentFormats.begin(), a_Info.renderingInfo.colorAttachmentFormats.end(),
+        colorAttachments.begin(), [](const auto& format) { return ConvertToVk(format); });
+    
+    vk::PipelineRenderingCreateInfo renderingInfo(
+        0,
+        colorAttachments,
+        ConvertToVk(a_Info.renderingInfo.depthAttachmentFormat),
+        ConvertToVk(a_Info.renderingInfo.stencilAttachmentFormat));
+
+    std::vector<vk::DescriptorSetLayoutBinding> bindings(a_Info.bindings.size());
+    std::vector<vk::PushConstantRange> pushConstantRanges(a_Info.pushConstants.size());
+    std::transform(a_Info.bindings.begin(), a_Info.bindings.end(),
+        bindings.begin(), [](const auto& a_Binding) { return ConvertToVk(a_Binding); });
+    std::transform(a_Info.pushConstants.begin(), a_Info.pushConstants.end(),
+        pushConstantRanges.begin(), [](const auto& a_Range) { return ConvertToVk(a_Range); });
+    auto layout = device.GetOrCreatePipelineLayout(
+        a_Device->GetOrCreateDescriptorSetLayout(bindings),
+        pushConstantRanges);
 
     vk::GraphicsPipelineCreateInfo info({},
         shaderStage.size(), shaderStage.data(),
@@ -211,46 +235,13 @@ Pipeline::Handle CreatePipelineGraphics(
         &multisampleStateCreateInfo,
         &depthStencilStateCreateInfo,
         colorBlendState.data(),
-        dynamicState.data());
-    std::vector<vk::DescriptorSetLayoutBinding> bindings(a_Info.bindings.size());
-    std::vector<vk::PushConstantRange> pushConstantRanges(a_Info.pushConstants.size());
-    std::transform(a_Info.bindings.begin(), a_Info.bindings.end(),
-        bindings.begin(), [](const auto& a_Binding) { return ConvertToVk(a_Binding); });
-    std::transform(a_Info.pushConstants.begin(), a_Info.pushConstants.end(),
-        pushConstantRanges.begin(), [](const auto& a_Range) { return ConvertToVk(a_Range); });
-    info.setLayout(device.GetOrCreatePipelineLayout(
-        a_Device->GetOrCreateDescriptorSetLayout(bindings),
-        pushConstantRanges));
-    std::vector<vk::Format> colorAttachments(a_Info.renderingInfo.colorAttachmentFormats.size());
-    std::transform(a_Info.renderingInfo.colorAttachmentFormats.begin(), a_Info.renderingInfo.colorAttachmentFormats.end(),
-        colorAttachments.begin(), [](const auto& format) { return ConvertToVk(format); });
-    vk::PipelineRenderingCreateInfo renderingInfo(
-        0,
-        colorAttachments,
-        ConvertToVk(a_Info.renderingInfo.depthAttachmentFormat),
-        ConvertToVk(a_Info.renderingInfo.stencilAttachmentFormat));
-    info.setPNext(&renderingInfo);
+        dynamicState.data(),
+        layout, 
+        vk::RenderPass(nullptr), 0,
+        vk::Pipeline(nullptr), 0,
+        &renderingInfo);
     return std::make_shared<Pipeline::Graphics::Impl>(device, device.pipelineCache, info);
 }
-
-//Pipeline::Layout::Handle CreatePipelineLayout(
-//    const Device::Handle&           a_Device,
-//    const CreatePipelineLayoutInfo& a_Info,
-//    const AllocationCallback*       a_Allocator)
-//{
-//    std::vector<vk::DescriptorSetLayoutBinding> bindings(a_Info.bindings.size());
-//    std::transform(
-//        a_Info.bindings.begin(), a_Info.bindings.end(),
-//        bindings.begin(), [](const auto& binding) { return ConvertToVk(binding); });
-//    std::vector<vk::DescriptorSetLayout> layouts{ a_Device->GetOrCreateDescriptorSetLayout(bindings) };
-//    std::vector<vk::PushConstantRange>   pushConstants(a_Info.pushConstants.size());
-//    std::transform(a_Info.pushConstants.begin(), a_Info.pushConstants.end(),
-//        pushConstants.begin(), [](const auto& ptr) { return ConvertToVk(ptr); });
-//    vk::PipelineLayoutCreateInfo info({}, layouts, pushConstants);
-//    //return a_Device->GetOrCreatePipelineLayout(layouts, pushConstants);
-//
-//    return std::make_shared<Pipeline::Layout::Impl>(*a_Device, info);
-//}
 
 Semaphore::Handle CreateSemaphore(
     const Device::Handle& a_Device,
