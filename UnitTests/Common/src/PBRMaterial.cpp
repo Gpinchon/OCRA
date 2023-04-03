@@ -3,14 +3,19 @@
 #include <OCRA/OCRA.hpp>
 
 #include <OCRA/ShaderCompiler/Compiler.hpp>
-#include <OCRA/ShaderCompiler/Shader.hpp>
 
 namespace OCRA {
 auto PBRFragmentShader(const Device::Handle& a_Device)
 {
     const auto compiler = ShaderCompiler::Create();
-    ShaderCompiler::Shader::Info shaderInfo;
-    shaderInfo.type = ShaderCompiler::Shader::Type::Fragment;
+    ShaderCompiler::ShaderInfo shaderInfo;
+    if (OCRA_API_IMPL == OCRA_API_Vulkan)
+        shaderInfo.targetAPI = ShaderCompiler::TargetAPI::Vulkan;
+    if (OCRA_API_IMPL == OCRA_API_OpenGL)
+        shaderInfo.targetAPI = ShaderCompiler::TargetAPI::OpenGL;
+    if (OCRA_API_IMPL == OCRA_API_DirectX)
+        shaderInfo.targetAPI = ShaderCompiler::TargetAPI::DirectX;
+    shaderInfo.type = ShaderCompiler::ShaderType::Fragment;
     shaderInfo.entryPoint = "main";
     shaderInfo.source = {
         "#version 450                                           \n"
@@ -28,9 +33,8 @@ auto PBRFragmentShader(const Device::Handle& a_Device)
         "    outColor *= texture(albedoTexture, vertTexCoord);  \n"
         "}                                                      \n"
     };
-    const auto fragmentShader = ShaderCompiler::Shader::Create(compiler, shaderInfo);
     CreateShaderModuleInfo shaderModuleInfo;
-    shaderModuleInfo.code = ShaderCompiler::Shader::Compile(fragmentShader);
+    shaderModuleInfo.code = ShaderCompiler::Compile(compiler, shaderInfo);
     const auto shaderModule = CreateShaderModule(a_Device, shaderModuleInfo);
     PipelineShaderStage shaderStageInfo;
     shaderStageInfo.entryPoint = "main";

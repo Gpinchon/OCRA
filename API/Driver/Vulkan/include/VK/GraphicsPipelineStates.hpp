@@ -31,33 +31,37 @@ struct IntermediateShaderStage
 {
     IntermediateShaderStage() = default;
     IntermediateShaderStage(const PipelineShaderStage& a_Stage)
-        : mapEntries(a_Stage.specializationInfo.mapEntries.size())
+        : entryPoint(a_Stage.entryPoint)
+        , mapEntries(a_Stage.specializationInfo.mapEntries.size())
         , specializationData(a_Stage.specializationInfo.data)
+        , specializationInfo(mapEntries.size(), mapEntries.data(), specializationData.size(), specializationData.data())
+        , info({}, GetStageBits(a_Stage.stage), **a_Stage.module, entryPoint.c_str(), &specializationInfo)
     {
-        std::vector<vk::SpecializationMapEntry> vkMapEntries(a_Stage.specializationInfo.mapEntries.size());
         std::transform(
             a_Stage.specializationInfo.mapEntries.begin(), a_Stage.specializationInfo.mapEntries.end(),
-            vkMapEntries.begin(), [](auto& mapEntry) {
+            mapEntries.begin(), [](auto& mapEntry) {
                 return vk::SpecializationMapEntry(
                     mapEntry.constantID,
                     mapEntry.offset,
                     mapEntry.size);
             });
-        vk::SpecializationInfo specializationInfo(
-            mapEntries.size(), mapEntries.data(),
-            specializationData.size(), specializationData.data());
-        info = vk::PipelineShaderStageCreateInfo({},
-            GetStageBits(a_Stage.stage),
-            **a_Stage.module,
-            a_Stage.entryPoint.c_str(),
-            &specializationInfo);
     }
+    IntermediateShaderStage& operator=(const IntermediateShaderStage& a_Other) {
+        entryPoint = (a_Other.entryPoint);
+        mapEntries = (a_Other.mapEntries);
+        specializationData = (a_Other.specializationData);
+        specializationInfo = { uint32_t(mapEntries.size()), mapEntries.data(), specializationData.size(), specializationData.data() };
+        info = { {}, a_Other.info.stage, a_Other.info.module, entryPoint.c_str(), &specializationInfo };
+        return *this;
+    };
     operator auto&() const {
         return info;
     }
-    vk::PipelineShaderStageCreateInfo info;
-    std::vector<uint8_t> specializationData;
+    std::string entryPoint;
     std::vector<vk::SpecializationMapEntry> mapEntries;
+    std::vector<uint8_t> specializationData;
+    vk::SpecializationInfo specializationInfo;
+    vk::PipelineShaderStageCreateInfo info;
 };
 
 struct IntermediateShaderState

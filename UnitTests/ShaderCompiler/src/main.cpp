@@ -1,5 +1,4 @@
 #include <OCRA/ShaderCompiler/Compiler.hpp>
-#include <OCRA/ShaderCompiler/Shader.hpp>
 
 #include <iostream>
 
@@ -10,20 +9,22 @@ int main()
     int ret = 0;
     auto compiler = ShaderCompiler::Create();
     {
-        ShaderCompiler::Shader::Info shaderInfo;
-        shaderInfo.type = ShaderCompiler::Shader::Type::Fragment;
+        ShaderCompiler::ShaderInfo shaderInfo;
+        shaderInfo.type = ShaderCompiler::ShaderType::Fragment;
         shaderInfo.entryPoint = "emptyShader";
         shaderInfo.source = {
             "#version 430                   \n"
             "void emptyShader() {}          \n"
             "void main() { emptyShader(); } \n"
         };
-        const auto shader = ShaderCompiler::Shader::Create(compiler, shaderInfo);
-        ret |= ShaderCompiler::Shader::Compile(shader).empty() ? -1 : 0;
+        shaderInfo.targetAPI = ShaderCompiler::TargetAPI::OpenGL;
+        ret |= ShaderCompiler::Compile(compiler, shaderInfo).empty() ? -1 : 0;
+        shaderInfo.targetAPI = ShaderCompiler::TargetAPI::Vulkan;
+        ret |= ShaderCompiler::Compile(compiler, shaderInfo).empty() ? -1 : 0;
     }
     {
-        ShaderCompiler::Shader::Info shaderInfo;
-        shaderInfo.type = ShaderCompiler::Shader::Type::Vertex;
+        ShaderCompiler::ShaderInfo shaderInfo;
+        shaderInfo.type = ShaderCompiler::ShaderType::Vertex;
         shaderInfo.entryPoint = "vertexIndex";
         shaderInfo.source = {
             "#version 430                                           \n"
@@ -39,12 +40,14 @@ int main()
             "   vertexIndex();                                      \n"
             "}                                                      \n"
         };
-        const auto shader = ShaderCompiler::Shader::Create(compiler, shaderInfo);
-        ret |= ShaderCompiler::Shader::Compile(shader).empty() ? -1 : 0;
+        shaderInfo.targetAPI = ShaderCompiler::TargetAPI::OpenGL;
+        ret |= ShaderCompiler::Compile(compiler, shaderInfo).empty() ? -1 : 0;
+        shaderInfo.targetAPI = ShaderCompiler::TargetAPI::Vulkan;
+        ret |= ShaderCompiler::Compile(compiler, shaderInfo).empty() ? -1 : 0;
     }
     {
-        ShaderCompiler::Shader::Info shaderInfo;
-        shaderInfo.type = ShaderCompiler::Shader::Type::Vertex;
+        ShaderCompiler::ShaderInfo shaderInfo;
+        shaderInfo.type = ShaderCompiler::ShaderType::Vertex;
         shaderInfo.entryPoint = "pushConstant";
         shaderInfo.source = {
             "#version 430                                                   \n"
@@ -59,12 +62,14 @@ int main()
             "   pushConstant();                                             \n"
             "}                                                              \n"
         };
-        const auto shader = ShaderCompiler::Shader::Create(compiler, shaderInfo);
-        ret |= ShaderCompiler::Shader::Compile(shader).empty() ? -1 : 0;
+        shaderInfo.targetAPI = ShaderCompiler::TargetAPI::OpenGL;
+        ret |= ShaderCompiler::Compile(compiler, shaderInfo).empty() ? -1 : 0;
+        shaderInfo.targetAPI = ShaderCompiler::TargetAPI::Vulkan;
+        ret |= ShaderCompiler::Compile(compiler, shaderInfo).empty() ? -1 : 0;
     }
     {
-        ShaderCompiler::Shader::Info shaderInfo;
-        shaderInfo.type = ShaderCompiler::Shader::Type::Vertex;
+        ShaderCompiler::ShaderInfo shaderInfo;
+        shaderInfo.type = ShaderCompiler::ShaderType::Vertex;
         shaderInfo.entryPoint = "instanceIndex";
         shaderInfo.source = {
             "#version 430                                                   \n"
@@ -88,13 +93,15 @@ int main()
             "   instanceIndex();                                            \n"
             "}                                                              \n"
         };
-        const auto shader = ShaderCompiler::Shader::Create(compiler, shaderInfo);
-        ret |= ShaderCompiler::Shader::Compile(shader).empty() ? -1 : 0;
+        shaderInfo.targetAPI = ShaderCompiler::TargetAPI::OpenGL;
+        ret |= ShaderCompiler::Compile(compiler, shaderInfo).empty() ? -1 : 0;
+        shaderInfo.targetAPI = ShaderCompiler::TargetAPI::Vulkan;
+        ret |= ShaderCompiler::Compile(compiler, shaderInfo).empty() ? -1 : 0;
     }
     try
     {
-        ShaderCompiler::Shader::Info shaderInfo;
-        shaderInfo.type = ShaderCompiler::Shader::Type::Fragment;
+        ShaderCompiler::ShaderInfo shaderInfo;
+        shaderInfo.type = ShaderCompiler::ShaderType::Fragment;
         shaderInfo.entryPoint = "subpassShader";
         shaderInfo.source = {
             "#version 430                                                                      \n"
@@ -105,15 +112,18 @@ int main()
             "}                                                                                 \n"
             "void main() { subpassShader(); }                                                  \n"
         };
-        const auto shader = ShaderCompiler::Shader::Create(compiler, shaderInfo);
-        ret |= ShaderCompiler::Shader::Compile(shader).empty() ? -1 : 0;
+        shaderInfo.targetAPI = ShaderCompiler::TargetAPI::OpenGL;
+        ret |= ShaderCompiler::Compile(compiler, shaderInfo).empty() ? -1 : 0;
+        shaderInfo.targetAPI = ShaderCompiler::TargetAPI::Vulkan;
+        ret |= ShaderCompiler::Compile(compiler, shaderInfo).empty() ? -1 : 0;
     }
     catch (std::exception& e) {
-        std::cout << e.what() << std::endl;
+        std::cerr << e.what() << std::endl;
     }
+    try
     {
-        ShaderCompiler::Shader::Info shaderInfo;
-        shaderInfo.type = ShaderCompiler::Shader::Type::Fragment;
+        ShaderCompiler::ShaderInfo shaderInfo;
+        shaderInfo.type = ShaderCompiler::ShaderType::Fragment;
         shaderInfo.entryPoint = "multipleSet";
         shaderInfo.source = {
             "#version 430                                                                      \n"
@@ -126,12 +136,17 @@ int main()
             "}                                                                                 \n"
             "void main() { multipleSet(); }                                                    \n"
         };
-        const auto shader = ShaderCompiler::Shader::Create(compiler, shaderInfo);
-        ret |= ShaderCompiler::Shader::Compile(shader).empty() ? -1 : 0;
+        shaderInfo.targetAPI = ShaderCompiler::TargetAPI::OpenGL;
+        ret |= ShaderCompiler::Compile(compiler, shaderInfo).empty() ? -1 : 0;
+        shaderInfo.targetAPI = ShaderCompiler::TargetAPI::Vulkan;
+        ret |= ShaderCompiler::Compile(compiler, shaderInfo).empty() ? -1 : 0;
+    }
+    catch (std::exception& e) {
+        std::cerr << e.what() << std::endl;
     }
     {
-        ShaderCompiler::Shader::Info shaderInfo;
-        shaderInfo.type = ShaderCompiler::Shader::Type::Vertex;
+        ShaderCompiler::ShaderInfo shaderInfo;
+        shaderInfo.type = ShaderCompiler::ShaderType::Vertex;
         shaderInfo.entryPoint = "uniformLocation";
         shaderInfo.source = {
             "#version 430                                               \n"
@@ -147,8 +162,10 @@ int main()
             "   uniformLocation();                                      \n"
             "}                                                          \n"
         };
-        const auto shader = ShaderCompiler::Shader::Create(compiler, shaderInfo);
-        ret |= ShaderCompiler::Shader::Compile(shader).empty() ? -1 : 0;
+        shaderInfo.targetAPI = ShaderCompiler::TargetAPI::OpenGL;
+        ret |= ShaderCompiler::Compile(compiler, shaderInfo).empty() ? -1 : 0;
+        shaderInfo.targetAPI = ShaderCompiler::TargetAPI::Vulkan;
+        ret |= ShaderCompiler::Compile(compiler, shaderInfo).empty() ? -1 : 0;
     }
     return ret;
 }

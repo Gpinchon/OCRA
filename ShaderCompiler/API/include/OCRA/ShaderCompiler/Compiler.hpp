@@ -1,10 +1,12 @@
 #pragma once
 
-#include <OCRA/ShaderCompiler/Handle.hpp>
+#include <OCRA/ShaderCompiler/Handles.hpp>
+#include <OCRA/ShaderCompiler/Structs.hpp>
 
-OCRA_DECLARE_HANDLE(OCRA::ShaderCompiler);
+#include <vector>
 
 namespace OCRA::ShaderCompiler
 {
 Handle Create();
+std::vector<uint32_t> Compile(const Handle& a_Compiler, const ShaderInfo& a_Info);
 }

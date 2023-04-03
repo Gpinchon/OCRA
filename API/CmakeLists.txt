@@ -9,7 +9,12 @@ set(OCRA_API_IMPL "OpenGL" CACHE STRING
 set(OCRA_API_IMPL_VALUES
   "OpenGL;Vulkan;DirectX")
 set_property(CACHE OCRA_API_IMPL PROPERTY STRINGS ${OCRA_API_IMPL_VALUES})
-add_compile_definitions(OCRA_API_IMPL=${OCRA_API_IMPL})
+
+add_compile_definitions(
+  OCRA_API_OpenGL=0
+  OCRA_API_Vulkan=1
+  OCRA_API_DirectX=2
+  OCRA_API_IMPL=OCRA_API_${OCRA_API_IMPL})
 
 set(OCRA_API_HEADER_LIST
   OCRA/Allocator.hpp

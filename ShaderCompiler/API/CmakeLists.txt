@@ -84,14 +84,17 @@ add_definitions(
 
 
 set(OCRA_SHADER_COMPILER_API_HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/ShaderCompiler/Shader.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/ShaderCompiler/Compiler.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/ShaderCompiler/Enums.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/ShaderCompiler/Handle.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/ShaderCompiler/Structs.hpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/OCRA/ShaderCompiler/Impl/Compiler.hpp
 )
 
 set(OCRA_SHADER_COMPILER_API_SOURCE_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/ShaderCompiler/Shader.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/ShaderCompiler/Compiler.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/ShaderCompiler/OpenGL.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/ShaderCompiler/Vulkan.cpp
 )
 
 add_library(OCRA-ShaderCompiler-API STATIC ${OCRA_SHADER_COMPILER_API_HEADER_FILES} ${OCRA_SHADER_COMPILER_API_SOURCE_FILES})

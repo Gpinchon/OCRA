@@ -222,9 +222,8 @@ Pipeline::Handle CreatePipelineGraphics(
         a_Device->GetOrCreateDescriptorSetLayout(bindings),
         pushConstantRanges));
     std::vector<vk::Format> colorAttachments(a_Info.renderingInfo.colorAttachmentFormats.size());
-    for (auto i = 0u; i < colorAttachments.size(); ++i) {
-        colorAttachments.at(i) = ConvertToVk(a_Info.renderingInfo.colorAttachmentFormats.at(i));
-    }
+    std::transform(a_Info.renderingInfo.colorAttachmentFormats.begin(), a_Info.renderingInfo.colorAttachmentFormats.end(),
+        colorAttachments.begin(), [](const auto& format) { return ConvertToVk(format); });
     vk::PipelineRenderingCreateInfo renderingInfo(
         0,
         colorAttachments,
@@ -266,11 +265,11 @@ Semaphore::Handle CreateSemaphore(
     return std::make_shared<Semaphore::Impl>(*a_Device, info);
 }
 
-Shader::Module::Handle CreateShaderModule(
+ShaderModule::Handle CreateShaderModule(
     const Device::Handle& a_Device,
     const CreateShaderModuleInfo& a_Info)
 {
-    return std::make_shared<Shader::Module::Impl>(
+    return std::make_shared<ShaderModule::Impl>(
         *a_Device, vk::ShaderModuleCreateInfo({}, a_Info.code));
 }
 

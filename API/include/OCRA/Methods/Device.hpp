@@ -79,7 +79,7 @@ Semaphore::Handle CreateSemaphore(
     const CreateSemaphoreInfo& a_Info,
     const AllocationCallback* a_Allocator = nullptr);
 
-Shader::Module::Handle CreateShaderModule(
+ShaderModule::Handle CreateShaderModule(
     const Device::Handle& a_Device,
     const CreateShaderModuleInfo& a_Info);
 

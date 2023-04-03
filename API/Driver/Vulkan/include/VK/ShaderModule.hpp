@@ -2,7 +2,7 @@
 
 #include <vulkan/vulkan_raii.hpp>
 
-namespace OCRA::Shader::Module
+namespace OCRA::ShaderModule
 {
 struct Impl : vk::raii::ShaderModule
 {

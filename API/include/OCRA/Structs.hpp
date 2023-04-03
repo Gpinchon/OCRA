@@ -282,7 +282,7 @@ struct ShaderSpecializationInfo {
 };
 struct PipelineShaderStage {
     ShaderStageFlags stage{ ShaderStageFlagBits::None }; //must be a single stage
-    Shader::Module::Handle module; //the spir-v module
+    ShaderModule::Handle module; //the spir-v module
     std::string entryPoint{ "" }; //entry point name
     ShaderSpecializationInfo specializationInfo;
 };
