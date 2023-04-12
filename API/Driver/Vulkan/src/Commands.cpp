@@ -1,4 +1,4 @@
-#include <OCRA/Core.hpp>
+#include <OCRA/OCRA.hpp>
 
 #include <VK/Buffer.hpp>
 #include <VK/DescriptorSet.hpp>
@@ -140,15 +140,37 @@ void CopyImage(
     const std::vector<ImageCopy>& a_Regions)
 {
     std::vector<vk::ImageCopy> vkCopies(a_Regions.size());
+    ImageAspectFlags srcImageAspects;
+    ImageAspectFlags dstImageAspects;
     for (auto i = 0u; i < vkCopies.size(); ++i)
     {
         auto& copy = a_Regions.at(i);
         auto& vkCopy = vkCopies.at(i);
-        vkCopy.extent = ConvertToVk(copy.extent);
+        vkCopy.extent         = ConvertToVk(copy.extent);
         vkCopy.dstOffset      = ConvertToVk(copy.dstOffset);
         vkCopy.dstSubresource = ConvertToVk(copy.dstSubresource);
         vkCopy.srcOffset      = ConvertToVk(copy.srcOffset);
         vkCopy.srcSubresource = ConvertToVk(copy.srcSubresource);
+        srcImageAspects |= copy.srcSubresource.aspects;
+        dstImageAspects |= copy.dstSubresource.aspects;
+    }
+    auto& srcImageLayout = a_CommandBuffer->imageLayouts[**a_SrcImage];
+    if (srcImageLayout != ImageLayout::TransferSrcOptimal) {
+        ImageLayoutTransitionInfo transition;
+        transition.image = a_SrcImage;
+        transition.subRange.aspects = srcImageAspects;
+        transition.oldLayout = srcImageLayout;
+        transition.newLayout = ImageLayout::TransferSrcOptimal;
+        TransitionImageLayout(a_CommandBuffer, transition);
+    }
+    auto& dstImageLayout = a_CommandBuffer->imageLayouts[**a_DstImage];
+    if (dstImageLayout != ImageLayout::TransferDstOptimal) {
+        ImageLayoutTransitionInfo transition;
+        transition.image = a_DstImage;
+        transition.subRange.aspects = dstImageAspects;
+        transition.oldLayout = dstImageLayout;
+        transition.newLayout = ImageLayout::TransferDstOptimal;
+        TransitionImageLayout(a_CommandBuffer, transition);
     }
     a_CommandBuffer->copyImage(
         **a_SrcImage, vk::ImageLayout::eTransferSrcOptimal,
@@ -215,7 +237,8 @@ void PipelineBarrier(
     for (const auto& barrier : a_ImageMemoryBarriers) {
         vk::ImageMemoryBarrier vkBarrier;
         vkBarrier.image = **barrier.image;
-        vkBarrier.newLayout = vk::ImageLayout::eTransferDstOptimal;
+        vkBarrier.oldLayout = ConvertToVk(barrier.oldLayout);
+        vkBarrier.newLayout = ConvertToVk(barrier.newLayout);
         vkBarrier.dstAccessMask = ConvertToVk(barrier.dstAccessMask);
         vkBarrier.srcAccessMask = ConvertToVk(barrier.srcAccessMask);
         vkBarrier.dstQueueFamilyIndex = barrier.dstQueueFamilyIndex;
@@ -226,6 +249,7 @@ void PipelineBarrier(
         vkBarrier.subresourceRange.layerCount = barrier.subRange.layerCount;
         vkBarrier.subresourceRange.levelCount = barrier.subRange.levelCount;
         vkImageMemoryBarriers.push_back(vkBarrier);
+        a_CommandBuffer->imageLayouts[**barrier.image] = barrier.newLayout;
     }
     a_CommandBuffer->pipelineBarrier(
         ConvertToVk(a_SrcStageMask),
@@ -256,7 +280,8 @@ void SetVertexInput(
             return vk::VertexInputBindingDescription2EXT(
                 binding.binding,
                 binding.stride,
-                ConvertToVk(binding.inputRate));
+                ConvertToVk(binding.inputRate),
+                1); //TODO enable instanced rendering
         });
     a_CommandBuffer->setVertexInputEXT(bindings, attribs);
 }
@@ -287,6 +312,7 @@ void TransitionImagesLayout(
         barrier.dstQueueFamilyIndex = dstQueueFamily;
         barrier.srcAccessMask = GetImageTransitionAccessMask(oldLayout);
         barrier.dstAccessMask = GetImageTransitionAccessMask(newLayout);
+        a_CommandBuffer->imageLayouts[*image] = transition.newLayout;
     }
     a_CommandBuffer->pipelineBarrier(
         vkSrcStageFlags, vkDstStageFlags,
@@ -307,16 +333,17 @@ void PushDescriptorSet(
     const Pipeline::Handle&                a_Pipeline,
     const std::vector<DescriptorSetWrite>& a_Writes)
 {
-    std::vector<vk::WriteDescriptorSet>  vkWriteInfos(a_Writes.size());
-    
+    std::vector<vk::WriteDescriptorSet>   vkWriteInfos(a_Writes.size());
     std::vector<vk::DescriptorImageInfo>  vkImageInfos(a_Writes.size());
     std::vector<vk::DescriptorBufferInfo> vkBufferInfos(a_Writes.size());
+    std::vector<ImageLayoutTransitionInfo> imageTransitions;
 
     for (auto i = 0u; i < vkWriteInfos.size(); ++i) {
         auto& writeInfo = a_Writes.at(i);
         auto& vkWriteInfo = vkWriteInfos.at(i);
 
         if (writeInfo.imageInfo.has_value()) {
+            
             auto& info = writeInfo.imageInfo.value();
             auto& vkInfo = vkImageInfos.at(i);
             vkInfo = vk::DescriptorImageInfo(
@@ -324,6 +351,15 @@ void PushDescriptorSet(
                 **info.imageView,
                 ConvertToVk(info.imageLayout));
             vkWriteInfo.pImageInfo = &vkInfo;
+            auto& imageLayout = a_CommandBuffer->imageLayouts[**info.imageView->image];
+            if (imageLayout != info.imageLayout) {
+                ImageLayoutTransitionInfo imageTransition;
+                imageTransition.image     = info.imageView->image;
+                imageTransition.oldLayout = imageLayout;
+                imageTransition.newLayout = info.imageLayout;
+                imageTransition.subRange  = info.imageView->subResourceRange;
+                TransitionImageLayout(a_CommandBuffer, { imageTransition });
+            }
         }
 
         if (writeInfo.bufferInfo.has_value()) {
@@ -335,12 +371,12 @@ void PushDescriptorSet(
                 info.range);
             vkWriteInfo.pBufferInfo = &vkInfo;
         }
-
         vkWriteInfo.descriptorCount = writeInfo.dstCount;
         vkWriteInfo.descriptorType  = ConvertToVk(writeInfo.type);
         vkWriteInfo.dstArrayElement = writeInfo.dstArrayElement;
         vkWriteInfo.dstBinding      = writeInfo.dstBinding;
-        vkWriteInfo.dstSet          = **writeInfo.dstSet;
+        if (writeInfo.dstSet != nullptr)
+            vkWriteInfo.dstSet      = **writeInfo.dstSet;
     }
     a_CommandBuffer->pushDescriptorSetKHR(
         a_Pipeline->bindPoint,
