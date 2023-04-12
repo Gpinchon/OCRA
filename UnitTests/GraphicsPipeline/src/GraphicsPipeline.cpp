@@ -171,7 +171,7 @@ struct GraphicsPipelineTestApp : TestApp
     {
         {
             CreateImageInfo imageInfo;
-            imageInfo.usage = ImageUsageFlagBits::ColorAttachment;
+            imageInfo.usage = ImageUsageFlagBits::ColorAttachment | ImageUsageFlagBits::TransferSrc;
             imageInfo.type = ImageType::Image2D;
             imageInfo.extent.width  = window.GetExtent().width;
             imageInfo.extent.height = window.GetExtent().height;
@@ -195,6 +195,7 @@ struct GraphicsPipelineTestApp : TestApp
     {
         CommandBufferBeginInfo bufferBeginInfo{};
         bufferBeginInfo.flags = CommandBufferUsageFlagBits::None;
+        bufferBeginInfo.inheritanceInfo.emplace();
         Command::Buffer::Reset(drawCommandBuffer);
 
         RenderingAttachmentInfo renderingAttachment{};
@@ -209,7 +210,12 @@ struct GraphicsPipelineTestApp : TestApp
         renderingInfo.colorAttachments.push_back(renderingAttachment);
         renderingInfo.layerCount = 1;
 
+        const auto descriptorWrites = mesh.GetDescriptorWrites();
+
         Command::Buffer::Begin(drawCommandBuffer, bufferBeginInfo);
+        if (!descriptorWrites.empty()) {
+            Command::PushDescriptorSet(drawCommandBuffer, graphicsPipeline, descriptorWrites);
+        }
         Command::BeginRendering(drawCommandBuffer, renderingInfo);
         {
             Command::BindPipeline(drawCommandBuffer, graphicsPipeline);
@@ -235,7 +241,10 @@ struct GraphicsPipelineTestApp : TestApp
         {
             Command::ExecuteCommandBuffer(mainCommandBuffer, drawCommandBuffer);
             {
+                
                 ImageCopy imageCopy;
+                imageCopy.srcSubresource.aspects = ImageAspectFlagBits::Color;
+                imageCopy.dstSubresource.aspects = ImageAspectFlagBits::Color;
                 imageCopy.extent.width  = window.GetExtent().width;
                 imageCopy.extent.height = window.GetExtent().height;
                 imageCopy.extent.depth  = 1;
@@ -244,6 +253,14 @@ struct GraphicsPipelineTestApp : TestApp
                     frameBufferImage,
                     swapChainImage,
                     { imageCopy });
+                ImageSubresourceRange range{};
+                range.aspects = ImageAspectFlagBits::Color;
+                range.levelCount = 1;
+                range.layerCount = 1;
+                Command::TransitionImageLayout(
+                    mainCommandBuffer, { swapChainImage, range,
+                    ImageLayout::TransferDstOptimal,
+                    ImageLayout::PresentSrc });
             }
         }
         Command::Buffer::End(mainCommandBuffer);

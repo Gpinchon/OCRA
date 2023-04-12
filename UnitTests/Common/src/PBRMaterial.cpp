@@ -82,5 +82,15 @@ PBRMaterial::PBRMaterial(
     bufferCopy.imageSubresource.aspects = ImageAspectFlagBits::Color;
     bufferCopy.imageSubresource.mipLevel = 0;
     Image::CopyBufferToImage(textureTransferBuffer, texture.GetImage(), { bufferCopy });
+    ImageLayoutTransitionInfo transition;
+    transition.image = texture.GetImage();
+    transition.oldLayout = ImageLayout::Undefined;
+    transition.newLayout = ImageLayout::General;
+    transition.subRange.aspects = ImageAspectFlagBits::Color;
+    transition.subRange.baseArrayLayer = 0;
+    transition.subRange.baseMipLevel = 0;
+    transition.subRange.layerCount = 1;
+    transition.subRange.levelCount = 1;
+    Image::TransitionLayouts({ transition });
 }
 }

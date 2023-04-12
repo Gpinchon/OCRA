@@ -14,6 +14,7 @@ void UniformBuffer::Update() {
         bufferInfo.buffer = buffer;
         bufferInfo.offset = 0;
         bufferInfo.range = data.size();
+        writeOperations.front().dstCount = 1;
         writeOperations.front().bufferInfo = bufferInfo;
         writeOperations.front().dstBinding = GetDescriptorSetLayoutBindings().front().binding;
         writeOperations.front().type = DescriptorType::UniformBuffer;

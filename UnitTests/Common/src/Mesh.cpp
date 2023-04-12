@@ -57,12 +57,11 @@ Mesh::Mesh(const Device::Handle& a_Device, const VertexBuffer& a_VertexBuffer, c
     layoutInfo.bindings = descriptorSetLayoutBindings;
     inputAssembly.topology = PrimitiveTopology::TriangleList;
     inputAssembly.primitiveRestartEnable = false;
+    Update();
 }
 
 void Mesh::Draw(const Command::Buffer::Handle& a_CommandBuffer, const Pipeline::Handle& a_Pipeline)
 {
-    Command::PushDescriptorSet(a_CommandBuffer, a_Pipeline, projectionMatrix.GetWriteOperations());
-    Command::PushDescriptorSet(a_CommandBuffer, a_Pipeline, material.GetWriteOperations());
     Command::SetVertexInput(a_CommandBuffer,
         GetVertexBuffer().GetAttribsDescriptions(),
         GetVertexBuffer().GetBindingDescriptions());

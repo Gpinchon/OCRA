@@ -6,11 +6,13 @@ void UniformTexture::Update()
     if (!dirty) return;
     DescriptorSetImageInfo setImageInfo;
     DescriptorSetWrite writeOp;
-    setImageInfo.imageView = texture.GetImageView();
+    setImageInfo.imageView   = texture.GetImageView();
+    setImageInfo.imageLayout = ImageLayout::General;
     setImageInfo.sampler = texture.GetSampler();
     writeOp.type = DescriptorType::ImageSampler;
     writeOp.imageInfo = setImageInfo;
     writeOp.dstBinding = GetDescriptorSetLayoutBindings().front().binding;
+    writeOp.dstCount = 1;
     SetWriteOperations({ writeOp });
     dirty = false;
 }

@@ -20,6 +20,20 @@ public:
         const VertexBuffer& a_VertexBuffer,
         const Material& a_Material);
 
+    auto GetDescriptorWrites() const {
+        std::vector<DescriptorSetWrite> writes;
+        writes.reserve(
+            projectionMatrix.GetWriteOperations().size() +
+            material.GetWriteOperations().size());
+        writes.insert(writes.end(),
+            projectionMatrix.GetWriteOperations().begin(),
+            projectionMatrix.GetWriteOperations().end());
+        writes.insert(writes.end(),
+            material.GetWriteOperations().begin(),
+            material.GetWriteOperations().end());
+        return writes;
+    }
+
     auto& GetProjectionMatrix() const {
         return projectionMatrix.Get<Mat4x4>();
     }
@@ -35,8 +49,6 @@ public:
     auto& GetDescriptorSets() const { return descriptorSets; }
     auto GetDescriptorSetLayouts() const { return descriptorSetLayouts; }
     auto& GetDescriptorSetLayoutBindings() const {
-        
-        
         return descriptorSetLayoutBindings;
     }
     std::vector<PipelineShaderStage> GetShaderStages() const {
