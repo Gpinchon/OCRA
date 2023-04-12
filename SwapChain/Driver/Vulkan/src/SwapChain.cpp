@@ -63,8 +63,10 @@ std::pair<Image::Handle, uint32_t> GetNextImage(
     const Fence::Handle& a_Fence)
 {
     auto& swapChain = *a_SwapChain;
-    auto imageIndex = swapChain.acquireNextImage(a_Timeout.count(),
-        **a_Semaphore, **a_Fence).second;
+    auto imageIndex = swapChain.acquireNextImage(
+        a_Timeout.count(),
+        a_Semaphore != nullptr ? **a_Semaphore : nullptr,
+        a_Fence     != nullptr ? **a_Fence     : nullptr).second;
     swapChain.imageIndex = imageIndex;
     return { swapChain.GetCurrentImage(), imageIndex };
 }
