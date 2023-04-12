@@ -23,7 +23,9 @@ struct DescriptorSetLayoutCache {
             }
             return *layout.layout;
         }
-        vk::DescriptorSetLayoutCreateInfo info({}, a_Bindings);
+        vk::DescriptorSetLayoutCreateInfo info(
+            vk::DescriptorSetLayoutCreateFlagBits::ePushDescriptorKHR,
+            a_Bindings);
         layouts.resize(layouts.size() + 1);
         auto& storage = layouts.back();
         storage.layout = std::move(a_Device.createDescriptorSetLayout(info));
