@@ -25,12 +25,7 @@ void Present(
     for (auto i = 0u; i < waitSemaphoreCount; ++i) {
         waitSemaphores.at(i) = **a_PresentInfo.waitSemaphores.at(i);
     }
-    vk::PresentInfoKHR info{ VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
-    info.swapchainCount = swapChainCount;
-    info.pSwapchains    = swapChains.data();
-    info.pImageIndices  = imageIndice.data();
-    info.waitSemaphoreCount = waitSemaphoreCount;
-    info.pWaitSemaphores    = waitSemaphores.data();
+    vk::PresentInfoKHR info(waitSemaphores, swapChains, imageIndice);
     VK_INVOKE(a_Queue->presentKHR(info));
 }
 }
