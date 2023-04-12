@@ -623,9 +623,21 @@ struct PhysicalDeviceFeatures {
     bool    inheritedQueries{ false };
 };
 
+/**
+* @brief if the command buffer is secondary, this specifies what is inherited from it
+*/
+struct CommandBufferInheritanceInfo {
+    uint32_t viewMask = 0;
+    std::vector<Format> colorAttachmentFormats;
+    Format depthAttachmentFormat = Format::Unknown;
+    Format stencilAttachmentFormat = Format::Unknown;
+    SampleCount samples = SampleCount::Count1;
+};
+
 struct CommandBufferBeginInfo
 {
     CommandBufferUsageFlags flags{ CommandBufferUsageFlagBits::None };
+    std::optional<CommandBufferInheritanceInfo> inheritanceInfo;
 };
 
 struct CreateBufferInfo {
