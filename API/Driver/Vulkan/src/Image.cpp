@@ -37,7 +37,7 @@ void CopyBufferToImage(
         commandBufferInfo.commandBufferCount = 1;
         commandBufferInfo.commandPool = *device.transferCommandPool;
         commandBufferInfo.level = vk::CommandBufferLevel::ePrimary;
-        transferCommandBuffer = std::make_shared<Command::Buffer::Impl>(std::move(device.allocateCommandBuffers(commandBufferInfo).front()));
+        transferCommandBuffer = std::make_shared<Command::Buffer::Impl>(std::move(device.allocateCommandBuffers(commandBufferInfo).front()), vk::CommandBufferLevel::ePrimary);
     }
     {
         vk::CommandBufferBeginInfo cmdBufferBeginInfo;
@@ -113,6 +113,56 @@ void CopyImageToBuffer(
     }
     device.transferQueue.waitIdle();
 }
+
+void TransitionLayouts(
+    const std::vector<ImageLayoutTransitionInfo>& a_Transitions)
+{
+    auto& device = a_Transitions.front().image->device;
+
+    vk::raii::CommandBuffer transitionCommandBuffer = nullptr;
+    {
+        vk::CommandBufferAllocateInfo commandBufferInfo;
+        commandBufferInfo.commandBufferCount = 1;
+        commandBufferInfo.commandPool = *device.transferCommandPool;
+        commandBufferInfo.level = vk::CommandBufferLevel::ePrimary;
+        transitionCommandBuffer = std::move(device.allocateCommandBuffers(commandBufferInfo).front());
+    }
+    vk::PipelineStageFlags vkSrcStageFlags;
+    vk::PipelineStageFlags vkDstStageFlags;
+    std::vector<vk::ImageMemoryBarrier> barriers(a_Transitions.size());
+    for (auto i = 0u; i < barriers.size(); ++i) {
+        auto& transition = a_Transitions.at(i);
+        auto& image = *transition.image;
+        auto& subResource = transition.subRange;
+        auto& srcQueueFamily = transition.srcQueueFamilyIndex;
+        auto& dstQueueFamily = transition.dstQueueFamilyIndex;
+        auto& barrier = barriers.at(i);
+        auto oldLayout = ConvertToVk(transition.oldLayout);
+        auto newLayout = ConvertToVk(transition.newLayout);
+        vkSrcStageFlags |= GetImageTransitionStage(oldLayout);
+        vkDstStageFlags |= GetImageTransitionStage(newLayout);
+        barrier.image = *image;
+        barrier.subresourceRange = ConvertToVk(subResource);
+        barrier.oldLayout = oldLayout;
+        barrier.newLayout = newLayout;
+        barrier.srcQueueFamilyIndex = srcQueueFamily;
+        barrier.dstQueueFamilyIndex = dstQueueFamily;
+        barrier.srcAccessMask = GetImageTransitionAccessMask(oldLayout);
+        barrier.dstAccessMask = GetImageTransitionAccessMask(newLayout);
+    }
+    {
+        vk::CommandBufferBeginInfo cmdBufferBeginInfo;
+        cmdBufferBeginInfo.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
+        transitionCommandBuffer.begin(cmdBufferBeginInfo);
+        transitionCommandBuffer.pipelineBarrier(
+            vkSrcStageFlags, vkDstStageFlags,
+            vk::DependencyFlags{},
+            {}, {}, barriers);
+        transitionCommandBuffer.end();
+    }
+    device.transferQueue.waitIdle();
+}
+
 size_t GetDataSize(const Image::Handle& a_Image)
 {
     auto requirements = a_Image->getMemoryRequirements();
