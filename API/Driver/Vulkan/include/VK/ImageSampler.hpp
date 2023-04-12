@@ -11,5 +11,6 @@ struct Impl : vk::raii::Sampler
         const vk::SamplerCreateInfo& a_Info)
         : vk::raii::Sampler(a_Device, a_Info)
     {}
+    vk::Image image;
 };
 }

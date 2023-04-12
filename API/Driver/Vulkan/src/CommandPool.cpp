@@ -24,7 +24,7 @@ std::vector<Command::Buffer::Handle> AllocateCommandBuffer(
     for (auto i = 0u ; i < vkBuffers.size(); ++i)
     {
         auto& vkBuffer = vkBuffers.at(i);
-        buffers.at(i) = std::allocate_shared<Command::Buffer::Impl>(allocator, std::move(vkBuffer));
+        buffers.at(i) = std::allocate_shared<Command::Buffer::Impl>(allocator, std::move(vkBuffer), info.level);
     }
     return buffers;
 }

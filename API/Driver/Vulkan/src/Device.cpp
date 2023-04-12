@@ -156,7 +156,7 @@ Image::View::Handle CreateImageView(
         ConvertToVk(a_Info.format),
         ConvertToVk(a_Info.components),
         ConvertToVk(a_Info.subRange));
-    return std::make_shared<Image::View::Impl>(device, vkInfo, a_Info.image);
+    return std::make_shared<Image::View::Impl>(device, vkInfo, a_Info.image, a_Info.subRange);
 }
 
 Pipeline::Handle CreatePipelineGraphics(
