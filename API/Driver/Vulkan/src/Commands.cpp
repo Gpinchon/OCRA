@@ -19,6 +19,7 @@ namespace OCRA::Command
 {
 static inline auto GetVkRenderingAttachmentInfo(const RenderingAttachmentInfo& a_Info) {
     vk::RenderingAttachmentInfo vkInfo;
+    if (a_Info.imageView == nullptr) return vkInfo;
     vkInfo.clearValue = ConvertToVk(a_Info.clearValue);
     vkInfo.imageLayout = ConvertToVk(a_Info.imageLayout);
     vkInfo.imageView = **a_Info.imageView;
@@ -43,14 +44,13 @@ void BeginRendering(
     vkDepthAttachment = GetVkRenderingAttachmentInfo(a_Info.depthAttachment);
     vkStencilAttachment = GetVkRenderingAttachmentInfo(a_Info.stencilAttachment);
     vk::RenderingInfo vkInfo;
-    vkInfo.colorAttachmentCount = vkColorAttachments.size();
     //vkInfo.flags = GetVkRenderingFlags(a_Info.flags);
     //vkInfo.viewMask = a_Info.viewMask;
     vkInfo.flags = {};
     vkInfo.viewMask = 0;
     vkInfo.layerCount = a_Info.layerCount;
     vkInfo.renderArea = ConvertToVk(a_Info.area);
-    vkInfo.pColorAttachments = vkColorAttachments.data();
+    vkInfo.setColorAttachments(vkColorAttachments);
     vkInfo.pDepthAttachment = &vkDepthAttachment;
     vkInfo.pStencilAttachment = &vkStencilAttachment;
     a_CommandBuffer->beginRendering(vkInfo);
