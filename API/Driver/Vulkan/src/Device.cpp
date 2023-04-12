@@ -101,7 +101,7 @@ Image::Handle CreateImage(
     vkInfo.usage = ConvertToVk(a_Info.usage);
     vkInfo.format = ConvertToVk(a_Info.format);
     vkInfo.imageType = ConvertToVk(a_Info.type);
-    vkInfo.initialLayout = ConvertToVk(a_Info.initialLayout);
+    vkInfo.initialLayout = vk::ImageLayout::eUndefined;//ConvertToVk(a_Info.initialLayout);
     vkInfo.mipLevels = a_Info.mipLevels;
     vkInfo.samples = ConvertToVk(a_Info.samples);
     auto image = std::make_shared<Image::Impl>(device, vkInfo);

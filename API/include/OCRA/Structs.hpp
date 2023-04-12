@@ -662,7 +662,6 @@ struct CreateDeviceInfo {
 };
 struct CreateImageInfo {
     ImageType           type{ ImageType::Unknown };
-    ImageLayout         initialLayout{ ImageLayout::Undefined };
     ImageUsageFlags     usage{ ImageUsageFlagBits::None }; //Specifies how the image will be used
     SampleCount         samples{ SampleCount::Count1 };
     Format              format{ Format::Unknown };
