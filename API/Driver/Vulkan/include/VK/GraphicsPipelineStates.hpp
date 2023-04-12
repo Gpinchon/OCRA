@@ -172,7 +172,7 @@ struct IntermediateDynamicState
             a_State.dynamicStates.begin(), a_State.dynamicStates.end(),
             states.begin(), [](const DynamicState& a_State) {
                 return ConvertToVk(a_State);
-            });
+        });
     }
     inline auto data() const {
         return &info;
