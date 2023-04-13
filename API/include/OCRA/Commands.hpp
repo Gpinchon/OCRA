@@ -38,14 +38,40 @@ void CopyImageToBuffer(
 
 /**
 * @brief Copies an image to an other,
-* a_SrcImage should be in Transfer Src Optimal
-* a_DstImage should be in Transfer Dst Optimal
+* a_SrcImage should be in layout TransferSrcOptimal
+* a_DstImage should be in layout TransferDstOptimal
 */
 void CopyImage(
     const Command::Buffer::Handle&  a_CommandBuffer,
     const Image::Handle&            a_SrcImage,
     const Image::Handle&            a_DstImage,
     const std::vector<ImageCopy>& a_Regions);
+
+/**
+* @brief The same as CopyImage except it performs automatic conversion
+* (eg. BGR to RGB), Images will be transitioned to specified layouts
+*/
+void BlitImage(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const Image::Handle& a_SrcImage,
+    const ImageLayout& a_SrcImageLayout,
+    const Image::Handle& a_DstImage,
+    const ImageLayout& a_DstImageLayout,
+    const std::vector<ImageBlit>& a_Blits,
+    const Filter& a_Filter);
+
+/**
+* @brief The same as CopyImage except it performs automatic conversion
+* (eg. BGR to RGB), Images will be transitioned to proper layout
+* a_SrcImage should be in layout TransferSrcOptimal
+* a_DstImage should be in layout TransferDstOptimal
+*/
+void BlitImage(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const Image::Handle& a_SrcImage,
+    const Image::Handle& a_DstImage,
+    const std::vector<ImageBlit>& a_Blits,
+    const Filter& a_Filter);
 
 void GenerateMipMap(
     const Command::Buffer::Handle&  a_CommandBuffer,

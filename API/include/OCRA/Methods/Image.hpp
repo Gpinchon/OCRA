@@ -39,9 +39,6 @@ void CopyImageToBuffer(
     const Image::Handle& a_SrcImage,
     const std::vector<ImageBufferCopy>& a_Regions);
 
-void TransitionLayouts(
-    const std::vector<ImageLayoutTransitionInfo>& a_Transition);
-
 /**
 * @brief Generates the mipmaps for the specified Image.
 * On OpenGL this is a native function, on VK it's emulated.

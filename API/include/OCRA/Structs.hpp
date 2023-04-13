@@ -193,6 +193,14 @@ struct ImageBufferCopy {
     Offset3D imageOffset;
     Extent3D imageExtent;
 };
+
+struct ImageBlit {
+    ImageSubresourceLayers  srcSubresource;
+    std::array<Offset3D, 2> srcOffsets;
+    ImageSubresourceLayers  dstSubresource;
+    std::array<Offset3D, 2> dstOffsets;
+};
+
 struct ImageCopy {
     ImageSubresourceLayers srcSubresource;
     Offset3D               srcOffset;
