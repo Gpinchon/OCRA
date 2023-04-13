@@ -1,8 +1,116 @@
 #include <GL/CommandBuffer.hpp>
 #include <GL/Image.hpp>
+#include <GL/Device.hpp>
 
 namespace OCRA::Command
 {
+struct BlitImageCommand : CommandI {
+    BlitImageCommand(
+        std::pmr::memory_resource* a_MemoryResource,
+        const Device::Handle& a_Device,
+        const Image::Handle& a_SrcImage,
+        const Image::Handle& a_DstImage,
+        const size_t a_Count,
+        const ImageBlit* a_Blits,
+        const Filter& a_Filter)
+        : device(a_Device)
+        , srcImage(a_SrcImage)
+        , dstImage(a_DstImage)
+        , blits(a_Blits, a_Blits + a_Count, a_MemoryResource)
+        , filter(a_Filter)
+    {
+        a_Device->PushCommand([this] {
+            for (const auto& blit : blits) {
+                for (auto blitLevel = blit.srcOffsets[0].z;
+                    blitLevel < blit.srcOffsets[1].z;
+                    ++blitLevel)
+                {
+                    std::array<GLuint, 2> FB{ 0, 0 };
+                    glCreateFramebuffers(2, FB.data());
+                    glNamedFramebufferReadBuffer(FB.at(0), GL_COLOR_ATTACHMENT0);
+                    glNamedFramebufferDrawBuffer(FB.at(1), GL_COLOR_ATTACHMENT0);
+                    if (dstImage->info.type == ImageType::Image1D) {
+                        glNamedFramebufferTexture(
+                            FB.at(0),
+                            GL_COLOR_ATTACHMENT0,
+                            dstImage->handle,
+                            blitLevel);
+                    }
+                    else if (dstImage->info.type == ImageType::Image2D) {
+                        //TODO manage multisampling
+                        glNamedFramebufferTexture(
+                            FB.at(0),
+                            GL_COLOR_ATTACHMENT0,
+                            dstImage->handle,
+                            blitLevel);
+                    }
+                    else if (dstImage->info.type == ImageType::Image3D) {
+                        glNamedFramebufferTextureLayer(
+                            FB.at(0),
+                            GL_COLOR_ATTACHMENT0,
+                            dstImage->handle,
+                            blitLevel, blitLevel);
+                    }
+                    if (srcImage->info.type == ImageType::Image1D) {
+                        glNamedFramebufferTexture(
+                            FB.at(1),
+                            GL_COLOR_ATTACHMENT0,
+                            srcImage->handle,
+                            blitLevel);
+                    }
+                    else if (srcImage->info.type == ImageType::Image2D) {
+                        //TODO manage multisampling
+                        glNamedFramebufferTexture(
+                            FB.at(1),
+                            GL_COLOR_ATTACHMENT0,
+                            srcImage->handle,
+                            blitLevel);
+                    }
+                    else if (srcImage->info.type == ImageType::Image3D) {
+                        glNamedFramebufferTextureLayer(
+                            FB.at(1),
+                            GL_COLOR_ATTACHMENT0,
+                            srcImage->handle,
+                            blitLevel, blitLevel);
+                    }
+                    framebuffers.push_back(FB);
+                }
+            }
+        }, false);
+    }
+    ~BlitImageCommand() {
+        device.lock()->PushCommand([framebuffers = framebuffers] {
+            for (const auto &FB : framebuffers) {
+                glDeleteFramebuffers(2, FB.data());
+            }
+        }, false);
+    }
+    virtual void operator()(Buffer::ExecutionState&) {
+        for (auto blitIndex = 0u; blitIndex < blits.size(); ++blitIndex) {
+            const auto& blit = blits.at(blitIndex);
+            for (auto blitLayer = blit.srcOffsets[0].z;
+                blitLayer < blit.srcOffsets[1].z;
+                 ++blitLayer)
+            {
+                const auto& FB = framebuffers.at(blitIndex + blitLayer);
+                glBlitNamedFramebuffer(
+                    FB.at(0),
+                    FB.at(1),
+                    blit.srcOffsets[0].x, blit.srcOffsets[0].y,
+                    blit.srcOffsets[1].x, blit.srcOffsets[1].y,
+                    blit.dstOffsets[0].x, blit.dstOffsets[0].y,
+                    blit.dstOffsets[1].x, blit.dstOffsets[1].y,
+                    0, GL_NEAREST);
+            }
+        }
+    }
+    const Device::WeakHandle device;
+    const Image::Handle srcImage;
+    const Image::Handle dstImage;
+    const std::pmr::vector<ImageBlit> blits;
+    const Filter filter;
+    std::pmr::vector<std::array<GLuint, 2>> framebuffers;
+};
 struct CopyImageCommand : CommandI {
     CopyImageCommand(
         std::pmr::memory_resource* a_MemoryResource,
@@ -133,10 +241,42 @@ void ClearColorImage(
 void TransitionImageLayout(
     const Command::Buffer::Handle& a_CommandBuffer,
     const ImageLayoutTransitionInfo& a_Transition)
-{}
+{
+    //TODO use glTextureBarrier, glMemoryBarrier and glMemoryBarrierByRegion when relevant
+}
 
 void TransitionImagesLayout(
     const Command::Buffer::Handle& a_CommandBuffer,
     const std::vector<ImageLayoutTransitionInfo>& a_Transitions)
-{}
+{
+    //TODO use glTextureBarrier, glMemoryBarrier and glMemoryBarrierByRegion when relevant
+}
+
+void BlitImage(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const Image::Handle& a_SrcImage,
+    const Image::Handle& a_DstImage,
+    const std::vector<ImageBlit>& a_Blits,
+    const Filter& a_Filter)
+{
+    //TODO implement a real blit with format conversion and all
+    std::vector<ImageCopy> copies(a_Blits.size());
+    std::transform(a_Blits.begin(), a_Blits.end(),
+        copies.begin(), [](const ImageBlit& a_Blit) {
+            ImageCopy copy;
+            copy.srcOffset = a_Blit.srcOffsets[0];
+            copy.dstOffset = a_Blit.dstOffsets[0];
+            copy.srcSubresource = a_Blit.srcSubresource;
+            copy.dstSubresource = a_Blit.dstSubresource;
+            copy.extent.width  = a_Blit.srcOffsets[1].x;
+            copy.extent.height = a_Blit.srcOffsets[1].y;
+            copy.extent.depth  = a_Blit.srcOffsets[1].z;
+            return copy;
+        });
+    CopyImage(
+        a_CommandBuffer,
+        a_SrcImage,
+        a_DstImage,
+        copies);
+}
 }
