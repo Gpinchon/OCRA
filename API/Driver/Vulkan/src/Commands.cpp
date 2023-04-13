@@ -17,17 +17,30 @@
 
 namespace OCRA::Command
 {
-static inline auto GetVkRenderingAttachmentInfo(const RenderingAttachmentInfo& a_Info) {
+static inline auto GetResolveMode(const ResolveMode& a_Resolve) {
+    switch (a_Resolve)
+    {
+    case OCRA::ResolveMode::None:
+        return vk::ResolveModeFlagBits::eNone;
+    case OCRA::ResolveMode::Average:
+        return vk::ResolveModeFlagBits::eAverage;
+    case OCRA::ResolveMode::SampleZero:
+        return vk::ResolveModeFlagBits::eSampleZero;
+    }
+    return vk::ResolveModeFlagBits::eNone;
+}
+static inline auto GetVkRenderingAttachmentInfo(const RenderingAttachmentInfo& a_Info, const vk::ResolveModeFlagBits& a_ResolveMode) {
     vk::RenderingAttachmentInfo vkInfo;
     if (a_Info.imageView == nullptr) return vkInfo;
-    vkInfo.clearValue = ConvertToVk(a_Info.clearValue);
-    vkInfo.imageLayout = ConvertToVk(a_Info.imageLayout);
-    vkInfo.imageView = **a_Info.imageView;
-    vkInfo.loadOp = ConvertToVk(a_Info.loadOp);
-    //vkInfo.resolveImageLayout
-    //vkInfo.resolveImageView
-    //vkInfo.resolveImageLayout
-    vkInfo.storeOp = ConvertToVk(a_Info.storeOp);
+    vkInfo.setClearValue(ConvertToVk(a_Info.clearValue));
+    vkInfo.setLoadOp(ConvertToVk(a_Info.loadOp));
+    vkInfo.setStoreOp(ConvertToVk(a_Info.storeOp));
+    vkInfo.setImageLayout(ConvertToVk(a_Info.imageLayout));
+    vkInfo.setImageView(**a_Info.imageView);
+    vkInfo.setResolveMode(a_ResolveMode);
+    vkInfo.setResolveImageLayout(ConvertToVk(a_Info.imageLayoutResolve));
+    if (a_Info.imageViewResolve != nullptr)
+        vkInfo.setResolveImageView(**a_Info.imageViewResolve);
     return vkInfo;
 }
 
@@ -38,42 +51,22 @@ void BeginRendering(
     std::vector<vk::RenderingAttachmentInfo> vkColorAttachments(a_Info.colorAttachments.size());
     vk::RenderingAttachmentInfo vkDepthAttachment;
     vk::RenderingAttachmentInfo vkStencilAttachment;
+    const auto resolveMode = GetResolveMode(a_Info.resolveMode);
     for (auto i = 0u; i < vkColorAttachments.size(); ++i) {
-        vkColorAttachments.at(i) = GetVkRenderingAttachmentInfo(a_Info.colorAttachments.at(i));
+        vkColorAttachments.at(i) = GetVkRenderingAttachmentInfo(a_Info.colorAttachments.at(i), resolveMode);
     }
-    vkDepthAttachment = GetVkRenderingAttachmentInfo(a_Info.depthAttachment);
-    vkStencilAttachment = GetVkRenderingAttachmentInfo(a_Info.stencilAttachment);
-    vk::RenderingInfo vkInfo;
-    //vkInfo.flags = GetVkRenderingFlags(a_Info.flags);
-    //vkInfo.viewMask = a_Info.viewMask;
-    vkInfo.flags = {};
-    vkInfo.viewMask = 0;
-    vkInfo.layerCount = a_Info.layerCount;
-    vkInfo.renderArea = ConvertToVk(a_Info.area);
-    vkInfo.setColorAttachments(vkColorAttachments);
-    vkInfo.pDepthAttachment = &vkDepthAttachment;
-    vkInfo.pStencilAttachment = &vkStencilAttachment;
+    vkDepthAttachment = GetVkRenderingAttachmentInfo(a_Info.depthAttachment, resolveMode);
+    vkStencilAttachment = GetVkRenderingAttachmentInfo(a_Info.stencilAttachment, resolveMode);
+    vk::RenderingInfo vkInfo(
+        {},
+        ConvertToVk(a_Info.area),
+        a_Info.layerCount,
+        0, //TODO figure out ViewMask
+        vkColorAttachments,
+        &vkDepthAttachment,
+        &vkStencilAttachment);
     a_CommandBuffer->beginRendering(vkInfo);
 }
-
-//void BeginRenderPass(
-//    const Command::Buffer::Handle& a_CommandBuffer,
-//    const RenderPassBeginInfo& a_BeginInfo,
-//    const SubPassContents& a_SubPassContents)
-//{
-//    std::vector<vk::ClearValue> vkClearValues(a_BeginInfo.colorClearValues.size() + 1);
-//    for (auto i = 0u; i < a_BeginInfo.colorClearValues.size(); ++i)
-//    {
-//        auto& clearValue = a_BeginInfo.colorClearValues.at(i);
-//        auto& vkClearValue = vkClearValues.at(i);
-//        vkClearValue.color = ConvertToVk(clearValue);
-//    }
-//    vkClearValues.back().depthStencil = ConvertToVk(a_BeginInfo.depthStencilClearValue);
-//    vk::RenderPassBeginInfo vkInfo;
-//    vkInfo.clearValueCount = vkClearValues.size();
-//    vkInfo.framebuffer = *a_BeginInfo.framebuffer;
-//    vkInfo.pClearValues = vkClearValues.data();
-//}
 
 void BindPipeline(
     const Command::Buffer::Handle& a_CommandBuffer,
@@ -155,13 +148,15 @@ void CopyImage(
         dstImageAspects |= copy.dstSubresource.aspects;
     }
     auto& srcImageLayout = a_CommandBuffer->imageLayouts[**a_SrcImage];
+    std::vector<ImageLayoutTransitionInfo> transitions;
     if (srcImageLayout != ImageLayout::TransferSrcOptimal) {
         ImageLayoutTransitionInfo transition;
         transition.image = a_SrcImage;
         transition.subRange.aspects = srcImageAspects;
         transition.oldLayout = srcImageLayout;
         transition.newLayout = ImageLayout::TransferSrcOptimal;
-        TransitionImageLayout(a_CommandBuffer, transition);
+        transitions.push_back(transition);
+        
     }
     auto& dstImageLayout = a_CommandBuffer->imageLayouts[**a_DstImage];
     if (dstImageLayout != ImageLayout::TransferDstOptimal) {
@@ -170,12 +165,72 @@ void CopyImage(
         transition.subRange.aspects = dstImageAspects;
         transition.oldLayout = dstImageLayout;
         transition.newLayout = ImageLayout::TransferDstOptimal;
-        TransitionImageLayout(a_CommandBuffer, transition);
+        transitions.push_back(transition);
     }
+    TransitionImagesLayout(a_CommandBuffer, transitions);
     a_CommandBuffer->copyImage(
         **a_SrcImage, vk::ImageLayout::eTransferSrcOptimal,
         **a_DstImage, vk::ImageLayout::eTransferDstOptimal,
         vkCopies);
+}
+
+void BlitImage(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const Image::Handle&           a_SrcImage,
+    const ImageLayout&             a_SrcImageLayout,
+    const Image::Handle&           a_DstImage,
+    const ImageLayout&             a_DstImageLayout,
+    const std::vector<ImageBlit>&  a_Blits,
+    const Filter&                  a_Filter)
+{
+    auto& srcImageLayout = a_CommandBuffer->imageLayouts[**a_SrcImage];
+    std::vector<vk::ImageBlit> blits(a_Blits.size());
+    std::vector<ImageLayoutTransitionInfo> transitions;
+    for (auto i = 0u; i < a_Blits.size(); ++i) {
+        const auto& blit = a_Blits.at(i);
+        blits.at(i) = vk::ImageBlit(
+            ConvertToVk(blit.srcSubresource),
+            { ConvertToVk(blit.srcOffsets[0]), ConvertToVk(blit.srcOffsets[1]) },
+            ConvertToVk(blit.dstSubresource),
+            { ConvertToVk(blit.dstOffsets[0]), ConvertToVk(blit.dstOffsets[1]) });
+
+        if (srcImageLayout != a_SrcImageLayout) {
+            ImageLayoutTransitionInfo transition;
+            transition.image = a_SrcImage;
+            transition.subRange.aspects = blit.srcSubresource.aspects;
+            transition.oldLayout = srcImageLayout;
+            transition.newLayout = a_SrcImageLayout;
+            transitions.push_back(transition);
+        }
+        auto& dstImageLayout = a_CommandBuffer->imageLayouts[**a_DstImage];
+        if (dstImageLayout != a_DstImageLayout) {
+            ImageLayoutTransitionInfo transition;
+            transition.image = a_DstImage;
+            transition.subRange.aspects = blit.dstSubresource.aspects;
+            transition.oldLayout = dstImageLayout;
+            transition.newLayout = a_DstImageLayout;
+            transitions.push_back(transition);
+        }
+    }
+    TransitionImagesLayout(a_CommandBuffer, transitions);
+    a_CommandBuffer->blitImage(
+        **a_SrcImage, ConvertToVk(a_SrcImageLayout),
+        **a_DstImage, ConvertToVk(a_DstImageLayout),
+        blits,
+        ConvertToVk(a_Filter));
+}
+
+void BlitImage(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const Image::Handle& a_SrcImage,
+    const Image::Handle& a_DstImage,
+    const std::vector<ImageBlit>& a_Blits,
+    const Filter& a_Filter)
+{
+    BlitImage(a_CommandBuffer,
+        a_SrcImage, ImageLayout::TransferSrcOptimal,
+        a_DstImage, ImageLayout::TransferDstOptimal,
+        a_Blits, a_Filter);
 }
 
 void Draw(
