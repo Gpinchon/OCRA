@@ -21,7 +21,7 @@ class UniformBuffer : public Uniform {
 public:
     template<typename T>
     UniformBuffer(const Device::Handle& a_Device, const uint32_t& a_Binding, const ShaderStageFlags& a_Stage, const T& a_DefaultValue);
-    virtual void Update() override;
+    virtual bool Update() override;
     inline auto GetDataSize() const {
         return data.size();
     }

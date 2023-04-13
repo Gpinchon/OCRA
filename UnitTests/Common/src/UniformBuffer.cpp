@@ -3,7 +3,8 @@
 #include <OCRA/OCRA.hpp>
 
 namespace OCRA {
-void UniformBuffer::Update() {
+bool UniformBuffer::Update() {
+    bool updated = false;
     if (dirtyDescriptorSet) {
         DescriptorSetBufferInfo info;
         info.buffer = buffer;
@@ -20,6 +21,7 @@ void UniformBuffer::Update() {
         writeOperations.front().type = DescriptorType::UniformBuffer;
         SetWriteOperations(writeOperations);
         dirtyDescriptorSet = false;
+        updated = true;
     }
     if (dirtyData) {
         MemoryMappedRange range;
@@ -29,6 +31,8 @@ void UniformBuffer::Update() {
         std::memcpy(ptr, data.data(), data.size());
         Memory::Unmap(memory);
         dirtyData = false;
+        updated = true;
     }
+    return updated;
 }
 }

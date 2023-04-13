@@ -68,9 +68,10 @@ public:
     }
 
     void Update() {
-        parameters.Update();
+        auto updated = parameters.Update();
         for (auto& texture : textures)
-            texture.Update();
+            updated |= texture.Update();
+        if (!updated) return;
         writeOperations = parameters.GetWriteOperations();
         for (const auto& texture : textures) {
             auto& textureWriteOp = texture.GetWriteOperations();

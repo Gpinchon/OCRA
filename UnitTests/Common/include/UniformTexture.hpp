@@ -19,7 +19,7 @@ public:
         dirty = true;
     }
     auto& GetTexture() const { return texture; }
-    virtual void Update() override;
+    virtual bool Update() override;
 private:
     static DescriptorSetLayoutBinding CreateSetLayoutBinding(const uint32_t a_Binding);
     bool    dirty{ true };

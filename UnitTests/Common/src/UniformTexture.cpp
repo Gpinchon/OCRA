@@ -1,9 +1,9 @@
 #include <UniformTexture.hpp>
 
 namespace OCRA {
-void UniformTexture::Update()
+bool UniformTexture::Update()
 {
-    if (!dirty) return;
+    if (!dirty) return false;
     DescriptorSetImageInfo setImageInfo;
     DescriptorSetWrite writeOp;
     setImageInfo.imageView   = texture.GetImageView();
@@ -15,6 +15,7 @@ void UniformTexture::Update()
     writeOp.dstCount = 1;
     SetWriteOperations({ writeOp });
     dirty = false;
+    return true;
 }
 
 DescriptorSetLayoutBinding UniformTexture::CreateSetLayoutBinding(const uint32_t a_Binding) {

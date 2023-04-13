@@ -32,6 +32,7 @@ public:
     auto GetNativeHandle() const { return nativeHandle; }
     auto GetSurface() const { return surface; }
     auto GetSwapChain() const { return swapChain; }
+    auto GetSwapChainFormat() const { return swapChainFormat; }
     auto GetExtent() const { return extent; }
     auto GetSwapChainImageNbr() const { return swapChainImageNbr; }
     auto GetNextImageIndex() const { return swapChainImageIndex; }

@@ -25,8 +25,11 @@ public:
     }
 
 protected:
-    //To be called when the data needs updating
-    virtual void Update() = 0;
+    /**
+    * @brief To be called when the data needs updating
+    * @return true if an update took place
+    */
+    virtual bool Update() = 0;
     void SetDescriptorSetLayoutBindings(const std::vector<DescriptorSetLayoutBinding>& a_Bindings) {
         descriptorSetLayoutBindings = a_Bindings;
     }
