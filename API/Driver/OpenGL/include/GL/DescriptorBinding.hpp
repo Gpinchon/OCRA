@@ -40,11 +40,11 @@ struct ImageStorage : Storage {
     OCRA::Image::View::Handle     imageView{ nullptr };
     
 };
-struct SampledImage : ImageStorage {
-    virtual ~SampledImage() override = default;
+struct ImageSampler : ImageStorage {
+    virtual ~ImageSampler() override = default;
     virtual void operator=(const Storage& a_Other) override {
         ImageStorage::operator=(a_Other);
-        auto& data = static_cast<const SampledImage&>(a_Other);
+        auto& data = static_cast<const ImageSampler&>(a_Other);
         imageSampler = data.imageSampler;
     }
     virtual void operator=(const DescriptorSetWrite& a_Write) override {
@@ -192,7 +192,7 @@ private:
         Memory() {};
         ~Memory() {};
         ImageStorage imageStorage;
-        SampledImage sampledImage;
+        ImageSampler imageSampler;
         StorageImage storageImage;
         BufferStorage bufferStorage;
         UniformTexelBuffer uniformTexelBuffer;
@@ -214,8 +214,8 @@ inline Binding::Binding(const DescriptorType& a_Type, uint32_t a_BindingIndex)
 {
     switch (type)
     {
-    case DescriptorType::SampledImage:
-        storage = new(&_memory.sampledImage) SampledImage;
+    case DescriptorType::ImageSampler:
+        storage = new(&_memory.imageSampler) ImageSampler;
         break;
     case DescriptorType::StorageImage:
         storage = new(&_memory.storageImage) StorageImage;
