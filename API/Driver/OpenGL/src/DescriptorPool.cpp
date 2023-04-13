@@ -52,7 +52,7 @@ Set::Handle AllocateSet(
     const AllocateDescriptorSetInfo& a_Info)
 {
     size_t bindingCount = 0;
-    const auto& bindings = a_Info.layout->bindings;
+    const auto& bindings = SetLayout::CreateDirectIndexedLayout(a_Info.bindings);
     for (auto& binding : bindings) {
         bindingCount += binding.count;
     }

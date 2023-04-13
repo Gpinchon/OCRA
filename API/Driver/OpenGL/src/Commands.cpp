@@ -6,6 +6,14 @@
 
 namespace OCRA::Command
 {
+void BlitImage(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const Image::Handle& a_SrcImage,
+    const Image::Handle& a_DstImage,
+    const std::vector<ImageBlit>& a_Blits,
+    const Filter& a_Filter)
+{}
+
 void TransitionImageLayout(
     const Command::Buffer::Handle& a_CommandBuffer,
     const Image::Handle& a_Image,

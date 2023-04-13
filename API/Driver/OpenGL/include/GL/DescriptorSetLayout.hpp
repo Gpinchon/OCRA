@@ -23,13 +23,13 @@ static inline auto CreateDirectIndexedLayout(const std::vector<DescriptorSetLayo
     }
     return bindings;
 }
-struct Impl
-{
-    Impl(const Device::Handle& a_Device, const CreateDescriptorSetLayoutInfo& a_Info)
-        : device(a_Device)
-        , bindings(CreateDirectIndexedLayout(a_Info.bindings))
-    {}
-    const Device::WeakHandle device;
-    const std::vector<DescriptorSetLayoutBinding> bindings;
-};
+//struct Impl
+//{
+//    Impl(const Device::Handle& a_Device, const CreateDescriptorSetLayoutInfo& a_Info)
+//        : device(a_Device)
+//        , bindings(CreateDirectIndexedLayout(a_Info.bindings))
+//    {}
+//    const Device::WeakHandle device;
+//    const std::vector<DescriptorSetLayoutBinding> bindings;
+//};
 }

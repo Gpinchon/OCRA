@@ -20,12 +20,12 @@ struct ExecuteCommandBufferCommand : CommandI {
 struct PushConstantCommand : CommandI {
     PushConstantCommand(
         OCRA::PushConstants& a_PushConstants,
-        const Pipeline::Layout::Handle& a_PipelineLayout,
+        const Pipeline::Handle& a_Pipeline,
         const size_t& a_Offset,
         const size_t& a_Size,
         const std::byte* a_Data)
         : pushConstants(a_PushConstants)
-        , pipelineLayout(a_PipelineLayout)
+        , pipeline(a_Pipeline)
         , offset(a_Offset)
         , size(a_Size)
     {
@@ -36,7 +36,7 @@ struct PushConstantCommand : CommandI {
         pushConstants.Update(offset, size, data.data());
     }
     OCRA::PushConstants& pushConstants;
-    const Pipeline::Layout::Handle pipelineLayout;
+    const Pipeline::Handle pipeline;
     const size_t offset;
     const size_t size;
     std::array<std::byte, 256> data;
@@ -50,13 +50,13 @@ void ExecuteCommandBuffer(
 }
 void PushConstants(
     const Command::Buffer::Handle& a_CommandBuffer,
-    const Pipeline::Layout::Handle& a_PipelineLayout,
+    const Pipeline::Handle& a_Pipeline,
     const uint8_t a_Offset,
     const std::vector<std::byte>& a_Data)
 {
     a_CommandBuffer->PushCommand<PushConstantCommand>(
         a_CommandBuffer->pushConstants,
-        a_PipelineLayout,
+        a_Pipeline,
         a_Offset,
         a_Data.size(),
         a_Data.data());

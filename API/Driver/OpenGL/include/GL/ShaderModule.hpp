@@ -2,7 +2,7 @@
 
 #include <OCRA/Core.hpp>
 
-namespace OCRA::Shader::Module
+namespace OCRA::ShaderModule
 {
 struct Impl : std::vector<uint32_t>
 {

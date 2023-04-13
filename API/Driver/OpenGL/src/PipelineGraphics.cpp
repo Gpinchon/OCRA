@@ -35,7 +35,7 @@ struct Impl : Pipeline::Impl {
 };
 
 Impl::Impl(const Device::Handle& a_Device, const CreatePipelineGraphicsInfo& a_Info)
-    : Pipeline::Impl(PipelineBindingPoint::Graphics, a_Info.layout)
+    : Pipeline::Impl(PipelineBindingPoint::Graphics)
     , colorBlendState(a_Device, a_Info.colorBlendState, a_Info.dynamicState)
     , depthStencilState(a_Device, a_Info.depthStencilState, a_Info.dynamicState)
     , inputAssemblyState(a_Device, a_Info.inputAssemblyState, a_Info.dynamicState)

@@ -44,4 +44,10 @@ Memory::Handle GetMemory(const Handle& a_Buffer)
 {
     return a_Buffer->memoryBinding.memory;
 }
+
+size_t GetSizeRequirement(
+    const Handle& a_Buffer)
+{
+    return a_Buffer->info.size;
+}
 }
