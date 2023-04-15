@@ -10,8 +10,8 @@ using namespace OCRA;
 
 constexpr auto VSync = false;
 constexpr auto SwapChainImageNbr = 5;
-constexpr auto Width  = 256;
-constexpr auto Height = 256;
+constexpr uExtent2D WindowSize(256, 256);
+constexpr uExtent2D InnerSize(1024, 1024);
 constexpr auto Samples = SampleCount::Count8;
 constexpr auto Resolve = Samples == SampleCount::Count1 ? ResolveMode::None : ResolveMode::Average;
 
@@ -68,7 +68,7 @@ struct GraphicsPipelineTestApp : TestApp
 {
     GraphicsPipelineTestApp()
         : TestApp("Test_GraphicsPipeline")
-        , window(instance, physicalDevice, device, name, Width, Height)
+        , window(instance, physicalDevice, device, name, WindowSize.width, WindowSize.height)
     {
         window.OnResize = [this](const Window&, const uint32_t a_Width, const uint32_t a_Height) {
             render = a_Width > 0 && a_Height > 0;
@@ -169,11 +169,11 @@ struct GraphicsPipelineTestApp : TestApp
     {
         ViewPort viewport;
         viewport.rect.offset = { 0, 0 };
-        viewport.rect.extent = window.GetExtent();
+        viewport.rect.extent = InnerSize;
         viewport.depthRange = { 0, 1 };
         Rect2D  scissor{};
         scissor.offset = { 0, 0 };
-        scissor.extent = window.GetExtent();
+        scissor.extent = InnerSize;
         CreatePipelineGraphicsInfo graphicsPipelineInfo;
         graphicsPipelineInfo.viewPortState.viewPorts = { viewport };
         graphicsPipelineInfo.viewPortState.scissors = { scissor };
@@ -203,9 +203,7 @@ struct GraphicsPipelineTestApp : TestApp
             imageInfo.type = ImageType::Image2D;
             imageInfo.usage = ImageUsageFlagBits::ColorAttachment | ImageUsageFlagBits::TransferSrc;
             imageInfo.samples = Samples;
-            imageInfo.extent.width  = window.GetExtent().width;
-            imageInfo.extent.height = window.GetExtent().height;
-            imageInfo.extent.depth  = 1;
+            imageInfo.extent = { InnerSize.width, InnerSize.height, 1 };
             imageInfo.format = Format::Uint8_Normalized_RGBA;
             imageInfo.arrayLayers = 1;
             imageInfo.mipLevels = 1;
@@ -223,9 +221,7 @@ struct GraphicsPipelineTestApp : TestApp
             CreateImageInfo imageInfo;
             imageInfo.type = ImageType::Image2D;
             imageInfo.usage = ImageUsageFlagBits::ColorAttachment | ImageUsageFlagBits::TransferSrc;
-            imageInfo.extent.width  = window.GetExtent().width;
-            imageInfo.extent.height = window.GetExtent().height;
-            imageInfo.extent.depth  = 1;
+            imageInfo.extent = { InnerSize.width, InnerSize.height, 1 };
             imageInfo.format = Format::Uint8_Normalized_RGBA;
             imageInfo.arrayLayers = 1;
             imageInfo.mipLevels = 1;
@@ -256,7 +252,7 @@ struct GraphicsPipelineTestApp : TestApp
         renderingAttachment.storeOp            = StoreOp::Store;
         RenderingInfo renderingInfo{};
         renderingInfo.area.offset = { 0, 0 };
-        renderingInfo.area.extent = window.GetExtent();
+        renderingInfo.area.extent = InnerSize;
         renderingInfo.colorAttachments.push_back(renderingAttachment);
         renderingInfo.layerCount = 1;
         renderingInfo.resolveMode = Resolve;
@@ -296,20 +292,20 @@ struct GraphicsPipelineTestApp : TestApp
                 imageBlit.srcSubresource.aspects = ImageAspectFlagBits::Color;
                 imageBlit.srcSubresource.layerCount = 1;
                 imageBlit.srcOffsets[0] = Offset3D(0, 0, 0);
-                imageBlit.srcOffsets[1] = Offset3D(window.GetExtent().width, window.GetExtent().height, 1);
+                imageBlit.srcOffsets[1] = Offset3D(InnerSize.width, InnerSize.height, 1);
 
                 imageBlit.dstSubresource.aspects = ImageAspectFlagBits::Color;
                 imageBlit.srcSubresource.layerCount = 1;
                 imageBlit.dstOffsets[0] = Offset3D(0, 0, 0);
                 imageBlit.dstOffsets[1] = Offset3D(window.GetExtent().width, window.GetExtent().height, 1);
 
-                auto srcImage = Samples == SampleCount::Count1 ? renderImage : resolveImage;
-                auto dstImage = a_SwapChainImage;
+                auto& srcImage = Samples == SampleCount::Count1 ? renderImage : resolveImage;
+                auto& dstImage = a_SwapChainImage;
 
                 //We do a blit here to perform necessary conversions
                 Command::BlitImage(mainCommandBuffer,
                     srcImage, dstImage,
-                    { imageBlit }, Filter::Nearest);
+                    { imageBlit }, Filter::Linear);
 
                 ImageSubresourceRange range{};
                 range.aspects = ImageAspectFlagBits::Color;
