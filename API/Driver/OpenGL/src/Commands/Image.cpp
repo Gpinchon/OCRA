@@ -260,23 +260,31 @@ void BlitImage(
     const Filter& a_Filter)
 {
     //TODO implement a real blit with format conversion and all
-    std::vector<ImageCopy> copies(a_Blits.size());
-    std::transform(a_Blits.begin(), a_Blits.end(),
-        copies.begin(), [](const ImageBlit& a_Blit) {
-            ImageCopy copy;
-            copy.srcOffset = a_Blit.srcOffsets[0];
-            copy.dstOffset = a_Blit.dstOffsets[0];
-            copy.srcSubresource = a_Blit.srcSubresource;
-            copy.dstSubresource = a_Blit.dstSubresource;
-            copy.extent.width  = a_Blit.srcOffsets[1].x;
-            copy.extent.height = a_Blit.srcOffsets[1].y;
-            copy.extent.depth  = a_Blit.srcOffsets[1].z;
-            return copy;
-        });
-    CopyImage(
-        a_CommandBuffer,
-        a_SrcImage,
-        a_DstImage,
-        copies);
+    //std::vector<ImageCopy> copies(a_Blits.size());
+    //std::transform(a_Blits.begin(), a_Blits.end(),
+    //    copies.begin(), [](const ImageBlit& a_Blit) {
+    //        ImageCopy copy;
+    //        copy.srcOffset = a_Blit.srcOffsets[0];
+    //        copy.dstOffset = a_Blit.dstOffsets[0];
+    //        copy.srcSubresource = a_Blit.srcSubresource;
+    //        copy.dstSubresource = a_Blit.dstSubresource;
+    //        copy.extent.width  = a_Blit.srcOffsets[1].x;
+    //        copy.extent.height = a_Blit.srcOffsets[1].y;
+    //        copy.extent.depth  = a_Blit.srcOffsets[1].z;
+    //        return copy;
+    //    });
+    //CopyImage(
+    //    a_CommandBuffer,
+    //    a_SrcImage,
+    //    a_DstImage,
+    //    copies);
+    auto device = a_CommandBuffer->device.lock();
+    a_CommandBuffer->PushCommand<GenericCommand>([
+        device,
+        srcImage = a_SrcImage, dstImage = a_DstImage,
+        blits = a_Blits, filter = a_Filter
+    ](Command::Buffer::ExecutionState& a_ExecutionState) {
+        device->textureBlitter.Blit(srcImage, dstImage, blits, filter);
+    });
 }
 }

@@ -4,6 +4,7 @@
 
 #include <GL/Common/Assert.hpp>
 #include <GL/PhysicalDevice.hpp>
+#include <GL/TextureBlitter.hpp>
 
 #include <functional>
 #include <map>
@@ -36,6 +37,7 @@ struct Impl
         physicalDevice.lock()->PushCommand(a_Command, a_Synchronous);
     }
     const PhysicalDevice::WeakHandle physicalDevice;
+    const TextureBlitter textureBlitter{ *this };
     std::map<uint32_t, std::vector<Queue::Handle>> queueFamilies;
 };
 }
