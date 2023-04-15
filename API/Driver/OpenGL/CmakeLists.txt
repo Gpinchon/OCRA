@@ -62,6 +62,7 @@ set(OCRA_IMPL_HEADER_FILES
   ${OCRA_IMPL_INCLUDE_DIR}/GL/ImageView.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Pipeline.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/PipelineLayout.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/GL/TextureBlitter.hpp
 
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/Assert.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/GL/Common/FixedSizeMemoryPool.hpp
@@ -104,6 +105,7 @@ set(OCRA_IMPL_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/PipelineLayout.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/ShaderModule.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/ShaderStage.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/TextureBlitter.cpp
   
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Commands/Buffer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Commands/CommandBuffer.cpp
