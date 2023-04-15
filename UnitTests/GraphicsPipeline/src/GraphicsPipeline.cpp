@@ -308,8 +308,7 @@ struct GraphicsPipelineTestApp : TestApp
 
                 //We do a blit here to perform necessary conversions
                 Command::BlitImage(mainCommandBuffer,
-                    srcImage,
-                    dstImage,
+                    srcImage, dstImage,
                     { imageBlit }, Filter::Nearest);
 
                 ImageSubresourceRange range{};
