@@ -130,24 +130,32 @@ void OCRA::TextureBlitter::Blit3D(
         blit.srcOffsets[1].y - blit.srcOffsets[0].y,
         blit.srcOffsets[1].z - blit.srcOffsets[0].z,
     };
-    const Offset3D dstOffset = blit.dstOffsets[0];
+    const Offset3D dstOffset = {
+        blit.dstOffsets[0].x,
+        blit.dstOffsets[0].y,
+        blit.dstOffsets[0].z + blit.dstSubresource.baseArrayLayer
+    };
     const Offset3D dstSize = {
         blit.dstOffsets[1].x - blit.dstOffsets[0].x,
         blit.dstOffsets[1].y - blit.dstOffsets[0].y,
         blit.dstOffsets[1].z - blit.dstOffsets[0].z,
     };
+    OCRA_ASSERT(dstOffset.x < a_DstImage->info.extent.width  && "Blit operation invalid : Offset exceeds image width");
+    OCRA_ASSERT(dstOffset.y < a_DstImage->info.extent.height && "Blit operation invalid : Offset exceeds image height");
+    OCRA_ASSERT(dstOffset.z < a_DstImage->info.extent.depth  && "Blit operation invalid : Offset exceeds image depth");
     glBindImageTexture(1,
         a_DstImage->handle,
         blit.dstSubresource.mipLevel,
         true,
-        blit.dstSubresource.baseArrayLayer,
+        0, //Level ignored because it's a Texture3D
         GL_WRITE_ONLY,
         a_DstImage->internalFormat);
     glUniform3f(0, srcOffset.x, srcOffset.y, srcOffset.z);
-    glUniform3f(1, srcSize.x, srcSize.y, srcSize.z);
+    glUniform3f(1, srcSize.x,   srcSize.y,   srcSize.z);
     glUniform3f(2, dstOffset.x, dstOffset.y, dstOffset.z);
-    glUniform3f(3, dstSize.x, dstSize.y, dstSize.z);
+    glUniform3f(3, dstSize.x,   dstSize.y,   dstSize.z);
     glDispatchCompute(dstSize.x, dstSize.y, dstSize.z);
+
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindSampler(0, 0);
@@ -175,6 +183,7 @@ void OCRA::TextureBlitter::Blit(
             Blit3D(a_SrcImage, a_DstImage, blit, a_Filter);
             continue;
         }
+        //TODO use correct attachment in accordance to subresource Aspect
         if (target == GL_TEXTURE_1D) {
             glNamedFramebufferTexture1DEXT(
                 frameBuffers.at(0), GL_COLOR_ATTACHMENT0,

@@ -29,7 +29,7 @@ struct TextureBlitter
 		const std::vector<ImageBlit>& a_Blits,
 		const Filter& a_Filter) const;
 	Device::Impl& device;
-	std::array<GLuint, 2> frameBuffers;
+	std::array<GLuint, 2> frameBuffers{ 0, 0 };
 	//For 3D Texture, a Compute Shader is used
 	GLuint shaderProgram = 0;
 	GLuint samplerSrc = 0;
