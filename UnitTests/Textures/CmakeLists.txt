@@ -9,7 +9,24 @@ add_executable(OCRA-UnitTests-Textures
 target_include_directories(OCRA-UnitTests-Textures PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-target_link_libraries(OCRA-UnitTests-Textures OCRA-UnitTests-Lib-Common OCRA-UnitTests-Lib-Window OCRA::API::Interface OCRA::API::Implementation OCRA::SwapChain::Implementation OCRA::ShaderCompiler::API)
+target_link_libraries(OCRA-UnitTests-Textures
+  OCRA-UnitTests-Lib-Common
+  OCRA-UnitTests-Lib-Window
+  OCRA::API::Interface
+  OCRA::API::Implementation
+  OCRA::SwapChain::Implementation
+  OCRA::ShaderCompiler::API)
+
+if(MSVC_IDE)
+  set_property(TARGET OCRA-UnitTests-Textures PROPERTY
+    VS_DEBUGGER_ENVIRONMENT "${OCRA_DEBUGGER_ENV}")
+endif()
+
+add_compile_definitions(
+  OCRA_API_OpenGL=0
+  OCRA_API_Vulkan=1
+  OCRA_API_DirectX=2
+  OCRA_API_IMPL=OCRA_API_${OCRA_API_IMPL})
 
 if(MSVC_IDE)
   # Run macro

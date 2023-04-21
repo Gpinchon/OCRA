@@ -5,11 +5,10 @@
 #include <OCRA/OCRA.hpp>
 
 #include <OCRA/ShaderCompiler/Compiler.hpp>
-#include <OCRA/ShaderCompiler/Shader.hpp>
 
 using namespace OCRA;
 
-#define SWAPCHAIN_IMAGE_NBR 2
+#define SWAPCHAIN_IMAGE_NBR 5
 
 Vec3 hue2rgb(float h)
 {
@@ -80,6 +79,7 @@ Texture2D CreateTexture(const PhysicalDevice::Handle& a_PhysicalDevice, const De
     }
     Memory::Unmap(textureTransferMemory);
     ImageBufferCopy bufferCopy;
+    bufferCopy.imageSubresource.aspects = ImageAspectFlagBits::Color;
     bufferCopy.imageExtent = texture.GetImageInfo().extent;
     Image::CopyBufferToImage(textureTransferBuffer, texture.GetImage(), { bufferCopy });
     return texture;
@@ -106,50 +106,85 @@ struct TexturesTestApp : TestApp
         window.OnMinimize = [this](const Window&, const uint32_t, const uint32_t) { render = false; };
         const auto queueFamily = FindQueueFamily(physicalDevice, QueueFlagBits::Graphics);
         queue = Device::GetQueue(device, queueFamily, 0); //Get first available queue
-        imageAcquisitionFence = CreateFence(device);
         commandPool = CreateCommandPool(device, queueFamily);
         mainCommandBuffer = CreateCommandBuffer(commandPool, CommandBufferLevel::Primary);
         drawCommandBuffer = CreateCommandBuffer(commandPool, CommandBufferLevel::Secondary);
-        drawSemaphore = CreateSemaphore(device, { SemaphoreType::Binary, 0 });
         CreateShaderStages();
+    }
+    void CreateSyncObjects()
+    {
+        auto swapchainNbr = window.GetSwapChainImageNbr();
+        CreateSemaphoreInfo semaphoreInfo;
+        semaphoreInfo.type = SemaphoreType::Binary;
+        completeBufferSemaphores.resize(swapchainNbr);
+        completeBufferFences.resize(swapchainNbr);
+        imageAcquisitionSemaphores.resize(swapchainNbr);
+        imageAcquisitionFences.resize(swapchainNbr);
+        for (auto& semaphore : completeBufferSemaphores) semaphore = CreateSemaphore(device, semaphoreInfo);
+        for (auto& fence : completeBufferFences)     fence = CreateFence(device, FenceStatus::Unsignaled);
+        for (auto& semaphore : imageAcquisitionSemaphores) semaphore = CreateSemaphore(device, semaphoreInfo);
+        for (auto& fence : imageAcquisitionFences)     fence = CreateFence(device, FenceStatus::Unsignaled);
     }
     void Loop()
     {
         FPSCounter fpsCounter;
-        auto printTime = std::chrono::high_resolution_clock::now();
+        auto lastTime = std::chrono::high_resolution_clock::now();
+        auto printTime = lastTime;
         window.SetVSync(false);
+        CreateSyncObjects();
         while (true) {
             fpsCounter.StartFrame();
             window.PushEvents();
             if (window.IsClosing()) break;
-
-            swapChainImage = window.AcquireNextImage(std::chrono::nanoseconds(15000000), nullptr, imageAcquisitionFence);
-            render = Fence::WaitFor(imageAcquisitionFence, std::chrono::nanoseconds(15000000));
-            Fence::Reset({ imageAcquisitionFence });
             if (!render) continue;
 
-            textureUniform.Update();
-            RecordMainCommandBuffer();
-            QueueSubmitInfo submitInfo;
-            submitInfo.commandBuffers   = { mainCommandBuffer };
-            submitInfo.signalSemaphores = { { drawSemaphore } };
-            Queue::Submit(queue, { submitInfo });
-            window.Present(queue, drawSemaphore);
-            fpsCounter.EndFrame();
+            uint32_t imageIndex = window.GetNextImageIndex();
+            auto& completeBufferSemaphore = completeBufferSemaphores.at(imageIndex);
+            auto& completeBufferFence     = completeBufferFences.at(imageIndex);
+            auto& imageAcquisitionSemaphore = imageAcquisitionSemaphores.at(imageIndex);
+            auto& imageAcquisitionFence     = imageAcquisitionFences.at(imageIndex);
 
+            swapChainImage = window.AcquireNextImage(
+                std::chrono::nanoseconds(0),
+                imageAcquisitionSemaphore, imageAcquisitionFence);
+            Fence::WaitFor(imageAcquisitionFence, IgnoreTimeout);
+
+            RecordMainCommandBuffer();
+
+            QueueSubmitInfo submitInfo;
+            submitInfo.commandBuffers = { mainCommandBuffer };
+            submitInfo.waitSemaphores = { { imageAcquisitionSemaphore, 0, PipelineStageFlagBits::BottomOfPipe } };
+            submitInfo.signalSemaphores = { { completeBufferSemaphore } };
+            Queue::Submit(queue, { submitInfo }, completeBufferFence);
+
+            window.Present(queue, completeBufferSemaphore);
+
+            fpsCounter.EndFrame();
+            fpsCounter.StartFrame();
             const auto now = std::chrono::high_resolution_clock::now();
+            lastTime = now;
             if (std::chrono::duration<double, std::milli>(now - printTime).count() >= 48) {
                 printTime = now;
                 fpsCounter.Print();
             }
+            Fence::WaitFor(completeBufferFence, IgnoreTimeout);
+            Fence::Reset({ completeBufferFence, imageAcquisitionFence });
         }
     }
     void CreateShaderStages()
     {
         const auto compiler = ShaderCompiler::Create();
+        ShaderCompiler::TargetAPI shaderTargetAPI;
+        if (OCRA_API_IMPL == OCRA_API_Vulkan)
+            shaderTargetAPI = ShaderCompiler::TargetAPI::Vulkan;
+        else if (OCRA_API_IMPL == OCRA_API_OpenGL)
+            shaderTargetAPI = ShaderCompiler::TargetAPI::OpenGL;
+        else if (OCRA_API_IMPL == OCRA_API_DirectX)
+            shaderTargetAPI = ShaderCompiler::TargetAPI::DirectX;
         {
-            ShaderCompiler::Shader::Info shaderInfo;
-            shaderInfo.type = ShaderCompiler::Shader::Type::Vertex;
+            ShaderCompiler::ShaderInfo shaderInfo;
+            shaderInfo.targetAPI = shaderTargetAPI;
+            shaderInfo.type = ShaderCompiler::ShaderType::Vertex;
             shaderInfo.entryPoint = "main";
             shaderInfo.source = {
                 "#version 450                                                   \n"
@@ -159,9 +194,8 @@ struct TexturesTestApp : TestApp
                 "   gl_Position = vec4(UV * 2.0f + -1.0f, 0.0f, 1.0f);          \n"
                 "}                                                              \n"
             };
-            const auto vertexShader = ShaderCompiler::Shader::Create(compiler, shaderInfo);
             CreateShaderModuleInfo shaderModuleInfo;
-            shaderModuleInfo.code = ShaderCompiler::Shader::Compile(vertexShader);
+            shaderModuleInfo.code = ShaderCompiler::Compile(compiler, shaderInfo);
             PipelineShaderStage shaderStage;
             shaderStage.entryPoint = "main";
             shaderStage.module = Device::CreateShaderModule(device, shaderModuleInfo);
@@ -170,8 +204,9 @@ struct TexturesTestApp : TestApp
             shaderStages.push_back(shaderStage);
         }
         {
-            ShaderCompiler::Shader::Info shaderInfo;
-            shaderInfo.type = ShaderCompiler::Shader::Type::Fragment;
+            ShaderCompiler::ShaderInfo shaderInfo;
+            shaderInfo.targetAPI = shaderTargetAPI;
+            shaderInfo.type = ShaderCompiler::ShaderType::Fragment;
             shaderInfo.entryPoint = "main";
             shaderInfo.source = {
                 "#version 450                                         \n"
@@ -183,9 +218,8 @@ struct TexturesTestApp : TestApp
                 "    outColor = vec4(color);                          \n"
                 "}                                                    \n"
             };
-            const auto fragmentShader = ShaderCompiler::Shader::Create(compiler, shaderInfo);
             CreateShaderModuleInfo shaderModuleInfo;
-            shaderModuleInfo.code = ShaderCompiler::Shader::Compile(fragmentShader);
+            shaderModuleInfo.code = ShaderCompiler::Compile(compiler, shaderInfo);
             PipelineShaderStage shaderStage;
             shaderStage.entryPoint = "main";
             shaderStage.module = Device::CreateShaderModule(device, shaderModuleInfo);
@@ -199,11 +233,13 @@ struct TexturesTestApp : TestApp
         {
             CreateImageInfo imageInfo;
             imageInfo.type = ImageType::Image2D;
+            imageInfo.usage = ImageUsageFlagBits::ColorAttachment | ImageUsageFlagBits::TransferSrc;
             imageInfo.extent.width = window.GetExtent().width;
             imageInfo.extent.height = window.GetExtent().height;
             imageInfo.extent.depth = 1;
             imageInfo.format = Format::Uint8_Normalized_RGBA;
             imageInfo.mipLevels = 1;
+            imageInfo.arrayLayers = 1;
             frameBufferImage = CreateImage(device, imageInfo);
         }
         {
@@ -211,6 +247,7 @@ struct TexturesTestApp : TestApp
             imageViewInfo.image = frameBufferImage;
             imageViewInfo.format = Format::Uint8_Normalized_RGBA;
             imageViewInfo.type = ImageViewType::View2D;
+            imageViewInfo.subRange.aspects = ImageAspectFlagBits::Color;
             imageViewInfo.subRange.layerCount = 1;
             frameBufferImageView = CreateImageView(device, imageViewInfo);
         }
@@ -224,20 +261,12 @@ struct TexturesTestApp : TestApp
         Rect2D  scissor{};
         scissor.offset = { 0, 0 };
         scissor.extent = window.GetExtent();
-        {
-            CreatePipelineLayoutInfo layoutInfo;
-            CreateDescriptorSetLayoutInfo descriptorInfo;
-            descriptorInfo.bindings = textureUniform.GetDescriptorSetLayoutBindings();
-            layoutInfo.setLayouts.push_back(CreateDescriptorSetLayout(device, descriptorInfo));
-            graphicsPipelineLayout = CreatePipelineLayout(device, layoutInfo);
-        }
         PipelineColorBlendState;
         PipelineColorBlendAttachmentState colorBlend0;
         colorBlend0.enable = true;
         CreatePipelineGraphicsInfo graphicsPipelineInfo;
-        graphicsPipelineInfo.layout = graphicsPipelineLayout;
-        graphicsPipelineInfo.colorBlendState.attachments.resize(1);
-        graphicsPipelineInfo.colorBlendState.attachments.front() = colorBlend0;
+        graphicsPipelineInfo.renderingInfo.colorAttachmentFormats = { Format::Uint8_Normalized_RGBA };
+        graphicsPipelineInfo.colorBlendState.attachments = { colorBlend0 };
         graphicsPipelineInfo.rasterizationState.cullMode = CullMode::None;
         graphicsPipelineInfo.inputAssemblyState.topology = PrimitiveTopology::TriangleList;
         graphicsPipelineInfo.inputAssemblyState.primitiveRestartEnable = false;
@@ -246,6 +275,7 @@ struct TexturesTestApp : TestApp
         graphicsPipelineInfo.vertexInputState.attributeDescriptions = {}; //empty attributes
         graphicsPipelineInfo.vertexInputState.bindingDescriptions = {}; //empty bindings
         graphicsPipelineInfo.shaderPipelineState.stages = shaderStages;
+        graphicsPipelineInfo.bindings = textureUniform.GetDescriptorSetLayoutBindings();
         //Everything else is left by default for now
         graphicsPipeline = CreatePipelineGraphics(device, graphicsPipelineInfo);
     }
@@ -259,15 +289,33 @@ struct TexturesTestApp : TestApp
         Command::ExecuteCommandBuffer(mainCommandBuffer, drawCommandBuffer);
         //copy result to swapchain
         {
-            ImageCopy imageCopy;
-            imageCopy.extent.width = window.GetExtent().width;
-            imageCopy.extent.height = window.GetExtent().height;
-            imageCopy.extent.depth = 1;
-            Command::CopyImage(
-                mainCommandBuffer,
-                frameBufferImage,
-                swapChainImage,
-                { imageCopy });
+            ImageBlit imageBlit;
+            imageBlit.srcSubresource.aspects = ImageAspectFlagBits::Color;
+            imageBlit.srcSubresource.layerCount = 1;
+            imageBlit.srcOffsets[0] = Offset3D(0, 0, 0);
+            imageBlit.srcOffsets[1] = Offset3D(window.GetExtent().width, window.GetExtent().height, 1);
+
+            imageBlit.dstSubresource.aspects = ImageAspectFlagBits::Color;
+            imageBlit.srcSubresource.layerCount = 1;
+            imageBlit.dstOffsets[0] = Offset3D(0, 0, 0);
+            imageBlit.dstOffsets[1] = Offset3D(window.GetExtent().width, window.GetExtent().height, 1);
+
+            auto& srcImage = frameBufferImage;
+            auto& dstImage = swapChainImage;
+
+            //We do a blit here to perform necessary conversions
+            Command::BlitImage(mainCommandBuffer,
+                srcImage, dstImage,
+                { imageBlit }, Filter::Linear);
+
+            ImageSubresourceRange range{};
+            range.aspects = ImageAspectFlagBits::Color;
+            range.levelCount = 1;
+            range.layerCount = 1;
+            Command::TransitionImageLayout(
+                mainCommandBuffer, { swapChainImage, range,
+                ImageLayout::TransferDstOptimal,
+                ImageLayout::PresentSrc });
         }
         Command::Buffer::End(mainCommandBuffer);
     }
@@ -276,6 +324,7 @@ struct TexturesTestApp : TestApp
         textureUniform.Update();
         CommandBufferBeginInfo bufferBeginInfo{};
         bufferBeginInfo.flags = CommandBufferUsageFlagBits::None;
+        bufferBeginInfo.inheritanceInfo.emplace();
         Command::Buffer::Reset(drawCommandBuffer);
 
         RenderingAttachmentInfo attachmentInfo;
@@ -290,12 +339,14 @@ struct TexturesTestApp : TestApp
         renderingInfo.area.extent = window.GetExtent();
         renderingInfo.colorAttachments.push_back(attachmentInfo);
         renderingInfo.layerCount = 1;
+        const auto descriptorWrites = textureUniform.GetWriteOperations();
 
         Command::Buffer::Begin(drawCommandBuffer, bufferBeginInfo);
+        if (!descriptorWrites.empty())
+            Command::PushDescriptorSet(drawCommandBuffer, graphicsPipeline, descriptorWrites);
         Command::BeginRendering(drawCommandBuffer, renderingInfo);
         {
             Command::BindPipeline(drawCommandBuffer, graphicsPipeline);
-            Command::PushDescriptorSet(drawCommandBuffer, PipelineBindingPoint::Graphics, graphicsPipelineLayout, textureUniform.GetWriteOperations());
             Command::Draw(drawCommandBuffer, 3, 1, 0, 0);
         }
         Command::EndRendering(drawCommandBuffer);
@@ -307,15 +358,10 @@ struct TexturesTestApp : TestApp
     Image::Handle           swapChainImage;
     Window                  window;    
 
-    Queue::Handle           queue;
-    Semaphore::Handle drawSemaphore;
-    Fence::Handle    imageAcquisitionFence;
-
     Image::Handle            frameBufferImage;
     Image::View::Handle      frameBufferImageView;
     
     Pipeline::Handle         graphicsPipeline;
-    Pipeline::Layout::Handle graphicsPipelineLayout;
 
     std::vector<PipelineShaderStage>   shaderStages;
 
@@ -324,6 +370,12 @@ struct TexturesTestApp : TestApp
     Command::Pool::Handle   commandPool;
     Command::Buffer::Handle mainCommandBuffer;
     Command::Buffer::Handle drawCommandBuffer;
+
+    Queue::Handle                  queue;
+    std::vector<Semaphore::Handle> completeBufferSemaphores;
+    std::vector<Fence::Handle>     completeBufferFences;
+    std::vector<Semaphore::Handle> imageAcquisitionSemaphores;
+    std::vector<Fence::Handle>     imageAcquisitionFences;
 };
 
 int main()
