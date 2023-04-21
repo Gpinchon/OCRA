@@ -260,9 +260,8 @@ struct GraphicsPipelineTestApp : TestApp
         const auto descriptorWrites = mesh.GetDescriptorWrites();
 
         Command::Buffer::Begin(drawCommandBuffer, bufferBeginInfo);
-        if (!descriptorWrites.empty()) {
+        if (!descriptorWrites.empty())
             Command::PushDescriptorSet(drawCommandBuffer, graphicsPipeline, descriptorWrites);
-        }
         Command::BeginRendering(drawCommandBuffer, renderingInfo);
         {
             Command::BindPipeline(drawCommandBuffer, graphicsPipeline);

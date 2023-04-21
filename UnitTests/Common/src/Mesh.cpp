@@ -8,9 +8,9 @@ auto DefaultVertexShader(const Device::Handle& a_Device) {
     ShaderCompiler::ShaderInfo shaderInfo;
     if (OCRA_API_IMPL == OCRA_API_Vulkan)
         shaderInfo.targetAPI = ShaderCompiler::TargetAPI::Vulkan;
-    if (OCRA_API_IMPL == OCRA_API_OpenGL)
+    else if (OCRA_API_IMPL == OCRA_API_OpenGL)
         shaderInfo.targetAPI = ShaderCompiler::TargetAPI::OpenGL;
-    if (OCRA_API_IMPL == OCRA_API_DirectX)
+    else if (OCRA_API_IMPL == OCRA_API_DirectX)
         shaderInfo.targetAPI = ShaderCompiler::TargetAPI::DirectX;
     shaderInfo.type = ShaderCompiler::ShaderType::Vertex;
     shaderInfo.entryPoint = "main";
