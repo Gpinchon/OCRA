@@ -2,7 +2,6 @@
 
 #include <GL/Device.hpp>
 #include <GL/Pipeline.hpp>
-#include <GL/PipelineLayout.hpp>
 #include <GL/ExecutionState.hpp>
 #include <GL/CommandBuffer.hpp>
 

@@ -6,7 +6,6 @@
 #include <GL/CommandBuffer.hpp>
 #include <GL/ExecutionState.hpp>
 #include <GL/Pipeline.hpp>
-#include <GL/PipelineLayout.hpp>
 
 namespace OCRA::Command{
 struct BindDescriptorSetCommand : CommandI {

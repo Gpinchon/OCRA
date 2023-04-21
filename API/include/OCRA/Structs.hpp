@@ -707,11 +707,6 @@ struct CreatePipelineGraphicsInfo { //describes a graphics pipeline with each st
     std::vector<DescriptorSetLayoutBinding> bindings; //the bindings of this pipeline, must be compatible with Pool::Info::sizes
     std::vector<PushConstantRange>          pushConstants;
 };
-struct CreatePipelineLayoutInfo
-{
-    std::vector<DescriptorSetLayoutBinding> bindings; //the bindings of this pipeline, must be compatible with Pool::Info::sizes
-    std::vector<PushConstantRange>          pushConstants;
-};
 
 struct CreateImageSamplerInfo {
     Filter minFilter{ Filter::Linear };
