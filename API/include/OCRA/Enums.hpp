@@ -215,6 +215,7 @@ enum class ImageLayout {
     ShaderReadOnlyOptimal,
     TransferSrcOptimal,
     TransferDstOptimal,
+    SharedPresent,
     Preinitialized,
     DepthReadOnlyStencilAttachmentOptimal,
     DepthAttachmentStencilReadOnlyOptimal,
