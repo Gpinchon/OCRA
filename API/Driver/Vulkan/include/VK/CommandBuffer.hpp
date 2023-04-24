@@ -14,6 +14,11 @@ struct Impl : vk::raii::CommandBuffer
         : vk::raii::CommandBuffer(std::move(a_CommandBuffer))
         , level(a_Level)
     {}
+    auto GetImageLayout(const vk::Image& a_Image) const {
+        auto res = imageLayouts.find(a_Image);
+        if (res != imageLayouts.end()) return res->second;
+        return ImageLayout::Undefined;
+    }
     const vk::CommandBufferLevel level;
     std::unordered_map<VkImage, ImageLayout> imageLayouts;
 };
