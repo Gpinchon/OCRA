@@ -171,7 +171,8 @@ struct ScissorTest {
     unsigned width, height;
 };
 
-
+static constexpr auto RemainingMipLevels = ~0U;
+static constexpr auto RemainingArrayLayers = ~0U;
 struct ImageSubresourceLayers {
     ImageAspectFlags    aspects        = ImageAspectFlagBits::None;
     uint32_t            mipLevel       = 0;
@@ -423,11 +424,13 @@ struct ImageLayoutTransitionInfo {
 
 /**
 * imageViewResolve : if RenderingInfo::resolveMode is not None & this is not nullptr, this attachment will be resolved
+* imageLayout        : the layout imageView is in or will be transitioned to
+* imageLayoutResolve : the layout imageViewResolve is in or will be transitioned to
 * loadOp : if this is Clear, this attachment will be cleared using clearValue
 * storeOp : if this is Store, this attachment will be used for rendering
 */
 struct RenderingAttachmentInfo {
-    Image::View::Handle imageView; 
+    Image::View::Handle imageView;
     Image::View::Handle imageViewResolve;
     ImageLayout imageLayout{ ImageLayout::Undefined };
     ImageLayout imageLayoutResolve{ ImageLayout::Undefined };
