@@ -49,19 +49,6 @@ void CopyImage(
 
 /**
 * @brief The same as CopyImage except it performs automatic conversion
-* (eg. BGR to RGB), Images will be transitioned to specified layouts
-*/
-void BlitImage(
-    const Command::Buffer::Handle& a_CommandBuffer,
-    const Image::Handle& a_SrcImage,
-    const ImageLayout& a_SrcImageLayout,
-    const Image::Handle& a_DstImage,
-    const ImageLayout& a_DstImageLayout,
-    const std::vector<ImageBlit>& a_Blits,
-    const Filter& a_Filter);
-
-/**
-* @brief The same as CopyImage except it performs automatic conversion
 * (eg. BGR to RGB), Images will be transitioned to proper layout
 * a_SrcImage should be in layout TransferSrcOptimal
 * a_DstImage should be in layout TransferDstOptimal
