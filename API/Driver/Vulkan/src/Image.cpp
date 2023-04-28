@@ -13,12 +13,18 @@ namespace OCRA::Image
 {
 void CopyBufferToImage(
     const OCRA::Buffer::Handle& a_SrcBuffer,
-    const Image::Handle& a_DstImage,
+    const Image::Handle&        a_DstImage,
+    const ImageLayout&          a_DstImageLayout,
     const std::vector<ImageBufferCopy>& a_Regions)
 {
     auto& srcBuffer = *a_SrcBuffer;
     auto& dstImage = *a_DstImage;
     auto& device = srcBuffer.device;
+    ImageSubresourceRange imageRange{};
+    imageRange.baseArrayLayer = std::numeric_limits<uint32_t>::max();
+    imageRange.baseMipLevel   = std::numeric_limits<uint32_t>::max();
+    imageRange.layerCount     = std::numeric_limits<uint32_t>::min();
+    imageRange.levelCount     = 1;
     std::vector<vk::BufferImageCopy> vkCopies(a_Regions.size());
     for (auto i = 0u; i < vkCopies.size(); ++i) {
         auto& ocCopy = a_Regions.at(i);
@@ -29,6 +35,11 @@ void CopyBufferToImage(
         vkCopy.imageExtent = ConvertToVk(ocCopy.imageExtent);
         vkCopy.imageOffset = ConvertToVk(ocCopy.imageOffset);
         vkCopy.imageSubresource = ConvertToVk(ocCopy.imageSubresource);
+
+        imageRange.aspects          |= ocCopy.imageSubresource.aspects;
+        imageRange.baseArrayLayer   = std::min(ocCopy.imageSubresource.baseArrayLayer, imageRange.baseArrayLayer);
+        imageRange.baseMipLevel     = std::min(ocCopy.imageSubresource.mipLevel,       imageRange.baseMipLevel);
+        imageRange.layerCount       = std::max(ocCopy.imageSubresource.layerCount,     imageRange.layerCount);
     }
 
     Command::Buffer::Handle transferCommandBuffer;
@@ -44,12 +55,8 @@ void CopyBufferToImage(
         cmdBufferBeginInfo.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
         transferCommandBuffer->begin(cmdBufferBeginInfo);
         {
-            ImageSubresourceRange range{};
-            range.aspects = ImageAspectFlagBits::Color;
-            range.levelCount = 1;
-            range.layerCount = 1;
             Command::TransitionImageLayout(
-                transferCommandBuffer, { a_DstImage, range,
+                transferCommandBuffer, { a_DstImage, imageRange,
                 ImageLayout::Undefined,
                 ImageLayout::TransferDstOptimal });
         }
@@ -57,6 +64,12 @@ void CopyBufferToImage(
             *srcBuffer,
             *dstImage, vk::ImageLayout::eTransferDstOptimal,
             vkCopies);
+        {
+            Command::TransitionImageLayout(
+                transferCommandBuffer, { a_DstImage, imageRange,
+                ImageLayout::TransferDstOptimal,
+                a_DstImageLayout });
+        }
         transferCommandBuffer->end();
     }
     {
@@ -70,12 +83,19 @@ void CopyBufferToImage(
 
 void CopyImageToBuffer(
     const OCRA::Buffer::Handle& a_DstBuffer,
-    const Image::Handle& a_SrcImage,
+    const Image::Handle&        a_SrcImage,
+    const ImageLayout&          a_SrcImageLayout,
+    const ImageLayout&          a_DstImageLayout,
     const std::vector<ImageBufferCopy>& a_Regions)
 {
     auto& dstBuffer = *a_DstBuffer;
     auto& srcImage = *a_SrcImage;
     auto& device = dstBuffer.device;
+    ImageSubresourceRange imageRange;
+    imageRange.baseArrayLayer = std::numeric_limits<uint32_t>::max();
+    imageRange.baseMipLevel   = std::numeric_limits<uint32_t>::max();
+    imageRange.layerCount     = std::numeric_limits<uint32_t>::min();
+    imageRange.levelCount     = 1;
     std::vector<vk::BufferImageCopy> vkCopies(a_Regions.size());
     for (auto i = 0u; i < vkCopies.size(); ++i) {
         auto& ocCopy = a_Regions.at(i);
@@ -86,29 +106,48 @@ void CopyImageToBuffer(
         vkCopy.imageExtent = ConvertToVk(ocCopy.imageExtent);
         vkCopy.imageOffset = ConvertToVk(ocCopy.imageOffset);
         vkCopy.imageSubresource = ConvertToVk(ocCopy.imageSubresource);
+
+        imageRange.aspects          |= ocCopy.imageSubresource.aspects;
+        imageRange.baseArrayLayer   = std::min(ocCopy.imageSubresource.baseArrayLayer, imageRange.baseArrayLayer);
+        imageRange.baseMipLevel     = std::min(ocCopy.imageSubresource.mipLevel,       imageRange.baseMipLevel);
+        imageRange.layerCount       = std::max(ocCopy.imageSubresource.layerCount,     imageRange.layerCount);
     }
-    vk::raii::CommandBuffer transferCommandBuffer = nullptr;
+    Command::Buffer::Handle transferCommandBuffer;
     {
         vk::CommandBufferAllocateInfo commandBufferInfo;
         commandBufferInfo.commandBufferCount = 1;
         commandBufferInfo.commandPool = *device.transferCommandPool;
         commandBufferInfo.level = vk::CommandBufferLevel::ePrimary;
-        transferCommandBuffer = std::move(device.allocateCommandBuffers(commandBufferInfo).front());
+        transferCommandBuffer = std::make_shared<Command::Buffer::Impl>(std::move(device.allocateCommandBuffers(commandBufferInfo).front()), vk::CommandBufferLevel::ePrimary);
     }
     {
         vk::CommandBufferBeginInfo cmdBufferBeginInfo;
         cmdBufferBeginInfo.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit;
-        transferCommandBuffer.begin(cmdBufferBeginInfo);
-        transferCommandBuffer.copyImageToBuffer(
-            *srcImage, vk::ImageLayout::eTransferDstOptimal,
+        transferCommandBuffer->begin(cmdBufferBeginInfo);
+        {
+            Command::TransitionImageLayout(
+                transferCommandBuffer,
+                { a_SrcImage, imageRange,
+                a_SrcImageLayout,
+                ImageLayout::TransferSrcOptimal });
+        }
+        transferCommandBuffer->copyImageToBuffer(
+            *srcImage, vk::ImageLayout::eTransferSrcOptimal,
             *dstBuffer,
             vkCopies);
-        transferCommandBuffer.end();
+        {
+            Command::TransitionImageLayout(
+                transferCommandBuffer,
+                { a_SrcImage, imageRange,
+                ImageLayout::TransferSrcOptimal,
+                a_DstImageLayout });
+        }
+        transferCommandBuffer->end();
     }
     {
         vk::SubmitInfo submitInfo;
         submitInfo.setCommandBufferCount(1);
-        submitInfo.setPCommandBuffers(&*transferCommandBuffer);
+        submitInfo.setPCommandBuffers(&**transferCommandBuffer);
         device.transferQueue.submit({ submitInfo }, nullptr);
     }
     device.transferQueue.waitIdle();

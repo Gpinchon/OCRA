@@ -48,41 +48,12 @@ void BeginRendering(
     const Command::Buffer::Handle& a_CommandBuffer,
     const RenderingInfo& a_Info)
 {
-    std::vector<ImageLayoutTransitionInfo> layoutTransitions;
     std::vector<vk::RenderingAttachmentInfo> vkColorAttachments(a_Info.colorAttachments.size());
     vk::RenderingAttachmentInfo vkDepthAttachment;
     vk::RenderingAttachmentInfo vkStencilAttachment;
     const auto resolveMode = GetResolveMode(a_Info.resolveMode);
     for (auto i = 0u; i < vkColorAttachments.size(); ++i) {
         auto& colorAttachment = a_Info.colorAttachments.at(i);
-        if (colorAttachment.imageView != nullptr) {
-            auto& image = colorAttachment.imageView->image;
-            auto imageLayout = a_CommandBuffer->GetImageLayout(**image);
-            if (imageLayout != colorAttachment.imageLayout) {
-                ImageLayoutTransitionInfo transition;
-                transition.image = image;
-                transition.oldLayout = imageLayout;
-                transition.newLayout = colorAttachment.imageLayout;
-                transition.subRange.aspects = ImageAspectFlagBits::Color;
-                transition.subRange.layerCount = RemainingArrayLayers;
-                transition.subRange.levelCount = RemainingMipLevels;
-                layoutTransitions.push_back(transition);
-            }
-        }
-        if (colorAttachment.imageViewResolve != nullptr) {
-            auto& image = colorAttachment.imageViewResolve->image;
-            auto imageLayout = a_CommandBuffer->GetImageLayout(**image);
-            if (imageLayout != colorAttachment.imageLayout) {
-                ImageLayoutTransitionInfo transition;
-                transition.image = image;
-                transition.oldLayout = imageLayout;
-                transition.newLayout = colorAttachment.imageLayout;
-                transition.subRange.aspects = ImageAspectFlagBits::Color;
-                transition.subRange.layerCount = RemainingArrayLayers;
-                transition.subRange.levelCount = RemainingMipLevels;
-                layoutTransitions.push_back(transition);
-            }
-        }
         vkColorAttachments.at(i) = GetVkRenderingAttachmentInfo(a_Info.colorAttachments.at(i), resolveMode);
     }
     vkDepthAttachment = GetVkRenderingAttachmentInfo(a_Info.depthAttachment, resolveMode);
@@ -95,8 +66,6 @@ void BeginRendering(
         vkColorAttachments,
         &vkDepthAttachment,
         &vkStencilAttachment);
-    if (!layoutTransitions.empty())
-        TransitionImagesLayout(a_CommandBuffer, layoutTransitions);
     a_CommandBuffer->beginRendering(vkInfo);
 }
 
@@ -161,7 +130,9 @@ void CopyBuffer(
 void CopyImage(
     const Command::Buffer::Handle& a_CommandBuffer,
     const Image::Handle& a_SrcImage,
+    const ImageLayout& a_SrcImageLayout,
     const Image::Handle& a_DstImage,
+    const ImageLayout& a_DstImageLayout,
     const std::vector<ImageCopy>& a_Regions)
 {
     std::vector<vk::ImageCopy> vkCopies(a_Regions.size());
@@ -173,55 +144,64 @@ void CopyImage(
     {
         auto& copy = a_Regions.at(i);
         auto& vkCopy = vkCopies.at(i);
-        vkCopy.extent         = ConvertToVk(copy.extent);
-        vkCopy.dstOffset      = ConvertToVk(copy.dstOffset);
+        vkCopy.extent = ConvertToVk(copy.extent);
+        vkCopy.dstOffset = ConvertToVk(copy.dstOffset);
         vkCopy.dstSubresource = ConvertToVk(copy.dstSubresource);
-        vkCopy.srcOffset      = ConvertToVk(copy.srcOffset);
+        vkCopy.srcOffset = ConvertToVk(copy.srcOffset);
         vkCopy.srcSubresource = ConvertToVk(copy.srcSubresource);
-        srcSubResource.aspects       |= copy.srcSubresource.aspects;
+        srcSubResource.aspects |= copy.srcSubresource.aspects;
         srcSubResource.baseArrayLayer = copy.srcSubresource.baseArrayLayer;
-        srcSubResource.layerCount     = copy.srcSubresource.layerCount;
-        srcSubResource.baseMipLevel   = copy.srcSubresource.mipLevel;
-        srcSubResource.levelCount     = 1;
-        dstSubResource.aspects       |= copy.dstSubresource.aspects;
+        srcSubResource.layerCount = copy.srcSubresource.layerCount;
+        srcSubResource.baseMipLevel = copy.srcSubresource.mipLevel;
+        srcSubResource.levelCount = RemainingMipLevels;
+        dstSubResource.aspects |= copy.dstSubresource.aspects;
         dstSubResource.baseArrayLayer = copy.dstSubresource.baseArrayLayer;
-        dstSubResource.layerCount     = copy.dstSubresource.layerCount;
-        dstSubResource.baseMipLevel   = copy.dstSubresource.mipLevel;
-        dstSubResource.levelCount     = 1;
+        dstSubResource.layerCount = copy.dstSubresource.layerCount;
+        dstSubResource.baseMipLevel = copy.dstSubresource.mipLevel;
+        dstSubResource.levelCount = RemainingMipLevels;
     }
-    
-    std::vector<ImageLayoutTransitionInfo> transitions;
-    auto srcImageLayout = a_CommandBuffer->imageLayouts[**a_SrcImage];
-    if (srcImageLayout != ImageLayout::TransferSrcOptimal &&
-        srcImageLayout != ImageLayout::SharedPresent &&
-        srcImageLayout != ImageLayout::General)
-    {
-        ImageLayoutTransitionInfo transition;
-        transition.image = a_SrcImage;
-        transition.subRange.aspects = srcImageAspects;
-        transition.oldLayout = srcImageLayout;
-        transition.newLayout = ImageLayout::TransferSrcOptimal;
-        transitions.push_back(transition);
-        srcImageLayout = ImageLayout::TransferDstOptimal;
-    }
-    auto dstImageLayout = a_CommandBuffer->imageLayouts[**a_DstImage];
-    if (dstImageLayout != ImageLayout::TransferDstOptimal &&
-        dstImageLayout != ImageLayout::SharedPresent &&
-        dstImageLayout != ImageLayout::General)
-    {
-        ImageLayoutTransitionInfo transition;
-        transition.image = a_DstImage;
-        transition.subRange.aspects = dstImageAspects;
-        transition.oldLayout = dstImageLayout;
-        transition.newLayout = ImageLayout::TransferDstOptimal;
-        transitions.push_back(transition);
-        dstImageLayout = ImageLayout::TransferDstOptimal;
-    }
-    TransitionImagesLayout(a_CommandBuffer, transitions);
     a_CommandBuffer->copyImage(
-        **a_SrcImage, ConvertToVk(srcImageLayout),
-        **a_DstImage, ConvertToVk(dstImageLayout),
+        **a_SrcImage, ConvertToVk(a_SrcImageLayout),
+        **a_DstImage, ConvertToVk(a_DstImageLayout),
         vkCopies);
+}
+
+void CopyImage(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const Image::Handle& a_SrcImage,
+    const Image::Handle& a_DstImage,
+    const std::vector<ImageCopy>& a_Regions)
+{
+    CopyImage(
+        a_CommandBuffer,
+        a_SrcImage, ImageLayout::TransferSrcOptimal,
+        a_DstImage, ImageLayout::TransferDstOptimal,
+        a_Regions);
+}
+
+void BlitImage(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const Image::Handle&            a_SrcImage,
+    const ImageLayout&              a_SrcImageLayout,
+    const Image::Handle&            a_DstImage,
+    const ImageLayout&              a_DstImageLayout,
+    const std::vector<ImageBlit>&   a_Blits,
+    const Filter&                   a_Filter)
+{
+    std::vector<vk::ImageBlit> blits(a_Blits.size());
+    for (auto i = 0u; i < a_Blits.size(); ++i) {
+        const auto& blit = a_Blits.at(i);
+        blits.at(i) = vk::ImageBlit(
+            ConvertToVk(blit.srcSubresource),
+            { ConvertToVk(blit.srcOffsets[0]), ConvertToVk(blit.srcOffsets[1]) },
+            ConvertToVk(blit.dstSubresource),
+            { ConvertToVk(blit.dstOffsets[0]), ConvertToVk(blit.dstOffsets[1]) });
+    }
+    a_CommandBuffer->blitImage(
+        **a_SrcImage, ConvertToVk(a_SrcImageLayout),
+        **a_DstImage, ConvertToVk(a_DstImageLayout),
+        blits,
+        ConvertToVk(a_Filter));
 }
 
 void BlitImage(
@@ -231,48 +211,12 @@ void BlitImage(
     const std::vector<ImageBlit>&  a_Blits,
     const Filter&                  a_Filter)
 {
-    auto& srcImageLayout = a_CommandBuffer->imageLayouts[**a_SrcImage];
-    auto& dstImageLayout = a_CommandBuffer->imageLayouts[**a_DstImage];
-    std::vector<vk::ImageBlit> blits(a_Blits.size());
-    std::vector<ImageLayoutTransitionInfo> transitions;
-    for (auto i = 0u; i < a_Blits.size(); ++i) {
-        const auto& blit = a_Blits.at(i);
-        blits.at(i) = vk::ImageBlit(
-            ConvertToVk(blit.srcSubresource),
-            { ConvertToVk(blit.srcOffsets[0]), ConvertToVk(blit.srcOffsets[1]) },
-            ConvertToVk(blit.dstSubresource),
-            { ConvertToVk(blit.dstOffsets[0]), ConvertToVk(blit.dstOffsets[1]) });
-        if (srcImageLayout != ImageLayout::TransferSrcOptimal &&
-            srcImageLayout != ImageLayout::SharedPresent && 
-            srcImageLayout != ImageLayout::General)
-        {
-            ImageLayoutTransitionInfo transition;
-            transition.image = a_SrcImage;
-            transition.subRange.aspects = blit.srcSubresource.aspects;
-            transition.oldLayout = srcImageLayout;
-            transition.newLayout = ImageLayout::TransferSrcOptimal;
-            transitions.push_back(transition);
-            srcImageLayout = ImageLayout::TransferSrcOptimal;
-        }
-        if (dstImageLayout != ImageLayout::TransferDstOptimal &&
-            dstImageLayout != ImageLayout::SharedPresent &&
-            dstImageLayout != ImageLayout::General)
-        {
-            ImageLayoutTransitionInfo transition;
-            transition.image = a_DstImage;
-            transition.subRange.aspects = blit.dstSubresource.aspects;
-            transition.oldLayout = dstImageLayout;
-            transition.newLayout = ImageLayout::TransferDstOptimal;
-            transitions.push_back(transition);
-            dstImageLayout = ImageLayout::TransferDstOptimal;
-        }
-    }
-    TransitionImagesLayout(a_CommandBuffer, transitions);
-    a_CommandBuffer->blitImage(
-        **a_SrcImage, ConvertToVk(srcImageLayout),
-        **a_DstImage, ConvertToVk(dstImageLayout),
-        blits,
-        ConvertToVk(a_Filter));
+    BlitImage(
+        a_CommandBuffer,
+        a_SrcImage, ImageLayout::TransferSrcOptimal,
+        a_DstImage, ImageLayout::TransferDstOptimal,
+        a_Blits,
+        a_Filter);
 }
 
 void Draw(
@@ -346,7 +290,6 @@ void PipelineBarrier(
         vkBarrier.subresourceRange.layerCount = barrier.subRange.layerCount;
         vkBarrier.subresourceRange.levelCount = barrier.subRange.levelCount;
         vkImageMemoryBarriers.push_back(vkBarrier);
-        a_CommandBuffer->imageLayouts[**barrier.image] = barrier.newLayout;
     }
     a_CommandBuffer->pipelineBarrier(
         ConvertToVk(a_SrcStageMask),
@@ -409,7 +352,6 @@ void TransitionImagesLayout(
         barrier.dstQueueFamilyIndex = dstQueueFamily;
         barrier.srcAccessMask = GetImageTransitionAccessMask(oldLayout);
         barrier.dstAccessMask = GetImageTransitionAccessMask(newLayout);
-        a_CommandBuffer->imageLayouts[*image] = transition.newLayout;
     }
     a_CommandBuffer->pipelineBarrier(
         vkSrcStageFlags, vkDstStageFlags,
@@ -448,15 +390,6 @@ void PushDescriptorSet(
                 **info.imageView,
                 ConvertToVk(info.imageLayout));
             vkWriteInfo.pImageInfo = &vkInfo;
-            auto& imageLayout = a_CommandBuffer->imageLayouts[**info.imageView->image];
-            if (imageLayout != info.imageLayout) {
-                ImageLayoutTransitionInfo imageTransition;
-                imageTransition.image     = info.imageView->image;
-                imageTransition.oldLayout = imageLayout;
-                imageTransition.newLayout = info.imageLayout;
-                imageTransition.subRange  = info.imageView->subResourceRange;
-                TransitionImageLayout(a_CommandBuffer, { imageTransition });
-            }
         }
 
         if (writeInfo.bufferInfo.has_value()) {

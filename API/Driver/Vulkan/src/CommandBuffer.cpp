@@ -29,7 +29,6 @@ void Begin(const Handle& a_CommandBuffer,
 
 void End(const Handle& a_CommandBuffer)
 {
-    a_CommandBuffer->imageLayouts.clear();
     a_CommandBuffer->end();
 }
 

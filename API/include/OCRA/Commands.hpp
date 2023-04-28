@@ -38,6 +38,21 @@ void CopyImageToBuffer(
 
 /**
 * @brief Copies an image to an other,
+* a_SrcImage the source of the copy
+* a_SrcImageLayout the current Layout of the source image
+* a_DstImage the destination of the copy
+* a_DstImageLayout the current Layout of the destination image
+*/
+void CopyImage(
+    const Command::Buffer::Handle&  a_CommandBuffer,
+    const Image::Handle&            a_SrcImage,
+    const ImageLayout&              a_SrcImageLayout,
+    const Image::Handle&            a_DstImage,
+    const ImageLayout&              a_DstImageLayout,
+    const std::vector<ImageCopy>&   a_Regions);
+
+/**
+* @brief Copies an image to an other,
 * a_SrcImage should be in layout TransferSrcOptimal
 * a_DstImage should be in layout TransferDstOptimal
 */
@@ -48,8 +63,23 @@ void CopyImage(
     const std::vector<ImageCopy>& a_Regions);
 
 /**
-* @brief The same as CopyImage except it performs automatic conversion
-* (eg. BGR to RGB), Images will be transitioned to proper layout
+* @brief The same as CopyImage except it performs automatic conversion (eg. BGR to RGB)
+* a_SrcImage the source of the blit
+* a_SrcImageLayout the current layout of the source image
+* a_DstImage the destination of the blit
+* a_SrcImageLayout the current layout of the destination image
+*/
+void BlitImage(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const Image::Handle&            a_SrcImage,
+    const ImageLayout&              a_SrcImageLayout,
+    const Image::Handle&            a_DstImage,
+    const ImageLayout&              a_DstImageLayout,
+    const std::vector<ImageBlit>&   a_Blits,
+    const Filter&                   a_Filter);
+
+/**
+* @brief The same as CopyImage except it performs automatic conversion (eg. BGR to RGB)
 * a_SrcImage should be in layout TransferSrcOptimal
 * a_DstImage should be in layout TransferDstOptimal
 */

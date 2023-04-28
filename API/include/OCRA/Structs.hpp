@@ -177,14 +177,14 @@ struct ImageSubresourceLayers {
     ImageAspectFlags    aspects        = ImageAspectFlagBits::None;
     uint32_t            mipLevel       = 0;
     uint32_t            baseArrayLayer = 0;
-    uint32_t            layerCount     = 1;
+    uint32_t            layerCount     = RemainingArrayLayers;
 };
 struct ImageSubresourceRange {
     ImageAspectFlags      aspects        = ImageAspectFlagBits::None;
     uint32_t              baseMipLevel   = 0;
-    uint32_t              levelCount     = 1;
+    uint32_t              levelCount     = RemainingMipLevels;
     uint32_t              baseArrayLayer = 0;
-    uint32_t              layerCount     = 1;
+    uint32_t              layerCount     = RemainingArrayLayers;
 };
 struct ImageBufferCopy {
     uint64_t bufferOffset{ 0 };

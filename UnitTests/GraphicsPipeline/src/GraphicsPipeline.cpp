@@ -262,6 +262,24 @@ struct GraphicsPipelineTestApp : TestApp
         Command::Buffer::Begin(drawCommandBuffer, bufferBeginInfo);
         if (!descriptorWrites.empty())
             Command::PushDescriptorSet(drawCommandBuffer, graphicsPipeline, descriptorWrites);
+        //Transition the render image to the proper layout
+        {
+            ImageLayoutTransitionInfo layoutTransition;
+            layoutTransition.image = renderImage;
+            layoutTransition.subRange.aspects = ImageAspectFlagBits::Color;
+            layoutTransition.oldLayout = ImageLayout::Undefined;
+            layoutTransition.newLayout = ImageLayout::General;
+            Command::TransitionImageLayout(drawCommandBuffer, layoutTransition);
+        }
+        if (Samples != SampleCount::Count1)
+        {
+            ImageLayoutTransitionInfo layoutTransition;
+            layoutTransition.image = resolveImage;
+            layoutTransition.subRange.aspects = ImageAspectFlagBits::Color;
+            layoutTransition.oldLayout = ImageLayout::Undefined;
+            layoutTransition.newLayout = ImageLayout::General;
+            Command::TransitionImageLayout(drawCommandBuffer, layoutTransition);
+        }
         Command::BeginRendering(drawCommandBuffer, renderingInfo);
         {
             Command::BindPipeline(drawCommandBuffer, graphicsPipeline);
@@ -287,23 +305,44 @@ struct GraphicsPipelineTestApp : TestApp
         {
             Command::ExecuteCommandBuffer(mainCommandBuffer, drawCommandBuffer);
             {
+                auto& srcImage = Samples == SampleCount::Count1 ? renderImage : resolveImage;
+                auto& dstImage = a_SwapChainImage;
+                //Transition source image layout
+                {
+                    ImageLayoutTransitionInfo layoutTransition;
+                    layoutTransition.image = srcImage;
+                    layoutTransition.subRange.aspects = ImageAspectFlagBits::Color;
+                    layoutTransition.oldLayout = ImageLayout::General;
+                    layoutTransition.newLayout = ImageLayout::TransferSrcOptimal;
+                    Command::TransitionImageLayout(
+                        mainCommandBuffer,
+                        layoutTransition);
+                }
+                //Transition destination image layout
+                {
+                    ImageLayoutTransitionInfo layoutTransition;
+                    layoutTransition.image = dstImage;
+                    layoutTransition.subRange.aspects = ImageAspectFlagBits::Color;
+                    layoutTransition.oldLayout = ImageLayout::Undefined;
+                    layoutTransition.newLayout = ImageLayout::TransferDstOptimal;
+                    Command::TransitionImageLayout(
+                        mainCommandBuffer,
+                        layoutTransition);
+                }
+
                 ImageBlit imageBlit;
                 imageBlit.srcSubresource.aspects = ImageAspectFlagBits::Color;
                 imageBlit.srcSubresource.layerCount = 1;
                 imageBlit.srcOffsets[0] = Offset3D(0, 0, 0);
                 imageBlit.srcOffsets[1] = Offset3D(InnerSize.width, InnerSize.height, 1);
-
                 imageBlit.dstSubresource.aspects = ImageAspectFlagBits::Color;
-                imageBlit.srcSubresource.layerCount = 1;
+                imageBlit.dstSubresource.layerCount = 1;
                 imageBlit.dstOffsets[0] = Offset3D(0, 0, 0);
                 imageBlit.dstOffsets[1] = Offset3D(window.GetExtent().width, window.GetExtent().height, 1);
-
-                auto& srcImage = Samples == SampleCount::Count1 ? renderImage : resolveImage;
-                auto& dstImage = a_SwapChainImage;
-
                 //We do a blit here to perform necessary conversions
                 Command::BlitImage(mainCommandBuffer,
-                    srcImage, dstImage,
+                    srcImage, ImageLayout::TransferSrcOptimal,
+                    dstImage, ImageLayout::TransferDstOptimal,
                     { imageBlit }, Filter::Linear);
 
                 ImageSubresourceRange range{};
@@ -311,7 +350,7 @@ struct GraphicsPipelineTestApp : TestApp
                 range.levelCount = 1;
                 range.layerCount = 1;
                 Command::TransitionImageLayout(
-                    mainCommandBuffer, { a_SwapChainImage, range,
+                    mainCommandBuffer, { dstImage, range,
                     ImageLayout::TransferDstOptimal,
                     ImageLayout::PresentSrc });
             }
