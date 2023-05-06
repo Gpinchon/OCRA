@@ -35,6 +35,9 @@ Impl::Impl(const Device::Handle& a_Device, const CreateImageViewInfo& a_Info)
     , format(GetGLSizedFormat(a_Info.format))
 {
     a_Device->PushCommand([this] {
+        auto& imageInfo = info.image->info;
+        auto levelCount = info.subRange.levelCount == OCRA::RemainingMipLevels   ? imageInfo.mipLevels  : info.subRange.levelCount;
+        auto layerCount = info.subRange.layerCount == OCRA::RemainingArrayLayers ? imageInfo.arrayLayers: info.subRange.layerCount;
         glGenTextures(1, &handle);
         glTextureView(
             handle,
@@ -42,9 +45,9 @@ Impl::Impl(const Device::Handle& a_Device, const CreateImageViewInfo& a_Info)
             info.image->handle,
             GetGLSizedFormat(info.format),
             info.subRange.baseMipLevel,
-            info.subRange.levelCount,
+            levelCount,
             info.subRange.baseArrayLayer,
-            info.subRange.layerCount);
+            layerCount);
         auto swizzleMask = GLSwizzleMask(info.components);
         glTextureParameteriv(
             handle,
