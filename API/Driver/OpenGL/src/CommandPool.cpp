@@ -25,6 +25,7 @@ struct Impl
 {
     Impl(const Device::Handle& a_Device, const CreateCommandPoolInfo& a_Info)
         : device(a_Device)
+        , allowReset((a_Info.flags & OCRA::CreateCommandPoolFlagBits::Reset) != 0)
     {}
     std::pmr::unsynchronized_pool_resource  memoryResource;
 
@@ -35,6 +36,7 @@ struct Impl
     }
     std::pmr::vector<Buffer::WeakHandle>    allocated{ &memoryResource };
 #endif
+    const bool         allowReset;
     Device::WeakHandle device;
 };
 
@@ -50,7 +52,8 @@ std::vector<Command::Buffer::Handle> AllocateCommandBuffer(
     auto& allocated = a_Pool->allocated;
 #endif
     for (auto i = 0u; i < a_Info.count; ++i) {
-        auto buffer = std::allocate_shared<Buffer::Impl>(allocator, a_Pool->device.lock(), a_Info.level, &memoryResource);
+        auto buffer = std::allocate_shared<Buffer::Impl>(allocator,
+            a_Pool->device.lock(), a_Info.level, a_Pool->allowReset, &memoryResource);
         commandBuffers.push_back(buffer);
 #ifdef _DEBUG
         allocated.push_back(buffer);

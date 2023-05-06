@@ -61,9 +61,14 @@ struct CommandStorage
 
 struct Impl
 {
-    Impl(const Device::Handle& a_Device, const CommandBufferLevel a_Level, std::pmr::memory_resource* a_MemoryResource)
+    Impl(
+        const Device::Handle& a_Device,
+        const CommandBufferLevel& a_Level,
+        const bool& a_AllowReset,
+        std::pmr::memory_resource* a_MemoryResource)
         : device(a_Device)
         , level(a_Level)
+        , allowReset(a_AllowReset)
         , pushConstants(a_Device)
         , memoryResource(a_MemoryResource)
     {}
@@ -86,6 +91,7 @@ struct Impl
     }
     const Device::WeakHandle device;
     const CommandBufferLevel level;
+    const bool               allowReset;
     CommandBufferState      state{ CommandBufferState::Initial };
     CommandBufferUsageFlags usageFlags;
     OCRA::PushConstants     pushConstants;
