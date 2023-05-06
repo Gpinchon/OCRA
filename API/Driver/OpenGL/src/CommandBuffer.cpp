@@ -39,7 +39,8 @@ void OCRA::Command::Buffer::Impl::Invalidate()
     OCRA_ASSERT(
         state == CommandBufferState::Recording  ||
         state == CommandBufferState::Executable ||
-        state == CommandBufferState::Pending
+        state == CommandBufferState::Pending    ||
+        state == CommandBufferState::Invalid
     );
     state = CommandBufferState::Invalid;
     commands.clear();
@@ -48,6 +49,9 @@ void OCRA::Command::Buffer::Impl::Invalidate()
 
 void OCRA::Command::Buffer::Impl::Begin(const CommandBufferBeginInfo& a_BeginInfo)
 {
+    if (state == CommandBufferState::Invalid ||
+        state == CommandBufferState::Executable)
+        Reset();
     OCRA_ASSERT(state == CommandBufferState::Initial);
     state = CommandBufferState::Recording;
     usageFlags = a_BeginInfo.flags;
