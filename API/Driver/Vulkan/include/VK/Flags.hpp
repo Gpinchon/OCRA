@@ -256,7 +256,7 @@ static inline vk::AccessFlags GetImageTransitionAccessMask(const vk::ImageLayout
     return vk::AccessFlagBits(-1);
 }
 
-static inline auto GetImageTransitionStage(const vk::ImageLayout& a_Stage)
+static inline vk::PipelineStageFlags GetImageTransitionStage(const vk::ImageLayout& a_Stage)
 {
     switch (a_Stage)
     {
@@ -265,13 +265,17 @@ static inline auto GetImageTransitionStage(const vk::ImageLayout& a_Stage)
     case vk::ImageLayout::eGeneral:
         return vk::PipelineStageFlagBits::eAllCommands;
     case vk::ImageLayout::eColorAttachmentOptimal:
-        break;
+        return vk::PipelineStageFlagBits::eColorAttachmentOutput;
     case vk::ImageLayout::eDepthStencilAttachmentOptimal:
-        break;
+        return vk::PipelineStageFlagBits::eFragmentShader;
     case vk::ImageLayout::eDepthStencilReadOnlyOptimal:
         break;
     case vk::ImageLayout::eShaderReadOnlyOptimal:
-        return vk::PipelineStageFlagBits::eFragmentShader;
+        return
+            vk::PipelineStageFlagBits::eFragmentShader |
+            vk::PipelineStageFlagBits::eVertexShader |
+            vk::PipelineStageFlagBits::eTessellationControlShader |
+            vk::PipelineStageFlagBits::eTessellationEvaluationShader;
     case vk::ImageLayout::eTransferSrcOptimal:
     case vk::ImageLayout::eTransferDstOptimal:
         return vk::PipelineStageFlagBits::eTransfer;
