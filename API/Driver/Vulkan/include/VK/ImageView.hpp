@@ -6,10 +6,8 @@
 
 #include <OCRA/Handles.hpp>
 
-namespace OCRA::Image::View
-{
-struct Impl : vk::raii::ImageView
-{
+namespace OCRA::Image::View {
+struct Impl : vk::raii::ImageView {
     Impl(
         const vk::raii::Device& a_Device,
         const vk::ImageViewCreateInfo& a_Info,
@@ -18,7 +16,8 @@ struct Impl : vk::raii::ImageView
         : vk::raii::ImageView(a_Device, a_Info)
         , image(a_Image)
         , subResourceRange(a_Range)
-    {}
+    {
+    }
     const Image::Handle image;
     const ImageSubresourceRange subResourceRange;
 };

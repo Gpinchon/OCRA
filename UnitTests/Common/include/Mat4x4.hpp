@@ -13,14 +13,17 @@ struct Mat<4, 4, T> {
     typedef Vec<4, T> col_type;
     typedef Vec<4, T> row_type;
 
-    Mat() : value{
-        col_type(1, 0, 0, 0),
-        col_type(0, 1, 0, 0),
-        col_type(0, 0, 1, 0),
-        col_type(0, 0, 0, 1) }
-    {}
+    Mat()
+        : value {
+            col_type(1, 0, 0, 0),
+            col_type(0, 1, 0, 0),
+            col_type(0, 0, 1, 0),
+            col_type(0, 0, 0, 1)
+        }
+    {
+    }
 
-    template<typename V1, typename V2, typename V3, typename V4>
+    template <typename V1, typename V2, typename V3, typename V4>
     Mat(col_type const& a_V1,
         col_type const& a_V2,
         col_type const& a_V3,
@@ -31,13 +34,15 @@ struct Mat<4, 4, T> {
         value[2] = a_V3;
         value[3] = a_V4;
     }
-    auto& operator[](size_t const& a_Col) {
+    auto& operator[](size_t const& a_Col)
+    {
         return value[a_Col];
     }
-    auto& operator[](size_t const& a_Col) const {
+    auto& operator[](size_t const& a_Col) const
+    {
         return value[a_Col];
     }
-    template<typename T>
+    template <typename T>
     static auto Rotate(Mat<4, 4, T> const& a_M, T a_Angle, Vec<3, T> const& a_V)
     {
         T const a = a_Angle;

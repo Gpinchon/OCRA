@@ -4,8 +4,7 @@
 
 #include <vector>
 
-namespace OCRA::PhysicalDevice
-{
+namespace OCRA::PhysicalDevice {
 const std::vector<QueueFamilyProperties> GetQueueFamilyProperties(const Handle& a_PhysicalDevice);
 
 /**
@@ -34,8 +33,8 @@ uint32_t FindQueueFamily(const Handle& a_PhysicalDevice, const QueueFlags& a_Que
 uint32_t FindMemoryType(const PhysicalDevice::Handle& a_PhysicalDevice, const MemoryPropertyFlags& a_MemoryProperties);
 
 /**
-* @brief creates a logical device that'll use the specified physical device
-*/
+ * @brief creates a logical device that'll use the specified physical device
+ */
 Device::Handle CreateDevice(
     const PhysicalDevice::Handle& a_PhysicalDevice,
     const CreateDeviceInfo& a_CreateInfo,

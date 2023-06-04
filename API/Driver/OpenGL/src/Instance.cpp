@@ -3,8 +3,7 @@
 #include <GL/Instance.hpp>
 #include <GL/Win32/Instance.hpp>
 
-namespace OCRA
-{
+namespace OCRA {
 Instance::Handle CreateInstance(
     const CreateInstanceInfo& a_Info,
     const AllocationCallback* a_Allocator)
@@ -15,13 +14,13 @@ Instance::Handle CreateInstance(
 }
 }
 
-namespace OCRA::Instance
-{
-//for multi instances
+namespace OCRA::Instance {
+// for multi instances
 static auto s_ID = 0u;
 Impl::Impl()
     : id(s_ID++)
-{}
+{
+}
 
 const std::string GetType(const Handle& a_Instance)
 {

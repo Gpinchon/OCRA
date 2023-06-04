@@ -1,7 +1,6 @@
 #pragma once
 
-namespace OCRA
-{
+namespace OCRA {
 enum class BlendOp {
     Add,
     Subtract,
@@ -77,7 +76,7 @@ enum class DescriptorType {
     StorageBufferDynamic,
     InputAttachment,
     InlineUniformBlock,
-    AccelerationStructure, //for RayTracing
+    AccelerationStructure, // for RayTracing
     MutableValve,
     MaxValue
 };
@@ -254,9 +253,9 @@ enum class IndexType {
     MaxValue
 };
 enum class LoadOp {
-    DontCare, //Nothing is done
-    Load,     //Values are kept
-    Clear,    //Values are cleared
+    DontCare, // Nothing is done
+    Load, // Values are kept
+    Clear, // Values are cleared
     MaxValue
 };
 enum class LogicOp {
@@ -278,12 +277,11 @@ enum class LogicOp {
     Set,
     MaxValue
 };
-enum class PipelineBindingPoint
-{
+enum class PipelineBindingPoint {
     Unknown = -1,
     Graphics,
     Compute,
-    RayTracing, //might be unavailable
+    RayTracing, // might be unavailable
     MaxValue
 };
 enum class DynamicState {
@@ -296,7 +294,7 @@ enum class DynamicState {
     StencilCompareMask,
     StencilWriteMask,
     StencilReference,
-    //VK 1.3
+    // VK 1.3
     CullMode,
     FrontFace,
     PrimitiveTopology,
@@ -322,18 +320,18 @@ enum class PolygonMode {
     MaxValue
 };
 enum class PrimitiveTopology {
-    Unknown = -1,
-    PointList = 0,
-    LineList = 1,
-    LineStrip = 2,
-    TriangleList = 3,
-    TriangleStrip = 4,
-    TriangleFan = 5,
-    LineListWithAdjacency = 6,
-    LineStripWithAdjacency = 7,
-    TriangleListWithAdjacency = 8,
+    Unknown                    = -1,
+    PointList                  = 0,
+    LineList                   = 1,
+    LineStrip                  = 2,
+    TriangleList               = 3,
+    TriangleStrip              = 4,
+    TriangleFan                = 5,
+    LineListWithAdjacency      = 6,
+    LineStripWithAdjacency     = 7,
+    TriangleListWithAdjacency  = 8,
     TriangleStripWithAdjacency = 9,
-    PatchList = 10,
+    PatchList                  = 10,
     MaxValue
 };
 enum class QueryType {
@@ -345,17 +343,17 @@ enum class QueryType {
 };
 enum class ResolveMode {
     None,
-    Average,   //equivalent to linear
-    SampleZero //equivalent to nearest
+    Average, // equivalent to linear
+    SampleZero // equivalent to nearest
 };
 enum class SampleCount {
-    Count1 = 1,
-    Count2 = 2,
-    Count4 = 4,
-    Count8 = 8,
-    Count16 = 16,
-    Count32 = 32,
-    Count64 = 64,
+    Count1   = 1,
+    Count2   = 2,
+    Count4   = 4,
+    Count8   = 8,
+    Count16  = 16,
+    Count32  = 32,
+    Count64  = 64,
     MaxValue = Count64
 };
 enum class SamplerAddressMode {
@@ -377,38 +375,42 @@ enum class SharingMode {
     MaxValue
 };
 enum class StoreOp {
-    DontCare, //Nothing is stored
-    Store,    //Values from the Fragment Shader are written
+    DontCare, // Nothing is stored
+    Store, // Values from the Fragment Shader are written
     MaxValue
 };
 enum class PhysicalDeviceType {
-    Other = 0,
+    Other         = 0,
     IntegratedGpu = 1,
-    DiscreteGpu = 2,
-    VirtualGpu = 3,
-    Cpu = 4,
+    DiscreteGpu   = 2,
+    VirtualGpu    = 3,
+    Cpu           = 4,
     MaxValue
 };
 enum class StencilOp {
-    Keep = 0,
-    Zero = 1,
-    Replace = 2,
+    Keep              = 0,
+    Zero              = 1,
+    Replace           = 2,
     IncrementAndClamp = 3,
     DecrementAndClamp = 4,
-    Invert = 5,
-    IncrementAndWrap = 6,
-    DecrementAndWrap = 7,
+    Invert            = 5,
+    IncrementAndWrap  = 6,
+    DecrementAndWrap  = 7,
     MaxValue
 };
 enum class Swizzle {
     Identity,
-    Zero, One,
-    R, G, B, A,
+    Zero,
+    One,
+    R,
+    G,
+    B,
+    A,
     MaxValue
 };
 enum class VertexInputRate {
-    Vertex,   //use vertex attribute
-    Instance, //use instance index
+    Vertex, // use vertex attribute
+    Instance, // use instance index
     MaxValue
 };
 enum class VertexType {

@@ -5,34 +5,32 @@
 #include <VK/Memory.hpp>
 #include <VK/PhysicalDevice.hpp>
 
-namespace OCRA::Device
-{
+namespace OCRA::Device {
 Memory::Handle AllocateMemory(
     const Device::Handle& a_Device,
     const AllocateMemoryInfo& a_Info)
 {
     auto& device = *a_Device;
     vk::MemoryAllocateInfo info;
-    info.allocationSize = a_Info.size;
+    info.allocationSize  = a_Info.size;
     info.memoryTypeIndex = a_Info.memoryTypeIndex;
     return std::make_shared<Memory::Impl>(device, info);
 }
 
 Memory::Handle AllocateMemory(
     const Handle& a_Device,
-    const size_t  a_Size,
+    const size_t a_Size,
     const MemoryPropertyFlags& a_MemoryFlags)
 {
     auto& device = *a_Device;
-    vk::MemoryAllocateInfo info{ VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO };
-    info.allocationSize = a_Size;
+    vk::MemoryAllocateInfo info { VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO };
+    info.allocationSize  = a_Size;
     info.memoryTypeIndex = device.physicalDevice.findMemoryType(ConvertToVk(a_MemoryFlags));
     return std::make_shared<Memory::Impl>(device, info);
 }
 }
 
-namespace OCRA::Memory
-{
+namespace OCRA::Memory {
 void* Map(const MemoryMappedRange& a_MemoryRange)
 {
     return a_MemoryRange.memory->mapMemory(a_MemoryRange.offset, a_MemoryRange.length);

@@ -4,13 +4,11 @@
 
 #include <vector>
 
-namespace OCRA::Instance
-{
-struct Impl
-{
+namespace OCRA::Instance {
+struct Impl {
     Impl();
-    const uint32_t  id;
+    const uint32_t id;
     std::vector<PhysicalDevice::Handle> physicalDevices;
-    static constexpr auto type{ "OpenGL" };
+    static constexpr auto type { "OpenGL" };
 };
 }

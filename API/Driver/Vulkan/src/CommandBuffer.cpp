@@ -1,17 +1,16 @@
 #include <OCRA/Structs.hpp>
 
 #include <VK/CommandBuffer.hpp>
-#include <VK/Flags.hpp>
 #include <VK/Enums.hpp>
+#include <VK/Flags.hpp>
 
-namespace OCRA::Command::Buffer
-{
+namespace OCRA::Command::Buffer {
 void Begin(const Handle& a_CommandBuffer,
-           const CommandBufferBeginInfo& a_BeginInfo)
+    const CommandBufferBeginInfo& a_BeginInfo)
 {
     vk::CommandBufferBeginInfo info;
     info.flags = ConvertToVk(a_BeginInfo.flags);
-    vk::CommandBufferInheritanceInfo          vkInheritanceInfo;
+    vk::CommandBufferInheritanceInfo vkInheritanceInfo;
     vk::CommandBufferInheritanceRenderingInfo inheritanceRenderingInfo;
     std::vector<vk::Format> colorAttachmentFormats;
     if (a_BeginInfo.inheritanceInfo.has_value()) {

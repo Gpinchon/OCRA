@@ -1,12 +1,11 @@
-#include <windows.h>
 #include <string>
+#include <windows.h>
 
 #include <GL/Win32/Error.hpp>
 #include <GL/glew.h>
 #include <GL/wglew.h>
 
-namespace OCRA::Window::Win32
-{
+namespace OCRA::Window::Win32 {
 void* Create(const std::string& a_ClassName, const std::string& a_Name)
 {
     const auto hwnd = CreateWindowEx(
@@ -20,7 +19,8 @@ void* Create(const std::string& a_ClassName, const std::string& a_Name)
     MSG msg = { 0 };
     while (PeekMessage(&msg, hwnd, 0, 0, PM_NOYIELD | PM_REMOVE)) {
         DispatchMessage(&msg);
-        if (msg.message == WM_CREATE) break;
+        if (msg.message == WM_CREATE)
+            break;
     }
     return hwnd;
 }

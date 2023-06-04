@@ -1,9 +1,8 @@
 #include <OCRA/OCRA.hpp>
 
 #include <VK/Buffer.hpp>
-#include <VK/DescriptorSet.hpp>
-#include <VK/PipelineLayout.hpp>
 #include <VK/CommandBuffer.hpp>
+#include <VK/DescriptorSet.hpp>
 #include <VK/Enums.hpp>
 #include <VK/Flags.hpp>
 #include <VK/FrameBuffer.hpp>
@@ -11,15 +10,15 @@
 #include <VK/ImageSampler.hpp>
 #include <VK/ImageView.hpp>
 #include <VK/Pipeline.hpp>
+#include <VK/PipelineLayout.hpp>
 #include <VK/Structs.hpp>
 
 #include <vulkan/vulkan.h>
 
-namespace OCRA::Command
+namespace OCRA::Command {
+static inline auto GetResolveMode(const ResolveMode& a_Resolve)
 {
-static inline auto GetResolveMode(const ResolveMode& a_Resolve) {
-    switch (a_Resolve)
-    {
+    switch (a_Resolve) {
     case OCRA::ResolveMode::None:
         return vk::ResolveModeFlagBits::eNone;
     case OCRA::ResolveMode::Average:
@@ -29,9 +28,11 @@ static inline auto GetResolveMode(const ResolveMode& a_Resolve) {
     }
     return vk::ResolveModeFlagBits::eNone;
 }
-static inline auto GetVkRenderingAttachmentInfo(const RenderingAttachmentInfo& a_Info, const vk::ResolveModeFlagBits& a_ResolveMode) {
+static inline auto GetVkRenderingAttachmentInfo(const RenderingAttachmentInfo& a_Info, const vk::ResolveModeFlagBits& a_ResolveMode)
+{
     vk::RenderingAttachmentInfo vkInfo;
-    if (a_Info.imageView == nullptr) return vkInfo;
+    if (a_Info.imageView == nullptr)
+        return vkInfo;
     vkInfo.setClearValue(ConvertToVk(a_Info.clearValue));
     vkInfo.setLoadOp(ConvertToVk(a_Info.loadOp));
     vkInfo.setStoreOp(ConvertToVk(a_Info.storeOp));
@@ -53,16 +54,16 @@ void BeginRendering(
     vk::RenderingAttachmentInfo vkStencilAttachment;
     const auto resolveMode = GetResolveMode(a_Info.resolveMode);
     for (auto i = 0u; i < vkColorAttachments.size(); ++i) {
-        auto& colorAttachment = a_Info.colorAttachments.at(i);
+        auto& colorAttachment    = a_Info.colorAttachments.at(i);
         vkColorAttachments.at(i) = GetVkRenderingAttachmentInfo(a_Info.colorAttachments.at(i), resolveMode);
     }
-    vkDepthAttachment = GetVkRenderingAttachmentInfo(a_Info.depthAttachment, resolveMode);
+    vkDepthAttachment   = GetVkRenderingAttachmentInfo(a_Info.depthAttachment, resolveMode);
     vkStencilAttachment = GetVkRenderingAttachmentInfo(a_Info.stencilAttachment, resolveMode);
     vk::RenderingInfo vkInfo(
         {},
         ConvertToVk(a_Info.area),
         a_Info.layerCount,
-        0, //TODO figure out ViewMask
+        0, // TODO figure out ViewMask
         vkColorAttachments,
         &vkDepthAttachment,
         &vkStencilAttachment);
@@ -79,7 +80,7 @@ void BindPipeline(
 
 void BindVertexBuffers(
     const Command::Buffer::Handle& a_CommandBuffer,
-    const uint32_t                              a_FirstBinding,
+    const uint32_t a_FirstBinding,
     const std::vector<OCRA::Buffer::Handle>& a_VertexBuffers,
     const std::vector<uint64_t>& a_Offsets)
 {
@@ -118,7 +119,7 @@ void CopyBuffer(
     std::vector<vk::BufferCopy> vkRegions;
     vkRegions.reserve(a_Regions.size());
     for (const auto& region : a_Regions) {
-        VkBufferCopy vkRegion{};
+        VkBufferCopy vkRegion {};
         vkRegion.dstOffset = region.writeOffset;
         vkRegion.srcOffset = region.readOffset;
         vkRegion.size      = region.size;
@@ -140,25 +141,24 @@ void CopyImage(
     ImageSubresourceRange dstSubResource;
     ImageAspectFlags srcImageAspects;
     ImageAspectFlags dstImageAspects;
-    for (auto i = 0u; i < vkCopies.size(); ++i)
-    {
-        auto& copy = a_Regions.at(i);
-        auto& vkCopy = vkCopies.at(i);
-        vkCopy.extent = ConvertToVk(copy.extent);
-        vkCopy.dstOffset = ConvertToVk(copy.dstOffset);
+    for (auto i = 0u; i < vkCopies.size(); ++i) {
+        auto& copy            = a_Regions.at(i);
+        auto& vkCopy          = vkCopies.at(i);
+        vkCopy.extent         = ConvertToVk(copy.extent);
+        vkCopy.dstOffset      = ConvertToVk(copy.dstOffset);
         vkCopy.dstSubresource = ConvertToVk(copy.dstSubresource);
-        vkCopy.srcOffset = ConvertToVk(copy.srcOffset);
+        vkCopy.srcOffset      = ConvertToVk(copy.srcOffset);
         vkCopy.srcSubresource = ConvertToVk(copy.srcSubresource);
         srcSubResource.aspects |= copy.srcSubresource.aspects;
         srcSubResource.baseArrayLayer = copy.srcSubresource.baseArrayLayer;
-        srcSubResource.layerCount = copy.srcSubresource.layerCount;
-        srcSubResource.baseMipLevel = copy.srcSubresource.mipLevel;
-        srcSubResource.levelCount = RemainingMipLevels;
+        srcSubResource.layerCount     = copy.srcSubresource.layerCount;
+        srcSubResource.baseMipLevel   = copy.srcSubresource.mipLevel;
+        srcSubResource.levelCount     = RemainingMipLevels;
         dstSubResource.aspects |= copy.dstSubresource.aspects;
         dstSubResource.baseArrayLayer = copy.dstSubresource.baseArrayLayer;
-        dstSubResource.layerCount = copy.dstSubresource.layerCount;
-        dstSubResource.baseMipLevel = copy.dstSubresource.mipLevel;
-        dstSubResource.levelCount = RemainingMipLevels;
+        dstSubResource.layerCount     = copy.dstSubresource.layerCount;
+        dstSubResource.baseMipLevel   = copy.dstSubresource.mipLevel;
+        dstSubResource.levelCount     = RemainingMipLevels;
     }
     a_CommandBuffer->copyImage(
         **a_SrcImage, ConvertToVk(a_SrcImageLayout),
@@ -181,17 +181,17 @@ void CopyImage(
 
 void BlitImage(
     const Command::Buffer::Handle& a_CommandBuffer,
-    const Image::Handle&            a_SrcImage,
-    const ImageLayout&              a_SrcImageLayout,
-    const Image::Handle&            a_DstImage,
-    const ImageLayout&              a_DstImageLayout,
-    const std::vector<ImageBlit>&   a_Blits,
-    const Filter&                   a_Filter)
+    const Image::Handle& a_SrcImage,
+    const ImageLayout& a_SrcImageLayout,
+    const Image::Handle& a_DstImage,
+    const ImageLayout& a_DstImageLayout,
+    const std::vector<ImageBlit>& a_Blits,
+    const Filter& a_Filter)
 {
     std::vector<vk::ImageBlit> blits(a_Blits.size());
     for (auto i = 0u; i < a_Blits.size(); ++i) {
         const auto& blit = a_Blits.at(i);
-        blits.at(i) = vk::ImageBlit(
+        blits.at(i)      = vk::ImageBlit(
             ConvertToVk(blit.srcSubresource),
             { ConvertToVk(blit.srcOffsets[0]), ConvertToVk(blit.srcOffsets[1]) },
             ConvertToVk(blit.dstSubresource),
@@ -206,10 +206,10 @@ void BlitImage(
 
 void BlitImage(
     const Command::Buffer::Handle& a_CommandBuffer,
-    const Image::Handle&           a_SrcImage,
-    const Image::Handle&           a_DstImage,
-    const std::vector<ImageBlit>&  a_Blits,
-    const Filter&                  a_Filter)
+    const Image::Handle& a_SrcImage,
+    const Image::Handle& a_DstImage,
+    const std::vector<ImageBlit>& a_Blits,
+    const Filter& a_Filter)
 {
     BlitImage(
         a_CommandBuffer,
@@ -252,9 +252,9 @@ void PipelineBarrier(
     const std::vector<BufferMemoryBarrier>& a_BufferMemoryBarriers,
     const std::vector<ImageMemoryBarrier>& a_ImageMemoryBarriers)
 {
-    std::vector<vk::MemoryBarrier>       vkMemoryBarriers;
+    std::vector<vk::MemoryBarrier> vkMemoryBarriers;
     std::vector<vk::BufferMemoryBarrier> vkBufferMemoryBarriers;
-    std::vector<vk::ImageMemoryBarrier>  vkImageMemoryBarriers;
+    std::vector<vk::ImageMemoryBarrier> vkImageMemoryBarriers;
     vkMemoryBarriers.reserve(a_MemoryBarriers.size());
     for (const auto& barrier : a_MemoryBarriers) {
         vk::MemoryBarrier vkBarrier;
@@ -265,30 +265,30 @@ void PipelineBarrier(
     vkBufferMemoryBarriers.reserve(a_BufferMemoryBarriers.size());
     for (const auto& barrier : a_BufferMemoryBarriers) {
         vk::BufferMemoryBarrier vkBarrier;
-        vkBarrier.dstAccessMask = ConvertToVk(barrier.dstAccessMask);
-        vkBarrier.srcAccessMask = ConvertToVk(barrier.srcAccessMask);
+        vkBarrier.dstAccessMask       = ConvertToVk(barrier.dstAccessMask);
+        vkBarrier.srcAccessMask       = ConvertToVk(barrier.srcAccessMask);
         vkBarrier.dstQueueFamilyIndex = barrier.dstQueueFamilyIndex;
         vkBarrier.srcQueueFamilyIndex = barrier.srcQueueFamilyIndex;
-        vkBarrier.buffer = **barrier.buffer;
-        vkBarrier.offset = barrier.offset;
-        vkBarrier.size = barrier.size;
+        vkBarrier.buffer              = **barrier.buffer;
+        vkBarrier.offset              = barrier.offset;
+        vkBarrier.size                = barrier.size;
         vkBufferMemoryBarriers.push_back(vkBarrier);
     }
     vkImageMemoryBarriers.reserve(a_ImageMemoryBarriers.size());
     for (const auto& barrier : a_ImageMemoryBarriers) {
         vk::ImageMemoryBarrier vkBarrier;
-        vkBarrier.image = **barrier.image;
-        vkBarrier.oldLayout = ConvertToVk(barrier.oldLayout);
-        vkBarrier.newLayout = ConvertToVk(barrier.newLayout);
-        vkBarrier.dstAccessMask = ConvertToVk(barrier.dstAccessMask);
-        vkBarrier.srcAccessMask = ConvertToVk(barrier.srcAccessMask);
-        vkBarrier.dstQueueFamilyIndex = barrier.dstQueueFamilyIndex;
-        vkBarrier.srcQueueFamilyIndex = barrier.srcQueueFamilyIndex;
-        vkBarrier.subresourceRange.aspectMask = ConvertToVk(barrier.subRange.aspects);
+        vkBarrier.image                           = **barrier.image;
+        vkBarrier.oldLayout                       = ConvertToVk(barrier.oldLayout);
+        vkBarrier.newLayout                       = ConvertToVk(barrier.newLayout);
+        vkBarrier.dstAccessMask                   = ConvertToVk(barrier.dstAccessMask);
+        vkBarrier.srcAccessMask                   = ConvertToVk(barrier.srcAccessMask);
+        vkBarrier.dstQueueFamilyIndex             = barrier.dstQueueFamilyIndex;
+        vkBarrier.srcQueueFamilyIndex             = barrier.srcQueueFamilyIndex;
+        vkBarrier.subresourceRange.aspectMask     = ConvertToVk(barrier.subRange.aspects);
         vkBarrier.subresourceRange.baseArrayLayer = barrier.subRange.baseArrayLayer;
-        vkBarrier.subresourceRange.baseMipLevel = barrier.subRange.baseMipLevel;
-        vkBarrier.subresourceRange.layerCount = barrier.subRange.layerCount;
-        vkBarrier.subresourceRange.levelCount = barrier.subRange.levelCount;
+        vkBarrier.subresourceRange.baseMipLevel   = barrier.subRange.baseMipLevel;
+        vkBarrier.subresourceRange.layerCount     = barrier.subRange.layerCount;
+        vkBarrier.subresourceRange.levelCount     = barrier.subRange.levelCount;
         vkImageMemoryBarriers.push_back(vkBarrier);
     }
     a_CommandBuffer->pipelineBarrier(
@@ -306,7 +306,7 @@ void SetVertexInput(
     const std::vector<VertexBindingDescription>& a_Bindings)
 {
     std::vector<vk::VertexInputAttributeDescription2EXT> attribs(a_Attribs.size());
-    std::vector<vk::VertexInputBindingDescription2EXT>   bindings(a_Bindings.size());
+    std::vector<vk::VertexInputBindingDescription2EXT> bindings(a_Bindings.size());
     std::transform(a_Attribs.begin(), a_Attribs.end(),
         attribs.begin(), [](auto& attrib) {
             return vk::VertexInputAttributeDescription2EXT(
@@ -321,7 +321,7 @@ void SetVertexInput(
                 binding.binding,
                 binding.stride,
                 ConvertToVk(binding.inputRate),
-                1); //TODO enable instanced rendering
+                1); // TODO enable instanced rendering
         });
     a_CommandBuffer->setVertexInputEXT(bindings, attribs);
 }
@@ -331,31 +331,31 @@ void TransitionImagesLayout(
     const std::vector<ImageLayoutTransitionInfo>& a_Transitions)
 {
     vk::PipelineStageFlags vkSrcStageFlags;
-    vk::PipelineStageFlags vkDstStageFlags;    
+    vk::PipelineStageFlags vkDstStageFlags;
     std::vector<vk::ImageMemoryBarrier> barriers(a_Transitions.size());
     for (auto i = 0u; i < barriers.size(); ++i) {
-        auto& transition = a_Transitions.at(i);
-        auto& image = *transition.image;
-        auto& subResource = transition.subRange;
+        auto& transition     = a_Transitions.at(i);
+        auto& image          = *transition.image;
+        auto& subResource    = transition.subRange;
         auto& srcQueueFamily = transition.srcQueueFamilyIndex;
         auto& dstQueueFamily = transition.dstQueueFamilyIndex;
-        auto& barrier = barriers.at(i);
-        auto oldLayout = ConvertToVk(transition.oldLayout);
-        auto newLayout = ConvertToVk(transition.newLayout);
+        auto& barrier        = barriers.at(i);
+        auto oldLayout       = ConvertToVk(transition.oldLayout);
+        auto newLayout       = ConvertToVk(transition.newLayout);
         vkSrcStageFlags |= GetImageTransitionStage(oldLayout);
         vkDstStageFlags |= GetImageTransitionStage(newLayout);
-        barrier.image = *image;
-        barrier.subresourceRange = ConvertToVk(subResource);
-        barrier.oldLayout = oldLayout;
-        barrier.newLayout = newLayout;
+        barrier.image               = *image;
+        barrier.subresourceRange    = ConvertToVk(subResource);
+        barrier.oldLayout           = oldLayout;
+        barrier.newLayout           = newLayout;
         barrier.srcQueueFamilyIndex = srcQueueFamily;
         barrier.dstQueueFamilyIndex = dstQueueFamily;
-        barrier.srcAccessMask = GetImageTransitionAccessMask(oldLayout);
-        barrier.dstAccessMask = GetImageTransitionAccessMask(newLayout);
+        barrier.srcAccessMask       = GetImageTransitionAccessMask(oldLayout);
+        barrier.dstAccessMask       = GetImageTransitionAccessMask(newLayout);
     }
     a_CommandBuffer->pipelineBarrier(
         vkSrcStageFlags, vkDstStageFlags,
-        vk::DependencyFlags{},
+        vk::DependencyFlags {},
         {}, {}, barriers);
 }
 
@@ -368,24 +368,24 @@ void TransitionImageLayout(
 }
 
 void PushDescriptorSet(
-    const Command::Buffer::Handle&         a_CommandBuffer,
-    const Pipeline::Handle&                a_Pipeline,
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const Pipeline::Handle& a_Pipeline,
     const std::vector<DescriptorSetWrite>& a_Writes)
 {
-    std::vector<vk::WriteDescriptorSet>   vkWriteInfos(a_Writes.size());
-    std::vector<vk::DescriptorImageInfo>  vkImageInfos(a_Writes.size());
+    std::vector<vk::WriteDescriptorSet> vkWriteInfos(a_Writes.size());
+    std::vector<vk::DescriptorImageInfo> vkImageInfos(a_Writes.size());
     std::vector<vk::DescriptorBufferInfo> vkBufferInfos(a_Writes.size());
     std::vector<ImageLayoutTransitionInfo> imageTransitions;
 
     for (auto i = 0u; i < vkWriteInfos.size(); ++i) {
-        auto& writeInfo = a_Writes.at(i);
+        auto& writeInfo   = a_Writes.at(i);
         auto& vkWriteInfo = vkWriteInfos.at(i);
 
         if (writeInfo.imageInfo.has_value()) {
-            
-            auto& info = writeInfo.imageInfo.value();
+
+            auto& info   = writeInfo.imageInfo.value();
             auto& vkInfo = vkImageInfos.at(i);
-            vkInfo = vk::DescriptorImageInfo(
+            vkInfo       = vk::DescriptorImageInfo(
                 **info.sampler,
                 **info.imageView,
                 ConvertToVk(info.imageLayout));
@@ -393,9 +393,9 @@ void PushDescriptorSet(
         }
 
         if (writeInfo.bufferInfo.has_value()) {
-            auto& info = writeInfo.bufferInfo.value();
+            auto& info   = writeInfo.bufferInfo.value();
             auto& vkInfo = vkBufferInfos.at(i);
-            vkInfo = vk::DescriptorBufferInfo(
+            vkInfo       = vk::DescriptorBufferInfo(
                 **info.buffer,
                 info.offset,
                 info.range);
@@ -406,7 +406,7 @@ void PushDescriptorSet(
         vkWriteInfo.dstArrayElement = writeInfo.dstArrayElement;
         vkWriteInfo.dstBinding      = writeInfo.dstBinding;
         if (writeInfo.dstSet != nullptr)
-            vkWriteInfo.dstSet      = **writeInfo.dstSet;
+            vkWriteInfo.dstSet = **writeInfo.dstSet;
     }
     a_CommandBuffer->pushDescriptorSetKHR(
         a_Pipeline->bindPoint,

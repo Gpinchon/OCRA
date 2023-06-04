@@ -2,8 +2,7 @@
 
 #include <GL/Fence.hpp>
 
-namespace OCRA::Device
-{
+namespace OCRA::Device {
 Fence::Handle CreateFence(
     const Device::Handle& a_Device,
     const FenceStatus& a_DefaultStatus,
@@ -14,14 +13,13 @@ Fence::Handle CreateFence(
             a_Allocator->userData,
             sizeof(Impl), alignof(Impl),
             AllocationScope::Object);
-        return Fence::Handle(new(ptr) Fence::Impl(a_DefaultStatus), Deleter(a_Allocator->userData, a_Allocator->freeFunc));
-    }
-    else return std::make_shared<Fence::Impl>(a_DefaultStatus);
+        return Fence::Handle(new (ptr) Fence::Impl(a_DefaultStatus), Deleter(a_Allocator->userData, a_Allocator->freeFunc));
+    } else
+        return std::make_shared<Fence::Impl>(a_DefaultStatus);
 }
 }
 
-namespace OCRA::Fence
-{
+namespace OCRA::Fence {
 bool WaitFor(
     const Handle& a_Fence,
     const std::chrono::nanoseconds& a_TimeoutNS)
@@ -37,8 +35,10 @@ bool WaitFor(
     bool ret = false;
     for (auto& fence : a_Fences) {
         const auto waitResult = WaitFor(fence, a_TimeoutNS);
-        if (a_WaitAll) ret |= waitResult;
-        else return waitResult;
+        if (a_WaitAll)
+            ret |= waitResult;
+        else
+            return waitResult;
     }
     return ret;
 }
@@ -50,7 +50,8 @@ void Reset(const Handle& a_Fence)
 
 void Reset(const std::vector<Handle>& a_Fences)
 {
-    for (auto& fence : a_Fences) fence->Reset();
+    for (auto& fence : a_Fences)
+        fence->Reset();
 }
 
 FenceStatus GetStatus(const Handle& a_Fence)

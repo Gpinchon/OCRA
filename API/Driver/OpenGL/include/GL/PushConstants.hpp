@@ -14,11 +14,11 @@ struct PushConstants {
     void Unbind();
     void Update(const size_t& a_Offset, const size_t& a_Size, const std::byte* a_Data);
     const Device::WeakHandle device;
-    const uint16_t  size;
-    const uint16_t  offsetAlignment;
-    const uint32_t  bufferHandle;
-    const void*     bufferPtr;
-    //the current offset of pushconstant buffer
-    uint32_t        offset{ 0 };
+    const uint16_t size;
+    const uint16_t offsetAlignment;
+    const uint32_t bufferHandle;
+    const void* bufferPtr;
+    // the current offset of pushconstant buffer
+    uint32_t offset { 0 };
 };
 }

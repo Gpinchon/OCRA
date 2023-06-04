@@ -1,24 +1,24 @@
 #include <OCRA/OCRA.hpp>
 #include <OCRA/SwapChain/Core.hpp>
 
-#include <GL/Win32/Surface.hpp>
-#include <GL/Win32/SwapChain.hpp>
+#include <GL/Win32/Error.hpp>
+#include <GL/Win32/OpenGL.hpp>
+#include <GL/Win32/PhysicalDevice.hpp>
 #include <GL/Win32/PresentGeometry.hpp>
 #include <GL/Win32/PresentPixels.hpp>
 #include <GL/Win32/PresentShader.hpp>
 #include <GL/Win32/PresentTexture.hpp>
-#include <GL/Win32/PhysicalDevice.hpp>
-#include <GL/Win32/Error.hpp>
-#include <GL/Win32/OpenGL.hpp>
+#include <GL/Win32/Surface.hpp>
+#include <GL/Win32/SwapChain.hpp>
 
 #include <GL/Common/Assert.hpp>
+#include <GL/Common/BufferOffset.hpp>
 #include <GL/Device.hpp>
 #include <GL/Enums.hpp>
+#include <GL/Fence.hpp>
 #include <GL/Image.hpp>
 #include <GL/Queue.hpp>
 #include <GL/Semaphore.hpp>
-#include <GL/Fence.hpp>
-#include <GL/Common/BufferOffset.hpp>
 
 #include <GL/glew.h>
 #include <GL/wglew.h>
@@ -26,8 +26,7 @@
 #include <iostream>
 #include <sstream>
 
-namespace OCRA::SwapChain
-{
+namespace OCRA::SwapChain {
 void GLAPIENTRY MessageCallback(
     GLenum source,
     GLenum type,
@@ -37,13 +36,12 @@ void GLAPIENTRY MessageCallback(
     const GLchar* message,
     const void* userParam)
 {
-    if (type == GL_DEBUG_TYPE_ERROR)
-    {
-        std::stringstream ss{};
-        ss << "GL CALLBACK : **GL ERROR * *\n" <<
-            " type     = " << type << "\n" <<
-            " severity = " << severity << "\n" <<
-            " message  = " << message;
+    if (type == GL_DEBUG_TYPE_ERROR) {
+        std::stringstream ss {};
+        ss << "GL CALLBACK : **GL ERROR * *\n"
+           << " type     = " << type << "\n"
+           << " severity = " << severity << "\n"
+           << " message  = " << message;
         std::cerr << ss.str() << std::endl;
         throw std::runtime_error(ss.str());
     }
@@ -52,27 +50,24 @@ static inline auto CreateImages(const Device::Handle& a_Device, const CreateSwap
 {
     std::vector<Image::Handle> images;
     images.reserve(a_Info.imageCount);
-    for (auto i = 0u; i < a_Info.imageCount; ++i)
-    {
+    for (auto i = 0u; i < a_Info.imageCount; ++i) {
         Image::Handle image;
         if (a_Info.oldSwapchain != nullptr && a_Info.oldSwapchain->images.size() > i) {
             const auto& imageInfo = a_Info.oldSwapchain->images.at(i)->info;
-            const bool canRecycle = imageInfo.extent.width == a_Info.imageExtent.width &&
-                                    imageInfo.extent.height == a_Info.imageExtent.height &&
-                                    imageInfo.arrayLayers == a_Info.imageArrayLayers &&
-                                    imageInfo.format == a_Info.imageFormat;
-            if (canRecycle) image = a_Info.oldSwapchain->images.at(i);
+            const bool canRecycle = imageInfo.extent.width == a_Info.imageExtent.width && imageInfo.extent.height == a_Info.imageExtent.height && imageInfo.arrayLayers == a_Info.imageArrayLayers && imageInfo.format == a_Info.imageFormat;
+            if (canRecycle)
+                image = a_Info.oldSwapchain->images.at(i);
         }
         if (image == nullptr) {
-            CreateImageInfo imageInfo{};
-            imageInfo.type = ImageType::Image2D;
-            imageInfo.extent.width = a_Info.imageExtent.width;
+            CreateImageInfo imageInfo {};
+            imageInfo.type          = ImageType::Image2D;
+            imageInfo.extent.width  = a_Info.imageExtent.width;
             imageInfo.extent.height = a_Info.imageExtent.height;
-            imageInfo.extent.depth = 1;
-            imageInfo.mipLevels = 1;
-            imageInfo.arrayLayers = a_Info.imageArrayLayers;
-            imageInfo.format = a_Info.imageFormat;
-            image = CreateImage(a_Device, imageInfo);
+            imageInfo.extent.depth  = 1;
+            imageInfo.mipLevels     = 1;
+            imageInfo.arrayLayers   = a_Info.imageArrayLayers;
+            imageInfo.format        = a_Info.imageFormat;
+            image                   = CreateImage(a_Device, imageInfo);
         }
         images.push_back(image);
     }
@@ -86,29 +81,28 @@ Impl::Impl(const Device::Handle& a_Device, const CreateSwapChainInfo& a_Info)
     , images(CreateImages(a_Device, a_Info))
 {
     const auto pixelSize = GetPixelSize(a_Info.imageFormat);
-    auto win32SwapChain = a_Info.oldSwapchain;
+    auto win32SwapChain  = a_Info.oldSwapchain;
     if (win32SwapChain != nullptr && !win32SwapChain->retired) {
         win32SwapChain->workerThread.Wait();
-        hdc = win32SwapChain->hdc;
+        hdc   = win32SwapChain->hdc;
         hglrc = win32SwapChain->hglrc;
         presentShader.swap(win32SwapChain->presentShader);
         win32SwapChain->Retire();
         win32SwapChain.reset();
-    }
-    else {
+    } else {
         hdc = GetDC(HWND(a_Info.surface->hwnd));
         OpenGL::Win32::Initialize();
         const int attribIList[] = {
             WGL_DRAW_TO_WINDOW_ARB, true,
             WGL_SUPPORT_OPENGL_ARB, true,
-            WGL_DOUBLE_BUFFER_ARB,  true,
-            WGL_ACCELERATION_ARB,   WGL_FULL_ACCELERATION_ARB,
-            WGL_COLORSPACE_EXT,     WGL_COLORSPACE_SRGB_EXT,
-            WGL_PIXEL_TYPE_ARB,     WGL_TYPE_RGBA_ARB,
-            WGL_COLOR_BITS_ARB,     int(pixelSize),
+            WGL_DOUBLE_BUFFER_ARB, true,
+            WGL_ACCELERATION_ARB, WGL_FULL_ACCELERATION_ARB,
+            WGL_COLORSPACE_EXT, WGL_COLORSPACE_SRGB_EXT,
+            WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB,
+            WGL_COLOR_BITS_ARB, int(pixelSize),
             0
         };
-        int32_t  pixelFormat = 0;
+        int32_t pixelFormat     = 0;
         uint32_t pixelFormatNbr = 0;
         WIN32_CHECK_ERROR(wglChoosePixelFormatARB(HDC(hdc), attribIList, nullptr, 1, &pixelFormat, &pixelFormatNbr));
         WIN32_CHECK_ERROR(pixelFormat != 0);
@@ -120,8 +114,8 @@ Impl::Impl(const Device::Handle& a_Device, const CreateSwapChainInfo& a_Info)
         WIN32_CHECK_ERROR(wglMakeCurrent(HDC(hdc), HGLRC(hglrc)));
         if (a_Info.presentMode == SwapChainPresentMode::Immediate) {
             WIN32_CHECK_ERROR(wglSwapIntervalEXT(0));
-        }
-        else WIN32_CHECK_ERROR(wglSwapIntervalEXT(1));
+        } else
+            WIN32_CHECK_ERROR(wglSwapIntervalEXT(1));
 #ifdef _DEBUG
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
         glDebugMessageCallback(MessageCallback, 0);
@@ -152,7 +146,8 @@ Impl::Impl(const Device::Handle& a_Device, const CreateSwapChainInfo& a_Info)
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
         glActiveTexture(GL_TEXTURE0);
         glBindSampler(0, presentTexture->samplerHandle);
-    }, true);
+    },
+        true);
     OCRA_ASSERT(surface != nullptr);
 }
 
@@ -165,24 +160,27 @@ Impl::~Impl()
         presentGeometry.reset();
         presentPixels.reset();
         wglMakeCurrent(nullptr, nullptr);
-    }, true);
+    },
+        true);
     if (hdc != nullptr)
         ReleaseDC(HWND(surface->hwnd), HDC(hdc));
     if (hglrc != nullptr)
         wglDeleteContext(HGLRC(hglrc));
 }
 
-void Impl::Retire() {
+void Impl::Retire()
+{
     workerThread.PushCommand([this] {
         presentShader.reset();
         presentTexture.reset();
         presentGeometry.reset();
         presentPixels.reset();
         wglMakeCurrent(nullptr, nullptr);
-    }, true);
+    },
+        true);
     images.clear();
-    hdc = nullptr;
-    hglrc = nullptr;
+    hdc     = nullptr;
+    hglrc   = nullptr;
     retired = true;
 }
 
@@ -191,37 +189,40 @@ void Impl::Present(const Queue::Handle& a_Queue)
     OCRA_ASSERT(!retired);
     if (WGLEW_NV_copy_image) {
         PresentNV(a_Queue);
-    }
-    else {
+    } else {
         PresentGL(a_Queue);
     }
 }
 
 void Impl::PresentNV(const Queue::Handle& a_Queue)
 {
-    //Only Mailbox mode can stack several presentation requests
-    if (presentMode != SwapChainPresentMode::Mailbox) workerThread.Wait();
+    // Only Mailbox mode can stack several presentation requests
+    if (presentMode != SwapChainPresentMode::Mailbox)
+        workerThread.Wait();
     workerThread.PushCommand([this, queue = a_Queue] {
         queue->PushCommand([this] {
-            const auto& image = images.at(backBufferIndex);
+            const auto& image  = images.at(backBufferIndex);
             const auto& extent = image->info.extent;
             WIN32_CHECK_ERROR(wglCopyImageSubDataNV(
-                nullptr, image->handle, image->target, //use current context
+                nullptr, image->handle, image->target, // use current context
                 0, 0, 0, 0,
                 HGLRC(hglrc), presentTexture->handle, presentTexture->target,
                 0, 0, 0, 0,
                 extent.width, extent.height, 1));
-        }, true);
+        },
+            true);
         presentGeometry->Draw();
         WIN32_CHECK_ERROR(SwapBuffers(HDC(hdc)));
-    }, false);
+    },
+        false);
     backBufferIndex = (backBufferIndex + 1) % images.size();
 }
 
 void Impl::PresentGL(const Queue::Handle& a_Queue)
 {
-    //Only Mailbox mode can stack several presentation requests
-    if (presentMode != SwapChainPresentMode::Mailbox) workerThread.Wait();
+    // Only Mailbox mode can stack several presentation requests
+    if (presentMode != SwapChainPresentMode::Mailbox)
+        workerThread.Wait();
     workerThread.PushCommand([this, queue = a_Queue] {
         queue->PushCommand([this] {
             const auto& image = images.at(backBufferIndex);
@@ -233,8 +234,9 @@ void Impl::PresentGL(const Queue::Handle& a_Queue)
                 image->dataType,
                 presentPixels->GetPtr());
             glBindTexture(image->target, 0);
-        }, true);
-        const auto& image = images.at(backBufferIndex);
+        },
+            true);
+        const auto& image  = images.at(backBufferIndex);
         const auto& extent = image->info.extent;
         presentPixels->Flush();
         glTexSubImage2D(
@@ -243,21 +245,20 @@ void Impl::PresentGL(const Queue::Handle& a_Queue)
             presentTexture->dataFormat, presentTexture->dataType, BUFFER_OFFSET(presentPixels->offset));
         presentGeometry->Draw();
         WIN32_CHECK_ERROR(SwapBuffers(HDC(hdc)));
-    }, false);
+    },
+        false);
     backBufferIndex = (backBufferIndex + 1) % images.size();
 }
 }
 
-namespace OCRA::Device
-{
+namespace OCRA::Device {
 SwapChain::Handle CreateSwapChain(const Device::Handle& a_Device, const CreateSwapChainInfo& a_Info)
 {
     return std::make_shared<SwapChain::Impl>(a_Device, a_Info);
 }
 }
 
-namespace OCRA::SwapChain
-{
+namespace OCRA::SwapChain {
 uint32_t GetImageCount(const Handle& a_SwapChain)
 {
     return a_SwapChain->images.size();
@@ -274,14 +275,15 @@ std::pair<Image::Handle, uint32_t> GetNextImage(
             OCRA_ASSERT(semaphore->type == SemaphoreType::Binary && "Cannot wait on Timeline Semaphores when requesting next image");
             std::static_pointer_cast<Semaphore::Binary>(semaphore)->Signal();
         }
-        if (fence != nullptr) fence->Signal();
-    }, false);
+        if (fence != nullptr)
+            fence->Signal();
+    },
+        false);
     return { a_SwapChain->images.at(a_SwapChain->backBufferIndex), a_SwapChain->backBufferIndex };
 }
 }
 
-namespace OCRA::Queue
-{
+namespace OCRA::Queue {
 void Present(const Queue::Handle& a_Queue, const SwapChainPresentInfo& a_PresentInfo)
 {
     a_Queue->PushCommand([a_PresentInfo] {
@@ -289,7 +291,8 @@ void Present(const Queue::Handle& a_Queue, const SwapChainPresentInfo& a_Present
             OCRA_ASSERT(semaphore->type == SemaphoreType::Binary && "Cannot wait on Timeline Semaphores when presenting");
             std::static_pointer_cast<Semaphore::Binary>(semaphore)->Wait();
         }
-    }, false);
+    },
+        false);
     for (const auto& swapChain : a_PresentInfo.swapChains)
         swapChain->Present(a_Queue);
 }

@@ -6,6 +6,6 @@ struct PresentShader {
     ~PresentShader();
     void Bind() const;
     void Unbind() const;
-    unsigned handle{ 0 };
+    unsigned handle { 0 };
 };
 }

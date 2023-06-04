@@ -4,16 +4,14 @@
 
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Device);
 
-namespace OCRA::Memory
-{
-struct Impl
-{
+namespace OCRA::Memory {
+struct Impl {
     Impl(const Device::Handle& a_Device, const size_t& a_Size, const MemoryPropertyFlags& a_Flags);
     Impl(const Device::Handle& a_Device, const AllocateMemoryInfo& a_Info);
     ~Impl();
     const Device::WeakHandle device;
-    const size_t             size{ 0 };
-    uint32_t handle{ 0 };
-    uint32_t mapFlags{ 0 };
+    const size_t size { 0 };
+    uint32_t handle { 0 };
+    uint32_t mapFlags { 0 };
 };
 }

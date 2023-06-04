@@ -1,8 +1,8 @@
-#include <GL/Pipeline/VertexInputState.hpp>
-#include <GL/ExecutionState.hpp>
-#include <GL/Device.hpp>
 #include <GL/Buffer.hpp>
+#include <GL/Device.hpp>
+#include <GL/ExecutionState.hpp>
 #include <GL/Memory.hpp>
+#include <GL/Pipeline/VertexInputState.hpp>
 
 #include <GL/glew.h>
 
@@ -16,7 +16,8 @@ CompileVertexInputState::CompileVertexInputState(
     , primitiveRestartIndex(a_Info.primitiveRestartIndex)
     , bindingDescriptions(a_Info.bindingDescriptions)
 {
-    if (!applyVertexInputs) return;
+    if (!applyVertexInputs)
+        return;
     a_Device->PushCommand([this, attributeDescriptions = a_Info.attributeDescriptions] {
         glGenVertexArrays(1, &handle);
         glBindVertexArray(handle);
@@ -33,14 +34,15 @@ CompileVertexInputState::CompileVertexInputState(
                 attribute.binding);
         }
         for (const auto& description : bindingDescriptions) {
-            //Is this binding divided by instance or by vertex ?
+            // Is this binding divided by instance or by vertex ?
             const auto divideByInstance = description.inputRate == VertexInputRate::Instance;
             glVertexBindingDivisor(
                 description.binding,
                 divideByInstance ? 1 : 0);
         }
         glBindVertexArray(0);
-    }, false);
+    },
+        false);
 }
 
 CompileVertexInputState::CompileVertexInputState(const CompileVertexInputState& a_Other)
@@ -49,21 +51,25 @@ CompileVertexInputState::CompileVertexInputState(const CompileVertexInputState& 
     , primitiveRestartIndex(a_Other.primitiveRestartIndex)
     , bindingDescriptions(a_Other.bindingDescriptions)
     , handle(std::exchange(a_Other.handle, 0))
-{}
+{
+}
 
 CompileVertexInputState::~CompileVertexInputState()
 {
-    if (handle == 0) return;
+    if (handle == 0)
+        return;
     device.lock()->PushCommand([handle = handle] {
         glDeleteVertexArrays(1, &handle);
-    }, false);
+    },
+        false);
 }
 
 void CompileVertexInputState::operator()(Command::Buffer::ExecutionState& a_ExecutionState) const
 {
     glPrimitiveRestartIndex(primitiveRestartIndex);
-    if (!applyVertexInputs) return;
-    a_ExecutionState.renderPass.vertexArray = handle;
+    if (!applyVertexInputs)
+        return;
+    a_ExecutionState.renderPass.vertexArray         = handle;
     a_ExecutionState.renderPass.vertexInputBindings = bindingDescriptions;
 }
 }

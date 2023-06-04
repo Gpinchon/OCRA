@@ -5,8 +5,7 @@
 
 #include <vector>
 
-namespace OCRA::ShaderCompiler
-{
+namespace OCRA::ShaderCompiler {
 Handle Create();
 std::vector<uint32_t> Compile(const Handle& a_Compiler, const ShaderInfo& a_Info);
 }

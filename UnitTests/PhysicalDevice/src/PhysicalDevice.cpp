@@ -6,24 +6,23 @@ using namespace OCRA;
 
 int main()
 {
-    //test multi instances
+    // test multi instances
     {
         std::vector<Instance::Handle> instances;
         for (auto i = 0u; i < 2; ++i) {
             CreateInstanceInfo instanceInfo;
-            instanceInfo.applicationInfo.name = "Test_PhysicalDevice_Instance_" + std::to_string(i);
+            instanceInfo.applicationInfo.name               = "Test_PhysicalDevice_Instance_" + std::to_string(i);
             instanceInfo.applicationInfo.applicationVersion = 1;
             instances.push_back(CreateInstance(instanceInfo));
         }
-        //if we did not crash yet, assume this test is successful
+        // if we did not crash yet, assume this test is successful
     }
     CreateInstanceInfo instanceInfo;
-    instanceInfo.applicationInfo.name = "Test_PhysicalDevice";
+    instanceInfo.applicationInfo.name               = "Test_PhysicalDevice";
     instanceInfo.applicationInfo.applicationVersion = 1;
-    const auto instance = CreateInstance(instanceInfo);
+    const auto instance                             = CreateInstance(instanceInfo);
     std::cout << "===== Physical Devices ====\n";
-    for (const auto& physicalDevice : Instance::EnumeratePhysicalDevices(instance))
-    {
+    for (const auto& physicalDevice : Instance::EnumeratePhysicalDevices(instance)) {
         const auto& properties = PhysicalDevice::GetProperties(physicalDevice);
         std::cout << "  =============\n";
         std::cout << "  Name        : " << properties.deviceName << "\n";

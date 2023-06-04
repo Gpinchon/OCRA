@@ -5,17 +5,17 @@
 #include <OCRA/Core.hpp>
 
 #include <GL/Buffer.hpp>
-#include <GL/Enums.hpp>
-#include <GL/Memory.hpp>
-#include <GL/ExecutionState.hpp>
 #include <GL/CommandBuffer.hpp>
 #include <GL/Common/BufferOffset.hpp>
 #include <GL/DescriptorSet.hpp>
+#include <GL/Enums.hpp>
+#include <GL/ExecutionState.hpp>
+#include <GL/Memory.hpp>
 #include <GL/Pipeline.hpp>
 
-namespace OCRA::Command
+namespace OCRA::Command {
+void ApplyPipelineStates(Buffer::ExecutionState& a_ExecutionState)
 {
-void ApplyPipelineStates(Buffer::ExecutionState& a_ExecutionState) {
     auto& pipelineState = a_ExecutionState.pipelineState.at(size_t(PipelineBindingPoint::Graphics));
     pipelineState.pipeline->Apply(a_ExecutionState);
     for (auto& binding : pipelineState.pushDescriptorSet)
@@ -34,21 +34,22 @@ struct DrawArraysIndirectCommand {
 struct DrawBase : CommandI {
     DrawBase(OCRA::PushConstants& a_PushConstants)
         : pushConstants(a_PushConstants)
-    {}
-    virtual void operator()(Buffer::ExecutionState& a_ExecutionState) override {
+    {
+    }
+    virtual void operator()(Buffer::ExecutionState& a_ExecutionState) override
+    {
         pushConstants.Bind();
         ApplyPipelineStates(a_ExecutionState);
         glBindVertexArray(a_ExecutionState.renderPass.vertexArray);
         for (const auto& bindingDescription : a_ExecutionState.renderPass.vertexInputBindings) {
-            const auto& vertexInput = a_ExecutionState.renderPass.vertexBufferBindings.at(bindingDescription.binding);
+            const auto& vertexInput  = a_ExecutionState.renderPass.vertexBufferBindings.at(bindingDescription.binding);
             const auto& vertexBuffer = vertexInput.buffer;
             if (vertexBuffer == nullptr) {
                 glBindVertexBuffer(
                     bindingDescription.binding,
                     0, 0,
                     bindingDescription.stride);
-            }
-            else {
+            } else {
                 const auto& vertexMemory = vertexBuffer->memoryBinding;
                 glBindVertexBuffer(
                     bindingDescription.binding,
@@ -57,7 +58,6 @@ struct DrawBase : CommandI {
                     bindingDescription.stride);
             }
         }
-        
     }
     OCRA::PushConstants& pushConstants;
 };
@@ -74,8 +74,10 @@ struct DrawCommand : DrawBase {
         , instanceCount(a_InstanceCount)
         , firstVertex(a_FirstVertex)
         , firstInstance(a_FirstInstance)
-    {}
-    virtual void operator()(Buffer::ExecutionState& a_ExecutionState) override {
+    {
+    }
+    virtual void operator()(Buffer::ExecutionState& a_ExecutionState) override
+    {
         DrawBase::operator()(a_ExecutionState);
         glDrawArraysInstancedBaseInstance(
             a_ExecutionState.primitiveTopology,
@@ -101,8 +103,10 @@ struct DrawIndexedCommand : DrawBase {
         , firstIndex(a_FirstIndex)
         , baseVertex(a_VertexOffset)
         , baseInstance(a_FirstInstance)
-    {}
-    virtual void operator()(Buffer::ExecutionState& a_ExecutionState) {
+    {
+    }
+    virtual void operator()(Buffer::ExecutionState& a_ExecutionState)
+    {
         DrawBase::operator()(a_ExecutionState);
         const auto& indexBufferBinding = a_ExecutionState.renderPass.indexBufferBinding;
         const auto& indexMemoryBinding = indexBufferBinding.buffer->memoryBinding;
@@ -120,7 +124,7 @@ struct DrawIndexedCommand : DrawBase {
     const uint32_t indexCount;
     const uint32_t instanceCount;
     const uint32_t firstIndex;
-    const int32_t  baseVertex;
+    const int32_t baseVertex;
     const uint32_t baseInstance;
 };
 
@@ -164,10 +168,8 @@ void DrawIndirect(
     const uint32_t a_Stride)
 {
     const auto offset = BUFFER_OFFSET(a_Buffer->memoryBinding.offset + a_Offset);
-    a_CommandBuffer->PushCommand<GenericCommand>([
-        &pushConstants = a_CommandBuffer->pushConstants,
-        buffer = a_Buffer, offset, drawCount = a_DrawCount, stride = a_Stride
-    ](Buffer::ExecutionState& a_ExecutionState) {
+    a_CommandBuffer->PushCommand<GenericCommand>([&pushConstants = a_CommandBuffer->pushConstants,
+                                                     buffer = a_Buffer, offset, drawCount = a_DrawCount, stride = a_Stride](Buffer::ExecutionState& a_ExecutionState) {
         pushConstants.Bind();
         ApplyPipelineStates(a_ExecutionState);
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, buffer->memoryBinding.memory->handle);
@@ -188,10 +190,8 @@ void DrawIndexedIndirect(
     const uint32_t a_Stride)
 {
     const auto offset = BUFFER_OFFSET(a_Buffer->memoryBinding.offset + a_Offset);
-    a_CommandBuffer->PushCommand<GenericCommand>([
-        &pushConstants = a_CommandBuffer->pushConstants,
-        buffer = a_Buffer, offset, drawCount = a_DrawCount, stride = a_Stride
-    ](Buffer::ExecutionState& a_ExecutionState) {
+    a_CommandBuffer->PushCommand<GenericCommand>([&pushConstants = a_CommandBuffer->pushConstants,
+                                                     buffer = a_Buffer, offset, drawCount = a_DrawCount, stride = a_Stride](Buffer::ExecutionState& a_ExecutionState) {
         pushConstants.Bind();
         ApplyPipelineStates(a_ExecutionState);
         const auto& indexBufferBinding = a_ExecutionState.renderPass.indexBufferBinding;

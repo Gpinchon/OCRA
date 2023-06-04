@@ -8,26 +8,29 @@
 #undef near
 #undef far
 
-namespace OCRA
+namespace OCRA {
+static inline auto ConvertToVk(const ColorValue& a_ClearValue)
 {
-static inline auto ConvertToVk(const ColorValue& a_ClearValue) {
     return reinterpret_cast<const vk::ClearColorValue&>(a_ClearValue);
 }
-static inline auto ConvertToVk(const DepthStencilValue& a_ClearValue) {
+static inline auto ConvertToVk(const DepthStencilValue& a_ClearValue)
+{
     return reinterpret_cast<const vk::ClearDepthStencilValue&>(a_ClearValue);
 }
-static inline auto ConvertToVk(const ClearValue& a_ClearValue) {
+static inline auto ConvertToVk(const ClearValue& a_ClearValue)
+{
     return reinterpret_cast<const vk::ClearValue&>(a_ClearValue);
 }
-static inline auto ConvertToVk(const ComponentMapping& a_Mapping) {
+static inline auto ConvertToVk(const ComponentMapping& a_Mapping)
+{
     return vk::ComponentMapping(
         ConvertToVk(a_Mapping.r),
         ConvertToVk(a_Mapping.g),
         ConvertToVk(a_Mapping.b),
-        ConvertToVk(a_Mapping.a)
-    );
+        ConvertToVk(a_Mapping.a));
 }
-static inline auto ConvertToVk(const DescriptorSetLayoutBinding& a_Binding) {
+static inline auto ConvertToVk(const DescriptorSetLayoutBinding& a_Binding)
+{
     return vk::DescriptorSetLayoutBinding(
         a_Binding.binding,
         ConvertToVk(a_Binding.type),
@@ -35,40 +38,41 @@ static inline auto ConvertToVk(const DescriptorSetLayoutBinding& a_Binding) {
         ConvertToVk(a_Binding.stageFlags));
 }
 template <typename T>
-static inline auto ConvertToVk(const Extent<2, T>& a_Extent) {
+static inline auto ConvertToVk(const Extent<2, T>& a_Extent)
+{
     return vk::Extent2D(
         a_Extent.width,
-        a_Extent.height
-    );
+        a_Extent.height);
 }
 template <typename T>
-static inline auto ConvertToVk(const Extent<3, T>& a_Extent) {
+static inline auto ConvertToVk(const Extent<3, T>& a_Extent)
+{
     return vk::Extent3D(
         a_Extent.width,
         a_Extent.height,
-        a_Extent.depth
-    );
+        a_Extent.depth);
 }
-static inline auto ConvertToVk(const Offset2D& a_Offset) {
+static inline auto ConvertToVk(const Offset2D& a_Offset)
+{
     return vk::Offset2D(
         a_Offset.x,
-        a_Offset.y
-    );
+        a_Offset.y);
 }
-static inline auto ConvertToVk(const Offset3D& a_Offset) {
+static inline auto ConvertToVk(const Offset3D& a_Offset)
+{
     return vk::Offset3D(
         a_Offset.x,
         a_Offset.y,
-        a_Offset.z
-    );
+        a_Offset.z);
 }
-static inline auto ConvertToVk(const Rect2D& a_Rect2D) {
+static inline auto ConvertToVk(const Rect2D& a_Rect2D)
+{
     return vk::Rect2D(
         ConvertToVk(a_Rect2D.offset),
-        ConvertToVk(a_Rect2D.extent)
-    );
+        ConvertToVk(a_Rect2D.extent));
 }
-static inline auto ConvertToVk(const PipelineStencilOpState& a_State) {
+static inline auto ConvertToVk(const PipelineStencilOpState& a_State)
+{
     return vk::StencilOpState(
         ConvertToVk(a_State.failOp),
         ConvertToVk(a_State.passOp),
@@ -76,7 +80,8 @@ static inline auto ConvertToVk(const PipelineStencilOpState& a_State) {
         ConvertToVk(a_State.compareOp),
         a_State.compareMask);
 }
-static inline auto ConvertToVk(const ViewPort& a_Viewport) {
+static inline auto ConvertToVk(const ViewPort& a_Viewport)
+{
     return vk::Viewport(
         a_Viewport.rect.offset.x,
         a_Viewport.rect.offset.y,
@@ -85,38 +90,40 @@ static inline auto ConvertToVk(const ViewPort& a_Viewport) {
         a_Viewport.depthRange.near,
         a_Viewport.depthRange.far);
 }
-static inline auto ConvertToVk(const ImageSubresourceLayers& a_Layers) {
+static inline auto ConvertToVk(const ImageSubresourceLayers& a_Layers)
+{
     return vk::ImageSubresourceLayers(
         ConvertToVk(a_Layers.aspects),
         a_Layers.mipLevel,
-        a_Layers.baseArrayLayer, a_Layers.layerCount
-    );
+        a_Layers.baseArrayLayer, a_Layers.layerCount);
 }
-static inline auto ConvertToVk(const ImageSubresourceRange& a_Range) {
+static inline auto ConvertToVk(const ImageSubresourceRange& a_Range)
+{
     return vk::ImageSubresourceRange(
         ConvertToVk(a_Range.aspects),
         a_Range.baseMipLevel, a_Range.levelCount,
-        a_Range.baseArrayLayer, a_Range.layerCount
-    );
+        a_Range.baseArrayLayer, a_Range.layerCount);
 }
-static inline auto ConvertToVk(const PipelineColorBlendAttachmentState& a_State) {
+static inline auto ConvertToVk(const PipelineColorBlendAttachmentState& a_State)
+{
     return vk::PipelineColorBlendAttachmentState(
         a_State.enable,
         ConvertToVk(a_State.srcColorBlendFactor), ConvertToVk(a_State.dstColorBlendFactor), ConvertToVk(a_State.colorBlendOperation),
         ConvertToVk(a_State.srcAlphaBlendFactor), ConvertToVk(a_State.dstAlphaBlendFactor), ConvertToVk(a_State.alphaBlendOperation),
         ConvertToVk(a_State.colorMask));
 }
-static inline auto ConvertToVk(const PushConstantRange& a_Range) {
+static inline auto ConvertToVk(const PushConstantRange& a_Range)
+{
     return vk::PushConstantRange(
         ConvertToVk(a_Range.stage),
         a_Range.offset, a_Range.size);
 }
-template<VertexType Type>
+template <VertexType Type>
 constexpr static inline vk::Format ConvertToVk(const uint8_t&, const bool&);
-template<>
-constexpr static inline vk::Format ConvertToVk<VertexType::Float32>(const uint8_t& a_Size, const bool& a_Normalized) {
-    switch (a_Size)
-    {
+template <>
+constexpr static inline vk::Format ConvertToVk<VertexType::Float32>(const uint8_t& a_Size, const bool& a_Normalized)
+{
+    switch (a_Size) {
     case 1:
         return vk::Format::eR32Sfloat;
     case 2:
@@ -128,10 +135,10 @@ constexpr static inline vk::Format ConvertToVk<VertexType::Float32>(const uint8_
     }
     return vk::Format(-1);
 }
-template<>
-constexpr static inline vk::Format ConvertToVk<VertexType::Float16>(const uint8_t& a_Size, const bool& a_Normalized) {
-    switch (a_Size)
-    {
+template <>
+constexpr static inline vk::Format ConvertToVk<VertexType::Float16>(const uint8_t& a_Size, const bool& a_Normalized)
+{
+    switch (a_Size) {
     case 1:
         return vk::Format::eR16Sfloat;
     case 2:
@@ -143,10 +150,10 @@ constexpr static inline vk::Format ConvertToVk<VertexType::Float16>(const uint8_
     }
     return vk::Format(-1);
 }
-template<>
-constexpr static inline vk::Format ConvertToVk<VertexType::Int32>  (const uint8_t& a_Size, const bool& a_Normalized) {
-    switch (a_Size)
-    {
+template <>
+constexpr static inline vk::Format ConvertToVk<VertexType::Int32>(const uint8_t& a_Size, const bool& a_Normalized)
+{
+    switch (a_Size) {
     case 1:
         return vk::Format::eR32Sint;
     case 2:
@@ -158,10 +165,10 @@ constexpr static inline vk::Format ConvertToVk<VertexType::Int32>  (const uint8_
     }
     return vk::Format(-1);
 }
-template<>
-constexpr static inline vk::Format ConvertToVk<VertexType::Uint32> (const uint8_t& a_Size, const bool& a_Normalized) {
-    switch (a_Size)
-    {
+template <>
+constexpr static inline vk::Format ConvertToVk<VertexType::Uint32>(const uint8_t& a_Size, const bool& a_Normalized)
+{
+    switch (a_Size) {
     case 1:
         return vk::Format::eR32Uint;
     case 2:
@@ -173,10 +180,10 @@ constexpr static inline vk::Format ConvertToVk<VertexType::Uint32> (const uint8_
     }
     return vk::Format(-1);
 }
-template<>
-constexpr static inline vk::Format ConvertToVk<VertexType::Int16>  (const uint8_t& a_Size, const bool& a_Normalized) {
-    switch (a_Size)
-    {
+template <>
+constexpr static inline vk::Format ConvertToVk<VertexType::Int16>(const uint8_t& a_Size, const bool& a_Normalized)
+{
+    switch (a_Size) {
     case 1:
         return a_Normalized ? vk::Format::eR16Snorm : vk::Format::eR16Sint;
     case 2:
@@ -188,10 +195,10 @@ constexpr static inline vk::Format ConvertToVk<VertexType::Int16>  (const uint8_
     }
     return vk::Format(-1);
 }
-template<>
-constexpr static inline vk::Format ConvertToVk<VertexType::Uint16> (const uint8_t& a_Size, const bool& a_Normalized) {
-    switch (a_Size)
-    {
+template <>
+constexpr static inline vk::Format ConvertToVk<VertexType::Uint16>(const uint8_t& a_Size, const bool& a_Normalized)
+{
+    switch (a_Size) {
     case 1:
         return a_Normalized ? vk::Format::eR16Unorm : vk::Format::eR16Uint;
     case 2:
@@ -203,10 +210,10 @@ constexpr static inline vk::Format ConvertToVk<VertexType::Uint16> (const uint8_
     }
     return vk::Format(-1);
 }
-template<>
-constexpr static inline vk::Format ConvertToVk<VertexType::Int8>   (const uint8_t& a_Size, const bool& a_Normalized) {
-    switch (a_Size)
-    {
+template <>
+constexpr static inline vk::Format ConvertToVk<VertexType::Int8>(const uint8_t& a_Size, const bool& a_Normalized)
+{
+    switch (a_Size) {
     case 1:
         return a_Normalized ? vk::Format::eR8Snorm : vk::Format::eR8Sint;
     case 2:
@@ -218,10 +225,10 @@ constexpr static inline vk::Format ConvertToVk<VertexType::Int8>   (const uint8_
     }
     return vk::Format(-1);
 }
-template<>
-constexpr static inline vk::Format ConvertToVk<VertexType::Uint8>  (const uint8_t& a_Size, const bool& a_Normalized) {
-    switch (a_Size)
-    {
+template <>
+constexpr static inline vk::Format ConvertToVk<VertexType::Uint8>(const uint8_t& a_Size, const bool& a_Normalized)
+{
+    switch (a_Size) {
     case 1:
         return a_Normalized ? vk::Format::eR8Unorm : vk::Format::eR8Uint;
     case 2:
@@ -233,25 +240,25 @@ constexpr static inline vk::Format ConvertToVk<VertexType::Uint8>  (const uint8_
     }
     return vk::Format(-1);
 }
-constexpr static inline vk::Format ConvertToVk(const VertexAttributeFormat& a_Format) {
-    switch (a_Format.type)
-    {
+constexpr static inline vk::Format ConvertToVk(const VertexAttributeFormat& a_Format)
+{
+    switch (a_Format.type) {
     case VertexType::Float32:
         return ConvertToVk<VertexType::Float32>(a_Format.size, a_Format.normalized);
     case VertexType::Float16:
         return ConvertToVk<VertexType::Float16>(a_Format.size, a_Format.normalized);
     case VertexType::Int32:
-        return ConvertToVk<VertexType::Int32>  (a_Format.size, a_Format.normalized);
+        return ConvertToVk<VertexType::Int32>(a_Format.size, a_Format.normalized);
     case VertexType::Uint32:
-        return ConvertToVk<VertexType::Uint32> (a_Format.size, a_Format.normalized);
+        return ConvertToVk<VertexType::Uint32>(a_Format.size, a_Format.normalized);
     case VertexType::Int16:
-        return ConvertToVk<VertexType::Int16>  (a_Format.size, a_Format.normalized);
+        return ConvertToVk<VertexType::Int16>(a_Format.size, a_Format.normalized);
     case VertexType::Uint16:
-        return ConvertToVk<VertexType::Uint16> (a_Format.size, a_Format.normalized);
+        return ConvertToVk<VertexType::Uint16>(a_Format.size, a_Format.normalized);
     case VertexType::Int8:
-        return ConvertToVk<VertexType::Int8>   (a_Format.size, a_Format.normalized);
+        return ConvertToVk<VertexType::Int8>(a_Format.size, a_Format.normalized);
     case VertexType::Uint8:
-        return ConvertToVk<VertexType::Uint8>  (a_Format.size, a_Format.normalized);
+        return ConvertToVk<VertexType::Uint8>(a_Format.size, a_Format.normalized);
     }
     return vk::Format(-1);
 }

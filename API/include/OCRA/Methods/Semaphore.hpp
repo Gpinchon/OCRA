@@ -1,15 +1,15 @@
 /*
-* @Author: gpinchon
-* @Date:   2021-09-26 00:00:00
-* @Last Modified by:   gpinchon
-* @Last Modified time: 2021-09-26 14:27:05
-*/
+ * @Author: gpinchon
+ * @Date:   2021-09-26 00:00:00
+ * @Last Modified by:   gpinchon
+ * @Last Modified time: 2021-09-26 14:27:05
+ */
 #pragma once
 
 #include <OCRA/Handles.hpp>
 
-#include <vector>
 #include <chrono>
+#include <vector>
 
 namespace OCRA::Semaphore {
 void Signal(

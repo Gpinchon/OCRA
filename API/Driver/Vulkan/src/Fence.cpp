@@ -5,8 +5,7 @@
 
 #include <chrono>
 
-namespace OCRA::Fence
-{
+namespace OCRA::Fence {
 bool WaitFor(
     const std::vector<Fence::Handle>& a_Fences,
     bool a_WaitAll,
@@ -24,7 +23,7 @@ bool WaitFor(
     const Fence::Handle& a_Fence,
     const std::chrono::nanoseconds& a_TimeoutNS)
 {
-    return a_Fence->getDevice().waitForFences({**a_Fence}, true, a_TimeoutNS.count()) == vk::Result::eSuccess;
+    return a_Fence->getDevice().waitForFences({ **a_Fence }, true, a_TimeoutNS.count()) == vk::Result::eSuccess;
 }
 
 void Reset(const Handle& a_Fence)

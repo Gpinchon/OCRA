@@ -8,51 +8,46 @@
 
 using namespace OCRA;
 
-constexpr auto VSync = false;
+constexpr auto VSync             = false;
 constexpr auto SwapChainImageNbr = 5;
 constexpr uExtent2D WindowSize(256, 256);
 constexpr uExtent2D InnerSize(1024, 1024);
 constexpr auto Samples = SampleCount::Count8;
 constexpr auto Resolve = Samples == SampleCount::Count1 ? ResolveMode::None : ResolveMode::Average;
 
-Vec3 HSVtoRGB(float fH, float fS, float fV) {
-    float fC = fV * fS; // Chroma
+Vec3 HSVtoRGB(float fH, float fS, float fV)
+{
+    float fC      = fV * fS; // Chroma
     float fHPrime = fmod(fH / 60.0, 6);
-    float fX = fC * (1 - fabs(fmod(fHPrime, 2) - 1));
-    float fM = fV - fC;
+    float fX      = fC * (1 - fabs(fmod(fHPrime, 2) - 1));
+    float fM      = fV - fC;
     float fR, fG, fB;
 
     if (0 <= fHPrime && fHPrime < 1) {
         fR = fC;
         fG = fX;
         fB = 0;
-    }
-    else if (1 <= fHPrime && fHPrime < 2) {
+    } else if (1 <= fHPrime && fHPrime < 2) {
         fR = fX;
         fG = fC;
         fB = 0;
-    }
-    else if (2 <= fHPrime && fHPrime < 3) {
+    } else if (2 <= fHPrime && fHPrime < 3) {
         fR = 0;
         fG = fC;
         fB = fX;
-    }
-    else if (3 <= fHPrime && fHPrime < 4) {
+    } else if (3 <= fHPrime && fHPrime < 4) {
         fR = 0;
         fG = fX;
         fB = fC;
-    }
-    else if (4 <= fHPrime && fHPrime < 5) {
+    } else if (4 <= fHPrime && fHPrime < 5) {
         fR = fX;
         fG = 0;
         fB = fC;
-    }
-    else if (5 <= fHPrime && fHPrime < 6) {
+    } else if (5 <= fHPrime && fHPrime < 6) {
         fR = fC;
         fG = 0;
         fB = fX;
-    }
-    else {
+    } else {
         fR = 0;
         fG = 0;
         fB = 0;
@@ -64,8 +59,7 @@ Vec3 HSVtoRGB(float fH, float fS, float fV) {
     return { fR, fG, fB };
 }
 
-struct GraphicsPipelineTestApp : TestApp
-{
+struct GraphicsPipelineTestApp : TestApp {
     GraphicsPipelineTestApp()
         : TestApp("Test_GraphicsPipeline")
         , window(instance, physicalDevice, device, name, WindowSize.width, WindowSize.height)
@@ -78,14 +72,14 @@ struct GraphicsPipelineTestApp : TestApp
                 RecordDrawCommandBuffer();
             }
         };
-        window.OnMaximize = window.OnResize;
-        window.OnRestore = window.OnResize;
-        window.OnMinimize = [this](const Window&, const uint32_t, const uint32_t) { render = false; };
+        window.OnMaximize      = window.OnResize;
+        window.OnRestore       = window.OnResize;
+        window.OnMinimize      = [this](const Window&, const uint32_t, const uint32_t) { render = false; };
         const auto queueFamily = PhysicalDevice::FindQueueFamily(physicalDevice, QueueFlagBits::Graphics);
-        queue = Device::GetQueue(device, queueFamily, 0); //Get first available queue
-        commandPool = CreateCommandPool(device, queueFamily);
-        mainCommandBuffer = CreateCommandBuffer(commandPool, CommandBufferLevel::Primary);
-        drawCommandBuffer = CreateCommandBuffer(commandPool, CommandBufferLevel::Secondary);
+        queue                  = Device::GetQueue(device, queueFamily, 0); // Get first available queue
+        commandPool            = CreateCommandPool(device, queueFamily);
+        mainCommandBuffer      = CreateCommandBuffer(commandPool, CommandBufferLevel::Primary);
+        drawCommandBuffer      = CreateCommandBuffer(commandPool, CommandBufferLevel::Secondary);
         CreateSemaphoreInfo semaphoreInfo;
         semaphoreInfo.type = SemaphoreType::Binary;
     }
@@ -98,28 +92,34 @@ struct GraphicsPipelineTestApp : TestApp
         completeBufferFences.resize(swapchainNbr);
         imageAcquisitionSemaphores.resize(swapchainNbr);
         imageAcquisitionFences.resize(swapchainNbr);
-        for (auto& semaphore : completeBufferSemaphores) semaphore = CreateSemaphore(device, semaphoreInfo);
-        for (auto& fence     : completeBufferFences)     fence = CreateFence(device, FenceStatus::Unsignaled);
-        for (auto& semaphore : imageAcquisitionSemaphores) semaphore = CreateSemaphore(device, semaphoreInfo);
-        for (auto& fence     : imageAcquisitionFences)     fence = CreateFence(device, FenceStatus::Unsignaled);
+        for (auto& semaphore : completeBufferSemaphores)
+            semaphore = CreateSemaphore(device, semaphoreInfo);
+        for (auto& fence : completeBufferFences)
+            fence = CreateFence(device, FenceStatus::Unsignaled);
+        for (auto& semaphore : imageAcquisitionSemaphores)
+            semaphore = CreateSemaphore(device, semaphoreInfo);
+        for (auto& fence : imageAcquisitionFences)
+            fence = CreateFence(device, FenceStatus::Unsignaled);
     }
     void Loop()
     {
         FPSCounter fpsCounter;
-        auto lastTime = std::chrono::high_resolution_clock::now();
-        auto printTime = lastTime;
+        auto lastTime          = std::chrono::high_resolution_clock::now();
+        auto printTime         = lastTime;
         auto uniformUpdateTime = lastTime;
         window.SetVSync(VSync);
         CreateSyncObjects();
         fpsCounter.StartFrame();
         while (true) {
             window.PushEvents();
-            if (window.IsClosing()) break;
-            if (!render) continue;
+            if (window.IsClosing())
+                break;
+            if (!render)
+                continue;
 
-            uint32_t imageIndex = window.GetNextImageIndex();
-            auto& completeBufferSemaphore = completeBufferSemaphores.at(imageIndex);
-            auto& completeBufferFence     = completeBufferFences.at(imageIndex);
+            uint32_t imageIndex             = window.GetNextImageIndex();
+            auto& completeBufferSemaphore   = completeBufferSemaphores.at(imageIndex);
+            auto& completeBufferFence       = completeBufferFences.at(imageIndex);
             auto& imageAcquisitionSemaphore = imageAcquisitionSemaphores.at(imageIndex);
             auto& imageAcquisitionFence     = imageAcquisitionFences.at(imageIndex);
 
@@ -128,26 +128,26 @@ struct GraphicsPipelineTestApp : TestApp
                 imageAcquisitionSemaphore, imageAcquisitionFence);
             Fence::WaitFor(imageAcquisitionFence, IgnoreTimeout);
 
-            const auto now = std::chrono::high_resolution_clock::now();
+            const auto now   = std::chrono::high_resolution_clock::now();
             const auto delta = std::chrono::duration<double, std::milli>(now - lastTime).count();
-            lastTime = now;
+            lastTime         = now;
 
             auto uniformUpdateDelta = std::chrono::duration<double, std::milli>(now - uniformUpdateTime).count();
-            if (uniformUpdateDelta >= 15)
-            {
-                uniformUpdateTime = now;
+            if (uniformUpdateDelta >= 15) {
+                uniformUpdateTime         = now;
                 const float rotationAngle = uniformUpdateDelta * 0.0005;
                 mesh.SetProjectionMatrix(Mat4x4::Rotate(mesh.GetProjectionMatrix(), rotationAngle, Vec3(0.f, 1.f, 0.f)));
                 UpdateMeshColor(uniformUpdateDelta);
                 mesh.Update();
-                if (firstLoop) RecordDrawCommandBuffer();
+                if (firstLoop)
+                    RecordDrawCommandBuffer();
             }
 
             RecordMainCommandBuffer(swapChainImage);
 
             QueueSubmitInfo submitInfo;
-            submitInfo.commandBuffers = { mainCommandBuffer };
-            submitInfo.waitSemaphores = { { imageAcquisitionSemaphore, 0, PipelineStageFlagBits::BottomOfPipe } };
+            submitInfo.commandBuffers   = { mainCommandBuffer };
+            submitInfo.waitSemaphores   = { { imageAcquisitionSemaphore, 0, PipelineStageFlagBits::BottomOfPipe } };
             submitInfo.signalSemaphores = { { completeBufferSemaphore } };
             Queue::Submit(queue, { submitInfo }, completeBufferFence);
 
@@ -170,79 +170,75 @@ struct GraphicsPipelineTestApp : TestApp
         ViewPort viewport;
         viewport.rect.offset = { 0, 0 };
         viewport.rect.extent = InnerSize;
-        viewport.depthRange = { 0, 1 };
-        Rect2D  scissor{};
+        viewport.depthRange  = { 0, 1 };
+        Rect2D scissor {};
         scissor.offset = { 0, 0 };
         scissor.extent = InnerSize;
         CreatePipelineGraphicsInfo graphicsPipelineInfo;
-        graphicsPipelineInfo.viewPortState.viewPorts = { viewport };
-        graphicsPipelineInfo.viewPortState.scissors = { scissor };
-
-        graphicsPipelineInfo.colorBlendState.attachments = { PipelineColorBlendAttachmentState{} };
-
-        graphicsPipelineInfo.dynamicState.dynamicStates = { DynamicState::VertexInput };
-
+        graphicsPipelineInfo.viewPortState.viewPorts     = { viewport };
+        graphicsPipelineInfo.viewPortState.scissors      = { scissor };
+        graphicsPipelineInfo.colorBlendState.attachments = { PipelineColorBlendAttachmentState {} };
+        graphicsPipelineInfo.dynamicState.dynamicStates  = { DynamicState::VertexInput };
         graphicsPipelineInfo.rasterizationState.cullMode = CullMode::None;
 
-        //graphicsPipelineInfo.layout = mesh.GetPipelineLayout();
-        graphicsPipelineInfo.bindings = mesh.GetDescriptorSetLayoutBindings();
-        graphicsPipelineInfo.inputAssemblyState = mesh.GetInputAssembly();
+        // graphicsPipelineInfo.layout = mesh.GetPipelineLayout();
+        graphicsPipelineInfo.bindings                   = mesh.GetDescriptorSetLayoutBindings();
+        graphicsPipelineInfo.inputAssemblyState         = mesh.GetInputAssembly();
         graphicsPipelineInfo.shaderPipelineState.stages = mesh.GetShaderStages();
-        //graphicsPipelineInfo.multisampleState.sampleShadingEnable = true;
+        // graphicsPipelineInfo.multisampleState.sampleShadingEnable = true;
         graphicsPipelineInfo.multisampleState.rasterizationSamples = Samples;
 
         graphicsPipelineInfo.renderingInfo.colorAttachmentFormats = { Format::Uint8_Normalized_RGBA };
 
-        //Everything else is left by default for now
+        // Everything else is left by default for now
         graphicsPipeline = CreatePipelineGraphics(device, graphicsPipelineInfo);
     }
     void CreateFrameBuffer()
     {
         {
             CreateImageInfo imageInfo;
-            imageInfo.type = ImageType::Image2D;
-            imageInfo.usage = ImageUsageFlagBits::ColorAttachment | ImageUsageFlagBits::TransferSrc;
-            imageInfo.samples = Samples;
-            imageInfo.extent = { InnerSize.width, InnerSize.height, 1 };
-            imageInfo.format = Format::Uint8_Normalized_RGBA;
+            imageInfo.type        = ImageType::Image2D;
+            imageInfo.usage       = ImageUsageFlagBits::ColorAttachment | ImageUsageFlagBits::TransferSrc;
+            imageInfo.samples     = Samples;
+            imageInfo.extent      = { InnerSize.width, InnerSize.height, 1 };
+            imageInfo.format      = Format::Uint8_Normalized_RGBA;
             imageInfo.arrayLayers = 1;
-            imageInfo.mipLevels = 1;
-            renderImage = CreateImage(device, imageInfo);
+            imageInfo.mipLevels   = 1;
+            renderImage           = CreateImage(device, imageInfo);
             CreateImageViewInfo imageViewInfo;
-            imageViewInfo.image = renderImage;
-            imageViewInfo.format = Format::Uint8_Normalized_RGBA;
-            imageViewInfo.type = ImageViewType::View2D;
+            imageViewInfo.image               = renderImage;
+            imageViewInfo.format              = Format::Uint8_Normalized_RGBA;
+            imageViewInfo.type                = ImageViewType::View2D;
             imageViewInfo.subRange.layerCount = 1;
-            imageViewInfo.subRange.aspects = ImageAspectFlagBits::Color;
-            renderImageView = CreateImageView(device, imageViewInfo);
+            imageViewInfo.subRange.aspects    = ImageAspectFlagBits::Color;
+            renderImageView                   = CreateImageView(device, imageViewInfo);
         }
-        if (Samples != SampleCount::Count1)
-        {
+        if (Samples != SampleCount::Count1) {
             CreateImageInfo imageInfo;
-            imageInfo.type = ImageType::Image2D;
-            imageInfo.usage = ImageUsageFlagBits::ColorAttachment | ImageUsageFlagBits::TransferSrc;
-            imageInfo.extent = { InnerSize.width, InnerSize.height, 1 };
-            imageInfo.format = Format::Uint8_Normalized_RGBA;
+            imageInfo.type        = ImageType::Image2D;
+            imageInfo.usage       = ImageUsageFlagBits::ColorAttachment | ImageUsageFlagBits::TransferSrc;
+            imageInfo.extent      = { InnerSize.width, InnerSize.height, 1 };
+            imageInfo.format      = Format::Uint8_Normalized_RGBA;
             imageInfo.arrayLayers = 1;
-            imageInfo.mipLevels = 1;
-            resolveImage = CreateImage(device, imageInfo);
+            imageInfo.mipLevels   = 1;
+            resolveImage          = CreateImage(device, imageInfo);
             CreateImageViewInfo imageViewInfo;
-            imageViewInfo.image = resolveImage;
-            imageViewInfo.format = Format::Uint8_Normalized_RGBA;
-            imageViewInfo.type = ImageViewType::View2D;
+            imageViewInfo.image               = resolveImage;
+            imageViewInfo.format              = Format::Uint8_Normalized_RGBA;
+            imageViewInfo.type                = ImageViewType::View2D;
             imageViewInfo.subRange.layerCount = 1;
-            imageViewInfo.subRange.aspects = ImageAspectFlagBits::Color;
-            resolveImageView = CreateImageView(device, imageViewInfo);
+            imageViewInfo.subRange.aspects    = ImageAspectFlagBits::Color;
+            resolveImageView                  = CreateImageView(device, imageViewInfo);
         }
     }
     void RecordDrawCommandBuffer()
     {
-        CommandBufferBeginInfo bufferBeginInfo{};
+        CommandBufferBeginInfo bufferBeginInfo {};
         bufferBeginInfo.flags = CommandBufferUsageFlagBits::None;
         bufferBeginInfo.inheritanceInfo.emplace();
         Command::Buffer::Reset(drawCommandBuffer);
 
-        RenderingAttachmentInfo renderingAttachment{};
+        RenderingAttachmentInfo renderingAttachment {};
         renderingAttachment.clearValue         = ColorValue(0.9529f, 0.6235f, 0.0941f, 1.f);
         renderingAttachment.imageView          = renderImageView;
         renderingAttachment.imageViewResolve   = Samples == SampleCount::Count1 ? nullptr : resolveImageView;
@@ -250,11 +246,11 @@ struct GraphicsPipelineTestApp : TestApp
         renderingAttachment.imageLayoutResolve = ImageLayout::General;
         renderingAttachment.loadOp             = LoadOp::Clear;
         renderingAttachment.storeOp            = StoreOp::Store;
-        RenderingInfo renderingInfo{};
+        RenderingInfo renderingInfo {};
         renderingInfo.area.offset = { 0, 0 };
         renderingInfo.area.extent = InnerSize;
         renderingInfo.colorAttachments.push_back(renderingAttachment);
-        renderingInfo.layerCount = 1;
+        renderingInfo.layerCount  = 1;
         renderingInfo.resolveMode = Resolve;
 
         const auto descriptorWrites = mesh.GetDescriptorWrites();
@@ -262,22 +258,21 @@ struct GraphicsPipelineTestApp : TestApp
         Command::Buffer::Begin(drawCommandBuffer, bufferBeginInfo);
         if (!descriptorWrites.empty())
             Command::PushDescriptorSet(drawCommandBuffer, graphicsPipeline, descriptorWrites);
-        //Transition the render image to the proper layout
+        // Transition the render image to the proper layout
         {
             ImageLayoutTransitionInfo layoutTransition;
-            layoutTransition.image = renderImage;
+            layoutTransition.image            = renderImage;
             layoutTransition.subRange.aspects = ImageAspectFlagBits::Color;
-            layoutTransition.oldLayout = ImageLayout::Undefined;
-            layoutTransition.newLayout = ImageLayout::General;
+            layoutTransition.oldLayout        = ImageLayout::Undefined;
+            layoutTransition.newLayout        = ImageLayout::General;
             Command::TransitionImageLayout(drawCommandBuffer, layoutTransition);
         }
-        if (Samples != SampleCount::Count1)
-        {
+        if (Samples != SampleCount::Count1) {
             ImageLayoutTransitionInfo layoutTransition;
-            layoutTransition.image = resolveImage;
+            layoutTransition.image            = resolveImage;
             layoutTransition.subRange.aspects = ImageAspectFlagBits::Color;
-            layoutTransition.oldLayout = ImageLayout::Undefined;
-            layoutTransition.newLayout = ImageLayout::General;
+            layoutTransition.oldLayout        = ImageLayout::Undefined;
+            layoutTransition.newLayout        = ImageLayout::General;
             Command::TransitionImageLayout(drawCommandBuffer, layoutTransition);
         }
         Command::BeginRendering(drawCommandBuffer, renderingInfo);
@@ -291,14 +286,14 @@ struct GraphicsPipelineTestApp : TestApp
     void UpdateMeshColor(const double a_Delta)
     {
         hue += 0.05 * a_Delta;
-        hue = hue > 360 ? 0 : hue;
+        hue                 = hue > 360 ? 0 : hue;
         PBRParameters param = mesh.GetMaterial().GetParameters<PBRParameters>();
-        param.albedo = { HSVtoRGB(hue, 0.5f, 1.f), 1.f };
+        param.albedo        = { HSVtoRGB(hue, 0.5f, 1.f), 1.f };
         mesh.GetMaterial().SetParameters(param);
     }
     void RecordMainCommandBuffer(const Image::Handle& a_SwapChainImage)
     {
-        CommandBufferBeginInfo bufferBeginInfo{};
+        CommandBufferBeginInfo bufferBeginInfo {};
         bufferBeginInfo.flags = CommandBufferUsageFlagBits::None;
         Command::Buffer::Reset(mainCommandBuffer);
         Command::Buffer::Begin(mainCommandBuffer, bufferBeginInfo);
@@ -307,82 +302,76 @@ struct GraphicsPipelineTestApp : TestApp
             {
                 auto& srcImage = Samples == SampleCount::Count1 ? renderImage : resolveImage;
                 auto& dstImage = a_SwapChainImage;
-                //Transition source image layout
+                // Transition source image layout
                 {
                     ImageLayoutTransitionInfo layoutTransition;
-                    layoutTransition.image = srcImage;
+                    layoutTransition.image            = srcImage;
                     layoutTransition.subRange.aspects = ImageAspectFlagBits::Color;
-                    layoutTransition.oldLayout = ImageLayout::General;
-                    layoutTransition.newLayout = ImageLayout::TransferSrcOptimal;
+                    layoutTransition.oldLayout        = ImageLayout::General;
+                    layoutTransition.newLayout        = ImageLayout::TransferSrcOptimal;
                     Command::TransitionImageLayout(
                         mainCommandBuffer,
                         layoutTransition);
                 }
-                //Transition destination image layout
+                // Transition destination image layout
                 {
                     ImageLayoutTransitionInfo layoutTransition;
-                    layoutTransition.image = dstImage;
+                    layoutTransition.image            = dstImage;
                     layoutTransition.subRange.aspects = ImageAspectFlagBits::Color;
-                    layoutTransition.oldLayout = ImageLayout::Undefined;
-                    layoutTransition.newLayout = ImageLayout::TransferDstOptimal;
+                    layoutTransition.oldLayout        = ImageLayout::Undefined;
+                    layoutTransition.newLayout        = ImageLayout::TransferDstOptimal;
                     Command::TransitionImageLayout(
                         mainCommandBuffer,
                         layoutTransition);
                 }
 
                 ImageBlit imageBlit;
-                imageBlit.srcSubresource.aspects = ImageAspectFlagBits::Color;
+                imageBlit.srcSubresource.aspects    = ImageAspectFlagBits::Color;
                 imageBlit.srcSubresource.layerCount = 1;
-                imageBlit.srcOffsets[0] = Offset3D(0, 0, 0);
-                imageBlit.srcOffsets[1] = Offset3D(InnerSize.width, InnerSize.height, 1);
-                imageBlit.dstSubresource.aspects = ImageAspectFlagBits::Color;
+                imageBlit.srcOffsets[0]             = Offset3D(0, 0, 0);
+                imageBlit.srcOffsets[1]             = Offset3D(InnerSize.width, InnerSize.height, 1);
+                imageBlit.dstSubresource.aspects    = ImageAspectFlagBits::Color;
                 imageBlit.dstSubresource.layerCount = 1;
-                imageBlit.dstOffsets[0] = Offset3D(0, 0, 0);
-                imageBlit.dstOffsets[1] = Offset3D(window.GetExtent().width, window.GetExtent().height, 1);
-                //We do a blit here to perform necessary conversions
+                imageBlit.dstOffsets[0]             = Offset3D(0, 0, 0);
+                imageBlit.dstOffsets[1]             = Offset3D(window.GetExtent().width, window.GetExtent().height, 1);
+                // We do a blit here to perform necessary conversions
                 Command::BlitImage(mainCommandBuffer,
                     srcImage, ImageLayout::TransferSrcOptimal,
                     dstImage, ImageLayout::TransferDstOptimal,
                     { imageBlit }, Filter::Linear);
 
-                ImageSubresourceRange range{};
-                range.aspects = ImageAspectFlagBits::Color;
+                ImageSubresourceRange range {};
+                range.aspects    = ImageAspectFlagBits::Color;
                 range.levelCount = 1;
                 range.layerCount = 1;
                 Command::TransitionImageLayout(
-                    mainCommandBuffer, { dstImage, range,
-                    ImageLayout::TransferDstOptimal,
-                    ImageLayout::PresentSrc });
+                    mainCommandBuffer, { dstImage, range, ImageLayout::TransferDstOptimal, ImageLayout::PresentSrc });
             }
         }
         Command::Buffer::End(mainCommandBuffer);
     }
-    float                    hue{ 0 };
-    bool                     render{ false };
-    bool                     firstLoop{ true };
-    Window                   window;
-    
-    Image::Handle            renderImage;
-    Image::Handle            resolveImage;
-    Image::View::Handle      renderImageView;
-    Image::View::Handle      resolveImageView;
+    float hue { 0 };
+    bool render { false };
+    bool firstLoop { true };
+    Window window;
 
-    Mesh    mesh{ device,
-        VertexBuffer(device, std::vector<DefaultVertex>{
-            { {  0.0f, -0.5f, 0.f }, { 1.0f, 0.0f, 0.0f }, { 0.f, 1.f }},
-            { {  0.5f,  0.5f, 0.f }, { 0.0f, 1.0f, 0.0f }, { 1.f, 0.f }},
-            { { -0.5f,  0.5f, 0.f }, { 0.0f, 0.0f, 1.0f }, { 1.f, 1.f }}
-        }),
+    Image::Handle renderImage;
+    Image::Handle resolveImage;
+    Image::View::Handle renderImageView;
+    Image::View::Handle resolveImageView;
+
+    Mesh mesh { device,
+        VertexBuffer(device, std::vector<DefaultVertex> { { { 0.0f, -0.5f, 0.f }, { 1.0f, 0.0f, 0.0f }, { 0.f, 1.f } }, { { 0.5f, 0.5f, 0.f }, { 0.0f, 1.0f, 0.0f }, { 1.f, 0.f } }, { { -0.5f, 0.5f, 0.f }, { 0.0f, 0.0f, 1.0f }, { 1.f, 1.f } } }),
         PBRMaterial(physicalDevice, device) };
-    Pipeline::Handle         graphicsPipeline;
-    Command::Pool::Handle    commandPool;
-    Command::Buffer::Handle  mainCommandBuffer;
-    Command::Buffer::Handle  drawCommandBuffer;
-    Queue::Handle            queue;
+    Pipeline::Handle graphicsPipeline;
+    Command::Pool::Handle commandPool;
+    Command::Buffer::Handle mainCommandBuffer;
+    Command::Buffer::Handle drawCommandBuffer;
+    Queue::Handle queue;
     std::vector<Semaphore::Handle> completeBufferSemaphores;
-    std::vector<Fence::Handle>     completeBufferFences;
+    std::vector<Fence::Handle> completeBufferFences;
     std::vector<Semaphore::Handle> imageAcquisitionSemaphores;
-    std::vector<Fence::Handle>     imageAcquisitionFences;
+    std::vector<Fence::Handle> imageAcquisitionFences;
 };
 
 int main()

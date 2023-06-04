@@ -1,24 +1,22 @@
-#include <GL/Flags.hpp>
 #include <GL/CommandBuffer.hpp>
+#include <GL/Flags.hpp>
 #include <GL/QueryPool.hpp>
 
 #include <OCRA/Core.hpp>
 
-namespace OCRA::Command
-{
+namespace OCRA::Command {
 void PipelineBarrier(
     const Buffer::Handle& a_CommandBuffer,
     const PipelineStageFlags& srcStageMask,
     const PipelineStageFlags& dstStageMask,
     const DependencyFlags& dependencyFlags,
-    const std::vector<MemoryBarrier>&       a_MemoryBarriers,
+    const std::vector<MemoryBarrier>& a_MemoryBarriers,
     const std::vector<BufferMemoryBarrier>& a_BufferMemoryBarriers,
-    const std::vector<ImageMemoryBarrier>&  a_ImageMemoryBarriers)
+    const std::vector<ImageMemoryBarrier>& a_ImageMemoryBarriers)
 {
-    a_CommandBuffer->PushCommand<GenericCommand>([
-            memoryBarriers = a_MemoryBarriers,
-            bufferMemoryBarriers = a_BufferMemoryBarriers,
-            imageMemoryBarriers = a_ImageMemoryBarriers](const Buffer::ExecutionState&) {
+    a_CommandBuffer->PushCommand<GenericCommand>([memoryBarriers          = a_MemoryBarriers,
+                                                     bufferMemoryBarriers = a_BufferMemoryBarriers,
+                                                     imageMemoryBarriers  = a_ImageMemoryBarriers](const Buffer::ExecutionState&) {
         GLbitfield flags = 0;
         for (const auto& memoryBarrier : memoryBarriers) {
             flags |= GetGLBarrierAccessBits(memoryBarrier.dstAccessMask);
@@ -33,18 +31,18 @@ void PipelineBarrier(
     });
 }
 void BeginQuery(
-    const Command::Buffer::Handle&  a_CommandBuffer,
-    const QueryPool::Handle&        a_QueryPool,
-    const uint32_t&                 a_QueryIndex)
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const QueryPool::Handle& a_QueryPool,
+    const uint32_t& a_QueryIndex)
 {
     a_CommandBuffer->PushCommand<GenericCommand>([queryPool = a_QueryPool, queryIndex = a_QueryIndex](Buffer::ExecutionState& a_ExecutionState) {
         queryPool->Begin(queryIndex);
     });
 }
 void EndQuery(
-    const Command::Buffer::Handle&  a_CommandBuffer,
-    const QueryPool::Handle&        a_QueryPool,
-    const uint32_t&                 a_QueryIndex)
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const QueryPool::Handle& a_QueryPool,
+    const uint32_t& a_QueryIndex)
 {
     a_CommandBuffer->PushCommand<GenericCommand>([queryPool = a_QueryPool, queryIndex = a_QueryIndex](Buffer::ExecutionState& a_ExecutionState) {
         queryPool->End(queryIndex);
@@ -52,8 +50,8 @@ void EndQuery(
 }
 void SetScissor(
     const Command::Buffer::Handle& a_CommandBuffer,
-    const uint32_t&                a_FirstScissor,
-    const std::vector<Rect2D>&     a_Scissors)
+    const uint32_t& a_FirstScissor,
+    const std::vector<Rect2D>& a_Scissors)
 {
     a_CommandBuffer->PushCommand<GenericCommand>([firstScissor = a_FirstScissor, scissors = a_Scissors](Buffer::ExecutionState& a_ExecutionState) {
         a_ExecutionState.dynamicStates.scissors.resize(scissors.size());
@@ -62,9 +60,9 @@ void SetScissor(
     });
 }
 void SetViewPort(
-    const Command::Buffer::Handle&  a_CommandBuffer,
-    const uint32_t&                 a_FirstViewPort,
-    const std::vector<ViewPort>&    a_ViewPorts)
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const uint32_t& a_FirstViewPort,
+    const std::vector<ViewPort>& a_ViewPorts)
 {
     a_CommandBuffer->PushCommand<GenericCommand>([firstViewPort = a_FirstViewPort, viewports = a_ViewPorts](Buffer::ExecutionState& a_ExecutionState) {
         a_ExecutionState.dynamicStates.viewPorts.resize(viewports.size());

@@ -15,52 +15,52 @@ auto PBRFragmentShader(const Device::Handle& a_Device)
         shaderInfo.targetAPI = ShaderCompiler::TargetAPI::OpenGL;
     if (OCRA_API_IMPL == OCRA_API_DirectX)
         shaderInfo.targetAPI = ShaderCompiler::TargetAPI::DirectX;
-    shaderInfo.type = ShaderCompiler::ShaderType::Fragment;
+    shaderInfo.type       = ShaderCompiler::ShaderType::Fragment;
     shaderInfo.entryPoint = "main";
-    shaderInfo.source = {
+    shaderInfo.source     = {
         "#version 450                                           \n"
-        "layout(location = 0) in vec3 vertColor;                \n"
-        "layout(location = 1) in vec2 vertTexCoord;             \n"
-        "layout(location = 0) out vec4 outColor;                \n"
-        "layout(binding = 1) uniform PBRParameters {            \n"
-        "    vec4 albedo;                                       \n"
-        "    float roughness;                                   \n"
-        "    float metallic;                                    \n"
-        "} matParam;                                            \n"
-        "layout(binding = 2) uniform sampler2D albedoTexture;   \n"
-        "void main() {                                          \n"
-        "    outColor = matParam.albedo * vec4(vertColor, 1.0); \n"
-        "    outColor *= texture(albedoTexture, vertTexCoord);  \n"
-        "}                                                      \n"
+            "layout(location = 0) in vec3 vertColor;                \n"
+            "layout(location = 1) in vec2 vertTexCoord;             \n"
+            "layout(location = 0) out vec4 outColor;                \n"
+            "layout(binding = 1) uniform PBRParameters {            \n"
+            "    vec4 albedo;                                       \n"
+            "    float roughness;                                   \n"
+            "    float metallic;                                    \n"
+            "} matParam;                                            \n"
+            "layout(binding = 2) uniform sampler2D albedoTexture;   \n"
+            "void main() {                                          \n"
+            "    outColor = matParam.albedo * vec4(vertColor, 1.0); \n"
+            "    outColor *= texture(albedoTexture, vertTexCoord);  \n"
+            "}                                                      \n"
     };
     CreateShaderModuleInfo shaderModuleInfo;
-    shaderModuleInfo.code = ShaderCompiler::Compile(compiler, shaderInfo);
+    shaderModuleInfo.code   = ShaderCompiler::Compile(compiler, shaderInfo);
     const auto shaderModule = CreateShaderModule(a_Device, shaderModuleInfo);
     PipelineShaderStage shaderStageInfo;
     shaderStageInfo.entryPoint = "main";
-    shaderStageInfo.stage = ShaderStageFlagBits::Fragment;
-    shaderStageInfo.module = shaderModule;
+    shaderStageInfo.stage      = ShaderStageFlagBits::Fragment;
+    shaderStageInfo.module     = shaderModule;
     return shaderStageInfo;
 }
 PBRMaterial::PBRMaterial(
     const PhysicalDevice::Handle& a_PhysicalDevice,
     const Device::Handle& a_Device)
-    : Material(a_Device, PBRParameters{}, { Texture2D(a_Device, Format::Uint8_Normalized_RGBA, 1, 1) }, PBRFragmentShader(a_Device))
+    : Material(a_Device, PBRParameters {}, { Texture2D(a_Device, Format::Uint8_Normalized_RGBA, 1, 1) }, PBRFragmentShader(a_Device))
 {
-    //Fill texture with white
-    auto& texture = static_cast<const Texture2D&>(GetTexture(0));
+    // Fill texture with white
+    auto& texture          = static_cast<const Texture2D&>(GetTexture(0));
     const auto textureSize = Image::GetDataSize(texture.GetImage());
     CreateBufferInfo bufferInfo;
-    bufferInfo.size = textureSize;
-    bufferInfo.usage = BufferUsageFlagBits::TransferSrc;
+    bufferInfo.size            = textureSize;
+    bufferInfo.usage           = BufferUsageFlagBits::TransferSrc;
     auto textureTransferBuffer = CreateBuffer(a_Device, bufferInfo);
     auto textureTransferMemory = AllocateMemory(a_Device,
         Buffer::GetSizeRequirement(textureTransferBuffer), MemoryPropertyFlagBits::HostVisible);
     Buffer::BindMemory(textureTransferBuffer, textureTransferMemory, 0);
     MemoryMappedRange range;
-    range.memory = textureTransferMemory;
-    range.length = textureSize;
-    range.offset = 0;
+    range.memory   = textureTransferMemory;
+    range.length   = textureSize;
+    range.offset   = 0;
     auto bufferPtr = (Vec<4, uint8_t>*)Memory::Map(range);
     for (uint32_t x = 0; x < texture.GetWidth(); ++x) {
         for (uint32_t y = 0; y < texture.GetHeight(); ++y) {
@@ -73,13 +73,13 @@ PBRMaterial::PBRMaterial(
     }
     Memory::Unmap(textureTransferMemory);
     ImageBufferCopy bufferCopy;
-    bufferCopy.bufferImageHeight = texture.GetHeight();
-    bufferCopy.bufferRowLength   = texture.GetWidth();
-    bufferCopy.bufferOffset      = 0;
-    bufferCopy.imageExtent.width  = texture.GetWidth();
-    bufferCopy.imageExtent.height = texture.GetHeight();
-    bufferCopy.imageExtent.depth  = 1;
-    bufferCopy.imageSubresource.aspects = ImageAspectFlagBits::Color;
+    bufferCopy.bufferImageHeight           = texture.GetHeight();
+    bufferCopy.bufferRowLength             = texture.GetWidth();
+    bufferCopy.bufferOffset                = 0;
+    bufferCopy.imageExtent.width           = texture.GetWidth();
+    bufferCopy.imageExtent.height          = texture.GetHeight();
+    bufferCopy.imageExtent.depth           = 1;
+    bufferCopy.imageSubresource.aspects    = ImageAspectFlagBits::Color;
     bufferCopy.imageSubresource.layerCount = 1;
     Image::CopyBufferToImage(textureTransferBuffer,
         texture.GetImage(), ImageLayout::General,

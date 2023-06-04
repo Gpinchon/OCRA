@@ -1,18 +1,18 @@
 /*
-* @Author: gpinchon
-* @Date:   2021-09-26 00:00:00
-* @Last Modified by:   gpinchon
-* @Last Modified time: 2021-09-26 14:31:50
-*/
+ * @Author: gpinchon
+ * @Date:   2021-09-26 00:00:00
+ * @Last Modified by:   gpinchon
+ * @Last Modified time: 2021-09-26 14:31:50
+ */
 #pragma once
 
 #include <OCRA/Core.hpp>
 
 #include <GL/Device.hpp>
 #include <GL/Enums.hpp>
-#include <GL/Structs.hpp>
 #include <GL/Image.hpp>
 #include <GL/ImageView.hpp>
+#include <GL/Structs.hpp>
 
 #include <GL/glew.h>
 
@@ -36,8 +36,8 @@ Impl::Impl(const Device::Handle& a_Device, const CreateImageViewInfo& a_Info)
 {
     a_Device->PushCommand([this] {
         auto& imageInfo = info.image->info;
-        auto levelCount = info.subRange.levelCount == OCRA::RemainingMipLevels   ? imageInfo.mipLevels  : info.subRange.levelCount;
-        auto layerCount = info.subRange.layerCount == OCRA::RemainingArrayLayers ? imageInfo.arrayLayers: info.subRange.layerCount;
+        auto levelCount = info.subRange.levelCount == OCRA::RemainingMipLevels ? imageInfo.mipLevels : info.subRange.levelCount;
+        auto layerCount = info.subRange.layerCount == OCRA::RemainingArrayLayers ? imageInfo.arrayLayers : info.subRange.layerCount;
         glGenTextures(1, &handle);
         glTextureView(
             handle,
@@ -53,13 +53,15 @@ Impl::Impl(const Device::Handle& a_Device, const CreateImageViewInfo& a_Info)
             handle,
             GL_TEXTURE_SWIZZLE_RGBA,
             (GLint*)&swizzleMask);
-    }, false);
+    },
+        false);
 }
 Impl::~Impl()
 {
     device.lock()->PushCommand([handle = handle] {
         glDeleteTextures(1, &handle);
-    }, false);
+    },
+        false);
 }
 unsigned GetGLHandle(const Device::Handle& a_Device, const Handle& a_Handle)
 {

@@ -6,12 +6,10 @@
 
 #include <stdexcept>
 
-namespace OCRA
-{
+namespace OCRA {
 static inline auto GetGLImageViewType(const ImageViewType& a_Type, const bool& a_Multisample)
 {
-    switch (a_Type)
-    {
+    switch (a_Type) {
     case ImageViewType::View1D:
         return a_Multisample ? GL_NONE : GL_TEXTURE_1D;
     case ImageViewType::View2D:
@@ -94,8 +92,7 @@ static inline auto GetGLBlendFactor(const BlendFactor& a_Factor)
 }
 static inline auto GetGLOperation(const CompareOp& a_Operation)
 {
-    switch (a_Operation)
-    {
+    switch (a_Operation) {
     case CompareOp::Never:
         return GL_NEVER;
     case CompareOp::Less:
@@ -116,9 +113,9 @@ static inline auto GetGLOperation(const CompareOp& a_Operation)
         throw std::runtime_error("Unknown Compare Operation");
     }
 }
-inline GLenum GetGLSwizzle(const Swizzle& a_Swizzle, const GLenum& a_SwizzleComponent) {
-    switch (a_Swizzle)
-    {
+inline GLenum GetGLSwizzle(const Swizzle& a_Swizzle, const GLenum& a_SwizzleComponent)
+{
+    switch (a_Swizzle) {
     case Swizzle::Identity:
         return a_SwizzleComponent;
     case Swizzle::Zero:
@@ -141,8 +138,7 @@ inline GLenum GetGLSwizzle(const Swizzle& a_Swizzle, const GLenum& a_SwizzleComp
 }
 static inline auto GetGLIndexType(const IndexType& a_IndexType)
 {
-    switch (a_IndexType)
-    {
+    switch (a_IndexType) {
     case IndexType::None:
         return GL_NONE;
     case IndexType::Uint32:
@@ -158,13 +154,14 @@ static inline auto GetGLIndexType(const IndexType& a_IndexType)
 static inline auto GetIndexTypeSize(const GLenum& a_IndexType)
 {
     switch (a_IndexType) {
-    case GL_UNSIGNED_BYTE :
+    case GL_UNSIGNED_BYTE:
         return 1;
-    case GL_UNSIGNED_SHORT :
+    case GL_UNSIGNED_SHORT:
         return 2;
-    case GL_UNSIGNED_INT :
+    case GL_UNSIGNED_INT:
         return 4;
-    default : throw std::runtime_error("Unknown Index Type");
+    default:
+        throw std::runtime_error("Unknown Index Type");
     }
 }
 static inline auto GetGLLogicOp(const LogicOp& a_LogicOp)
@@ -208,21 +205,20 @@ static inline auto GetGLLogicOp(const LogicOp& a_LogicOp)
 }
 static inline auto GetGLPolygonMode(const PolygonMode& a_Mode)
 {
-    switch (a_Mode)
-    {
-    case PolygonMode::Fill :
+    switch (a_Mode) {
+    case PolygonMode::Fill:
         return GL_FILL;
-    case PolygonMode::Line :
+    case PolygonMode::Line:
         return GL_LINE;
-    case PolygonMode::Point :
+    case PolygonMode::Point:
         return GL_POINT;
     default:
         throw std::runtime_error("Unknown Polygon Mode");
     }
 }
-static inline auto GetGLOperation(const StencilOp& a_Operation) {
-    switch (a_Operation)
-    {
+static inline auto GetGLOperation(const StencilOp& a_Operation)
+{
+    switch (a_Operation) {
     case StencilOp::Keep:
         return GL_KEEP;
     case StencilOp::Zero:
@@ -245,8 +241,7 @@ static inline auto GetGLOperation(const StencilOp& a_Operation) {
 }
 static inline auto GetGLVertexType(const VertexType& a_VertexType)
 {
-    switch (a_VertexType)
-    {
+    switch (a_VertexType) {
     case OCRA::VertexType::None:
         return GL_NONE;
     case OCRA::VertexType::Float32:
@@ -271,13 +266,12 @@ static inline auto GetGLVertexType(const VertexType& a_VertexType)
 }
 static inline auto GetGLPolygonOffsetMode(const PolygonMode& a_Mode)
 {
-    switch (a_Mode)
-    {
-    case PolygonMode::Fill :
+    switch (a_Mode) {
+    case PolygonMode::Fill:
         return GL_POLYGON_OFFSET_FILL;
-    case PolygonMode::Line :
+    case PolygonMode::Line:
         return GL_POLYGON_OFFSET_LINE;
-    case PolygonMode::Point :
+    case PolygonMode::Point:
         return GL_POLYGON_OFFSET_POINT;
     default:
         throw std::runtime_error("Unknown Polygon Mode");
@@ -285,15 +279,14 @@ static inline auto GetGLPolygonOffsetMode(const PolygonMode& a_Mode)
 }
 static inline auto GetGLCullMode(const CullMode& a_Mode)
 {
-    switch (a_Mode)
-    {
-    case CullMode::None :
+    switch (a_Mode) {
+    case CullMode::None:
         return GL_NONE;
-    case CullMode::Front :
+    case CullMode::Front:
         return GL_FRONT;
-    case CullMode::Back :
+    case CullMode::Back:
         return GL_BACK;
-    case CullMode::FrontAndBack :
+    case CullMode::FrontAndBack:
         return GL_FRONT_AND_BACK;
     default:
         throw std::runtime_error("Unknown Cull Mode");
@@ -301,20 +294,19 @@ static inline auto GetGLCullMode(const CullMode& a_Mode)
 }
 static inline auto GetGLFrontFace(const FrontFace& a_FrontFace)
 {
-    switch (a_FrontFace)
-    {
-    case FrontFace::Clockwise :
+    switch (a_FrontFace) {
+    case FrontFace::Clockwise:
         return GL_CW;
     case FrontFace::CounterClockwise:
         return GL_CCW;
-    default :
+    default:
         throw std::runtime_error("Unknown Front Face");
     }
 }
 
-static inline auto GetGLAddressMode(const SamplerAddressMode& a_AddressMode) {
-    switch (a_AddressMode)
-    {
+static inline auto GetGLAddressMode(const SamplerAddressMode& a_AddressMode)
+{
+    switch (a_AddressMode) {
     case SamplerAddressMode::Repeat:
         return GL_REPEAT;
     case SamplerAddressMode::MirroredRepeat:
@@ -328,9 +320,9 @@ static inline auto GetGLAddressMode(const SamplerAddressMode& a_AddressMode) {
     }
 }
 
-static inline auto GetGLMagFilter(const Filter& a_Filter) {
-    switch (a_Filter)
-    {
+static inline auto GetGLMagFilter(const Filter& a_Filter)
+{
+    switch (a_Filter) {
     case Filter::Nearest:
         return GL_NEAREST;
     case Filter::Linear:
@@ -340,13 +332,14 @@ static inline auto GetGLMagFilter(const Filter& a_Filter) {
     }
 }
 
-static inline auto GetGLMinFilter(const Filter& a_Filter, const Filter& a_MipmapMode) {
-    switch (a_Filter)
-    {
+static inline auto GetGLMinFilter(const Filter& a_Filter, const Filter& a_MipmapMode)
+{
+    switch (a_Filter) {
     case Filter::Nearest:
         return (a_MipmapMode == Filter::Nearest) ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST_MIPMAP_LINEAR;
     case Filter::Linear:
-        return (a_MipmapMode == Filter::Nearest) ? GL_LINEAR_MIPMAP_NEAREST : GL_LINEAR_MIPMAP_LINEAR;;
+        return (a_MipmapMode == Filter::Nearest) ? GL_LINEAR_MIPMAP_NEAREST : GL_LINEAR_MIPMAP_LINEAR;
+        ;
     default:
         throw std::runtime_error("Unknown Filter Mode");
     }
@@ -879,9 +872,6 @@ static inline auto GetStencilSize(const Format& format)
 }
 static inline auto GetPixelSize(const Format& a_Format)
 {
-    return
-        GetRedSize(a_Format) + GetGreenSize(a_Format) +
-        GetBlueSize(a_Format) + GetAlphaSize(a_Format) +
-        GetDepthSize(a_Format) + GetStencilSize(a_Format);
+    return GetRedSize(a_Format) + GetGreenSize(a_Format) + GetBlueSize(a_Format) + GetAlphaSize(a_Format) + GetDepthSize(a_Format) + GetStencilSize(a_Format);
 }
 }

@@ -1,22 +1,20 @@
 #include <OCRA/Core.hpp>
 
-#include <GL/Device.hpp>
-#include <GL/Queue.hpp>
-#include <GL/Fence.hpp>
-#include <GL/Semaphore.hpp>
 #include <GL/CommandBuffer.hpp>
+#include <GL/Device.hpp>
+#include <GL/Fence.hpp>
+#include <GL/Queue.hpp>
+#include <GL/Semaphore.hpp>
 
 #include <vector>
 
 OCRA_DECLARE_HANDLE(OCRA::Fence);
 OCRA_DECLARE_HANDLE(OCRA::Queue);
 
-namespace OCRA::Queue
-{
+namespace OCRA::Queue {
 static inline void Execute(const QueueSubmitInfo& a_SubmitInfo)
 {
-    for (auto& waitInfo : a_SubmitInfo.waitSemaphores)
-    {
+    for (auto& waitInfo : a_SubmitInfo.waitSemaphores) {
         if (waitInfo.semaphore->type == SemaphoreType::Binary)
             std::static_pointer_cast<Semaphore::Binary>(waitInfo.semaphore)->Wait();
         else {
@@ -25,8 +23,7 @@ static inline void Execute(const QueueSubmitInfo& a_SubmitInfo)
         }
     }
     OCRA::Command::Buffer::Execute(a_SubmitInfo.commandBuffers);
-    for (auto& signalInfo : a_SubmitInfo.signalSemaphores)
-    {
+    for (auto& signalInfo : a_SubmitInfo.signalSemaphores) {
         if (signalInfo.semaphore->type == SemaphoreType::Binary)
             std::static_pointer_cast<Semaphore::Binary>(signalInfo.semaphore)->Signal();
         else {
@@ -45,8 +42,10 @@ void Submit(
         for (const auto& submitInfo : submitInfos) {
             Execute(submitInfo);
         }
-        if (fence != nullptr) fence->Signal();
-    }, false);
+        if (fence != nullptr)
+            fence->Signal();
+    },
+        false);
 }
 void WaitIdle(const Handle& a_Queue)
 {

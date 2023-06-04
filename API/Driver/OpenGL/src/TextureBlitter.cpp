@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-constexpr char  ShaderCode[] = "                                    \n\
+constexpr char ShaderCode[] = "                                    \n\
 #version 430														\n\
 uniform layout (binding = 0) sampler3D img_src;                     \n\
 uniform layout (binding = 1) writeonly image3D img_dst;             \n\
@@ -32,14 +32,13 @@ void main() {														\n\
     }                                                               \n\
 }                                                                   \n\
 ";
-constexpr GLint CodeLength = sizeof(ShaderCode);
+constexpr GLint CodeLength  = sizeof(ShaderCode);
 
 static inline bool CheckShader(GLuint shader)
 {
     GLint isCompiled = 0;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &isCompiled);
-    if (isCompiled == GL_FALSE)
-    {
+    if (isCompiled == GL_FALSE) {
         GLint maxLength = 0;
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
 
@@ -61,8 +60,7 @@ static inline bool CheckProgram(GLuint program)
 {
     GLint isLinked = 0;
     glGetProgramiv(program, GL_LINK_STATUS, &isLinked);
-    if (isLinked == GL_FALSE)
-    {
+    if (isLinked == GL_FALSE) {
         GLint maxLength = 0;
         glGetProgramiv(program, GL_INFO_LOG_LENGTH, &maxLength);
 
@@ -89,18 +87,21 @@ OCRA::TextureBlitter::TextureBlitter(Device::Impl& a_Device)
         glCreateFramebuffers(2, frameBuffers.data());
 
         glCreateSamplers(1, &samplerSrc);
-        shaderProgram = glCreateProgram();
-        auto shader = glCreateShader(GL_COMPUTE_SHADER);
+        shaderProgram       = glCreateProgram();
+        auto shader         = glCreateShader(GL_COMPUTE_SHADER);
         const char* codePtr = ShaderCode;
         glShaderSource(shader, 1, &codePtr, &CodeLength);
         glCompileShader(shader);
-        if (!CheckShader(shader)) return;
+        if (!CheckShader(shader))
+            return;
         glAttachShader(shaderProgram, shader);
         glLinkProgram(shaderProgram);
-        if (!CheckProgram(shaderProgram)) return;
+        if (!CheckProgram(shaderProgram))
+            return;
         glDetachShader(shaderProgram, shader);
         glDeleteShader(shader);
-    }, false);
+    },
+        false);
 }
 
 OCRA::TextureBlitter::~TextureBlitter()
@@ -109,7 +110,8 @@ OCRA::TextureBlitter::~TextureBlitter()
         glDeleteFramebuffers(2, frameBuffers.data());
         glDeleteSamplers(1, &samplerSrc);
         glDeleteProgram(shaderProgram);
-    }, false);
+    },
+        false);
 }
 
 void OCRA::TextureBlitter::Blit3D(
@@ -123,9 +125,9 @@ void OCRA::TextureBlitter::Blit3D(
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(a_SrcImage->target, a_SrcImage->handle);
     glBindSampler(0, samplerSrc);
-    auto& blit = a_Blit;
+    auto& blit               = a_Blit;
     const Offset3D srcOffset = blit.srcOffsets[0];
-    const Offset3D srcSize = {
+    const Offset3D srcSize   = {
         blit.srcOffsets[1].x - blit.srcOffsets[0].x,
         blit.srcOffsets[1].y - blit.srcOffsets[0].y,
         blit.srcOffsets[1].z - blit.srcOffsets[0].z,
@@ -140,20 +142,20 @@ void OCRA::TextureBlitter::Blit3D(
         blit.dstOffsets[1].y - blit.dstOffsets[0].y,
         blit.dstOffsets[1].z - blit.dstOffsets[0].z,
     };
-    OCRA_ASSERT(dstOffset.x < a_DstImage->info.extent.width  && "Blit operation invalid : Offset exceeds image width");
+    OCRA_ASSERT(dstOffset.x < a_DstImage->info.extent.width && "Blit operation invalid : Offset exceeds image width");
     OCRA_ASSERT(dstOffset.y < a_DstImage->info.extent.height && "Blit operation invalid : Offset exceeds image height");
-    OCRA_ASSERT(dstOffset.z < a_DstImage->info.extent.depth  && "Blit operation invalid : Offset exceeds image depth");
+    OCRA_ASSERT(dstOffset.z < a_DstImage->info.extent.depth && "Blit operation invalid : Offset exceeds image depth");
     glBindImageTexture(1,
         a_DstImage->handle,
         blit.dstSubresource.mipLevel,
         true,
-        0, //Level ignored because it's a Texture3D
+        0, // Level ignored because it's a Texture3D
         GL_WRITE_ONLY,
         a_DstImage->internalFormat);
     glUniform3f(0, srcOffset.x, srcOffset.y, srcOffset.z);
-    glUniform3f(1, srcSize.x,   srcSize.y,   srcSize.z);
+    glUniform3f(1, srcSize.x, srcSize.y, srcSize.z);
     glUniform3f(2, dstOffset.x, dstOffset.y, dstOffset.z);
-    glUniform3f(3, dstSize.x,   dstSize.y,   dstSize.z);
+    glUniform3f(3, dstSize.x, dstSize.y, dstSize.z);
     glDispatchCompute(dstSize.x, dstSize.y, dstSize.z);
 
     glActiveTexture(GL_TEXTURE0);
@@ -169,21 +171,20 @@ void OCRA::TextureBlitter::Blit(
     const size_t a_BlitsCount, const ImageBlit* a_Blits,
     const Filter& a_Filter) const
 {
-    auto& srcTarget = a_SrcImage->target;
-    auto& srcHandle = a_SrcImage->handle;
-    auto& dstTarget = a_DstImage->target;
-    auto& dstHandle = a_DstImage->handle;
-    auto& target = srcTarget;
+    auto& srcTarget   = a_SrcImage->target;
+    auto& srcHandle   = a_SrcImage->handle;
+    auto& dstTarget   = a_DstImage->target;
+    auto& dstHandle   = a_DstImage->handle;
+    auto& target      = srcTarget;
     const auto filter = a_Filter == Filter::Linear ? GL_LINEAR : GL_NEAREST;
     OCRA_ASSERT(srcTarget == dstTarget && "Textures must be of the same type to be blitted");
-    for (auto blitPtr = a_Blits; blitPtr != a_Blits + a_BlitsCount; ++blitPtr)
-    {
+    for (auto blitPtr = a_Blits; blitPtr != a_Blits + a_BlitsCount; ++blitPtr) {
         auto& blit = *blitPtr;
         if (target == GL_TEXTURE_3D) {
             Blit3D(a_SrcImage, a_DstImage, blit, a_Filter);
             continue;
         }
-        //TODO use correct attachment in accordance to subresource Aspect
+        // TODO use correct attachment in accordance to subresource Aspect
         if (target == GL_TEXTURE_1D) {
             glNamedFramebufferTexture1DEXT(
                 frameBuffers.at(0), GL_COLOR_ATTACHMENT0,
@@ -193,8 +194,7 @@ void OCRA::TextureBlitter::Blit(
                 frameBuffers.at(0), GL_COLOR_ATTACHMENT0,
                 target, dstHandle,
                 blit.dstSubresource.mipLevel);
-        }
-        else if (target == GL_TEXTURE_2D) {
+        } else if (target == GL_TEXTURE_2D) {
             glNamedFramebufferTexture2DEXT(
                 frameBuffers.at(0), GL_COLOR_ATTACHMENT0,
                 target, srcHandle,

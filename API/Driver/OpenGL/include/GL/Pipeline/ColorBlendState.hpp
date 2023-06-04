@@ -1,23 +1,24 @@
 /*
-* @Author: gpinchon
-* @Date:   2021-09-26 00:00:00
-* @Last Modified by:   gpinchon
-* @Last Modified time: 2021-09-27 22:56:42
-*/
+ * @Author: gpinchon
+ * @Date:   2021-09-26 00:00:00
+ * @Last Modified by:   gpinchon
+ * @Last Modified time: 2021-09-27 22:56:42
+ */
 #pragma once
 
 #include <OCRA/Core.hpp>
 
 #include <GL/Enums.hpp>
-#include <GL/Structs.hpp>
 #include <GL/ExecutionState.hpp>
+#include <GL/Structs.hpp>
 
 #include <GL/glew.h>
 
 #include <vector>
 
 namespace OCRA::Pipeline {
-static inline auto CompileAttachments(const PipelineColorBlendState& a_Info) {
+static inline auto CompileAttachments(const PipelineColorBlendState& a_Info)
+{
     std::vector<GLAttachmentState> attachments;
     attachments.reserve(a_Info.attachments.size());
     for (uint8_t index = 0; index < a_Info.attachments.size(); ++index)
@@ -31,8 +32,10 @@ struct CompileColorBlendState {
         , dynamicBlendConstants(a_DynamicState.Contains(DynamicState::BlendConstants))
         , blendConstants(a_Info.blendConstants)
         , attachments(CompileAttachments(a_Info))
-    {}
-    void operator()(Command::Buffer::ExecutionState& a_ExecutionState) const {
+    {
+    }
+    void operator()(Command::Buffer::ExecutionState& a_ExecutionState) const
+    {
         logicOpEnable ? glEnable(GL_COLOR_LOGIC_OP) : glDisable(GL_COLOR_LOGIC_OP);
         glLogicOp(logicOp);
         if (dynamicBlendConstants)
@@ -41,13 +44,13 @@ struct CompileColorBlendState {
                 a_ExecutionState.dynamicStates.blendConstants.g,
                 a_ExecutionState.dynamicStates.blendConstants.b,
                 a_ExecutionState.dynamicStates.blendConstants.a);
-        else glBlendColor(
-            blendConstants.r,
-            blendConstants.g,
-            blendConstants.b,
-            blendConstants.a);
-        for (const auto& attachment : attachments)
-        {
+        else
+            glBlendColor(
+                blendConstants.r,
+                blendConstants.g,
+                blendConstants.b,
+                blendConstants.a);
+        for (const auto& attachment : attachments) {
             attachment.enable ? glEnablei(GL_BLEND, attachment.index) : glDisablei(GL_BLEND, attachment.index);
             glBlendFuncSeparatei(
                 attachment.index,

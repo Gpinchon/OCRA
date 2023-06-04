@@ -2,16 +2,17 @@
 //  Command buffer commands
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <GL/Common/Assert.hpp>
 #include <GL/CommandBuffer.hpp>
+#include <GL/Common/Assert.hpp>
 
-namespace OCRA::Command
-{
+namespace OCRA::Command {
 struct ExecuteCommandBufferCommand : CommandI {
     ExecuteCommandBufferCommand(const Command::Buffer::Handle& a_CommandBuffer)
         : commandBuffer(a_CommandBuffer)
-    {}
-    virtual void operator()(Buffer::ExecutionState& a_ExecutionState) {
+    {
+    }
+    virtual void operator()(Buffer::ExecutionState& a_ExecutionState)
+    {
         commandBuffer->ExecuteSecondary(a_ExecutionState);
     }
     Command::Buffer::Handle commandBuffer;
@@ -32,7 +33,8 @@ struct PushConstantCommand : CommandI {
         OCRA_ASSERT(size < 256);
         std::copy(a_Data, a_Data + size, data.data());
     }
-    virtual void operator()(Buffer::ExecutionState&) {
+    virtual void operator()(Buffer::ExecutionState&)
+    {
         pushConstants.Update(offset, size, data.data());
     }
     OCRA::PushConstants& pushConstants;

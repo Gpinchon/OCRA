@@ -1,13 +1,13 @@
 /*
-* @Author: gpinchon
-* @Date:   2021-09-26 00:00:00
-* @Last Modified by:   gpinchon
-* @Last Modified time: 2021-09-26 15:03:53
-*/
+ * @Author: gpinchon
+ * @Date:   2021-09-26 00:00:00
+ * @Last Modified by:   gpinchon
+ * @Last Modified time: 2021-09-26 15:03:53
+ */
 #include <OCRA/Core.hpp>
 
-#include <GL/ExecutionState.hpp>
 #include <GL/Common/Assert.hpp>
+#include <GL/ExecutionState.hpp>
 #include <GL/Pipeline.hpp>
 #include <GL/Pipeline/ColorBlendState.hpp>
 #include <GL/Pipeline/DepthStencilState.hpp>
@@ -16,22 +16,22 @@
 #include <GL/Pipeline/RasterizationState.hpp>
 #include <GL/Pipeline/ShaderPipelineState.hpp>
 #include <GL/Pipeline/TessellationState.hpp>
-#include <GL/Pipeline/ViewPortState.hpp>
 #include <GL/Pipeline/VertexInputState.hpp>
+#include <GL/Pipeline/ViewPortState.hpp>
 
 namespace OCRA::Pipeline::Graphics {
 struct Impl : Pipeline::Impl {
     Impl::Impl(const Device::Handle& a_Device, const CreatePipelineGraphicsInfo& a_Info);
     virtual void Impl::Apply(Command::Buffer::ExecutionState& a_ExecutionState) const override;
-    const CompileColorBlendState      colorBlendState;
-    const CompileDepthStencilState    depthStencilState;
-    const CompileInputAssemblyState   inputAssemblyState;
-    const CompileMultisampleState     multisampleState;
-    const CompileRasterizationState   rasterizationState;
-    const CompileShaderPipelineState  shaderPipelineState;
-    const CompileTessellationState    tessellationState;
-    const CompileViewPortState        viewportState;
-    const CompileVertexInputState     vertexInputState;
+    const CompileColorBlendState colorBlendState;
+    const CompileDepthStencilState depthStencilState;
+    const CompileInputAssemblyState inputAssemblyState;
+    const CompileMultisampleState multisampleState;
+    const CompileRasterizationState rasterizationState;
+    const CompileShaderPipelineState shaderPipelineState;
+    const CompileTessellationState tessellationState;
+    const CompileViewPortState viewportState;
+    const CompileVertexInputState vertexInputState;
 };
 
 Impl::Impl(const Device::Handle& a_Device, const CreatePipelineGraphicsInfo& a_Info)
@@ -45,12 +45,15 @@ Impl::Impl(const Device::Handle& a_Device, const CreatePipelineGraphicsInfo& a_I
     , tessellationState(a_Device, a_Info.tessellationState, a_Info.dynamicState)
     , viewportState(a_Device, a_Info.viewPortState, a_Info.dynamicState)
     , vertexInputState(a_Device, a_Info.vertexInputState, a_Info.dynamicState)
-{}
+{
+}
 
-void Impl::Apply(Command::Buffer::ExecutionState& a_ExecutionState) const {
+void Impl::Apply(Command::Buffer::ExecutionState& a_ExecutionState) const
+{
     const auto& lastPipeline = std::static_pointer_cast<Impl>(a_ExecutionState.lastPipelineState.at(size_t(PipelineBindingPoint::Graphics)).pipeline);
-    if (lastPipeline.get() == this) return; //we did not change states set
-    if (lastPipeline == nullptr) { //first graphics pipeline on this command buffer, just apply the states
+    if (lastPipeline.get() == this)
+        return; // we did not change states set
+    if (lastPipeline == nullptr) { // first graphics pipeline on this command buffer, just apply the states
         colorBlendState(a_ExecutionState);
         depthStencilState(a_ExecutionState);
         inputAssemblyState(a_ExecutionState);
@@ -60,8 +63,7 @@ void Impl::Apply(Command::Buffer::ExecutionState& a_ExecutionState) const {
         tessellationState(a_ExecutionState);
         viewportState(a_ExecutionState);
         vertexInputState(a_ExecutionState);
-    }
-    else {
+    } else {
         if (std::memcmp(&lastPipeline->colorBlendState, &colorBlendState, sizeof(colorBlendState)) != 0)
             colorBlendState(a_ExecutionState);
         if (std::memcmp(&lastPipeline->depthStencilState, &depthStencilState, sizeof(depthStencilState)) != 0)
@@ -84,9 +86,9 @@ void Impl::Apply(Command::Buffer::ExecutionState& a_ExecutionState) const {
 }
 }
 
-namespace OCRA::Device
+namespace OCRA::Device {
+Pipeline::Handle CreatePipelineGraphics(const Device::Handle& a_Device, const CreatePipelineGraphicsInfo& a_Info)
 {
-Pipeline::Handle CreatePipelineGraphics(const Device::Handle& a_Device, const CreatePipelineGraphicsInfo& a_Info) {
     return std::make_shared<Pipeline::Graphics::Impl>(a_Device, a_Info);
 }
 }

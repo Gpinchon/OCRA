@@ -7,11 +7,10 @@
 
 #include <vulkan/vulkan.hpp>
 
-namespace OCRA
+namespace OCRA {
+static inline auto ConvertFromVk(const vk::ColorSpaceKHR& a_ColorSpace)
 {
-static inline auto ConvertFromVk(const vk::ColorSpaceKHR& a_ColorSpace) {
-    switch (a_ColorSpace)
-    {
+    switch (a_ColorSpace) {
     case vk::ColorSpaceKHR::eExtendedSrgbLinearEXT:
         return ColorSpace::Linear;
     case vk::ColorSpaceKHR::eSrgbNonlinear:
@@ -21,9 +20,9 @@ static inline auto ConvertFromVk(const vk::ColorSpaceKHR& a_ColorSpace) {
     }
     return ColorSpace::MaxValue;
 }
-static inline auto ConvertFromVk(const vk::Format& a_Format) {
-    switch (a_Format)
-    {
+static inline auto ConvertFromVk(const vk::Format& a_Format)
+{
+    switch (a_Format) {
     case vk::Format::eR8Unorm:
         return Format::Uint8_Normalized_R;
     case vk::Format::eR8G8Unorm:
@@ -151,8 +150,7 @@ static inline auto ConvertFromVk(const vk::Format& a_Format) {
 }
 static inline auto ConvertFromVk(const vk::PhysicalDeviceType& a_Type)
 {
-    switch (a_Type)
-    {
+    switch (a_Type) {
     case vk::PhysicalDeviceType::eOther:
         return PhysicalDeviceType::Other;
     case vk::PhysicalDeviceType::eIntegratedGpu:
@@ -167,9 +165,9 @@ static inline auto ConvertFromVk(const vk::PhysicalDeviceType& a_Type)
     return PhysicalDeviceType::MaxValue;
 }
 
-static inline auto ConvertToVk(const BlendFactor& a_BlendFactor) {
-    switch (a_BlendFactor)
-    {
+static inline auto ConvertToVk(const BlendFactor& a_BlendFactor)
+{
+    switch (a_BlendFactor) {
     case BlendFactor::Zero:
         return vk::BlendFactor::eZero;
     case BlendFactor::One:
@@ -211,9 +209,9 @@ static inline auto ConvertToVk(const BlendFactor& a_BlendFactor) {
     }
     return vk::BlendFactor(-1);
 }
-static inline auto ConvertToVk(const BlendOp& a_BlendOp) {
-    switch (a_BlendOp)
-    {
+static inline auto ConvertToVk(const BlendOp& a_BlendOp)
+{
+    switch (a_BlendOp) {
     case BlendOp::Add:
         return vk::BlendOp::eAdd;
     case BlendOp::Subtract:
@@ -227,9 +225,9 @@ static inline auto ConvertToVk(const BlendOp& a_BlendOp) {
     }
     return vk::BlendOp(-1);
 }
-static inline auto ConvertToVk(const CompareOp& a_Op) {
-    switch (a_Op)
-    {
+static inline auto ConvertToVk(const CompareOp& a_Op)
+{
+    switch (a_Op) {
     case CompareOp::Never:
         return vk::CompareOp::eNever;
     case CompareOp::Less:
@@ -249,9 +247,9 @@ static inline auto ConvertToVk(const CompareOp& a_Op) {
     }
     return vk::CompareOp(-1);
 }
-static inline auto ConvertToVk(const CullMode& a_Mode) {
-    switch (a_Mode)
-    {
+static inline auto ConvertToVk(const CullMode& a_Mode)
+{
+    switch (a_Mode) {
     case CullMode::None:
         return vk::CullModeFlagBits::eNone;
     case CullMode::Front:
@@ -261,11 +259,11 @@ static inline auto ConvertToVk(const CullMode& a_Mode) {
     case CullMode::FrontAndBack:
         return vk::CullModeFlagBits::eFrontAndBack;
     }
-    return vk::CullModeFlagBits{};
+    return vk::CullModeFlagBits {};
 }
-static inline auto ConvertToVk(const DynamicState& a_State) {
-    switch (a_State)
-    {
+static inline auto ConvertToVk(const DynamicState& a_State)
+{
+    switch (a_State) {
     case DynamicState::Viewport:
         return vk::DynamicState::eViewport;
     case DynamicState::Scissor:
@@ -319,9 +317,9 @@ static inline auto ConvertToVk(const DynamicState& a_State) {
     }
     return vk::DynamicState(-1);
 }
-static inline auto ConvertToVk(const Filter& a_Filter) {
-    switch (a_Filter)
-    {
+static inline auto ConvertToVk(const Filter& a_Filter)
+{
+    switch (a_Filter) {
     case Filter::Nearest:
         return vk::Filter::eNearest;
     case Filter::Linear:
@@ -329,9 +327,9 @@ static inline auto ConvertToVk(const Filter& a_Filter) {
     }
     return vk::Filter(-1);
 }
-static inline auto ConvertToVk(const LoadOp& a_LoadOp) {
-    switch (a_LoadOp)
-    {
+static inline auto ConvertToVk(const LoadOp& a_LoadOp)
+{
+    switch (a_LoadOp) {
     case LoadOp::DontCare:
         return vk::AttachmentLoadOp::eDontCare;
     case LoadOp::Load:
@@ -341,9 +339,9 @@ static inline auto ConvertToVk(const LoadOp& a_LoadOp) {
     }
     return vk::AttachmentLoadOp(-1);
 }
-static inline auto ConvertToVk(const LogicOp& a_Op) {
-    switch (a_Op)
-    {
+static inline auto ConvertToVk(const LogicOp& a_Op)
+{
+    switch (a_Op) {
     case LogicOp::Clear:
         return vk::LogicOp::eClear;
     case LogicOp::And:
@@ -379,9 +377,9 @@ static inline auto ConvertToVk(const LogicOp& a_Op) {
     }
     return vk::LogicOp(-1);
 }
-static inline auto ConvertToVk(const StoreOp& a_StoreOp) {
-    switch (a_StoreOp)
-    {
+static inline auto ConvertToVk(const StoreOp& a_StoreOp)
+{
+    switch (a_StoreOp) {
     case StoreOp::DontCare:
         return vk::AttachmentStoreOp::eDontCare;
     case StoreOp::Store:
@@ -389,9 +387,9 @@ static inline auto ConvertToVk(const StoreOp& a_StoreOp) {
     }
     return vk::AttachmentStoreOp(-1);
 }
-static inline auto ConvertToVk(const DescriptorType& a_Type) {
-    switch (a_Type)
-    {
+static inline auto ConvertToVk(const DescriptorType& a_Type)
+{
+    switch (a_Type) {
     case DescriptorType::SampledImage:
         return vk::DescriptorType::eSampledImage;
     case DescriptorType::ImageSampler:
@@ -421,9 +419,9 @@ static inline auto ConvertToVk(const DescriptorType& a_Type) {
     }
     return vk::DescriptorType(-1);
 }
-static inline auto ConvertToVk(const ColorSpace& a_ColorSpace) {
-    switch (a_ColorSpace)
-    {
+static inline auto ConvertToVk(const ColorSpace& a_ColorSpace)
+{
+    switch (a_ColorSpace) {
     case ColorSpace::Linear:
         return vk::ColorSpaceKHR::eExtendedSrgbLinearEXT;
     case ColorSpace::sRGB:
@@ -433,9 +431,9 @@ static inline auto ConvertToVk(const ColorSpace& a_ColorSpace) {
     }
     return vk::ColorSpaceKHR(-1);
 }
-static inline auto ConvertToVk(const CommandBufferLevel& a_Level) {
-    switch (a_Level)
-    {
+static inline auto ConvertToVk(const CommandBufferLevel& a_Level)
+{
+    switch (a_Level) {
     case CommandBufferLevel::Primary:
         return vk::CommandBufferLevel::ePrimary;
     case CommandBufferLevel::Secondary:
@@ -443,9 +441,9 @@ static inline auto ConvertToVk(const CommandBufferLevel& a_Level) {
     }
     return vk::CommandBufferLevel(-1);
 }
-static inline auto ConvertToVk(const Swizzle& a_Swizzle) {
-    switch (a_Swizzle)
-    {
+static inline auto ConvertToVk(const Swizzle& a_Swizzle)
+{
+    switch (a_Swizzle) {
     case Swizzle::Identity:
         return vk::ComponentSwizzle::eIdentity;
     case Swizzle::Zero:
@@ -463,9 +461,9 @@ static inline auto ConvertToVk(const Swizzle& a_Swizzle) {
     }
     return vk::ComponentSwizzle(-1);
 }
-static inline auto ConvertToVk(const FrontFace& a_Face) {
-    switch (a_Face)
-    {
+static inline auto ConvertToVk(const FrontFace& a_Face)
+{
+    switch (a_Face) {
     case FrontFace::Clockwise:
         return vk::FrontFace::eClockwise;
     case FrontFace::CounterClockwise:
@@ -473,9 +471,9 @@ static inline auto ConvertToVk(const FrontFace& a_Face) {
     }
     return vk::FrontFace(-1);
 }
-static inline auto ConvertToVk(const Format& a_Format) {
-    switch (a_Format)
-    {
+static inline auto ConvertToVk(const Format& a_Format)
+{
+    switch (a_Format) {
     case Format::Unknown:
         return vk::Format::eUndefined;
     case Format::Uint8_Normalized_R:
@@ -599,9 +597,9 @@ static inline auto ConvertToVk(const Format& a_Format) {
     }
     return vk::Format(-1);
 }
-static inline auto ConvertToVk(const ImageLayout& a_Layout) {
-    switch (a_Layout)
-    {
+static inline auto ConvertToVk(const ImageLayout& a_Layout)
+{
+    switch (a_Layout) {
     case ImageLayout::Undefined:
         return vk::ImageLayout::eUndefined;
     case ImageLayout::General:
@@ -641,9 +639,9 @@ static inline auto ConvertToVk(const ImageLayout& a_Layout) {
     }
     return vk::ImageLayout(-1);
 }
-static inline auto ConvertToVk(const ImageType& a_Type) {
-    switch (a_Type)
-    {
+static inline auto ConvertToVk(const ImageType& a_Type)
+{
+    switch (a_Type) {
     case ImageType::Image1D:
         return vk::ImageType::e1D;
     case ImageType::Image2D:
@@ -653,9 +651,9 @@ static inline auto ConvertToVk(const ImageType& a_Type) {
     }
     return vk::ImageType(-1);
 }
-static inline auto ConvertToVk(const ImageViewType& a_Type) {
-    switch (a_Type)
-    {
+static inline auto ConvertToVk(const ImageViewType& a_Type)
+{
+    switch (a_Type) {
     case ImageViewType::View1D:
         return vk::ImageViewType::e1D;
     case ImageViewType::View2D:
@@ -665,9 +663,9 @@ static inline auto ConvertToVk(const ImageViewType& a_Type) {
     }
     return vk::ImageViewType(-1);
 }
-static inline auto ConvertToVk(const PolygonMode& a_Mode) {
-    switch (a_Mode)
-    {
+static inline auto ConvertToVk(const PolygonMode& a_Mode)
+{
+    switch (a_Mode) {
     case PolygonMode::Fill:
         return vk::PolygonMode::eFill;
     case PolygonMode::Line:
@@ -679,8 +677,7 @@ static inline auto ConvertToVk(const PolygonMode& a_Mode) {
 }
 static inline auto ConvertToVk(const PipelineBindingPoint& a_BindingPoint)
 {
-    switch (a_BindingPoint)
-    {
+    switch (a_BindingPoint) {
     case PipelineBindingPoint::Graphics:
         return vk::PipelineBindPoint::eGraphics;
     case PipelineBindingPoint::Compute:
@@ -692,8 +689,7 @@ static inline auto ConvertToVk(const PipelineBindingPoint& a_BindingPoint)
 }
 static inline auto ConvertToVk(const PrimitiveTopology& a_Topology)
 {
-    switch (a_Topology)
-    {
+    switch (a_Topology) {
     case PrimitiveTopology::PointList:
         return vk::PrimitiveTopology::ePointList;
     case PrimitiveTopology::LineList:
@@ -719,9 +715,9 @@ static inline auto ConvertToVk(const PrimitiveTopology& a_Topology)
     }
     return vk::PrimitiveTopology(-1);
 }
-static inline auto ConvertToVk(const SampleCount& a_Count) {
-    switch (a_Count)
-    {
+static inline auto ConvertToVk(const SampleCount& a_Count)
+{
+    switch (a_Count) {
     case SampleCount::Count1:
         return vk::SampleCountFlagBits::e1;
     case SampleCount::Count2:
@@ -739,9 +735,9 @@ static inline auto ConvertToVk(const SampleCount& a_Count) {
     }
     return vk::SampleCountFlagBits(-1);
 }
-static inline auto ConvertToVk(const SamplerAddressMode& a_Mode) {
-    switch (a_Mode)
-    {
+static inline auto ConvertToVk(const SamplerAddressMode& a_Mode)
+{
+    switch (a_Mode) {
     case SamplerAddressMode::Repeat:
         return vk::SamplerAddressMode::eRepeat;
     case SamplerAddressMode::MirroredRepeat:
@@ -753,19 +749,19 @@ static inline auto ConvertToVk(const SamplerAddressMode& a_Mode) {
     }
     return vk::SamplerAddressMode(-1);
 }
-static inline auto ConvertToVk(const SharingMode& a_SharingMode) {
-    switch (a_SharingMode)
-    {
-    case SharingMode::Exclusive :
+static inline auto ConvertToVk(const SharingMode& a_SharingMode)
+{
+    switch (a_SharingMode) {
+    case SharingMode::Exclusive:
         return vk::SharingMode::eExclusive;
-    case SharingMode::Concurrent :
+    case SharingMode::Concurrent:
         return vk::SharingMode::eConcurrent;
     }
     return vk::SharingMode(-1);
 }
-static inline auto ConvertToVk(const StencilOp& a_Op) {
-    switch (a_Op)
-    {
+static inline auto ConvertToVk(const StencilOp& a_Op)
+{
+    switch (a_Op) {
     case StencilOp::Keep:
         return vk::StencilOp::eKeep;
     case StencilOp::Zero:
@@ -785,9 +781,9 @@ static inline auto ConvertToVk(const StencilOp& a_Op) {
     }
     return vk::StencilOp(-1);
 }
-static inline auto ConvertToVk(const VertexInputRate& a_InputRate) {
-    switch (a_InputRate)
-    {
+static inline auto ConvertToVk(const VertexInputRate& a_InputRate)
+{
+    switch (a_InputRate) {
     case VertexInputRate::Vertex:
         return vk::VertexInputRate::eVertex;
     case VertexInputRate::Instance:

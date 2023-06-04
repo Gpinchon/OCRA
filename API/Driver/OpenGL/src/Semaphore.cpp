@@ -5,8 +5,7 @@
 
 #include <stdexcept>
 
-namespace OCRA::Device
-{
+namespace OCRA::Device {
 Semaphore::Handle CreateSemaphore(
     const Device::Handle& a_Device,
     const CreateSemaphoreInfo& a_Info,
@@ -52,11 +51,12 @@ bool Wait(
     const std::vector<uint64_t>& a_Values,
     const std::chrono::nanoseconds& a_TimeoutNS)
 {
-    std::chrono::nanoseconds timeout = a_TimeoutNS; //make a copy to edit it
-    const auto waitStart = std::chrono::system_clock::now();
+    std::chrono::nanoseconds timeout = a_TimeoutNS; // make a copy to edit it
+    const auto waitStart             = std::chrono::system_clock::now();
     for (auto i = 0u; i < a_Semaphores.size(); ++i) {
         const auto waitResult = Wait(a_Device, a_Semaphores.at(i), a_Values.at(i), timeout);
-        if (!waitResult) return false;
+        if (!waitResult)
+            return false;
         const auto waitDuration = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - waitStart);
         timeout -= waitDuration;
     }

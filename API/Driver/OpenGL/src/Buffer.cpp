@@ -3,8 +3,7 @@
 #include <GL/Buffer.hpp>
 #include <GL/Device.hpp>
 
-namespace OCRA::Device
-{
+namespace OCRA::Device {
 Buffer::Handle CreateBuffer(
     const Device::Handle& a_Device,
     const CreateBufferInfo& a_Info,
@@ -18,23 +17,22 @@ Buffer::Handle AllocateBuffer(
     const AllocationCallback* a_Allocator)
 {
     CreateBufferInfo bufferInfo;
-    bufferInfo.flags = a_Info.bufferFlags;
-    bufferInfo.usage = a_Info.bufferUsage;
-    bufferInfo.size  = a_Info.size;
-    bufferInfo.sharingMode = a_Info.sharingMode;
+    bufferInfo.flags              = a_Info.bufferFlags;
+    bufferInfo.usage              = a_Info.bufferUsage;
+    bufferInfo.size               = a_Info.size;
+    bufferInfo.sharingMode        = a_Info.sharingMode;
     bufferInfo.queueFamilyIndices = a_Info.queueFamilyIndices;
-    auto buffer = CreateBuffer(a_Device, bufferInfo, a_Allocator);
+    auto buffer                   = CreateBuffer(a_Device, bufferInfo, a_Allocator);
     AllocateMemoryInfo memoryInfo;
-    memoryInfo.size = a_Info.size;
+    memoryInfo.size            = a_Info.size;
     memoryInfo.memoryTypeIndex = PhysicalDevice::FindMemoryType(a_Device->physicalDevice.lock(), a_Info.memoryFlags);
-    auto memory = AllocateMemory(a_Device, memoryInfo);
+    auto memory                = AllocateMemory(a_Device, memoryInfo);
     Buffer::BindMemory(buffer, memory, 0);
     return buffer;
 }
 }
 
-namespace OCRA::Buffer
-{
+namespace OCRA::Buffer {
 void BindMemory(const Handle& a_Buffer, const Memory::Handle& a_Memory, const size_t& a_MemoryOffset)
 {
     a_Buffer->memoryBinding.memory = a_Memory;

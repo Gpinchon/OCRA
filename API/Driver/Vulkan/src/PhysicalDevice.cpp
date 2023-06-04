@@ -6,11 +6,10 @@
 #include <VK/Instance.hpp>
 #include <VK/PhysicalDevice.hpp>
 
-namespace OCRA::PhysicalDevice
-{
+namespace OCRA::PhysicalDevice {
 static inline auto GetLimits(const vk::PhysicalDeviceLimits& a_vkLimits)
 {
-    PhysicalDeviceLimits limits{};
+    PhysicalDeviceLimits limits {};
     memset(&limits, 0, sizeof(limits));
     limits.maxImageDimension1D    = a_vkLimits.maxImageDimension1D;
     limits.maxImageDimension2D    = a_vkLimits.maxImageDimension2D;
@@ -107,53 +106,54 @@ static inline auto GetLimits(const vk::PhysicalDeviceLimits& a_vkLimits)
     limits.minInterpolationOffset          = a_vkLimits.minInterpolationOffset;
     limits.maxInterpolationOffset          = a_vkLimits.maxInterpolationOffset;
     limits.subPixelInterpolationOffsetBits = a_vkLimits.subPixelInterpolationOffsetBits;
-    
+
     limits.maxFramebufferWidth  = a_vkLimits.maxFramebufferWidth;
     limits.maxFramebufferHeight = a_vkLimits.maxFramebufferHeight;
     limits.maxFramebufferLayers = a_vkLimits.maxFramebufferLayers;
-    limits.maxColorAttachments = a_vkLimits.maxColorAttachments;
-    //limits.framebufferColorSampleCounts   = OCRA::SampleCount(a_vkLimits.framebufferColorSampleCounts + 1);
-    //limits.framebufferDepthSampleCounts   = OCRA::SampleCount(a_vkLimits.framebufferDepthSampleCounts + 1);
-    //limits.framebufferStencilSampleCounts = OCRA::SampleCount(a_vkLimits.framebufferStencilSampleCounts + 1);
-    //limits.framebufferNoAttachmentsSampleCounts = OCRA::SampleCount(a_vkLimits.framebufferNoAttachmentsSampleCounts + 1);
+    limits.maxColorAttachments  = a_vkLimits.maxColorAttachments;
+    // limits.framebufferColorSampleCounts   = OCRA::SampleCount(a_vkLimits.framebufferColorSampleCounts + 1);
+    // limits.framebufferDepthSampleCounts   = OCRA::SampleCount(a_vkLimits.framebufferDepthSampleCounts + 1);
+    // limits.framebufferStencilSampleCounts = OCRA::SampleCount(a_vkLimits.framebufferStencilSampleCounts + 1);
+    // limits.framebufferNoAttachmentsSampleCounts = OCRA::SampleCount(a_vkLimits.framebufferNoAttachmentsSampleCounts + 1);
     //
-    //limits.sampledImageColorSampleCounts   = OCRA::SampleCount(a_vkLimits.sampledImageColorSampleCounts + 1);
-    //limits.sampledImageIntegerSampleCounts = OCRA::SampleCount(a_vkLimits.sampledImageIntegerSampleCounts + 1);
-    //limits.sampledImageDepthSampleCounts   = OCRA::SampleCount(a_vkLimits.sampledImageDepthSampleCounts + 1);
-    //limits.sampledImageStencilSampleCounts = OCRA::SampleCount(a_vkLimits.sampledImageStencilSampleCounts + 1);
-    //limits.storageImageSampleCounts        = OCRA::SampleCount(a_vkLimits.storageImageSampleCounts + 1);
+    // limits.sampledImageColorSampleCounts   = OCRA::SampleCount(a_vkLimits.sampledImageColorSampleCounts + 1);
+    // limits.sampledImageIntegerSampleCounts = OCRA::SampleCount(a_vkLimits.sampledImageIntegerSampleCounts + 1);
+    // limits.sampledImageDepthSampleCounts   = OCRA::SampleCount(a_vkLimits.sampledImageDepthSampleCounts + 1);
+    // limits.sampledImageStencilSampleCounts = OCRA::SampleCount(a_vkLimits.sampledImageStencilSampleCounts + 1);
+    // limits.storageImageSampleCounts        = OCRA::SampleCount(a_vkLimits.storageImageSampleCounts + 1);
     limits.maxSampleMaskWords = a_vkLimits.maxSampleMaskWords;
 
     limits.timestampComputeAndGraphics = a_vkLimits.timestampComputeAndGraphics;
-    limits.timestampPeriod = a_vkLimits.timestampPeriod;
+    limits.timestampPeriod             = a_vkLimits.timestampPeriod;
 
-    limits.maxClipDistances = a_vkLimits.maxClipDistances;
-    limits.maxCullDistances = a_vkLimits.maxCullDistances;
+    limits.maxClipDistances                = a_vkLimits.maxClipDistances;
+    limits.maxCullDistances                = a_vkLimits.maxCullDistances;
     limits.maxCombinedClipAndCullDistances = a_vkLimits.maxCombinedClipAndCullDistances;
 
     limits.discreteQueuePriorities = a_vkLimits.discreteQueuePriorities;
-    limits.pointSizeRange[0] = a_vkLimits.pointSizeRange[0];
-    limits.pointSizeRange[1] = a_vkLimits.pointSizeRange[1];
-    limits.lineWidthRange[0] = a_vkLimits.lineWidthRange[0];
-    limits.lineWidthRange[1] = a_vkLimits.lineWidthRange[1];
-    limits.pointSizeGranularity = a_vkLimits.pointSizeGranularity;
-    limits.lineWidthGranularity = a_vkLimits.lineWidthGranularity;
-    limits.strictLines = a_vkLimits.strictLines;
+    limits.pointSizeRange[0]       = a_vkLimits.pointSizeRange[0];
+    limits.pointSizeRange[1]       = a_vkLimits.pointSizeRange[1];
+    limits.lineWidthRange[0]       = a_vkLimits.lineWidthRange[0];
+    limits.lineWidthRange[1]       = a_vkLimits.lineWidthRange[1];
+    limits.pointSizeGranularity    = a_vkLimits.pointSizeGranularity;
+    limits.lineWidthGranularity    = a_vkLimits.lineWidthGranularity;
+    limits.strictLines             = a_vkLimits.strictLines;
 
-    limits.standardSampleLocations = a_vkLimits.standardSampleLocations;
-    limits.optimalBufferCopyOffsetAlignment = a_vkLimits.optimalBufferCopyOffsetAlignment;
+    limits.standardSampleLocations            = a_vkLimits.standardSampleLocations;
+    limits.optimalBufferCopyOffsetAlignment   = a_vkLimits.optimalBufferCopyOffsetAlignment;
     limits.optimalBufferCopyRowPitchAlignment = a_vkLimits.optimalBufferCopyRowPitchAlignment;
-    limits.nonCoherentAtomSize = a_vkLimits.nonCoherentAtomSize;
+    limits.nonCoherentAtomSize                = a_vkLimits.nonCoherentAtomSize;
     return limits;
 }
 
-static inline auto GetSparseProperties(const VkPhysicalDeviceSparseProperties& a_SparseProperties) {
-    PhysicalDeviceSparseProperties sparseProperties{};
-    sparseProperties.residencyAlignedMipSize = a_SparseProperties.residencyAlignedMipSize;
-    sparseProperties.residencyNonResidentStrict = a_SparseProperties.residencyNonResidentStrict;
-    sparseProperties.residencyStandard2DBlockShape = a_SparseProperties.residencyStandard2DBlockShape;
+static inline auto GetSparseProperties(const VkPhysicalDeviceSparseProperties& a_SparseProperties)
+{
+    PhysicalDeviceSparseProperties sparseProperties {};
+    sparseProperties.residencyAlignedMipSize                  = a_SparseProperties.residencyAlignedMipSize;
+    sparseProperties.residencyNonResidentStrict               = a_SparseProperties.residencyNonResidentStrict;
+    sparseProperties.residencyStandard2DBlockShape            = a_SparseProperties.residencyStandard2DBlockShape;
     sparseProperties.residencyStandard2DMultisampleBlockShape = a_SparseProperties.residencyStandard2DMultisampleBlockShape;
-    sparseProperties.residencyStandard3DBlockShape = a_SparseProperties.residencyStandard3DBlockShape;
+    sparseProperties.residencyStandard3DBlockShape            = a_SparseProperties.residencyStandard3DBlockShape;
     return sparseProperties;
 }
 
@@ -164,15 +164,15 @@ const MemoryProperties GetMemoryProperties(const Handle& a_PhysicalDevice)
     memoryProperties.memoryHeaps.resize(p.memoryHeapCount);
     for (auto i = 0u; i < p.memoryHeapCount; ++i) {
         const auto& mh = p.memoryHeaps[i];
-        auto& omh = memoryProperties.memoryHeaps.at(i);
-        omh.size = mh.size;
-        omh.flags = ConvertFromVk(mh.flags);
+        auto& omh      = memoryProperties.memoryHeaps.at(i);
+        omh.size       = mh.size;
+        omh.flags      = ConvertFromVk(mh.flags);
     }
     memoryProperties.memoryTypes.resize(p.memoryTypeCount);
     for (auto i = 0u; i < p.memoryTypeCount; ++i) {
-        const auto& mt = p.memoryTypes[i];
-        auto& omt = memoryProperties.memoryTypes.at(i);
-        omt.heapIndex = mt.heapIndex;
+        const auto& mt    = p.memoryTypes[i];
+        auto& omt         = memoryProperties.memoryTypes.at(i);
+        omt.heapIndex     = mt.heapIndex;
         omt.propertyFlags = ConvertFromVk(mt.propertyFlags);
     }
     return memoryProperties;
@@ -181,10 +181,9 @@ const MemoryProperties GetMemoryProperties(const Handle& a_PhysicalDevice)
 const PhysicalDeviceProperties GetProperties(const Handle& a_PhysicalDevice)
 {
     PhysicalDeviceProperties properties;
-    auto& vkProperties = a_PhysicalDevice->getProperties();
+    auto& vkProperties    = a_PhysicalDevice->getProperties();
     properties.deviceType = ConvertFromVk(vkProperties.deviceType);
-    switch (vkProperties.vendorID)
-    {
+    switch (vkProperties.vendorID) {
     case 0x1002:
         properties.vendorName = "AMD";
         break;
@@ -207,13 +206,13 @@ const PhysicalDeviceProperties GetProperties(const Handle& a_PhysicalDevice)
         break;
     }
     std::copy(vkProperties.pipelineCacheUUID.data(), vkProperties.pipelineCacheUUID + 16, properties.pipelineCacheUUID.data());
-    properties.deviceID = vkProperties.deviceID;
-    properties.vendorID = vkProperties.vendorID;
-    properties.apiVersion = vkProperties.apiVersion;
-    properties.driverVersion = vkProperties.driverVersion;
-    properties.deviceName = vkProperties.deviceName.data();
+    properties.deviceID         = vkProperties.deviceID;
+    properties.vendorID         = vkProperties.vendorID;
+    properties.apiVersion       = vkProperties.apiVersion;
+    properties.driverVersion    = vkProperties.driverVersion;
+    properties.deviceName       = vkProperties.deviceName.data();
     properties.sparseProperties = GetSparseProperties(vkProperties.sparseProperties);
-    properties.limits = GetLimits(vkProperties.limits);
+    properties.limits           = GetLimits(vkProperties.limits);
     return properties;
 }
 
@@ -221,73 +220,73 @@ const PhysicalDeviceFeatures GetFeatures(const Handle& a_PhysicalDevice)
 {
     auto vkFeatures = a_PhysicalDevice->getFeatures();
     PhysicalDeviceFeatures features;
-    features.robustBufferAccess = vkFeatures.robustBufferAccess;
-    features.fullDrawIndexUint32 = vkFeatures.fullDrawIndexUint32;
-    features.imageCubeArray = vkFeatures.imageCubeArray;
-    features.independentBlend = vkFeatures.independentBlend;
-    features.geometryShader = vkFeatures.geometryShader;
-    features.tessellationShader = vkFeatures.tessellationShader;
-    features.sampleRateShading = vkFeatures.sampleRateShading;
-    features.dualSrcBlend = vkFeatures.dualSrcBlend;
-    features.logicOp = vkFeatures.logicOp;
-    features.multiDrawIndirect = vkFeatures.multiDrawIndirect;
-    features.drawIndirectFirstInstance = vkFeatures.drawIndirectFirstInstance;
-    features.depthClamp = vkFeatures.depthClamp;
-    features.depthBiasClamp = vkFeatures.depthBiasClamp;
-    features.fillModeNonSolid = vkFeatures.fillModeNonSolid;
-    features.depthBounds = vkFeatures.depthBounds;
-    features.wideLines = vkFeatures.wideLines;
-    features.largePoints = vkFeatures.largePoints;
-    features.alphaToOne = vkFeatures.alphaToOne;
-    features.multiViewport = vkFeatures.multiViewport;
-    features.samplerAnisotropy = vkFeatures.samplerAnisotropy;
-    features.textureCompressionETC2 = vkFeatures.textureCompressionETC2;
-    features.textureCompressionASTC_LDR = vkFeatures.textureCompressionASTC_LDR;
-    features.textureCompressionBC = vkFeatures.textureCompressionBC;
-    features.occlusionQueryPrecise = vkFeatures.occlusionQueryPrecise;
-    features.pipelineStatisticsQuery = vkFeatures.pipelineStatisticsQuery;
-    features.vertexPipelineStoresAndAtomics = vkFeatures.vertexPipelineStoresAndAtomics;
-    features.fragmentStoresAndAtomics = vkFeatures.fragmentStoresAndAtomics;
-    features.shaderTessellationAndGeometryPointSize = vkFeatures.shaderTessellationAndGeometryPointSize;
-    features.shaderImageGatherExtended = vkFeatures.shaderImageGatherExtended;
-    features.shaderStorageImageExtendedFormats = vkFeatures.shaderStorageImageExtendedFormats;
-    features.shaderStorageImageMultisample = vkFeatures.shaderStorageImageMultisample;
-    features.shaderStorageImageReadWithoutFormat = vkFeatures.shaderStorageImageReadWithoutFormat;
-    features.shaderStorageImageWriteWithoutFormat = vkFeatures.shaderStorageImageWriteWithoutFormat;
+    features.robustBufferAccess                      = vkFeatures.robustBufferAccess;
+    features.fullDrawIndexUint32                     = vkFeatures.fullDrawIndexUint32;
+    features.imageCubeArray                          = vkFeatures.imageCubeArray;
+    features.independentBlend                        = vkFeatures.independentBlend;
+    features.geometryShader                          = vkFeatures.geometryShader;
+    features.tessellationShader                      = vkFeatures.tessellationShader;
+    features.sampleRateShading                       = vkFeatures.sampleRateShading;
+    features.dualSrcBlend                            = vkFeatures.dualSrcBlend;
+    features.logicOp                                 = vkFeatures.logicOp;
+    features.multiDrawIndirect                       = vkFeatures.multiDrawIndirect;
+    features.drawIndirectFirstInstance               = vkFeatures.drawIndirectFirstInstance;
+    features.depthClamp                              = vkFeatures.depthClamp;
+    features.depthBiasClamp                          = vkFeatures.depthBiasClamp;
+    features.fillModeNonSolid                        = vkFeatures.fillModeNonSolid;
+    features.depthBounds                             = vkFeatures.depthBounds;
+    features.wideLines                               = vkFeatures.wideLines;
+    features.largePoints                             = vkFeatures.largePoints;
+    features.alphaToOne                              = vkFeatures.alphaToOne;
+    features.multiViewport                           = vkFeatures.multiViewport;
+    features.samplerAnisotropy                       = vkFeatures.samplerAnisotropy;
+    features.textureCompressionETC2                  = vkFeatures.textureCompressionETC2;
+    features.textureCompressionASTC_LDR              = vkFeatures.textureCompressionASTC_LDR;
+    features.textureCompressionBC                    = vkFeatures.textureCompressionBC;
+    features.occlusionQueryPrecise                   = vkFeatures.occlusionQueryPrecise;
+    features.pipelineStatisticsQuery                 = vkFeatures.pipelineStatisticsQuery;
+    features.vertexPipelineStoresAndAtomics          = vkFeatures.vertexPipelineStoresAndAtomics;
+    features.fragmentStoresAndAtomics                = vkFeatures.fragmentStoresAndAtomics;
+    features.shaderTessellationAndGeometryPointSize  = vkFeatures.shaderTessellationAndGeometryPointSize;
+    features.shaderImageGatherExtended               = vkFeatures.shaderImageGatherExtended;
+    features.shaderStorageImageExtendedFormats       = vkFeatures.shaderStorageImageExtendedFormats;
+    features.shaderStorageImageMultisample           = vkFeatures.shaderStorageImageMultisample;
+    features.shaderStorageImageReadWithoutFormat     = vkFeatures.shaderStorageImageReadWithoutFormat;
+    features.shaderStorageImageWriteWithoutFormat    = vkFeatures.shaderStorageImageWriteWithoutFormat;
     features.shaderUniformBufferArrayDynamicIndexing = vkFeatures.shaderUniformBufferArrayDynamicIndexing;
-    features.shaderSampledImageArrayDynamicIndexing = vkFeatures.shaderSampledImageArrayDynamicIndexing;
+    features.shaderSampledImageArrayDynamicIndexing  = vkFeatures.shaderSampledImageArrayDynamicIndexing;
     features.shaderStorageBufferArrayDynamicIndexing = vkFeatures.shaderStorageBufferArrayDynamicIndexing;
-    features.shaderStorageImageArrayDynamicIndexing = vkFeatures.shaderStorageImageArrayDynamicIndexing;
-    features.shaderClipDistance = vkFeatures.shaderClipDistance;
-    features.shaderCullDistance = vkFeatures.shaderCullDistance;
-    features.shaderFloat64 = vkFeatures.shaderFloat64;
-    features.shaderInt64 = vkFeatures.shaderInt64;
-    features.shaderInt16 = vkFeatures.shaderInt16;
-    features.shaderResourceResidency = vkFeatures.shaderResourceResidency;
-    features.shaderResourceMinLod = vkFeatures.shaderResourceMinLod;
-    features.sparseBinding = vkFeatures.sparseBinding;
-    features.sparseResidencyBuffer = vkFeatures.sparseResidencyBuffer;
-    features.sparseResidencyImage2D = vkFeatures.sparseResidencyImage2D;
-    features.sparseResidencyImage3D = vkFeatures.sparseResidencyImage3D;
-    features.sparseResidency2Samples = vkFeatures.sparseResidency2Samples;
-    features.sparseResidency4Samples = vkFeatures.sparseResidency4Samples;
-    features.sparseResidency8Samples = vkFeatures.sparseResidency8Samples;
-    features.sparseResidency16Samples = vkFeatures.sparseResidency16Samples;
-    features.sparseResidencyAliased = vkFeatures.sparseResidencyAliased;
-    features.variableMultisampleRate = vkFeatures.variableMultisampleRate;
-    features.inheritedQueries = vkFeatures.inheritedQueries;
+    features.shaderStorageImageArrayDynamicIndexing  = vkFeatures.shaderStorageImageArrayDynamicIndexing;
+    features.shaderClipDistance                      = vkFeatures.shaderClipDistance;
+    features.shaderCullDistance                      = vkFeatures.shaderCullDistance;
+    features.shaderFloat64                           = vkFeatures.shaderFloat64;
+    features.shaderInt64                             = vkFeatures.shaderInt64;
+    features.shaderInt16                             = vkFeatures.shaderInt16;
+    features.shaderResourceResidency                 = vkFeatures.shaderResourceResidency;
+    features.shaderResourceMinLod                    = vkFeatures.shaderResourceMinLod;
+    features.sparseBinding                           = vkFeatures.sparseBinding;
+    features.sparseResidencyBuffer                   = vkFeatures.sparseResidencyBuffer;
+    features.sparseResidencyImage2D                  = vkFeatures.sparseResidencyImage2D;
+    features.sparseResidencyImage3D                  = vkFeatures.sparseResidencyImage3D;
+    features.sparseResidency2Samples                 = vkFeatures.sparseResidency2Samples;
+    features.sparseResidency4Samples                 = vkFeatures.sparseResidency4Samples;
+    features.sparseResidency8Samples                 = vkFeatures.sparseResidency8Samples;
+    features.sparseResidency16Samples                = vkFeatures.sparseResidency16Samples;
+    features.sparseResidencyAliased                  = vkFeatures.sparseResidencyAliased;
+    features.variableMultisampleRate                 = vkFeatures.variableMultisampleRate;
+    features.inheritedQueries                        = vkFeatures.inheritedQueries;
     return features;
 }
 
 const std::vector<QueueFamilyProperties> GetQueueFamilyProperties(const Handle& a_PhysicalDevice)
 {
     auto vkQueueProperties = a_PhysicalDevice->getQueueFamilyProperties();
-    std::vector<QueueFamilyProperties>   queueProperties{ vkQueueProperties.size() };
+    std::vector<QueueFamilyProperties> queueProperties { vkQueueProperties.size() };
     for (auto i = 0u; i < queueProperties.size(); ++i) {
-        const auto& qp = vkQueueProperties.at(i);
-        auto& oqp = queueProperties.at(i);
-        oqp.queueCount = qp.queueCount;
-        oqp.timestampValidBits = qp.timestampValidBits;
+        const auto& qp                  = vkQueueProperties.at(i);
+        auto& oqp                       = queueProperties.at(i);
+        oqp.queueCount                  = qp.queueCount;
+        oqp.timestampValidBits          = qp.timestampValidBits;
         oqp.minImageTransferGranularity = OCRA::Extent3D(
             qp.minImageTransferGranularity.width,
             qp.minImageTransferGranularity.height,
@@ -302,24 +301,24 @@ Device::Handle CreateDevice(
     const CreateDeviceInfo& a_Info,
     const AllocationCallback* a_Allocator)
 {
-    const std::vector<const char*> extensions{
+    const std::vector<const char*> extensions {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME,
         VK_KHR_PUSH_DESCRIPTOR_EXTENSION_NAME,
-        //VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME,
-        //VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
+        // VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME,
+        // VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
         VK_EXT_VERTEX_INPUT_DYNAMIC_STATE_EXTENSION_NAME,
         VK_EXT_CUSTOM_BORDER_COLOR_EXTENSION_NAME
     };
     std::vector<vk::DeviceQueueCreateInfo> queues;
-    const std::vector<const char*> layers{};
-    auto transferQueue = a_PhysicalDevice->findQueueFamily(vk::QueueFlagBits::eTransfer);
+    const std::vector<const char*> layers {};
+    auto transferQueue      = a_PhysicalDevice->findQueueFamily(vk::QueueFlagBits::eTransfer);
     bool foundTransferQueue = false;
-    
+
     queues.reserve(a_Info.queueInfos.size());
     for (const auto& queueInfo : a_Info.queueInfos) {
         vk::DeviceQueueCreateInfo vkQueueInfo;
         vkQueueInfo.pQueuePriorities = queueInfo.queuePriorities.data();
-        vkQueueInfo.queueCount = queueInfo.queueCount;
+        vkQueueInfo.queueCount       = queueInfo.queueCount;
         vkQueueInfo.queueFamilyIndex = queueInfo.queueFamilyIndex;
         queues.push_back(vkQueueInfo);
         foundTransferQueue |= queueInfo.queueFamilyIndex == transferQueue;
@@ -330,7 +329,7 @@ Device::Handle CreateDevice(
     vk::PhysicalDeviceDynamicRenderingFeaturesKHR dynamicRenderingFeature(true, &customBorder);
     vk::PhysicalDeviceVertexInputDynamicStateFeaturesEXT dynamicVertexInputFeature(true, &dynamicRenderingFeature);
     vk::DeviceCreateInfo info(
-        vk::DeviceCreateFlags{},
+        vk::DeviceCreateFlags {},
         queues,
         layers,
         extensions,

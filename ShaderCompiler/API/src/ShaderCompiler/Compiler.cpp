@@ -2,9 +2,7 @@
 
 #include <OCRA/ShaderCompiler/Impl/Compiler.hpp>
 
-
-namespace OCRA::ShaderCompiler
-{
+namespace OCRA::ShaderCompiler {
 Handle OCRA::ShaderCompiler::Create()
 {
     return Handle(new Impl);

@@ -1,17 +1,21 @@
 #pragma once
 
-namespace OCRA::ShaderCompiler
-{
+namespace OCRA::ShaderCompiler {
 enum class TargetAPI {
     Unknown = -1,
-    OpenGL, Vulkan, DirectX,
+    OpenGL,
+    Vulkan,
+    DirectX,
     MaxValue
 };
 enum class ShaderType {
     Unknown = -1,
-    Vertex, Geometry, Fragment,
+    Vertex,
+    Geometry,
+    Fragment,
     Compute,
-    TessControl, TessEval,
+    TessControl,
+    TessEval,
     MaxValue
 };
 }

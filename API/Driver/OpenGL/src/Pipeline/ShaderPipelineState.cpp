@@ -21,22 +21,27 @@ CompileShaderPipelineState::CompileShaderPipelineState(
             const auto& shaderStage = shaderStages.back();
             glUseProgramStages(handle, shaderStage.stageBits, shaderStage.handle);
         }
-    }, false);
+    },
+        false);
 }
 CompileShaderPipelineState::CompileShaderPipelineState(const CompileShaderPipelineState& a_Other)
     : device(a_Other.device)
     , info(a_Other.info)
     , handle(std::exchange(a_Other.handle, 0))
-{}
+{
+}
 
 CompileShaderPipelineState::~CompileShaderPipelineState()
 {
-    if (handle == 0) return; //this state set does not own a GL pipeline anymore
+    if (handle == 0)
+        return; // this state set does not own a GL pipeline anymore
     device.lock()->PushCommand([handle = handle] {
         glDeleteProgramPipelines(1, &handle);
-    }, false);
+    },
+        false);
 }
-void CompileShaderPipelineState::operator()(Command::Buffer::ExecutionState& a_ExecutionState) const {
+void CompileShaderPipelineState::operator()(Command::Buffer::ExecutionState& a_ExecutionState) const
+{
     glBindProgramPipeline(handle);
 }
 }

@@ -8,8 +8,7 @@
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Command::Buffer);
 #endif
 
-namespace OCRA::Device
-{
+namespace OCRA::Device {
 Command::Pool::Handle CreateCommandPool(
     const Device::Handle& a_Device,
     const CreateCommandPoolInfo& a_Info,
@@ -19,24 +18,25 @@ Command::Pool::Handle CreateCommandPool(
 }
 }
 
-namespace OCRA::Command::Pool
-{
-struct Impl
-{
+namespace OCRA::Command::Pool {
+struct Impl {
     Impl(const Device::Handle& a_Device, const CreateCommandPoolInfo& a_Info)
         : device(a_Device)
         , allowReset((a_Info.flags & OCRA::CreateCommandPoolFlagBits::Reset) != 0)
-    {}
-    std::pmr::unsynchronized_pool_resource  memoryResource;
+    {
+    }
+    std::pmr::unsynchronized_pool_resource memoryResource;
 
 #ifdef _DEBUG
-    ~Impl() {
-        //If this assert fails, this pool was destroyed before the objects it allocated
-        for (auto& allocated : allocated) assert(allocated.expired());
+    ~Impl()
+    {
+        // If this assert fails, this pool was destroyed before the objects it allocated
+        for (auto& allocated : allocated)
+            assert(allocated.expired());
     }
-    std::pmr::vector<Buffer::WeakHandle>    allocated{ &memoryResource };
+    std::pmr::vector<Buffer::WeakHandle> allocated { &memoryResource };
 #endif
-    const bool         allowReset;
+    const bool allowReset;
     Device::WeakHandle device;
 };
 
@@ -47,7 +47,7 @@ std::vector<Command::Buffer::Handle> AllocateCommandBuffer(
     std::vector<Buffer::Handle> commandBuffers;
     commandBuffers.reserve(a_Info.count);
     auto& memoryResource = a_Pool->memoryResource;
-    auto allocator = std::pmr::polymorphic_allocator<Buffer::Impl>(&memoryResource);
+    auto allocator       = std::pmr::polymorphic_allocator<Buffer::Impl>(&memoryResource);
 #ifdef _DEBUG
     auto& allocated = a_Pool->allocated;
 #endif
@@ -57,7 +57,7 @@ std::vector<Command::Buffer::Handle> AllocateCommandBuffer(
         commandBuffers.push_back(buffer);
 #ifdef _DEBUG
         allocated.push_back(buffer);
-        //cleanup while we're at it
+        // cleanup while we're at it
         allocated.erase(std::remove_if(allocated.begin(), allocated.end(), [](auto& allocated) { return allocated.expired(); }), allocated.end());
 #endif
     }

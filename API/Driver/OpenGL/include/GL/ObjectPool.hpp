@@ -1,9 +1,9 @@
 /*
-* @Author: gpinchon
-* @Date:   2021-09-26 00:00:00
-* @Last Modified by:   gpinchon
-* @Last Modified time: 2021-10-03 22:11:23
-*/
+ * @Author: gpinchon
+ * @Date:   2021-09-26 00:00:00
+ * @Last Modified by:   gpinchon
+ * @Last Modified time: 2021-10-03 22:11:23
+ */
 #pragma once
 
 #include <array>
@@ -36,7 +36,8 @@ struct ObjectPool {
             if (Valid())
                 GetPool()->Unref(index);
         }
-        bool Valid() const {
+        bool Valid() const
+        {
             return !pool.expired() && index >= 0;
         }
         T* Get() const
@@ -53,17 +54,18 @@ struct ObjectPool {
         {
             if (Valid())
                 GetPool()->Unref(index);
-            pool = a_Other.pool;
+            pool  = a_Other.pool;
             index = a_Other.index;
             if (Valid())
                 GetPool()->Ref(index);
             return *this;
         }
-        ObjectPool* GetPool() const {
+        ObjectPool* GetPool() const
+        {
             return *pool.lock();
         }
         std::weak_ptr<ObjectPoolType*> pool;
-        int32_t index{ -1 };
+        int32_t index { -1 };
     };
 
     ObjectPool()
@@ -72,7 +74,8 @@ struct ObjectPool {
         for (auto i = 0u; i < MaxObjects; ++i)
             freeIndices.push(i);
     }
-    inline virtual void ReleaseObject(IndexType a_Index) {
+    inline virtual void ReleaseObject(IndexType a_Index)
+    {
         freeIndices.push(a_Index);
         usedIndices.erase(a_Index);
     }
@@ -90,7 +93,7 @@ struct ObjectPool {
     inline void Unref(IndexType a_Index)
     {
         auto& obj { objectArray.at(a_Index) };
-        auto& refCount{ objectRef.at(a_Index) };
+        auto& refCount { objectRef.at(a_Index) };
         if (refCount > 0)
             --refCount;
         else
@@ -102,10 +105,10 @@ struct ObjectPool {
     {
         return objectArray.at(a_VAOIndex);
     }
-    std::array<uint32_t, MaxObjects> objectRef{ 0 };
+    std::array<uint32_t, MaxObjects> objectRef { 0 };
     std::array<T, MaxObjects> objectArray;
     std::queue<IndexType> freeIndices;
     std::set<IndexType> usedIndices;
-    std::shared_ptr<ObjectPoolType *> controlBlock;
+    std::shared_ptr<ObjectPoolType*> controlBlock;
 };
 }

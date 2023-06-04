@@ -1,7 +1,7 @@
 #include <OCRA/Structs.hpp>
 
-#include <VK/Semaphore.hpp>
 #include <VK/Device.hpp>
+#include <VK/Semaphore.hpp>
 
 #include <chrono>
 
@@ -13,7 +13,7 @@ void Signal(
     auto& semaphore = *a_Semaphore;
     vk::SemaphoreSignalInfo info;
     info.semaphore = *semaphore;
-    info.value = a_Value;
+    info.value     = a_Value;
     semaphore.getDevice().signalSemaphore(info);
 }
 
@@ -34,8 +34,8 @@ bool Wait(
     auto& semaphore = *a_Semaphore;
     vk::SemaphoreWaitInfo info;
     info.semaphoreCount = 1;
-    info.pValues = &a_Value;
-    info.pSemaphores = &*semaphore;
+    info.pValues        = &a_Value;
+    info.pSemaphores    = &*semaphore;
     return semaphore.getDevice().waitSemaphores(info, a_TimeoutNS.count()) == vk::Result::eSuccess;
 }
 
@@ -52,8 +52,8 @@ bool Wait(
     }
     vk::SemaphoreWaitInfo info;
     info.semaphoreCount = a_Semaphores.size();
-    info.pValues = a_Values.data();
-    info.pSemaphores = vkSemaphores.data();
+    info.pValues        = a_Values.data();
+    info.pSemaphores    = vkSemaphores.data();
     return device.waitSemaphores(info, a_TimeoutNS.count()) == vk::Result::eSuccess;
 }
 

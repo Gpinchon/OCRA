@@ -11,7 +11,7 @@
 
 namespace OCRA {
 struct Traverser {
-    PipelineViewPortState viewPort{};
+    PipelineViewPortState viewPort {};
 };
 class Mesh {
 public:
@@ -20,11 +20,11 @@ public:
         const VertexBuffer& a_VertexBuffer,
         const Material& a_Material);
 
-    auto GetDescriptorWrites() const {
+    auto GetDescriptorWrites() const
+    {
         std::vector<DescriptorSetWrite> writes;
         writes.reserve(
-            projectionMatrix.GetWriteOperations().size() +
-            material.GetWriteOperations().size());
+            projectionMatrix.GetWriteOperations().size() + material.GetWriteOperations().size());
         writes.insert(writes.end(),
             projectionMatrix.GetWriteOperations().begin(),
             projectionMatrix.GetWriteOperations().end());
@@ -34,10 +34,12 @@ public:
         return writes;
     }
 
-    auto& GetProjectionMatrix() const {
+    auto& GetProjectionMatrix() const
+    {
         return projectionMatrix.Get<Mat4x4>();
     }
-    void SetProjectionMatrix(const Mat4x4& a_ProjectionMatrix) {
+    void SetProjectionMatrix(const Mat4x4& a_ProjectionMatrix)
+    {
         projectionMatrix.Set(a_ProjectionMatrix);
     }
 
@@ -48,19 +50,23 @@ public:
     auto& GetMaterial() { return material; }
     auto& GetDescriptorSets() const { return descriptorSets; }
     auto GetDescriptorSetLayouts() const { return descriptorSetLayouts; }
-    auto& GetDescriptorSetLayoutBindings() const {
+    auto& GetDescriptorSetLayoutBindings() const
+    {
         return descriptorSetLayoutBindings;
     }
-    std::vector<PipelineShaderStage> GetShaderStages() const {
+    std::vector<PipelineShaderStage> GetShaderStages() const
+    {
         return { material.GetFragmentShader(), GetVertexShader() };
     }
 
     auto GetInputAssembly() const { return inputAssembly; }
-    void SetInputAssembly(const PipelineInputAssemblyState& a_InputAssembly) {
+    void SetInputAssembly(const PipelineInputAssemblyState& a_InputAssembly)
+    {
         inputAssembly = a_InputAssembly;
     }
 
-    void Update() {
+    void Update()
+    {
         material.Update();
         projectionMatrix.Update();
     }
@@ -68,14 +74,14 @@ public:
     void Draw(const Command::Buffer::Handle& a_CommandBuffer, const Pipeline::Handle& a_Pipeline);
 
 private:
-    OCRA::Device::Handle     device;
-    PipelineShaderStage      vertexShader;
+    OCRA::Device::Handle device;
+    PipelineShaderStage vertexShader;
     PipelineInputAssemblyState inputAssembly;
-    VertexBuffer            vertexBuffer;
-    Material                material;
-    UniformBuffer           projectionMatrix;
-    std::vector<Descriptor::Set::Handle>        descriptorSets;
-    std::vector<Descriptor::SetLayout::Handle>  descriptorSetLayouts;
-    std::vector<DescriptorSetLayoutBinding>     descriptorSetLayoutBindings;
+    VertexBuffer vertexBuffer;
+    Material material;
+    UniformBuffer projectionMatrix;
+    std::vector<Descriptor::Set::Handle> descriptorSets;
+    std::vector<Descriptor::SetLayout::Handle> descriptorSetLayouts;
+    std::vector<DescriptorSetLayoutBinding> descriptorSetLayoutBindings;
 };
 }

@@ -19,8 +19,10 @@ struct UpdateBufferCommand : CommandI {
         : dstBuffer(a_DstBuffer)
         , offset(a_Offset)
         , data(a_Data, a_Data + a_Size, a_MemoryResource)
-    {}
-    virtual void operator()(Buffer::ExecutionState&) override {
+    {
+    }
+    virtual void operator()(Buffer::ExecutionState&) override
+    {
         auto& dstMemory = dstBuffer->memoryBinding;
         glNamedBufferSubData(dstMemory.memory->handle, dstMemory.offset + offset, data.size(), data.data());
     }
@@ -39,8 +41,10 @@ struct CopyBufferCommand : CommandI {
         : srcBuffer(a_SrcBuffer)
         , dstBuffer(a_DstBuffer)
         , regions(a_Regions, a_Regions + a_RegionCount, a_MemoryResource)
-    {}
-    virtual void operator()(Buffer::ExecutionState&) override {
+    {
+    }
+    virtual void operator()(Buffer::ExecutionState&) override
+    {
         auto& srcMemory = srcBuffer->memoryBinding;
         auto& dstMemory = dstBuffer->memoryBinding;
         for (const auto& region : regions) {
@@ -65,15 +69,17 @@ struct BindIBOCommand : CommandI {
         : indexBuffer(a_IndexBuffer)
         , offset(a_Offset + indexBuffer->memoryBinding.offset)
         , indexType(GetGLIndexType(a_IndexType))
-    {}
-    virtual void operator()(Buffer::ExecutionState& a_ExecutionState) override {
+    {
+    }
+    virtual void operator()(Buffer::ExecutionState& a_ExecutionState) override
+    {
         a_ExecutionState.renderPass.indexBufferBinding.buffer = indexBuffer;
         a_ExecutionState.renderPass.indexBufferBinding.offset = offset;
-        a_ExecutionState.renderPass.indexBufferBinding.type = indexType;
+        a_ExecutionState.renderPass.indexBufferBinding.type   = indexType;
     }
     const OCRA::Buffer::Handle indexBuffer;
-    const uint32_t  offset;
-    const GLenum    indexType;
+    const uint32_t offset;
+    const GLenum indexType;
 };
 
 struct BindVBOCommand : CommandI {
@@ -88,14 +94,15 @@ struct BindVBOCommand : CommandI {
     {
         for (auto index = 0u; index < buffers.size(); ++index) {
             const auto& buffer = a_Buffers[index];
-            const auto  offset = a_Offsets[index] + buffer->memoryBinding.offset;
-            buffers.at(index) = { offset, buffer };
+            const auto offset  = a_Offsets[index] + buffer->memoryBinding.offset;
+            buffers.at(index)  = { offset, buffer };
         }
     }
-    virtual void operator()(Buffer::ExecutionState& a_ExecutionState) override {
+    virtual void operator()(Buffer::ExecutionState& a_ExecutionState) override
+    {
         a_ExecutionState.renderPass.vertexBufferBindings.resize(buffers.size());
         for (auto index = 0u; index < buffers.size(); ++index) {
-            const auto binding = firstBinding + index;
+            const auto binding                                                  = firstBinding + index;
             a_ExecutionState.renderPass.vertexBufferBindings.at(binding).offset = buffers.at(index).first;
             a_ExecutionState.renderPass.vertexBufferBindings.at(binding).buffer = buffers.at(index).second;
         }
@@ -130,22 +137,26 @@ struct SetVertexInputCommand : CommandI {
                     attribute.binding);
             }
             for (const auto& description : bindings) {
-                //Is this binding divided by instance or by vertex ?
+                // Is this binding divided by instance or by vertex ?
                 const auto divideByInstance = description.inputRate == VertexInputRate::Instance;
                 glVertexBindingDivisor(
                     description.binding,
                     divideByInstance ? 1 : 0);
             }
             glBindVertexArray(0);
-        }, false);
+        },
+            false);
     }
-    ~SetVertexInputCommand() {
+    ~SetVertexInputCommand()
+    {
         device.lock()->PushCommand([handle = handle]() {
             glDeleteVertexArrays(1, &handle);
-        }, false);
+        },
+            false);
     }
-    virtual void operator()(Buffer::ExecutionState& a_ExecutionState) override {
-        a_ExecutionState.renderPass.vertexArray = handle;
+    virtual void operator()(Buffer::ExecutionState& a_ExecutionState) override
+    {
+        a_ExecutionState.renderPass.vertexArray         = handle;
         a_ExecutionState.renderPass.vertexInputBindings = { bindings.begin(), bindings.end() };
     }
     uint32_t handle = 0;
@@ -157,11 +168,11 @@ struct SetVertexInputCommand : CommandI {
 
 namespace OCRA::Command {
 void UpdateBuffer(
-    const Command::Buffer::Handle&  a_CommandBuffer,
-    const OCRA::Buffer::Handle&     a_DstBuffer,
-    const size_t&                   a_Offset,
-    const size_t&                   a_Size,
-    const std::byte*                a_Data)
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const OCRA::Buffer::Handle& a_DstBuffer,
+    const size_t& a_Offset,
+    const size_t& a_Size,
+    const std::byte* a_Data)
 {
     a_CommandBuffer->PushCommand<UpdateBufferCommand>(
         a_CommandBuffer->memoryResource,
@@ -171,10 +182,10 @@ void UpdateBuffer(
         a_Data);
 }
 void UpdateBuffer(
-    const Command::Buffer::Handle&  a_CommandBuffer,
-    const OCRA::Buffer::Handle&     a_DstBuffer,
-    const size_t&                   a_Offset,
-    const std::vector<std::byte>&   a_Data)
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const OCRA::Buffer::Handle& a_DstBuffer,
+    const size_t& a_Offset,
+    const std::vector<std::byte>& a_Data)
 {
     a_CommandBuffer->PushCommand<UpdateBufferCommand>(
         a_CommandBuffer->memoryResource,
@@ -185,9 +196,9 @@ void UpdateBuffer(
 }
 void CopyBuffer(
     const Command::Buffer::Handle& a_CommandBuffer,
-    const OCRA::Buffer::Handle&    a_SrcBuffer,
-    const OCRA::Buffer::Handle&    a_DstBuffer,
-    const std::vector<BufferCopyRegion>&  a_Regions)
+    const OCRA::Buffer::Handle& a_SrcBuffer,
+    const OCRA::Buffer::Handle& a_DstBuffer,
+    const std::vector<BufferCopyRegion>& a_Regions)
 {
     a_CommandBuffer->PushCommand<CopyBufferCommand>(
         a_CommandBuffer->memoryResource,
@@ -199,18 +210,18 @@ void CopyBuffer(
 
 void BindIndexBuffer(
     const Command::Buffer::Handle& a_CommandBuffer,
-    const OCRA::Buffer::Handle&    a_IndexBuffer,
-    const uint64_t                 a_Offset,
-    const IndexType                a_IndexType)
+    const OCRA::Buffer::Handle& a_IndexBuffer,
+    const uint64_t a_Offset,
+    const IndexType a_IndexType)
 {
     a_CommandBuffer->PushCommand<BindIBOCommand>(a_IndexBuffer, a_Offset, a_IndexType);
 }
 
 void BindVertexBuffers(
-    const Command::Buffer::Handle&           a_CommandBuffer,
-    const uint32_t                           a_FirstBinding,
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const uint32_t a_FirstBinding,
     const std::vector<OCRA::Buffer::Handle>& a_Buffers,
-    const std::vector<uint64_t>&             a_Offsets)
+    const std::vector<uint64_t>& a_Offsets)
 {
     a_CommandBuffer->PushCommand<BindVBOCommand>(
         a_CommandBuffer->memoryResource,

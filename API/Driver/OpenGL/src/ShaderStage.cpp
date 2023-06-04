@@ -1,15 +1,15 @@
 ﻿/*
-* @Author: gpinchon
-* @Date:   2021-10-04 20:31:19
-* @Last Modified by:   gpinchon
-* @Last Modified time: 2021-10-04 20:35:26
-*/
+ * @Author: gpinchon
+ * @Date:   2021-10-04 20:31:19
+ * @Last Modified by:   gpinchon
+ * @Last Modified time: 2021-10-04 20:35:26
+ */
 #include <OCRA/Core.hpp>
 
+#include <GL/Common/Assert.hpp>
 #include <GL/Device.hpp>
 #include <GL/ShaderModule.hpp>
 #include <GL/ShaderStage.hpp>
-#include <GL/Common/Assert.hpp>
 
 #include <GL/glew.h>
 
@@ -63,7 +63,8 @@ static inline auto CheckShaderCompilation(GLuint a_Shader)
             glGetShaderInfoLog(a_Shader, length, nullptr, infoLog.data());
             std::string logString(infoLog.begin(), infoLog.end());
             throw std::runtime_error(logString);
-        } else throw std::runtime_error("Unknown Error");
+        } else
+            throw std::runtime_error("Unknown Error");
         return false;
     }
     return true;
@@ -80,7 +81,7 @@ Stage::Stage(const Device::Handle& a_Device, const PipelineShaderStage& a_Info)
     constantIndex.reserve(a_Info.specializationInfo.mapEntries.size());
     constantValue.reserve(a_Info.specializationInfo.mapEntries.size());
     for (const auto& entry : a_Info.specializationInfo.mapEntries) {
-        uint32_t value{ 0 };
+        uint32_t value { 0 };
         OCRA_ASSERT(entry.size <= sizeof(value));
         auto data = &a_Info.specializationInfo.data.at(entry.offset);
         std::memcpy(&value, data, entry.size);
@@ -92,7 +93,7 @@ Stage::Stage(const Device::Handle& a_Device, const PipelineShaderStage& a_Info)
     OCRA_ASSERT(GLEW_ARB_gl_spirv);
     glShaderBinary(1, &shader, GL_SHADER_BINARY_FORMAT_SPIR_V, a_Info.module->data(), sizeof(a_Info.module->front()) * a_Info.module->size());
     glSpecializeShader(shader, a_Info.entryPoint.c_str(), constantIndex.size(), constantIndex.data(), constantValue.data());
-    if (CheckShaderCompilation(shader)) //compilation is successful
+    if (CheckShaderCompilation(shader)) // compilation is successful
     {
         glAttachShader(handle, shader);
         glLinkProgram(handle);
@@ -103,8 +104,10 @@ Stage::Stage(const Device::Handle& a_Device, const PipelineShaderStage& a_Info)
 
 Stage::~Stage()
 {
-    if (handle != 0) device.lock()->PushCommand([handle = handle] {
-        glDeleteProgram(handle);
-    }, false);
+    if (handle != 0)
+        device.lock()->PushCommand([handle = handle] {
+            glDeleteProgram(handle);
+        },
+            false);
 }
 }

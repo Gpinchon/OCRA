@@ -6,8 +6,7 @@
 
 #include <stdexcept>
 
-namespace OCRA::QueryPool
-{
+namespace OCRA::QueryPool {
 static inline auto GetQueryObject32(GLuint a_ID, GLenum a_Parameter)
 {
     uint32_t result = 0;
@@ -23,9 +22,10 @@ static inline auto GetQueryObject64(GLuint a_ID, GLenum a_Parameter)
 static inline auto GenQueries(const Device::Handle& a_Device, const uint32_t& a_Count)
 {
     std::vector<GLuint> handles(a_Count);
-    a_Device->PushCommand([data = handles.data(), a_Count]{
+    a_Device->PushCommand([data = handles.data(), a_Count] {
         glGenQueries(a_Count, data);
-    }, true);
+    },
+        true);
     return handles;
 }
 static inline auto GetPipelineQueryTargets(const QueryPipelineStatisticFlags& a_Flags)
@@ -64,107 +64,114 @@ Impl::Impl(
     , device(a_Device)
     , handles(GenQueries(a_Device, a_Count))
     , targets(a_Targets)
-{}
+{
+}
 Impl::~Impl()
 {
     device.lock()->PushCommand([handles = handles] {
         for (const auto& handle : handles)
             glDeleteQueries(1, &handle);
-    }, true);
+    },
+        true);
 }
 void Impl::GetResult(
-        const uint32_t& a_FirstQuery,
-        const uint32_t& a_QueryCount,
-        const size_t& a_DataSize,
-        void* const a_Data,
-        const size_t& a_Stride,
-        const QueryResultFlags& a_Flags)
+    const uint32_t& a_FirstQuery,
+    const uint32_t& a_QueryCount,
+    const size_t& a_DataSize,
+    void* const a_Data,
+    const size_t& a_Stride,
+    const QueryResultFlags& a_Flags)
 {
-    device.lock()->PushCommand([
-        this,
-        &a_FirstQuery,
-        &a_QueryCount,
-        &a_DataSize,
-        &a_Data,
-        &a_Stride,
-        &a_Flags] {
-        auto use64bits = (a_Flags & QueryResultFlagBits::Result64Bits) != 0;
+    device.lock()->PushCommand([this,
+                                   &a_FirstQuery,
+                                   &a_QueryCount,
+                                   &a_DataSize,
+                                   &a_Data,
+                                   &a_Stride,
+                                   &a_Flags] {
+        auto use64bits        = (a_Flags & QueryResultFlagBits::Result64Bits) != 0;
         auto withAvailability = (a_Flags & QueryResultFlagBits::WithAvailability) != 0;
-        auto waitResult = (a_Flags & QueryResultFlagBits::Wait) != 0;
+        auto waitResult       = (a_Flags & QueryResultFlagBits::Wait) != 0;
         for (auto index = a_FirstQuery; index < a_FirstQuery + a_QueryCount; ++index) {
             const auto& handle = handles.at(index);
-            if (use64bits) static_cast<uint64_t*>(a_Data)[a_Stride * 1] = GetQueryObject64(handle, waitResult ? GL_QUERY_RESULT : GL_QUERY_RESULT_NO_WAIT);
-            else static_cast<uint32_t*>(a_Data)[a_Stride * 1] = GetQueryObject32(handle, waitResult ? GL_QUERY_RESULT : GL_QUERY_RESULT_NO_WAIT);
-            if (withAvailability)
-            {
-                if (use64bits) static_cast<uint64_t*>(a_Data)[a_Stride * 2] = GetQueryObject64(handle, GL_QUERY_RESULT_AVAILABLE);
-                else static_cast<uint32_t*>(a_Data)[a_Stride * 2] = GetQueryObject32(handle, GL_QUERY_RESULT_AVAILABLE);
+            if (use64bits)
+                static_cast<uint64_t*>(a_Data)[a_Stride * 1] = GetQueryObject64(handle, waitResult ? GL_QUERY_RESULT : GL_QUERY_RESULT_NO_WAIT);
+            else
+                static_cast<uint32_t*>(a_Data)[a_Stride * 1] = GetQueryObject32(handle, waitResult ? GL_QUERY_RESULT : GL_QUERY_RESULT_NO_WAIT);
+            if (withAvailability) {
+                if (use64bits)
+                    static_cast<uint64_t*>(a_Data)[a_Stride * 2] = GetQueryObject64(handle, GL_QUERY_RESULT_AVAILABLE);
+                else
+                    static_cast<uint32_t*>(a_Data)[a_Stride * 2] = GetQueryObject32(handle, GL_QUERY_RESULT_AVAILABLE);
             }
         }
-    }, true);
+    },
+        true);
 }
 PipelineStatistics::PipelineStatistics(const Device::Handle& a_Device, const CreateQueryPoolInfo& a_Info)
     : Impl(a_Device, a_Info.count * a_Info.pipelineStatistics.count(), GetPipelineQueryTargets(a_Info.pipelineStatistics), QueryType::PipelineStatistics)
     , pipelineStatisticsCount(a_Info.pipelineStatistics.count())
-{}
-void PipelineStatistics::GetResult(
-        const uint32_t& a_FirstQuery,
-        const uint32_t& a_QueryCount,
-        const size_t& a_DataSize,
-        void* const a_Data,
-        const size_t& a_Stride,
-        const QueryResultFlags& a_Flags)
 {
-    device.lock()->PushCommand([
-        this,
-        &a_FirstQuery,
-        &a_QueryCount,
-        &a_DataSize,
-        &a_Data,
-        &a_Stride,
-        &a_Flags] {
-        auto use64bits = (a_Flags & QueryResultFlagBits::Result64Bits) != 0;
+}
+void PipelineStatistics::GetResult(
+    const uint32_t& a_FirstQuery,
+    const uint32_t& a_QueryCount,
+    const size_t& a_DataSize,
+    void* const a_Data,
+    const size_t& a_Stride,
+    const QueryResultFlags& a_Flags)
+{
+    device.lock()->PushCommand([this,
+                                   &a_FirstQuery,
+                                   &a_QueryCount,
+                                   &a_DataSize,
+                                   &a_Data,
+                                   &a_Stride,
+                                   &a_Flags] {
+        auto use64bits        = (a_Flags & QueryResultFlagBits::Result64Bits) != 0;
         auto withAvailability = (a_Flags & QueryResultFlagBits::WithAvailability) != 0;
-        auto waitResult = (a_Flags & QueryResultFlagBits::Wait) != 0;
+        auto waitResult       = (a_Flags & QueryResultFlagBits::Wait) != 0;
         for (auto index = a_FirstQuery; index < a_FirstQuery + a_QueryCount; ++index) {
             const auto realIndex = pipelineStatisticsCount * index;
-            for (auto dataIndex = 0; dataIndex < pipelineStatisticsCount; ++dataIndex)
-            {
+            for (auto dataIndex = 0; dataIndex < pipelineStatisticsCount; ++dataIndex) {
                 const auto& handle = handles.at(realIndex + dataIndex);
-                if (use64bits) static_cast<uint64_t*>(a_Data)[a_Stride * dataIndex] = GetQueryObject64(handle, waitResult ? GL_QUERY_RESULT : GL_QUERY_RESULT_NO_WAIT);
-                else static_cast<uint32_t*>(a_Data)[a_Stride * dataIndex] = GetQueryObject32(handle, waitResult ? GL_QUERY_RESULT : GL_QUERY_RESULT_NO_WAIT);
-                if (withAvailability)
-                {
-                    if (use64bits) static_cast<uint64_t*>(a_Data)[a_Stride * pipelineStatisticsCount] |= GetQueryObject64(handle, GL_QUERY_RESULT_AVAILABLE);
-                    else static_cast<uint32_t*>(a_Data)[a_Stride * pipelineStatisticsCount] |= GetQueryObject32(handle, GL_QUERY_RESULT_AVAILABLE);
+                if (use64bits)
+                    static_cast<uint64_t*>(a_Data)[a_Stride * dataIndex] = GetQueryObject64(handle, waitResult ? GL_QUERY_RESULT : GL_QUERY_RESULT_NO_WAIT);
+                else
+                    static_cast<uint32_t*>(a_Data)[a_Stride * dataIndex] = GetQueryObject32(handle, waitResult ? GL_QUERY_RESULT : GL_QUERY_RESULT_NO_WAIT);
+                if (withAvailability) {
+                    if (use64bits)
+                        static_cast<uint64_t*>(a_Data)[a_Stride * pipelineStatisticsCount] |= GetQueryObject64(handle, GL_QUERY_RESULT_AVAILABLE);
+                    else
+                        static_cast<uint32_t*>(a_Data)[a_Stride * pipelineStatisticsCount] |= GetQueryObject32(handle, GL_QUERY_RESULT_AVAILABLE);
                 }
             }
-            
         }
-    }, true);
+    },
+        true);
 }
 Handle Create(
-    const Device::Handle&   a_Device,
-    const CreateQueryPoolInfo&             a_Info)
+    const Device::Handle& a_Device,
+    const CreateQueryPoolInfo& a_Info)
 {
     switch (a_Info.type) {
-    case(QueryType::Occlusion) :
+    case (QueryType::Occlusion):
         return Handle(new Impl(a_Device, a_Info.count, std::vector<GLenum>(a_Info.count, GL_SAMPLES_PASSED), QueryType::Occlusion));
-    case(QueryType::TimeStamp):
+    case (QueryType::TimeStamp):
         return Handle(new Impl(a_Device, a_Info.count, std::vector<GLenum>(a_Info.count, GL_TIME_ELAPSED), QueryType::TimeStamp));
-    case(QueryType::PipelineStatistics):
+    case (QueryType::PipelineStatistics):
         return Handle(new PipelineStatistics(a_Device, a_Info));
     default:
         throw std::runtime_error("Unknown Barrier type");
     }
 }
 void GetResult(
-    const Handle&   a_QueryPool,
+    const Handle& a_QueryPool,
     const uint32_t& a_FirstQuery,
     const uint32_t& a_QueryCount,
-    const size_t&   a_DataSize,
-    void* const     a_Data,
-    const size_t    a_Stride,
+    const size_t& a_DataSize,
+    void* const a_Data,
+    const size_t a_Stride,
     const QueryResultFlags& a_Flags)
 {
     a_QueryPool->GetResult(

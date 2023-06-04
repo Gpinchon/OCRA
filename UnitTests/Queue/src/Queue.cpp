@@ -10,8 +10,7 @@ static inline void ListQueues(const PhysicalDevice::Handle& a_PhysicalDevice, co
 {
     PrintQueueInfos(a_PhysicalDevice);
     std::cout << "===== Device's Queues =====\n";
-    for (const auto& queueInfo : GetQueueInfos(a_PhysicalDevice))
-    {
+    for (const auto& queueInfo : GetQueueInfos(a_PhysicalDevice)) {
         for (auto queueIndex = 0u; queueIndex < queueInfo.queueCount; ++queueIndex) {
             const auto queue = Device::GetQueue(a_Device, queueInfo.queueFamilyIndex, queueIndex);
             std::cout << "  == Queue ==\n";
@@ -27,7 +26,7 @@ static inline void ListQueues(const PhysicalDevice::Handle& a_PhysicalDevice, co
 
 int main()
 {
-    const auto instance = CreateInstance("Test_Queue");
+    const auto instance       = CreateInstance("Test_Queue");
     const auto physicalDevice = Instance::EnumeratePhysicalDevices(instance).front();
     ListQueues(physicalDevice, CreateDevice(physicalDevice));
     return 0;

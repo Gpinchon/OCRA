@@ -1,11 +1,10 @@
 #pragma once
 
-namespace OCRA
-{
+namespace OCRA {
 enum class SwapChainPresentMode {
-    Immediate, //No V-Sync
-    Fifo,      //Yes V-Sync
-    Mailbox,   //Present requests are queued
+    Immediate, // No V-Sync
+    Fifo, // Yes V-Sync
+    Mailbox, // Present requests are queued
     MaxValue
 };
 }

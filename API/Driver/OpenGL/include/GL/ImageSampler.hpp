@@ -11,5 +11,5 @@ struct Impl {
     const Device::WeakHandle device;
     const CreateImageSamplerInfo info;
     uint32_t handle;
-}; 
+};
 }

@@ -2,30 +2,32 @@
 
 #include <OCRA/ShaderCompiler/Structs.hpp>
 
-#include <vector>
 #include <stdexcept>
+#include <vector>
 
 #include <glslang/Public/ShaderLang.h>
 #include <spirv.hpp>
 
-namespace OCRA::ShaderCompiler
-{
+namespace OCRA::ShaderCompiler {
 struct Impl {
-	Impl() {
-		glslang::InitializeProcess();
-	}
-	~Impl() {
-		glslang::FinalizeProcess();
-	}
-	std::vector<uint32_t> Compile(const ShaderInfo& a_Info) {
-		if (a_Info.targetAPI == TargetAPI::OpenGL)
-			return CompileOpenGL(a_Info);
-		else if (a_Info.targetAPI == TargetAPI::Vulkan)
-			return CompileVulkan(a_Info);
-		throw std::runtime_error("ShaderCompiler : Unknown target API");
-	}
-	std::vector<uint32_t> CompileOpenGL(const ShaderInfo& a_Info);
-	std::vector<uint32_t> CompileVulkan(const ShaderInfo& a_Info);
+    Impl()
+    {
+        glslang::InitializeProcess();
+    }
+    ~Impl()
+    {
+        glslang::FinalizeProcess();
+    }
+    std::vector<uint32_t> Compile(const ShaderInfo& a_Info)
+    {
+        if (a_Info.targetAPI == TargetAPI::OpenGL)
+            return CompileOpenGL(a_Info);
+        else if (a_Info.targetAPI == TargetAPI::Vulkan)
+            return CompileVulkan(a_Info);
+        throw std::runtime_error("ShaderCompiler : Unknown target API");
+    }
+    std::vector<uint32_t> CompileOpenGL(const ShaderInfo& a_Info);
+    std::vector<uint32_t> CompileVulkan(const ShaderInfo& a_Info);
     static auto inline GetExecutionModel(const ShaderType& a_Type)
     {
         switch (a_Type) {

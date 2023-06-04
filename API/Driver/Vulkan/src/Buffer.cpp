@@ -1,14 +1,12 @@
 #include <OCRA/OCRA.hpp>
 
-#include <VK/Device.hpp>
 #include <VK/Buffer.hpp>
-#include <VK/Flags.hpp>
-#include <VK/Memory.hpp>
+#include <VK/Device.hpp>
 #include <VK/Enums.hpp>
 #include <VK/Flags.hpp>
+#include <VK/Memory.hpp>
 
-namespace OCRA::Device
-{
+namespace OCRA::Device {
 Buffer::Handle CreateBuffer(
     const Device::Handle& a_Device,
     const CreateBufferInfo& a_Info,
@@ -16,11 +14,11 @@ Buffer::Handle CreateBuffer(
 {
     vk::BufferCreateInfo info;
     info.queueFamilyIndexCount = a_Info.queueFamilyIndices.size();
-    info.pQueueFamilyIndices = a_Info.queueFamilyIndices.data();
-    info.size = a_Info.size;
-    info.usage = ConvertToVk(a_Info.usage);
-    info.flags = ConvertToVk(a_Info.flags);
-    info.sharingMode = ConvertToVk(a_Info.sharingMode);
+    info.pQueueFamilyIndices   = a_Info.queueFamilyIndices.data();
+    info.size                  = a_Info.size;
+    info.usage                 = ConvertToVk(a_Info.usage);
+    info.flags                 = ConvertToVk(a_Info.flags);
+    info.sharingMode           = ConvertToVk(a_Info.sharingMode);
     return std::make_shared<Buffer::Impl>(*a_Device, info);
 }
 
@@ -31,23 +29,23 @@ Buffer::Handle AllocateBuffer(
 {
     auto& device = *a_Device;
     CreateBufferInfo bufferInfo;
-    bufferInfo.usage = a_Info.bufferUsage;
-    bufferInfo.flags = a_Info.bufferFlags;
-    bufferInfo.size  = a_Info.size;
-    bufferInfo.sharingMode = a_Info.sharingMode;
+    bufferInfo.usage              = a_Info.bufferUsage;
+    bufferInfo.flags              = a_Info.bufferFlags;
+    bufferInfo.size               = a_Info.size;
+    bufferInfo.sharingMode        = a_Info.sharingMode;
     bufferInfo.queueFamilyIndices = a_Info.queueFamilyIndices;
-    auto buffer = CreateBuffer(a_Device, bufferInfo, a_Allocator);
+    auto buffer                   = CreateBuffer(a_Device, bufferInfo, a_Allocator);
     Memory::Handle memory;
     {
-        vk::MemoryAllocateInfo  vkMemoryInfo;
+        vk::MemoryAllocateInfo vkMemoryInfo;
         vk::MemoryPropertyFlags vkMemoryFlags = ConvertToVk(a_Info.memoryFlags);
-        auto p = device.physicalDevice.getMemoryProperties();
-        vkMemoryInfo.allocationSize = Buffer::GetSizeRequirement(buffer);
+        auto p                                = device.physicalDevice.getMemoryProperties();
+        vkMemoryInfo.allocationSize           = Buffer::GetSizeRequirement(buffer);
         for (auto i = 0u; i < p.memoryTypeCount; ++i) {
             const auto& mt = p.memoryTypes[i];
             if ((mt.propertyFlags & vkMemoryFlags)) {
                 vkMemoryInfo.memoryTypeIndex = i;
-                memory = std::make_shared<Memory::Impl>(device, vkMemoryInfo);
+                memory                       = std::make_shared<Memory::Impl>(device, vkMemoryInfo);
                 break;
             }
         }
@@ -57,15 +55,14 @@ Buffer::Handle AllocateBuffer(
 }
 }
 
-namespace OCRA::Buffer
-{
+namespace OCRA::Buffer {
 void BindMemory(
     const Handle& a_Buffer,
     const Memory::Handle& a_Memory,
     const size_t& a_MemoryOffset)
 {
-    auto& buffer = *a_Buffer;
-    auto& memory = *a_Memory;
+    auto& buffer  = *a_Buffer;
+    auto& memory  = *a_Memory;
     buffer.memory = a_Memory;
     buffer.bindMemory(*memory, a_MemoryOffset);
 }

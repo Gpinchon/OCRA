@@ -9,24 +9,23 @@
 OCRA_DECLARE_HANDLE(OCRA::Instance);
 OCRA_DECLARE_WEAK_HANDLE(OCRA::Instance);
 
-namespace OCRA::PhysicalDevice
-{
+namespace OCRA::PhysicalDevice {
 using Command = std::function<void()>;
-struct Queue
-{
-    Queue() {
-        properties.queueCount = 1;
-        properties.queueFlags = QueueFlagBits::Graphics | QueueFlagBits::Compute | QueueFlagBits::Transfer | QueueFlagBits::SparseBinding;
-        properties.minImageTransferGranularity = { 1, 1, 1 }; //Queues supporting graphics and/or compute operations must report (1,1,1)
+struct Queue {
+    Queue()
+    {
+        properties.queueCount                  = 1;
+        properties.queueFlags                  = QueueFlagBits::Graphics | QueueFlagBits::Compute | QueueFlagBits::Transfer | QueueFlagBits::SparseBinding;
+        properties.minImageTransferGranularity = { 1, 1, 1 }; // Queues supporting graphics and/or compute operations must report (1,1,1)
     };
-    inline void PushCommand(const Command& a_Command, const bool& a_Synchronous) {
+    inline void PushCommand(const Command& a_Command, const bool& a_Synchronous)
+    {
         workerThread.PushCommand(a_Command, a_Synchronous);
     }
-    WorkerThread            workerThread;
-    QueueFamilyProperties   properties;
+    WorkerThread workerThread;
+    QueueFamilyProperties properties;
 };
-struct Impl
-{
+struct Impl {
     Impl(const Instance::Handle& a_Instance);
     inline void PushCommand(
         const Command& a_Command,
@@ -36,9 +35,9 @@ struct Impl
     }
     void GetProperties();
     const Instance::WeakHandle instance;
-    Queue                    queue;
+    Queue queue;
     PhysicalDeviceProperties properties;
-    PhysicalDeviceFeatures   features;
-    MemoryProperties         memoryProperties;
+    PhysicalDeviceFeatures features;
+    MemoryProperties memoryProperties;
 };
 }

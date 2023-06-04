@@ -24,8 +24,7 @@
 
 #undef CreateSemaphore
 
-namespace OCRA::Device
-{
+namespace OCRA::Device {
 Command::Pool::Handle CreateCommandPool(
     const Device::Handle& a_Device,
     const CreateCommandPoolInfo& a_Info,
@@ -33,7 +32,7 @@ Command::Pool::Handle CreateCommandPool(
 {
     vk::CommandPoolCreateInfo info;
     info.queueFamilyIndex = a_Info.queueFamilyIndex;
-    info.flags = ConvertToVk(a_Info.flags);
+    info.flags            = ConvertToVk(a_Info.flags);
     return std::make_shared<Command::Pool::Impl>(*a_Device, info);
 }
 
@@ -43,41 +42,41 @@ Descriptor::Pool::Handle CreateDescriptorPool(const Device::Handle& a_Device, co
     std::vector<vk::DescriptorPoolSize> vkPoolSizes;
     vkPoolSizes.reserve(a_Info.sizes.size());
     for (const auto& size : a_Info.sizes) {
-        vk::DescriptorPoolSize vkSize{};
+        vk::DescriptorPoolSize vkSize {};
         vkSize.descriptorCount = size.count;
-        vkSize.type = ConvertToVk(size.type);
+        vkSize.type            = ConvertToVk(size.type);
         vkPoolSizes.push_back(vkSize);
     }
-    info.flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet | vk::DescriptorPoolCreateFlagBits::eUpdateAfterBind;
+    info.flags         = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet | vk::DescriptorPoolCreateFlagBits::eUpdateAfterBind;
     info.poolSizeCount = vkPoolSizes.size();
-    info.pPoolSizes = vkPoolSizes.data();
-    info.maxSets = a_Info.maxSets;
+    info.pPoolSizes    = vkPoolSizes.data();
+    info.maxSets       = a_Info.maxSets;
     return std::make_shared<Descriptor::Pool::Impl>(*a_Device, info);
 }
 
-//Descriptor::SetLayout::Handle CreateDescriptorSetLayout(
-//    const Device::Handle& a_Device,
-//    const CreateDescriptorSetLayoutInfo& a_Info,
-//    const AllocationCallback* a_Allocator = nullptr)
+// Descriptor::SetLayout::Handle CreateDescriptorSetLayout(
+//     const Device::Handle& a_Device,
+//     const CreateDescriptorSetLayoutInfo& a_Info,
+//     const AllocationCallback* a_Allocator = nullptr)
 //{
-//    auto& device = *a_Device;
-//    vk::DescriptorSetLayout setLayout = nullptr;
-//    vk::DescriptorSetLayoutCreateInfo info;
-//    std::vector<vk::DescriptorSetLayoutBinding> vkBindings;
-//    vkBindings.reserve(a_Info.bindings.size());
-//    for (const auto& binding : a_Info.bindings)
-//    {
-//        vk::DescriptorSetLayoutBinding vkBinding{};
-//        vkBinding.binding = binding.binding;
-//        vkBinding.descriptorCount = binding.count;
-//        vkBinding.descriptorType = ConvertToVk(binding.type);
-//        vkBinding.stageFlags = ConvertToVk(binding.stageFlags);
-//        vkBindings.push_back(vkBinding);
-//    }
-//    info.bindingCount = vkBindings.size();
-//    info.pBindings = vkBindings.data();
-//    return std::make_shared<Descriptor::SetLayout::Impl>(device, info);
-//}
+//     auto& device = *a_Device;
+//     vk::DescriptorSetLayout setLayout = nullptr;
+//     vk::DescriptorSetLayoutCreateInfo info;
+//     std::vector<vk::DescriptorSetLayoutBinding> vkBindings;
+//     vkBindings.reserve(a_Info.bindings.size());
+//     for (const auto& binding : a_Info.bindings)
+//     {
+//         vk::DescriptorSetLayoutBinding vkBinding{};
+//         vkBinding.binding = binding.binding;
+//         vkBinding.descriptorCount = binding.count;
+//         vkBinding.descriptorType = ConvertToVk(binding.type);
+//         vkBinding.stageFlags = ConvertToVk(binding.stageFlags);
+//         vkBindings.push_back(vkBinding);
+//     }
+//     info.bindingCount = vkBindings.size();
+//     info.pBindings = vkBindings.data();
+//     return std::make_shared<Descriptor::SetLayout::Impl>(device, info);
+// }
 
 Fence::Handle CreateFence(
     const Device::Handle& a_Device,
@@ -86,7 +85,7 @@ Fence::Handle CreateFence(
 {
     auto& device = *a_Device;
     vk::FenceCreateInfo info;
-    info.flags = a_DefaultStatus == FenceStatus::Signaled ? vk::FenceCreateFlagBits::eSignaled : vk::FenceCreateFlags{};
+    info.flags = a_DefaultStatus == FenceStatus::Signaled ? vk::FenceCreateFlagBits::eSignaled : vk::FenceCreateFlags {};
     return std::make_shared<Fence::Impl>(device, info);
 }
 
@@ -96,19 +95,19 @@ Image::Handle CreateImage(
 {
     auto& device = *a_Device;
     vk::ImageCreateInfo vkInfo;
-    vkInfo.arrayLayers = a_Info.arrayLayers;
-    vkInfo.extent = ConvertToVk(a_Info.extent);
-    vkInfo.usage = ConvertToVk(a_Info.usage);
-    vkInfo.format = ConvertToVk(a_Info.format);
-    vkInfo.imageType = ConvertToVk(a_Info.type);
-    vkInfo.initialLayout = vk::ImageLayout::eUndefined;//ConvertToVk(a_Info.initialLayout);
-    vkInfo.mipLevels = a_Info.mipLevels;
-    vkInfo.samples = ConvertToVk(a_Info.samples);
-    auto image = std::make_shared<Image::Impl>(device, vkInfo);
+    vkInfo.arrayLayers   = a_Info.arrayLayers;
+    vkInfo.extent        = ConvertToVk(a_Info.extent);
+    vkInfo.usage         = ConvertToVk(a_Info.usage);
+    vkInfo.format        = ConvertToVk(a_Info.format);
+    vkInfo.imageType     = ConvertToVk(a_Info.type);
+    vkInfo.initialLayout = vk::ImageLayout::eUndefined; // ConvertToVk(a_Info.initialLayout);
+    vkInfo.mipLevels     = a_Info.mipLevels;
+    vkInfo.samples       = ConvertToVk(a_Info.samples);
+    auto image           = std::make_shared<Image::Impl>(device, vkInfo);
     vk::MemoryAllocateInfo vkMemoryInfo;
-    vkMemoryInfo.allocationSize = image->getMemoryRequirements().size;
+    vkMemoryInfo.allocationSize  = image->getMemoryRequirements().size;
     vkMemoryInfo.memoryTypeIndex = device.physicalDevice.findMemoryType(vk::MemoryPropertyFlagBits::eDeviceLocal);
-    image->memory = device.allocateMemory(vkMemoryInfo);
+    image->memory                = device.allocateMemory(vkMemoryInfo);
     image->bindMemory(*image->memory, 0);
     return image;
 }
@@ -128,7 +127,7 @@ Image::Sampler::Handle CreateImageSampler(
         ConvertToVk(a_Info.minFilter),
         a_Info.mipmapMode == Filter::Linear ? vk::SamplerMipmapMode::eLinear : vk::SamplerMipmapMode::eNearest,
         ConvertToVk(a_Info.addressModeU),
-        ConvertToVk(a_Info.addressModeV), 
+        ConvertToVk(a_Info.addressModeV),
         ConvertToVk(a_Info.addressModeW),
         a_Info.mipLodBias,
         a_Info.anisotropyEnable,
@@ -138,7 +137,7 @@ Image::Sampler::Handle CreateImageSampler(
         a_Info.minLod,
         a_Info.maxLod,
         vk::BorderColor::eFloatCustomEXT,
-        false, //Because OGL always uses normalized
+        false, // Because OGL always uses normalized
         &borderColor);
     return std::make_shared<Image::Sampler::Impl>(*a_Device, info);
 }
@@ -163,19 +162,19 @@ Pipeline::Handle CreatePipelineGraphics(
     const Device::Handle& a_Device,
     const CreatePipelineGraphicsInfo& a_Info)
 {
-    //IF THIS CRASHES, IT MIGHT BE BECAUSE PipelineColorBlendState ATTACHMENTS DOESN'T MATCH PipelineRenderingInfo ATTACHMENTS
+    // IF THIS CRASHES, IT MIGHT BE BECAUSE PipelineColorBlendState ATTACHMENTS DOESN'T MATCH PipelineRenderingInfo ATTACHMENTS
     OCRA_ASSERT(a_Info.renderingInfo.colorAttachmentFormats.size() == a_Info.colorBlendState.attachments.size());
 
     auto& device = *a_Device;
-    IntermediateShaderState                     shaderStage(a_Info.shaderPipelineState);
-    IntermediateVertexInputState                vertexInputState(a_Info.vertexInputState);
-    vk::PipelineInputAssemblyStateCreateInfo    inputAssemblyStateCreateInfo({},
+    IntermediateShaderState shaderStage(a_Info.shaderPipelineState);
+    IntermediateVertexInputState vertexInputState(a_Info.vertexInputState);
+    vk::PipelineInputAssemblyStateCreateInfo inputAssemblyStateCreateInfo({},
         ConvertToVk(a_Info.inputAssemblyState.topology),
         a_Info.inputAssemblyState.primitiveRestartEnable);
-    vk::PipelineTessellationStateCreateInfo     tessellationStateCreateInfo({},
+    vk::PipelineTessellationStateCreateInfo tessellationStateCreateInfo({},
         a_Info.tessellationState.patchControlPoints);
-    IntermediateViewportState                   viewportState(a_Info.viewPortState);
-    vk::PipelineRasterizationStateCreateInfo    rasterizationStateCreateInfo({},
+    IntermediateViewportState viewportState(a_Info.viewPortState);
+    vk::PipelineRasterizationStateCreateInfo rasterizationStateCreateInfo({},
         a_Info.rasterizationState.depthClampEnable,
         a_Info.rasterizationState.rasterizerDiscardEnable,
         ConvertToVk(a_Info.rasterizationState.polygonMode),
@@ -186,14 +185,14 @@ Pipeline::Handle CreatePipelineGraphics(
         a_Info.rasterizationState.depthBiasClamp,
         a_Info.rasterizationState.depthBiasSlopeFactor,
         a_Info.rasterizationState.lineWidth);
-    vk::PipelineMultisampleStateCreateInfo      multisampleStateCreateInfo({},
+    vk::PipelineMultisampleStateCreateInfo multisampleStateCreateInfo({},
         ConvertToVk(a_Info.multisampleState.rasterizationSamples),
         a_Info.multisampleState.sampleShadingEnable,
         a_Info.multisampleState.minSampleShading,
         a_Info.multisampleState.sampleMasks.data(),
         a_Info.multisampleState.alphaToCoverageEnable,
         a_Info.multisampleState.alphaToOneEnable);
-    vk::PipelineDepthStencilStateCreateInfo     depthStencilStateCreateInfo({},
+    vk::PipelineDepthStencilStateCreateInfo depthStencilStateCreateInfo({},
         a_Info.depthStencilState.depthTestEnable,
         a_Info.depthStencilState.depthWriteEnable,
         ConvertToVk(a_Info.depthStencilState.depthCompareOp),
@@ -203,12 +202,12 @@ Pipeline::Handle CreatePipelineGraphics(
         ConvertToVk(a_Info.depthStencilState.backStencilOpState),
         a_Info.depthStencilState.depthBounds.min,
         a_Info.depthStencilState.depthBounds.max);
-    IntermediateColorBlendState                 colorBlendState(a_Info.colorBlendState);
-    IntermediateDynamicState                    dynamicState(a_Info.dynamicState);
+    IntermediateColorBlendState colorBlendState(a_Info.colorBlendState);
+    IntermediateDynamicState dynamicState(a_Info.dynamicState);
     std::vector<vk::Format> colorAttachments(a_Info.renderingInfo.colorAttachmentFormats.size());
     std::transform(a_Info.renderingInfo.colorAttachmentFormats.begin(), a_Info.renderingInfo.colorAttachmentFormats.end(),
         colorAttachments.begin(), [](const auto& format) { return ConvertToVk(format); });
-    
+
     vk::PipelineRenderingCreateInfo renderingInfo(
         0,
         colorAttachments,
@@ -236,7 +235,7 @@ Pipeline::Handle CreatePipelineGraphics(
         &depthStencilStateCreateInfo,
         colorBlendState.data(),
         dynamicState.data(),
-        layout, 
+        layout,
         vk::RenderPass(nullptr), 0,
         vk::Pipeline(nullptr), 0,
         &renderingInfo);
@@ -251,8 +250,8 @@ Semaphore::Handle CreateSemaphore(
     vk::SemaphoreCreateInfo info;
     vk::SemaphoreTypeCreateInfo semaphoreType;
     semaphoreType.semaphoreType = a_Info.type == SemaphoreType::Binary ? vk::SemaphoreType::eBinary : vk::SemaphoreType::eTimeline;
-    semaphoreType.initialValue = a_Info.initialValue;
-    info.pNext = &semaphoreType;
+    semaphoreType.initialValue  = a_Info.initialValue;
+    info.pNext                  = &semaphoreType;
     return std::make_shared<Semaphore::Impl>(*a_Device, info);
 }
 

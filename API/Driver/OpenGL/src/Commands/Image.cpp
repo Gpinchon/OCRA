@@ -1,9 +1,8 @@
 #include <GL/CommandBuffer.hpp>
-#include <GL/Image.hpp>
 #include <GL/Device.hpp>
+#include <GL/Image.hpp>
 
-namespace OCRA::Command
-{
+namespace OCRA::Command {
 struct BlitImageCommand : CommandI {
     BlitImageCommand(
         std::pmr::memory_resource* a_MemoryResource,
@@ -18,8 +17,10 @@ struct BlitImageCommand : CommandI {
         , dstImage(a_DstImage)
         , blits(a_Blits, a_Blits + a_Count, a_MemoryResource)
         , filter(a_Filter)
-    {}
-    virtual void operator()(Buffer::ExecutionState&) {
+    {
+    }
+    virtual void operator()(Buffer::ExecutionState&)
+    {
         device.lock()->textureBlitter.Blit(
             srcImage, dstImage,
             blits.size(), blits.data(),
@@ -41,8 +42,10 @@ struct CopyImageCommand : CommandI {
         : srcImage(a_SrcImage)
         , dstImage(a_DstImage)
         , regions(a_Regions, a_Regions + a_Count, a_MemoryResource)
-    {}
-    virtual void operator()(Buffer::ExecutionState&) {
+    {
+    }
+    virtual void operator()(Buffer::ExecutionState&)
+    {
         for (const auto& copy : regions) {
             glCopyImageSubData(
                 srcImage->handle, srcImage->target, copy.srcSubresource.mipLevel, copy.srcOffset.x, copy.srcOffset.y, copy.srcOffset.z,
@@ -58,8 +61,10 @@ struct CopyImageCommand : CommandI {
 struct GenerateMipMapCommand : CommandI {
     GenerateMipMapCommand(const Image::Handle& a_Image)
         : image(a_Image)
-    {}
-    virtual void operator()(Buffer::ExecutionState&) {
+    {
+    }
+    virtual void operator()(Buffer::ExecutionState&)
+    {
         glGenerateTextureMipmap(image->handle);
     }
     const Image::Handle image;
@@ -69,16 +74,17 @@ struct ClearColorImageCommand : CommandI {
     ClearColorImageCommand(
         std::pmr::memory_resource* a_MemoryResource,
         const Image::Handle& a_Image,
-        const ColorValue&    a_Color,
-        const size_t&        a_Count,
+        const ColorValue& a_Color,
+        const size_t& a_Count,
         const ImageSubresourceRange* a_Ranges)
         : image(a_Image)
         , color(a_Color)
         , ranges(a_Ranges, a_Ranges + a_Count, a_MemoryResource)
-    {}
-    virtual void operator()(Buffer::ExecutionState&) {
-        for (const auto& range : ranges)
-        {
+    {
+    }
+    virtual void operator()(Buffer::ExecutionState&)
+    {
+        for (const auto& range : ranges) {
             for (uint32_t level = range.baseMipLevel; level < range.levelCount; ++level)
                 glClearTexImage(
                     image->handle,
@@ -89,37 +95,36 @@ struct ClearColorImageCommand : CommandI {
         }
     }
     const Image::Handle image;
-    const ColorValue    color;
+    const ColorValue color;
     const std::pmr::vector<ImageSubresourceRange> ranges;
 };
 
 void CopyBufferToImage(
     const Command::Buffer::Handle& a_CommandBuffer,
-    const OCRA::Buffer::Handle&    a_SrcBuffer,
-    const Image::Handle&           a_DstImage,
+    const OCRA::Buffer::Handle& a_SrcBuffer,
+    const Image::Handle& a_DstImage,
     const std::vector<ImageBufferCopy>& a_Regions)
 {
-    for (const auto& copy : a_Regions) CheckValidCopy(copy, a_DstImage);
-    a_CommandBuffer->PushCommand<GenericCommand>([
-        srcBuffer = a_SrcBuffer, dstImage = a_DstImage, regions = a_Regions
-    ](Command::Buffer::ExecutionState&) {
+    for (const auto& copy : a_Regions)
+        CheckValidCopy(copy, a_DstImage);
+    a_CommandBuffer->PushCommand<GenericCommand>([srcBuffer = a_SrcBuffer, dstImage = a_DstImage, regions = a_Regions](Command::Buffer::ExecutionState&) {
         const auto& memoryBinding = srcBuffer->memoryBinding;
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, memoryBinding.memory->handle);
-        for (auto& copy : regions) dstImage->Upload(copy, memoryBinding.offset);
+        for (auto& copy : regions)
+            dstImage->Upload(copy, memoryBinding.offset);
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
     });
 }
 
 void CopyImageToBuffer(
     const Command::Buffer::Handle& a_CommandBuffer,
-    const OCRA::Buffer::Handle&    a_DstBuffer,
-    const Image::Handle&           a_SrcImage,
+    const OCRA::Buffer::Handle& a_DstBuffer,
+    const Image::Handle& a_SrcImage,
     const std::vector<ImageBufferCopy>& a_Regions)
 {
-    for (const auto& copy : a_Regions) CheckValidCopy(copy, a_SrcImage);
-    a_CommandBuffer->PushCommand<GenericCommand>([
-        dstBuffer = a_DstBuffer, srcImage = a_SrcImage, regions = a_Regions
-    ](Command::Buffer::ExecutionState&) {
+    for (const auto& copy : a_Regions)
+        CheckValidCopy(copy, a_SrcImage);
+    a_CommandBuffer->PushCommand<GenericCommand>([dstBuffer = a_DstBuffer, srcImage = a_SrcImage, regions = a_Regions](Command::Buffer::ExecutionState&) {
         const auto& memoryBinding = dstBuffer->memoryBinding;
         glBindBuffer(GL_PIXEL_PACK_BUFFER, memoryBinding.memory->handle);
         for (const auto& copy : regions)
@@ -129,10 +134,10 @@ void CopyImageToBuffer(
 }
 
 void CopyImage(
-    const Command::Buffer::Handle&  a_CommandBuffer,
-    const Image::Handle&            a_SrcImage,
-    const Image::Handle&            a_DstImage,
-    const std::vector<ImageCopy>&  a_Regions)
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const Image::Handle& a_SrcImage,
+    const Image::Handle& a_DstImage,
+    const std::vector<ImageCopy>& a_Regions)
 {
     a_CommandBuffer->PushCommand<CopyImageCommand>(
         a_CommandBuffer->memoryResource,
@@ -148,9 +153,9 @@ void GenerateMipMap(
 }
 
 void ClearColorImage(
-    const Command::Buffer::Handle&  a_CommandBuffer,
-    const Image::Handle&            a_Image,
-    const ColorValue&               a_Color,
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const Image::Handle& a_Image,
+    const ColorValue& a_Color,
     const std::vector<ImageSubresourceRange>& a_Ranges)
 {
     a_CommandBuffer->PushCommand<ClearColorImageCommand>(
@@ -162,14 +167,14 @@ void TransitionImageLayout(
     const Command::Buffer::Handle& a_CommandBuffer,
     const ImageLayoutTransitionInfo& a_Transition)
 {
-    //TODO use glTextureBarrier, glMemoryBarrier and glMemoryBarrierByRegion when relevant
+    // TODO use glTextureBarrier, glMemoryBarrier and glMemoryBarrierByRegion when relevant
 }
 
 void TransitionImagesLayout(
     const Command::Buffer::Handle& a_CommandBuffer,
     const std::vector<ImageLayoutTransitionInfo>& a_Transitions)
 {
-    //TODO use glTextureBarrier, glMemoryBarrier and glMemoryBarrierByRegion when relevant
+    // TODO use glTextureBarrier, glMemoryBarrier and glMemoryBarrierByRegion when relevant
 }
 
 void BlitImage(

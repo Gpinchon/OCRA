@@ -12,13 +12,11 @@
 
 OCRA_DECLARE_WEAK_HANDLE(OCRA::PhysicalDevice);
 
-namespace OCRA::Device
-{
+namespace OCRA::Device {
 using Command = std::function<void()>;
-struct Impl
-{
+struct Impl {
     Impl(const PhysicalDevice::Handle& a_PhysicalDevice);
-    //Push a command to a specific queue
+    // Push a command to a specific queue
     inline void PushCommand(
         const uint32_t& a_FamilyIndex,
         const uint32_t& a_QueueIndex,
@@ -29,7 +27,7 @@ struct Impl
         OCRA_ASSERT(a_QueueIndex == 0);
         physicalDevice.lock()->PushCommand(a_Command, a_Synchronous);
     }
-    //Push a command directly to PhysicalDevice
+    // Push a command directly to PhysicalDevice
     inline void PushCommand(
         const Command& a_Command,
         const bool a_Synchronous)
@@ -37,7 +35,7 @@ struct Impl
         physicalDevice.lock()->PushCommand(a_Command, a_Synchronous);
     }
     const PhysicalDevice::WeakHandle physicalDevice;
-    const TextureBlitter textureBlitter{ *this };
+    const TextureBlitter textureBlitter { *this };
     std::map<uint32_t, std::vector<Queue::Handle>> queueFamilies;
 };
 }
