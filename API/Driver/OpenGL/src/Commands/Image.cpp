@@ -191,4 +191,19 @@ void BlitImage(
         a_Blits.size(), a_Blits.data(),
         a_Filter);
 }
+
+void BlitImage(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const Image::Handle& a_SrcImage,
+    const ImageLayout& a_SrcImageLayout,
+    const Image::Handle& a_DstImage,
+    const ImageLayout& a_DstImageLayout,
+    const std::vector<ImageBlit>& a_Blits,
+    const Filter& a_Filter)
+{
+    BlitImage(
+        a_CommandBuffer,
+        a_SrcImage, a_DstImage,
+        a_Blits, a_Filter);
+}
 }

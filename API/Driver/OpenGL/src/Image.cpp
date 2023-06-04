@@ -269,6 +269,7 @@ void Texture3D<false>::Upload(const ImageBufferCopy& a_Copy, const size_t& a_Mem
 void CopyBufferToImage(
     const OCRA::Buffer::Handle& a_SrcBuffer,
     const Image::Handle& a_DstImage,
+    const ImageLayout& a_DstImageLayout,
     const std::vector<ImageBufferCopy>& a_Regions)
 {
     for (const auto& copy : a_Regions)
