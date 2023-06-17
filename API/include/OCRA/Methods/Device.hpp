@@ -64,11 +64,6 @@ Pipeline::Handle CreatePipelineGraphics(
     const Device::Handle& a_Device,
     const CreatePipelineGraphicsInfo& a_Info);
 
-// Pipeline::Layout::Handle CreatePipelineLayout(
-//     const Device::Handle& a_Device,
-//     const CreatePipelineLayoutInfo& a_Info,
-//     const AllocationCallback* a_Allocator = nullptr);
-
 Handle CreateQueryPool(
     const Device::Handle& a_Device,
     const CreateQueryPoolInfo& a_Info);
@@ -111,4 +106,12 @@ Memory::Handle AllocateMemory(
  * In OGL, this will push an empty synchronized command
  */
 void WaitIdle(const Handle& a_Device);
+
+/**
+* Clears the caches of this device
+* Usually this includes pipeline, pipeline layout, descriptor set layout caches
+* WARNING : if the objects stored in cache are in use, this might cause undefined behavior
+* In general, this function should only be used after releasing all objects from device
+*/
+void ClearCache(const Handle& a_Device);
 }
