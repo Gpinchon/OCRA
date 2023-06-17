@@ -60,7 +60,7 @@ void BeginRendering(
     vkDepthAttachment   = GetVkRenderingAttachmentInfo(a_Info.depthAttachment, resolveMode);
     vkStencilAttachment = GetVkRenderingAttachmentInfo(a_Info.stencilAttachment, resolveMode);
     vk::RenderingInfo vkInfo(
-        {},
+        {}, //RenderingFlags is empty
         ConvertToVk(a_Info.area),
         a_Info.layerCount,
         0, // TODO figure out ViewMask
@@ -68,6 +68,21 @@ void BeginRendering(
         &vkDepthAttachment,
         &vkStencilAttachment);
     a_CommandBuffer->beginRendering(vkInfo);
+}
+
+void BindDescriptorSet(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const Pipeline::Handle& a_Pipeline,
+    const Descriptor::Set::Handle& a_Descriptor,
+    const uint32_t a_DynamicOffset)
+{
+    auto& bindPoint = a_Pipeline->bindPoint;
+    a_CommandBuffer->bindDescriptorSets(
+        a_Pipeline->bindPoint,
+        a_Pipeline->layout,
+        0, //firstSet is always zero
+        { **a_Descriptor },
+        { a_DynamicOffset });
 }
 
 void BindPipeline(
