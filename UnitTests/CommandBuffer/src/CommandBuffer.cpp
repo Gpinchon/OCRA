@@ -3,7 +3,8 @@
 #include <Common.hpp>
 
 #include <future>
-#include <iostream>
+
+#include <gtest/gtest.h>
 
 #define FENCE_VERSION
 #define CHUNK_SIZE 256
@@ -13,14 +14,15 @@
 
 using namespace OCRA;
 
-#ifdef FENCE_VERSION
-static inline void SubmitCommandBuffer(const Device::Handle& a_Device, const Queue::Handle& a_Queue, const Command::Buffer::Handle& a_CommandBuffer)
+static inline void SubmitCommandBufferFence(
+    const Device::Handle& a_Device,
+    const Queue::Handle& a_Queue,
+    const Command::Buffer::Handle& a_CommandBuffer)
 {
     auto fence = CreateFence(a_Device);
     QueueSubmitInfo submitInfo;
     for (auto i = 0u; i < SWAP_NBR; ++i)
         submitInfo.commandBuffers.push_back(a_CommandBuffer);
-    std::cout << "========== Command Buffer submit ==========\n";
     {
         VerboseTimer("Queue Submission");
         Queue::Submit(a_Queue, { submitInfo }, fence);
@@ -37,43 +39,45 @@ static inline void SubmitCommandBuffer(const Device::Handle& a_Device, const Que
         for (auto i = 0; i < waitNbr; ++i) {
             Fence::WaitFor(fence, IgnoreTimeout);
         }
-        std::cout << "Already signaled Fence mean wait time : " << timer.Elapsed().count() / double(waitNbr) << " nanoseconds\n";
     }
-    std::cout << "===========================================\n";
-    std::cout << "\n";
 }
-#else //FENCE_VERSION
-static inline void SubmitCommandBuffer(const Device::Handle& a_Device, const Queue::Handle& a_Queue, const Command::Buffer::Handle& a_CommandBuffer)
+
+static inline void SubmitCommandBufferSemaphore(
+    const Device::Handle& a_Device,
+    const Queue::Handle& a_Queue,
+    const Command::Buffer::Handle& a_CommandBuffer)
 {
-    Semaphore::Info semaphoreInfo;
-    semaphoreInfo.type = Semaphore::Type::Timeline;
+    CreateSemaphoreInfo semaphoreInfo;
+    semaphoreInfo.type = SemaphoreType::Timeline;
     semaphoreInfo.initialValue = 0;
-    Semaphore::Handle semaphore = Semaphore::Create(a_Device, semaphoreInfo);
-    Queue::TimelineSemaphoreSubmitInfo timelineValues;
+    Semaphore::Handle semaphore = Device::CreateSemaphore(a_Device, semaphoreInfo);
+    TimelineSemaphoreSubmitInfo timelineValues;
     timelineValues.waitSemaphoreValues.push_back(1);
     timelineValues.signalSemaphoreValues.push_back(2);
-    Queue::SubmitInfo submitInfo;
+    QueueSubmitInfo submitInfo;
     for (auto i = 0u; i < SWAP_NBR; ++i)
         submitInfo.commandBuffers.push_back(a_CommandBuffer);
-    submitInfo.waitSemaphores.push_back(semaphore);
-    submitInfo.signalSemaphores.push_back(semaphore);
-    submitInfo.timelineSemaphoreValues = timelineValues;
-    std::cout << "========== Command Buffer submit ==========\n";
+    QueueSubmitWaitInfo waitInfo;
+    waitInfo.semaphore = semaphore;
+    waitInfo.timelineValue = 1;
+    waitInfo.dstStages = PipelineStageFlagBits::Transfer;
+    QueueSubmitSignalInfo signalInfo;
+    signalInfo.semaphore = semaphore;
+    signalInfo.timelineValue = 2;
+    submitInfo.waitSemaphores.push_back(waitInfo);
+    submitInfo.signalSemaphores.push_back(signalInfo);
     //test multithreaded submit
     std::async([a_Queue, submitInfo] {
         VerboseTimer("Queue Submission");
         Queue::Submit(a_Queue, { submitInfo });
     });
-    Semaphore::Signal(a_Device, semaphore, 1);
+    Semaphore::Signal(semaphore, 1);
     //make sure GPU is done
     {
         VerboseTimer bufferCopiesTimer("Buffer Copies");
-        Semaphore::Wait(a_Device, { semaphore }, { 2 }, std::chrono::nanoseconds(15000000));
+        Semaphore::Wait({ semaphore }, { 2 }, std::chrono::nanoseconds(15000000));
     }
-    std::cout << "===========================================\n";
-    std::cout << "\n";
 }
-#endif
 
 static inline void RecordSwapCommandBuffer(
     const Command::Buffer::Handle& a_CommandBuffer,
@@ -120,7 +124,7 @@ static inline void RecordSwapCommandBuffer(
     Command::Buffer::End(a_CommandBuffer);
 }
 
-int main()
+int TestBufferSwap(bool useFence)
 {
     const auto instance = CreateInstance("Test_CommandBuffer");
     const auto physicalDevice = Instance::EnumeratePhysicalDevices(instance).front();
@@ -163,14 +167,10 @@ int main()
         Memory::Unmap(memory);
     }
     RecordSwapCommandBuffer(commandBuffer, buffer0, buffer1, bufferT);
-    SubmitCommandBuffer(device, queue, commandBuffer);
+    if (useFence)
+        SubmitCommandBufferFence(device, queue, commandBuffer);
+    else SubmitCommandBufferSemaphore(device, queue, commandBuffer);
 
-    std::cout << "========== Sentences to swap ==========\n";
-    std::cout << "  Sentence 0 : " << SENTENCE0 << "\n";
-    std::cout << "  Sentence 1 : " << SENTENCE1 << "\n";
-    std::cout << "=======================================\n";
-    std::cout << "\n";
-    std::cout << "===== Check if sentences were swapped =====\n";
     int success = 0;
     {
         MemoryMappedRange mappedRange;
@@ -178,8 +178,8 @@ int main()
         mappedRange.offset = CHUNK_SIZE * 0;
         mappedRange.length = CHUNK_SIZE;
         std::string buffer0String = (char*)Memory::Map(mappedRange);
+        EXPECT_EQ(buffer0String, SENTENCE1);
         success += buffer0String == SENTENCE1 ? 0 : 1;
-        std::cout << "  Buffer 0 value : " << buffer0String << "\n";
         Memory::Unmap(memory);
     }
     {
@@ -188,11 +188,25 @@ int main()
         mappedRange.offset = CHUNK_SIZE * 1;
         mappedRange.length = CHUNK_SIZE;
         std::string buffer1String = (char*)Memory::Map(mappedRange);
+        EXPECT_EQ(buffer1String, SENTENCE0);
         success += buffer1String == SENTENCE0 ? 0 : 1;
-        std::cout << "  Buffer 1 value : " << buffer1String << "\n";
         Memory::Unmap(memory);
     }
-    std::cout << "    " << (success == 0 ? "***** Great success ! *****" : "XXXXX Failure will not be tolerated. XXXXX") << "\n";
-    std::cout << "===========================================\n";
     return success;
+}
+
+TEST(SwapBufferTests, SwapWithFence)
+{
+    ASSERT_EQ(TestBufferSwap(true), 0);
+}
+
+TEST(SwapBufferTests, SwapWithSemaphore)
+{
+    ASSERT_EQ(TestBufferSwap(false), 0);
+}
+
+int main(int argc, char** argv)
+{
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }

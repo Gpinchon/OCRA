@@ -80,9 +80,13 @@ Texture2D CreateTexture(const PhysicalDevice::Handle& a_PhysicalDevice, const De
     }
     Memory::Unmap(textureTransferMemory);
     ImageBufferCopy bufferCopy;
-    bufferCopy.imageSubresource.aspects = ImageAspectFlagBits::Color;
-    bufferCopy.imageExtent              = texture.GetImageInfo().extent;
-    Image::CopyBufferToImage(textureTransferBuffer, texture.GetImage(), { bufferCopy });
+    bufferCopy.imageSubresource.aspects    = ImageAspectFlagBits::Color;
+    bufferCopy.imageSubresource.layerCount = 1;
+    bufferCopy.imageExtent                 = texture.GetImageInfo().extent;
+    Image::CopyBufferToImage(
+        textureTransferBuffer,
+        texture.GetImage(),
+        ImageLayout::General, { bufferCopy });
     return texture;
 }
 
@@ -302,12 +306,35 @@ struct TexturesTestApp : TestApp {
             imageBlit.srcOffsets[1]             = Offset3D(window.GetExtent().width, window.GetExtent().height, 1);
 
             imageBlit.dstSubresource.aspects    = ImageAspectFlagBits::Color;
-            imageBlit.srcSubresource.layerCount = 1;
+            imageBlit.dstSubresource.layerCount = 1;
             imageBlit.dstOffsets[0]             = Offset3D(0, 0, 0);
             imageBlit.dstOffsets[1]             = Offset3D(window.GetExtent().width, window.GetExtent().height, 1);
 
             auto& srcImage = frameBufferImage;
             auto& dstImage = swapChainImage;
+
+            // Transition source image layout
+            {
+                ImageLayoutTransitionInfo layoutTransition;
+                layoutTransition.image = srcImage;
+                layoutTransition.subRange.aspects = ImageAspectFlagBits::Color;
+                layoutTransition.oldLayout = ImageLayout::Undefined;
+                layoutTransition.newLayout = ImageLayout::TransferSrcOptimal;
+                Command::TransitionImageLayout(
+                    mainCommandBuffer,
+                    layoutTransition);
+            }
+            // Transition destination image layout
+            {
+                ImageLayoutTransitionInfo layoutTransition;
+                layoutTransition.image = dstImage;
+                layoutTransition.subRange.aspects = ImageAspectFlagBits::Color;
+                layoutTransition.oldLayout = ImageLayout::Undefined;
+                layoutTransition.newLayout = ImageLayout::TransferDstOptimal;
+                Command::TransitionImageLayout(
+                    mainCommandBuffer,
+                    layoutTransition);
+            }
 
             // We do a blit here to perform necessary conversions
             Command::BlitImage(mainCommandBuffer,
@@ -319,7 +346,7 @@ struct TexturesTestApp : TestApp {
             range.levelCount = 1;
             range.layerCount = 1;
             Command::TransitionImageLayout(
-                mainCommandBuffer, { swapChainImage, range, ImageLayout::TransferDstOptimal, ImageLayout::PresentSrc });
+                mainCommandBuffer, { dstImage, range, ImageLayout::TransferDstOptimal, ImageLayout::PresentSrc });
         }
         Command::Buffer::End(mainCommandBuffer);
     }
@@ -339,11 +366,11 @@ struct TexturesTestApp : TestApp {
         attachmentInfo.storeOp     = StoreOp::Store;
 
         RenderingInfo renderingInfo;
-        renderingInfo.area.offset = { 0, 0 };
-        renderingInfo.area.extent = window.GetExtent();
-        renderingInfo.colorAttachments.push_back(attachmentInfo);
-        renderingInfo.layerCount    = 1;
-        const auto descriptorWrites = textureUniform.GetWriteOperations();
+        renderingInfo.area.offset      = { 0, 0 };
+        renderingInfo.area.extent      = window.GetExtent();
+        renderingInfo.colorAttachments = { attachmentInfo };
+        renderingInfo.layerCount       = 1;
+        const auto descriptorWrites    = textureUniform.GetWriteOperations();
 
         Command::Buffer::Begin(drawCommandBuffer, bufferBeginInfo);
         if (!descriptorWrites.empty())

@@ -307,7 +307,7 @@ struct GraphicsPipelineTestApp : TestApp {
                     ImageLayoutTransitionInfo layoutTransition;
                     layoutTransition.image            = srcImage;
                     layoutTransition.subRange.aspects = ImageAspectFlagBits::Color;
-                    layoutTransition.oldLayout        = ImageLayout::General;
+                    layoutTransition.oldLayout        = ImageLayout::Undefined;
                     layoutTransition.newLayout        = ImageLayout::TransferSrcOptimal;
                     Command::TransitionImageLayout(
                         mainCommandBuffer,
