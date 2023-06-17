@@ -17,6 +17,8 @@ void Update(
         device = a_Writes.front().dstSet->getDevice();
     else if (!a_Copies.empty())
         device = a_Copies.front().dstSet->getDevice();
+    else
+        return;
     std::vector<vk::WriteDescriptorSet> vkWrites(a_Writes.size());
     std::vector<vk::DescriptorBufferInfo> vkWriteBufferInfo(a_Writes.size());
     std::vector<vk::DescriptorImageInfo> vkWriteImageInfo(a_Writes.size());
