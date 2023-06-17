@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.19)
 cmake_policy(SET CMP0074 NEW)
 
+Fetch_GoogleTest()
 
 set(OCRA_TEST_QUEUE_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Queue.cpp)
@@ -14,7 +15,12 @@ if(MSVC_IDE)
     VS_DEBUGGER_ENVIRONMENT "${OCRA_DEBUGGER_ENV}")
 endif()
 
-target_link_libraries(OCRA-UnitTests-Queue OCRA-UnitTests-Lib-Common OCRA::API::Interface OCRA::API::Implementation)
+target_link_libraries(
+  OCRA-UnitTests-Queue PRIVATE
+    GTest::GTest
+    OCRA-UnitTests-Lib-Common
+    OCRA::API::Interface
+    OCRA::API::Implementation)
 
 if(MSVC_IDE)
   # Run macro

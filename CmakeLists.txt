@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.19)
 cmake_policy(SET CMP0074 NEW)
 
-include(FetchContent)
+include(cmake-tools/Fetch_Dependencies.cmake)
 include(cmake-tools/GroupSources.cmake)
 include(cmake-tools/add_subdirectory_with_folder.cmake)
 
@@ -10,6 +10,9 @@ project(OCRA LANGUAGES CXX)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS_RELEASE "-Ox")
+
+set(OCRA_EXTERNAL_PATH ${CMAKE_BINARY_DIR}/external/)
+list(APPEND CMAKE_PREFIX_PATH ${OCRA_EXTERNAL_PATH})
 
 add_subdirectory(API)
 add_subdirectory(SwapChain)

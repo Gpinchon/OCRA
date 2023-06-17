@@ -12,93 +12,9 @@ find_package(Vulkan)
 if (NOT Vulkan_FOUND)
   message("Vulkan SDK not installed, fetching minimal dependencies")
   option(UPDATE_DEPS "Run update_deps.py for user" OFF)
-  set(OCRA_EXTERNAL_PATH ${CMAKE_BINARY_DIR}/external/)
-  list(APPEND CMAKE_PREFIX_PATH ${OCRA_EXTERNAL_PATH})
 
-  #Fetch Vulkan-Headers
-  FetchContent_Declare(
-    VK_HEADERS
-    GIT_REPOSITORY  https://github.com/KhronosGroup/Vulkan-Headers.git
-    GIT_TAG         v1.3.244)
-  FetchContent_GetProperties(VK_HEADERS)
-  if (NOT vk_headers_POPULATED)
-    FetchContent_Populate(VK_HEADERS)
-    message("Vulkan-Headers fetched to ${vk_headers_SOURCE_DIR}")
-  endif (NOT vk_headers_POPULATED)
-  find_package(VulkanHeaders CONFIG QUIET)
-  if (NOT TARGET Vulkan::Headers)
-    execute_process(COMMAND ${CMAKE_COMMAND} -S ${vk_headers_SOURCE_DIR} -B ${vk_headers_BINARY_DIR})
-    execute_process(COMMAND ${CMAKE_COMMAND} --install ${vk_headers_BINARY_DIR} --prefix ${OCRA_EXTERNAL_PATH})
-    find_package(VulkanHeaders REQUIRED CONFIG QUIET)
-    message("Vulkan-Headers built to ${OCRA_EXTERNAL_PATH}")
-  endif (NOT TARGET Vulkan::Headers)
-
-  #Fetch SPIRV-Headers
-  FetchContent_Declare(
-    SPIRV_HEADERS
-    GIT_REPOSITORY  https://github.com/KhronosGroup/SPIRV-Headers.git
-    GIT_TAG         main)
-  FetchContent_GetProperties(SPIRV_HEADERS)
-  if (NOT spirv_headers_POPULATED)
-    FetchContent_Populate(SPIRV_HEADERS)
-    message("SPV-Headers fetched to ${spirv_headers_SOURCE_DIR}")
-  endif (NOT spirv_headers_POPULATED)
-  find_package(SPIRV-Headers CONFIG QUIET)
-  if(NOT TARGET SPIRV-Headers::SPIRV-Headers)
-    execute_process(COMMAND ${CMAKE_COMMAND} -S ${spirv_headers_SOURCE_DIR} -B ${spirv_headers_BINARY_DIR})
-    execute_process(COMMAND ${CMAKE_COMMAND} --install ${spirv_headers_BINARY_DIR} --config Release --prefix ${OCRA_EXTERNAL_PATH})
-    find_package(SPIRV-Headers REQUIRED CONFIG QUIET)
-    message("SPV-Headers built to ${OCRA_EXTERNAL_PATH}")
-  endif(NOT TARGET SPIRV-Headers::SPIRV-Headers)
-
-  #Fetch SPV-Tools
-  FetchContent_Declare(
-    SPIRV_TOOLS
-    GIT_REPOSITORY  https://github.com/KhronosGroup/SPIRV-Tools.git
-    GIT_TAG         v2023.1)
-  FetchContent_GetProperties(SPIRV_TOOLS)
-  if (NOT spirv_tools_POPULATED)
-    FetchContent_Populate(SPIRV_TOOLS)    
-    message("SPV-Tools fetched to ${spirv_tools_SOURCE_DIR}")
-  endif (NOT spirv_tools_POPULATED)
-  find_package(SPIRV-Tools CONFIG QUIET)
-  if (NOT TARGET SPIRV-Tools-static)
-    execute_process(COMMAND ${CMAKE_COMMAND} "-DSPIRV-Headers_SOURCE_DIR=${spirv_headers_SOURCE_DIR}" -S ${spirv_tools_SOURCE_DIR} -B ${spirv_tools_BINARY_DIR})
-    execute_process(COMMAND ${CMAKE_COMMAND} --build ${spirv_tools_BINARY_DIR} --config Release)
-    execute_process(COMMAND ${CMAKE_COMMAND} --install ${spirv_tools_BINARY_DIR} --config Release --prefix ${OCRA_EXTERNAL_PATH})
-    find_package(SPIRV-Tools REQUIRED CONFIG QUIET)
-    message("SPV-Tools built to ${OCRA_EXTERNAL_PATH}")
-  endif(NOT TARGET SPIRV-Tools-static)
-
-  #Fetch Vulkan-ValidationLayers
-  FetchContent_Declare(
-    VK_LAYERS
-    GIT_REPOSITORY  https://github.com/KhronosGroup/Vulkan-ValidationLayers.git
-    GIT_TAG         v1.3.244)
-  FetchContent_GetProperties(VK_LAYERS)
-  if (NOT vk_layers_POPULATED)
-    FetchContent_Populate(VK_LAYERS)
-    message("Vulkan-ValidationLayers fetched to ${vk_layers_SOURCE_DIR}")
-  endif (NOT vk_layers_POPULATED)
-  if (NOT DEFINED OCRA_VK_LAYER_PATH)
-    execute_process(COMMAND ${CMAKE_COMMAND} "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}" -S ${vk_layers_SOURCE_DIR} -B ${vk_layers_BINARY_DIR})
-    execute_process(COMMAND ${CMAKE_COMMAND} --build ${vk_layers_BINARY_DIR} --config Release)
-    execute_process(COMMAND ${CMAKE_COMMAND} --install ${vk_layers_BINARY_DIR} --config Release --prefix ${OCRA_EXTERNAL_PATH})
-    set(OCRA_VK_LAYER_PATH "${OCRA_EXTERNAL_PATH}/bin" CACHE PATH "Home of Vulkan layers")
-    message("Vulkan-ValidationLayers built to ${OCRA_EXTERNAL_PATH}")
-  endif (NOT DEFINED OCRA_VK_LAYER_PATH)
-
-  #Fetch Vulkan-Loader
-  FetchContent_Declare(
-    VK_LOADER
-    GIT_REPOSITORY  https://github.com/KhronosGroup/Vulkan-Loader.git
-    GIT_TAG         v1.3.244
-  )
-  FetchContent_MakeAvailable(VK_LOADER)
-  set_subdirectory_folder("3rdparty/Vulkan-Loader" ${vk_loader_SOURCE_DIR})
-  message("Vulkan-Loader fetched to ${vk_loader_SOURCE_DIR}")
-
-  set(OCRA_DEBUGGER_ENV "VK_LAYER_PATH=${OCRA_VK_LAYER_PATH}" CACHE STRING "The debugging environment")
+  Fetch_VulkanValidationLayers()
+  Fetch_VulkanLoader()
 
   set(VK_LIBS vulkan Vulkan::Headers)
 else (NOT Vulkan_FOUND)
@@ -113,6 +29,7 @@ set(OCRA_IMPL_HEADER_FILES
   ${OCRA_IMPL_INCLUDE_DIR}/VK/DescriptorPool.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/VK/DescriptorSet.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/VK/DescriptorSetLayout.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/VK/DescriptorSetLayoutCache.hpp  
   ${OCRA_IMPL_INCLUDE_DIR}/VK/Device.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/VK/Enums.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/VK/Fence.hpp
@@ -123,9 +40,11 @@ set(OCRA_IMPL_HEADER_FILES
   ${OCRA_IMPL_INCLUDE_DIR}/VK/ImageSampler.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/VK/ImageView.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/VK/Instance.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/VK/LazyConstructor.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/VK/Memory.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/VK/Pipeline.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/VK/PipelineLayout.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/VK/PipelineLayoutCache.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/VK/PhysicalDevice.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/VK/Queue.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/VK/Semaphore.hpp

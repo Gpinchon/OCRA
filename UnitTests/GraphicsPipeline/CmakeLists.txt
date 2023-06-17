@@ -13,7 +13,14 @@ if(MSVC_IDE)
     VS_DEBUGGER_ENVIRONMENT "${OCRA_DEBUGGER_ENV}")
 endif()
 
-target_link_libraries(OCRA-UnitTests-GraphicsPipeline OCRA-UnitTests-Lib-Common OCRA-UnitTests-Lib-Window OCRA-UnitTests-Lib-Mesh OCRA::API::Interface OCRA::API::Implementation OCRA::SwapChain::Implementation)
+target_link_libraries(
+  OCRA-UnitTests-GraphicsPipeline PRIVATE
+    OCRA-UnitTests-Lib-Common
+    OCRA-UnitTests-Lib-Window
+    OCRA-UnitTests-Lib-Mesh
+    OCRA::API::Interface
+    OCRA::API::Implementation
+    OCRA::SwapChain::Implementation)
 
 if(MSVC_IDE)
   # Run macro
