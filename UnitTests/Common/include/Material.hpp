@@ -93,7 +93,7 @@ private:
     PipelineShaderStage fragmentShader;
     UniformBuffer parameters;
     std::vector<UniformTexture> textures;
-    std::vector<DescriptorSetLayoutBinding> descriptorLayoutBindings;
+    std::vector<DescriptorSetBinding> descriptorLayoutBindings;
     std::vector<DescriptorSetWrite> writeOperations;
 };
 }

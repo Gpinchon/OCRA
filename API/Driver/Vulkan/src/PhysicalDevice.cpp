@@ -328,13 +328,14 @@ Device::Handle CreateDevice(
     vk::PhysicalDeviceCustomBorderColorFeaturesEXT customBorder(true, true);
     vk::PhysicalDeviceDynamicRenderingFeaturesKHR dynamicRenderingFeature(true, &customBorder);
     vk::PhysicalDeviceVertexInputDynamicStateFeaturesEXT dynamicVertexInputFeature(true, &dynamicRenderingFeature);
+    vk::PhysicalDeviceTimelineSemaphoreFeatures timelineSemaphoreFeature(true, &dynamicVertexInputFeature);
     vk::DeviceCreateInfo info(
         vk::DeviceCreateFlags {},
         queues,
         layers,
         extensions,
         &enabledFeatures,
-        &dynamicVertexInputFeature);
+        &timelineSemaphoreFeature);
     return std::make_shared<Device::Impl>(*a_PhysicalDevice, info, foundTransferQueue);
 }
 

@@ -29,7 +29,7 @@ static inline auto ConvertToVk(const ComponentMapping& a_Mapping)
         ConvertToVk(a_Mapping.b),
         ConvertToVk(a_Mapping.a));
 }
-static inline auto ConvertToVk(const DescriptorSetLayoutBinding& a_Binding)
+static inline auto ConvertToVk(const DescriptorSetBinding& a_Binding)
 {
     return vk::DescriptorSetLayoutBinding(
         a_Binding.binding,

@@ -11,15 +11,15 @@ Instance::Handle CreateInstance(const std::string& a_Name)
 {
     Instance::Handle instance;
     CreateInstanceInfo instanceInfo;
-    instanceInfo.applicationInfo.name               = a_Name;
-    instanceInfo.applicationInfo.applicationVersion = 1;
-    instance                                        = CreateInstance(instanceInfo);
+    instanceInfo.name               = a_Name;
+    instanceInfo.applicationVersion = 1;
+    instance                        = CreateInstance(instanceInfo);
     std::cout << "==== Instance ====\n";
     std::cout << "  Type           : " << Instance::GetType(instance) << "\n";
-    std::cout << "  App Name       : " << instanceInfo.applicationInfo.name << "\n";
-    std::cout << "  App Version    : " << instanceInfo.applicationInfo.applicationVersion << "\n";
-    std::cout << "  Engine Name    : " << instanceInfo.applicationInfo.engineName << "\n";
-    std::cout << "  Engine Version : " << instanceInfo.applicationInfo.engineVersion << "\n";
+    std::cout << "  App Name       : " << instanceInfo.name << "\n";
+    std::cout << "  App Version    : " << instanceInfo.applicationVersion << "\n";
+    std::cout << "  Engine Name    : " << instanceInfo.engineName << "\n";
+    std::cout << "  Engine Version : " << instanceInfo.engineVersion << "\n";
     std::cout << "==================\n";
     std::cout << "\n";
     return instance;
@@ -85,14 +85,6 @@ Command::Buffer::Handle CreateCommandBuffer(const Command::Pool::Handle& a_Comma
     commandBufferAllocateInfo.level = a_Level;
     return Command::Pool::AllocateCommandBuffer(a_CommandPool, commandBufferAllocateInfo).front();
 }
-
-// Memory::Handle AllocateMemory(const PhysicalDevice::Handle& a_PhysicalDevice, const Device::Handle& a_Device, const uint64_t& a_Size, const MemoryPropertyFlags& a_MemoryProperties)
-//{
-//     AllocateMemoryInfo memoryInfo;
-//     memoryInfo.memoryTypeIndex = FindMemoryType(a_PhysicalDevice, a_MemoryProperties);
-//     memoryInfo.size = a_Size;
-//     return AllocateMemory(a_Device, memoryInfo);
-// }
 
 Descriptor::Pool::Handle CreateDescriptorPool(const Device::Handle& a_Device, const size_t& a_MaxSets)
 {

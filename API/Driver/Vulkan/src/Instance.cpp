@@ -6,6 +6,7 @@
 
 #include <stdexcept>
 
+#include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_raii.hpp>
 #ifdef _WIN32
 #include <Windows.h>
@@ -66,10 +67,10 @@ Instance::Handle CreateInstance(
     static vk::raii::Context context;
     vk::InstanceCreateInfo info;
     vk::ApplicationInfo appInfo;
-    appInfo.applicationVersion   = a_Info.applicationInfo.applicationVersion;
-    appInfo.pApplicationName     = a_Info.applicationInfo.name.c_str();
-    appInfo.engineVersion        = a_Info.applicationInfo.engineVersion;
-    appInfo.pEngineName          = a_Info.applicationInfo.engineName.c_str();
+    appInfo.applicationVersion   = a_Info.applicationVersion;
+    appInfo.pApplicationName     = a_Info.name.c_str();
+    appInfo.engineVersion        = a_Info.engineVersion;
+    appInfo.pEngineName          = a_Info.engineName.c_str();
     appInfo.apiVersion           = VK_API_VERSION_1_3;
     info.pApplicationInfo        = &appInfo;
     info.enabledExtensionCount   = extensions.size();

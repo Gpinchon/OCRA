@@ -6,13 +6,6 @@
 
 #include <cassert>
 
-OCRA_DECLARE_HANDLE(OCRA::PhysicalDevice);
-OCRA_DECLARE_HANDLE(OCRA::Device);
-OCRA_DECLARE_HANDLE(OCRA::Memory);
-OCRA_DECLARE_HANDLE(OCRA::Descriptor::Pool);
-OCRA_DECLARE_HANDLE(OCRA::Descriptor::Set);
-OCRA_DECLARE_HANDLE(OCRA::Descriptor::SetLayout);
-
 /**
  * @brief Shader pipeline helpers
  */
@@ -41,9 +34,9 @@ public:
     }
 
 private:
-    inline static DescriptorSetLayoutBinding CreateSetLayoutBinding(const uint32_t a_Binding, const ShaderStageFlags& a_ShaderStages)
+    inline static DescriptorSetBinding CreateSetBinding(const uint32_t a_Binding, const ShaderStageFlags& a_ShaderStages)
     {
-        DescriptorSetLayoutBinding binding;
+        DescriptorSetBinding binding;
         binding.binding    = a_Binding;
         binding.count      = 1;
         binding.type       = DescriptorType::UniformBuffer;
@@ -59,7 +52,7 @@ private:
 
 template <typename T>
 inline UniformBuffer::UniformBuffer(const Device::Handle& a_Device, const uint32_t& a_Binding, const ShaderStageFlags& a_Stages, const T& a_DefaultValue)
-    : Uniform(a_Device, { CreateSetLayoutBinding(a_Binding, a_Stages) })
+    : Uniform(a_Device, { CreateSetBinding(a_Binding, a_Stages) })
     , data(sizeof(T))
 {
     Set(a_DefaultValue);

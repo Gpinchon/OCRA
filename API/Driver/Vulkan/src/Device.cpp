@@ -220,9 +220,8 @@ Pipeline::Handle CreatePipelineGraphics(
         bindings.begin(), [](const auto& a_Binding) { return ConvertToVk(a_Binding); });
     std::transform(a_Info.pushConstants.begin(), a_Info.pushConstants.end(),
         pushConstantRanges.begin(), [](const auto& a_Range) { return ConvertToVk(a_Range); });
-    auto layout = device.GetOrCreatePipelineLayout(
-        a_Device->GetOrCreateDescriptorSetLayout(bindings),
-        pushConstantRanges);
+    auto descriptorSetLayout = device.GetOrCreatePushDescriptorSetLayout(bindings);
+    auto pipelineLayout = device.GetOrCreatePipelineLayout(descriptorSetLayout, pushConstantRanges);
 
     vk::GraphicsPipelineCreateInfo info({},
         shaderStage.size(), shaderStage.data(),
@@ -235,9 +234,9 @@ Pipeline::Handle CreatePipelineGraphics(
         &depthStencilStateCreateInfo,
         colorBlendState.data(),
         dynamicState.data(),
-        layout,
-        vk::RenderPass(nullptr), 0,
-        vk::Pipeline(nullptr), 0,
+        pipelineLayout,
+        vk::RenderPass(nullptr), /* subpass  index */ 0,
+        vk::Pipeline(nullptr),   /* pipeline index */ 0,
         &renderingInfo);
     return std::make_shared<Pipeline::Graphics::Impl>(device, device.pipelineCache, info);
 }
@@ -269,5 +268,15 @@ Queue::Handle GetQueue(
     uint32_t a_QueueIndex)
 {
     return std::make_shared<Queue::Impl>(*a_Device, a_FamilyIndex, a_QueueIndex);
+}
+
+void WaitIdle(const Handle& a_Device)
+{
+    a_Device->waitIdle();
+}
+
+void ClearCache(const Handle& a_Device)
+{
+    a_Device->ClearCache();
 }
 }

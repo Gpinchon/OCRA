@@ -19,9 +19,9 @@ bool UniformTexture::Update()
     return true;
 }
 
-DescriptorSetLayoutBinding UniformTexture::CreateSetLayoutBinding(const uint32_t a_Binding)
+DescriptorSetBinding UniformTexture::CreateSetBinding(const uint32_t a_Binding)
 {
-    DescriptorSetLayoutBinding binding;
+    DescriptorSetBinding binding;
     binding.binding    = a_Binding;
     binding.count      = 1;
     binding.type       = DescriptorType::ImageSampler;

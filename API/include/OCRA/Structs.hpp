@@ -28,18 +28,12 @@ namespace OCRA {
 // Use this to ignore timeout and wait indefinitely
 static constexpr auto IgnoreTimeout     = (std::chrono::nanoseconds::max)();
 static constexpr auto IgnoreQueueFamily = (std::numeric_limits<uint32_t>::max)();
-struct ApplicationInfo {
-    std::string name;
-    uint32_t applicationVersion { 0 };
-    std::string engineName;
-    uint32_t engineVersion { 0 };
-};
 struct DescriptorPoolSize {
     DescriptorType type { DescriptorType::Unknown };
     uint32_t count { 0 }; // nbr of allocated types, byte size for InlineUniformBlock
 };
 
-struct DescriptorSetLayoutBinding {
+struct DescriptorSetBinding {
     uint32_t binding { 0 }; // number of this entry corresponding to a resource inside shader
     DescriptorType type { DescriptorType::Unknown }; // the type of resource descriptor to use
     uint32_t count { 0 }; // the nbr of descriptor, when InlineUniformBlock used, is byte size
@@ -653,9 +647,14 @@ struct CommandBufferBeginInfo {
     std::optional<CommandBufferInheritanceInfo> inheritanceInfo;
 };
 
+struct CreateInstanceInfo {
+    std::string name;
+    uint32_t applicationVersion { 0 };
+    std::string engineName;
+    uint32_t engineVersion { 0 };
+};
 struct CreateBufferInfo {
     CreateBufferFlags flags { CreateBufferFlagBits::None };
-    ;
     uint64_t size { 0 };
     BufferUsageFlags usage { BufferUsageFlagBits::None };
     SharingMode sharingMode { SharingMode::Exclusive };
@@ -688,13 +687,6 @@ struct CreateImageViewInfo {
     ComponentMapping components {};
     ImageSubresourceRange subRange {};
 };
-struct CreateInstanceInfo {
-    ApplicationInfo applicationInfo;
-};
-struct CreateFrameBufferInfo {
-    std::vector<Image::View::Handle> attachments; // Image View handles
-    Extent<3, uint16_t> extent; // default FB extent
-};
 struct CreatePipelineGraphicsInfo { // describes a graphics pipeline with each stage
     PipelineColorBlendState colorBlendState {};
     PipelineDepthStencilState depthStencilState {};
@@ -707,10 +699,9 @@ struct CreatePipelineGraphicsInfo { // describes a graphics pipeline with each s
     PipelineViewPortState viewPortState {};
     PipelineDynamicState dynamicState {};
     PipelineRenderingInfo renderingInfo {};
-    std::vector<DescriptorSetLayoutBinding> bindings; // the bindings of this pipeline, must be compatible with Pool::Info::sizes
+    std::vector<DescriptorSetBinding> bindings; // the bindings of this pipeline, must be compatible with Pool::Info::sizes
     std::vector<PushConstantRange> pushConstants;
 };
-
 struct CreateImageSamplerInfo {
     Filter minFilter { Filter::Linear };
     Filter magFilter { Filter::Linear };
@@ -740,7 +731,7 @@ struct AllocateCommandBufferInfo {
     uint32_t count { 0 };
 };
 struct AllocateDescriptorSetInfo {
-    std::vector<DescriptorSetLayoutBinding> bindings; // the bindings of this descriptor set, must be compatible with Pool::Info::sizes
+    std::vector<DescriptorSetBinding> bindings; // the bindings of this descriptor set, must be compatible with Pool::Info::sizes
 };
 struct AllocateMemoryInfo {
     size_t size { 0 };

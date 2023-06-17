@@ -49,7 +49,6 @@ public:
     auto& GetVertexBuffer() const { return vertexBuffer; }
     auto& GetMaterial() { return material; }
     auto& GetDescriptorSets() const { return descriptorSets; }
-    auto GetDescriptorSetLayouts() const { return descriptorSetLayouts; }
     auto& GetDescriptorSetLayoutBindings() const
     {
         return descriptorSetLayoutBindings;
@@ -81,7 +80,6 @@ private:
     Material material;
     UniformBuffer projectionMatrix;
     std::vector<Descriptor::Set::Handle> descriptorSets;
-    std::vector<Descriptor::SetLayout::Handle> descriptorSetLayouts;
-    std::vector<DescriptorSetLayoutBinding> descriptorSetLayoutBindings;
+    std::vector<DescriptorSetBinding> descriptorSetLayoutBindings;
 };
 }

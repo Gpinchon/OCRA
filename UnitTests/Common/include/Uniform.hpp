@@ -10,9 +10,9 @@ public:
     Uniform()               = default;
     Uniform(const Uniform&) = default;
     // We already know how our uniforms are formated
-    Uniform(const Device::Handle& a_Device, const std::vector<DescriptorSetLayoutBinding>& a_Bindings)
+    Uniform(const Device::Handle& a_Device, const std::vector<DescriptorSetBinding>& a_Bindings)
         : device(a_Device)
-        , descriptorSetLayoutBindings(a_Bindings)
+        , descriptorSetBindings(a_Bindings)
     {
     }
     // We don't know our bindings yet and will call CreateDescriptorSetLayout & CreateDescriptorSets later
@@ -21,7 +21,7 @@ public:
     {
     }
     auto& GetDevice() const { return device; };
-    auto& GetDescriptorSetLayoutBindings() const { return descriptorSetLayoutBindings; }
+    auto& GetDescriptorSetLayoutBindings() const { return descriptorSetBindings; }
     virtual const std::vector<DescriptorSetWrite>& GetWriteOperations() const final
     {
         return writeOperations;
@@ -33,9 +33,9 @@ protected:
      * @return true if an update took place
      */
     virtual bool Update() = 0;
-    void SetDescriptorSetLayoutBindings(const std::vector<DescriptorSetLayoutBinding>& a_Bindings)
+    void SetDescriptorSetBindings(const std::vector<DescriptorSetBinding>& a_Bindings)
     {
-        descriptorSetLayoutBindings = a_Bindings;
+        descriptorSetBindings = a_Bindings;
     }
     void SetWriteOperations(const std::vector<DescriptorSetWrite>& a_WriteOperations)
     {
@@ -44,7 +44,7 @@ protected:
 
 private:
     const Device::Handle device;
-    std::vector<DescriptorSetLayoutBinding> descriptorSetLayoutBindings;
+    std::vector<DescriptorSetBinding> descriptorSetBindings;
     std::vector<DescriptorSetWrite> writeOperations;
 };
 }

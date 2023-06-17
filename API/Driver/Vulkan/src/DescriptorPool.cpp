@@ -16,10 +16,10 @@ Descriptor::Set::Handle AllocateDescriptorSet(
     std::vector<vk::DescriptorSetLayoutBinding> bindings(a_Info.bindings.size());
     std::transform(
         a_Info.bindings.begin(), a_Info.bindings.end(),
-        bindings.begin(), [](const DescriptorSetLayoutBinding& binding) { return ConvertToVk(binding); });
+        bindings.begin(), [](const DescriptorSetBinding& binding) { return ConvertToVk(binding); });
     auto& pool                = *a_Pool;
     auto& device              = pool.device;
-    auto& descriptorSetLayout = device.GetOrCreateDescriptorSetLayout(bindings);
+    auto& descriptorSetLayout = device.GetOrCreateUpdatableDescriptorSetLayout(bindings);
     vk::DescriptorSetAllocateInfo info;
     info.descriptorPool     = *pool;
     info.descriptorSetCount = 1;
