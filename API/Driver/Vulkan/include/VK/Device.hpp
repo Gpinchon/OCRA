@@ -1,76 +1,18 @@
 #pragma once
 
 #include <VK/PhysicalDevice.hpp>
+#include <VK/PipelineLayoutCache.hpp>
+#include <VK/DescriptorSetLayoutCache.hpp>
+
+#include <functional>
+#include <unordered_map>
 
 #include <vulkan/vulkan_raii.hpp>
 
 namespace OCRA::Device {
-struct DescriptorSetLayoutCache {
-    struct Storage {
-        vk::raii::DescriptorSetLayout layout { nullptr };
-        std::vector<vk::DescriptorSetLayoutBinding> bindings;
-    };
-    auto GetOrCreate(
-        const vk::raii::Device& a_Device,
-        const std::vector<vk::DescriptorSetLayoutBinding>& a_Bindings)
-    {
-        for (auto& layout : layouts) {
-            if (layout.bindings.size() != a_Bindings.size())
-                continue;
-            for (auto i = 0u; i < a_Bindings.size(); ++i) {
-                auto& binding   = layout.bindings.at(i);
-                auto& bindingIn = a_Bindings.at(i);
-                if (binding != bindingIn)
-                    continue;
-            }
-            return *layout.layout;
-        }
-        vk::DescriptorSetLayoutCreateInfo info(
-            vk::DescriptorSetLayoutCreateFlagBits::ePushDescriptorKHR,
-            a_Bindings);
-        layouts.resize(layouts.size() + 1);
-        auto& storage    = layouts.back();
-        storage.layout   = std::move(a_Device.createDescriptorSetLayout(info));
-        storage.bindings = a_Bindings;
-        return *storage.layout;
-    }
-    std::vector<Storage> layouts;
-};
-struct PipelineLayoutCache {
-    struct Storage {
-        vk::raii::PipelineLayout layout { nullptr };
-        vk::DescriptorSetLayout descriptorLayout;
-        std::vector<vk::PushConstantRange> pushConstants;
-    };
-    auto GetOrCreate(
-        vk::raii::Device& a_Device,
-        const vk::DescriptorSetLayout& a_Layout,
-        const std::vector<vk::PushConstantRange>& a_PushConstants)
-    {
-        for (auto& layout : layouts) {
-            if (layout.descriptorLayout != a_Layout)
-                continue;
-            if (layout.pushConstants.size() != a_PushConstants.size())
-                continue;
-            for (auto i = 0u; i < a_PushConstants.size(); ++i) {
-                auto& pushConstants   = layout.pushConstants.at(i);
-                auto& pushConstantsIn = a_PushConstants.at(i);
-                if (pushConstants != pushConstantsIn)
-                    continue;
-            }
-            return *layout.layout;
-        }
-        vk::PipelineLayoutCreateInfo info({}, a_Layout, a_PushConstants);
-        layouts.resize(layouts.size() + 1);
-        auto& storage            = layouts.back();
-        storage.layout           = std::move(a_Device.createPipelineLayout(info));
-        storage.descriptorLayout = a_Layout;
-        storage.pushConstants    = a_PushConstants;
-        return *storage.layout;
-    }
-    std::vector<Storage> layouts;
-};
 struct Impl : vk::raii::Device {
+    using PushDescriptorSetLayoutCache = DescriptorSetLayoutCache<vk::DescriptorSetLayoutCreateFlagBits::ePushDescriptorKHR>;
+    using UpdatableDescriptorSetLayoutCache = DescriptorSetLayoutCache<vk::DescriptorSetLayoutCreateFlagBits::eUpdateAfterBindPool>;
     Impl(PhysicalDevice::Impl& a_PhysicalDevice, const vk::DeviceCreateInfo& a_Info, const bool a_NeedsTransferQueue)
         : vk::raii::Device(a_PhysicalDevice, a_Info)
         , physicalDevice(a_PhysicalDevice)
@@ -85,10 +27,15 @@ struct Impl : vk::raii::Device {
         transferQueue                    = getQueue(queueFamilyIndex, 0);
         transferCommandPool              = createCommandPool(commandPoolInfo);
     }
-    auto GetOrCreateDescriptorSetLayout(
+    auto GetOrCreatePushDescriptorSetLayout(
         const std::vector<vk::DescriptorSetLayoutBinding>& a_Bindings)
     {
-        return descriptorSetLayoutCache.GetOrCreate(*this, a_Bindings);
+        return pushDescriptorSetLayoutCache.GetOrCreate(*this, a_Bindings);
+    }
+    auto GetOrCreateUpdatableDescriptorSetLayout(
+        const std::vector<vk::DescriptorSetLayoutBinding>& a_Bindings)
+    {
+        return updatableDescriptorSetLayoutCache.GetOrCreate(*this, a_Bindings);
     }
     auto GetOrCreatePipelineLayout(
         const vk::DescriptorSetLayout& a_Layout,
@@ -96,11 +43,18 @@ struct Impl : vk::raii::Device {
     {
         return pipelineLayoutCache.GetOrCreate(*this, a_Layout, a_PushConstants);
     }
+    void ClearCache() {
+        pipelineLayoutCache.storage.clear();
+        pushDescriptorSetLayoutCache.storage.clear();
+        updatableDescriptorSetLayoutCache.storage.clear();
+        pipelineCache = createPipelineCache({});
+    }
     const PhysicalDevice::Impl& physicalDevice;
     vk::raii::Queue transferQueue { nullptr };
     vk::raii::CommandPool transferCommandPool { nullptr };
     vk::raii::PipelineCache pipelineCache;
     PipelineLayoutCache pipelineLayoutCache;
-    DescriptorSetLayoutCache descriptorSetLayoutCache;
+    PushDescriptorSetLayoutCache pushDescriptorSetLayoutCache;
+    UpdatableDescriptorSetLayoutCache updatableDescriptorSetLayoutCache;
 };
 }
