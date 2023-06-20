@@ -56,30 +56,6 @@ Descriptor::Pool::Handle CreateDescriptorPool(const Device::Handle& a_Device, co
     return std::make_shared<Descriptor::Pool::Impl>(*a_Device, info);
 }
 
-// Descriptor::SetLayout::Handle CreateDescriptorSetLayout(
-//     const Device::Handle& a_Device,
-//     const CreateDescriptorSetLayoutInfo& a_Info,
-//     const AllocationCallback* a_Allocator = nullptr)
-//{
-//     auto& device = *a_Device;
-//     vk::DescriptorSetLayout setLayout = nullptr;
-//     vk::DescriptorSetLayoutCreateInfo info;
-//     std::vector<vk::DescriptorSetLayoutBinding> vkBindings;
-//     vkBindings.reserve(a_Info.bindings.size());
-//     for (const auto& binding : a_Info.bindings)
-//     {
-//         vk::DescriptorSetLayoutBinding vkBinding{};
-//         vkBinding.binding = binding.binding;
-//         vkBinding.descriptorCount = binding.count;
-//         vkBinding.descriptorType = ConvertToVk(binding.type);
-//         vkBinding.stageFlags = ConvertToVk(binding.stageFlags);
-//         vkBindings.push_back(vkBinding);
-//     }
-//     info.bindingCount = vkBindings.size();
-//     info.pBindings = vkBindings.data();
-//     return std::make_shared<Descriptor::SetLayout::Impl>(device, info);
-// }
-
 Fence::Handle CreateFence(
     const Device::Handle& a_Device,
     const FenceStatus& a_DefaultStatus,
