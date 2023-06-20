@@ -47,9 +47,11 @@ set(OCRA_IMPL_HEADER_FILES
   ${OCRA_IMPL_INCLUDE_DIR}/VK/PipelineLayoutCache.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/VK/PhysicalDevice.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/VK/Queue.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/VK/RangeHasher.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/VK/Semaphore.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/VK/ShaderModule.hpp
   ${OCRA_IMPL_INCLUDE_DIR}/VK/Structs.hpp
+  ${OCRA_IMPL_INCLUDE_DIR}/VK/VkObjectCache.hpp
 )
 
 set(OCRA_IMPL_SOURCE_FILES
