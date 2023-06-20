@@ -20,6 +20,8 @@
 #include <VK/Semaphore.hpp>
 #include <VK/ShaderModule.hpp>
 #include <VK/Structs.hpp>
+#include <VK/ToVk.hpp>
+
 #include <iostream>
 
 #undef CreateSemaphore
@@ -100,7 +102,7 @@ Image::Handle CreateImage(
     vkInfo.usage         = ConvertToVk(a_Info.usage);
     vkInfo.format        = ConvertToVk(a_Info.format);
     vkInfo.imageType     = ConvertToVk(a_Info.type);
-    vkInfo.initialLayout = vk::ImageLayout::eUndefined; // ConvertToVk(a_Info.initialLayout);
+    vkInfo.initialLayout = vk::ImageLayout::eUndefined; // always undefined
     vkInfo.mipLevels     = a_Info.mipLevels;
     vkInfo.samples       = ConvertToVk(a_Info.samples);
     auto image           = std::make_shared<Image::Impl>(device, vkInfo);
@@ -206,7 +208,7 @@ Pipeline::Handle CreatePipelineGraphics(
     IntermediateDynamicState dynamicState(a_Info.dynamicState);
     std::vector<vk::Format> colorAttachments(a_Info.renderingInfo.colorAttachmentFormats.size());
     std::transform(a_Info.renderingInfo.colorAttachmentFormats.begin(), a_Info.renderingInfo.colorAttachmentFormats.end(),
-        colorAttachments.begin(), [](const auto& format) { return ConvertToVk(format); });
+        colorAttachments.begin(), ToVk {});
 
     vk::PipelineRenderingCreateInfo renderingInfo(
         0,
@@ -217,9 +219,9 @@ Pipeline::Handle CreatePipelineGraphics(
     std::vector<vk::DescriptorSetLayoutBinding> bindings(a_Info.bindings.size());
     std::vector<vk::PushConstantRange> pushConstantRanges(a_Info.pushConstants.size());
     std::transform(a_Info.bindings.begin(), a_Info.bindings.end(),
-        bindings.begin(), [](const auto& a_Binding) { return ConvertToVk(a_Binding); });
+        bindings.begin(), ToVk {});
     std::transform(a_Info.pushConstants.begin(), a_Info.pushConstants.end(),
-        pushConstantRanges.begin(), [](const auto& a_Range) { return ConvertToVk(a_Range); });
+        pushConstantRanges.begin(), ToVk {});
     vk::DescriptorSetLayout descriptorSetLayout;
     if (a_Info.descriptorUpdate == DescriptorUpdate::Push) {
         descriptorSetLayout = device.GetOrCreateDescriptorSetLayout(vk::DescriptorSetLayoutCreateFlagBits::ePushDescriptorKHR, bindings);

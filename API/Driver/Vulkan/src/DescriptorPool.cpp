@@ -5,6 +5,7 @@
 #include <VK/DescriptorSetLayout.hpp>
 #include <VK/Enums.hpp>
 #include <VK/Structs.hpp>
+#include <VK/ToVk.hpp>
 
 #include <vector>
 
@@ -16,7 +17,7 @@ Descriptor::Set::Handle AllocateDescriptorSet(
     std::vector<vk::DescriptorSetLayoutBinding> bindings(a_Info.bindings.size());
     std::transform(
         a_Info.bindings.begin(), a_Info.bindings.end(),
-        bindings.begin(), [](const DescriptorSetBinding& binding) { return ConvertToVk(binding); });
+        bindings.begin(), ToVk {});
     auto& pool                = *a_Pool;
     auto& device              = pool.device;
     auto descriptorSetLayout = device.GetOrCreateDescriptorSetLayout(

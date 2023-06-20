@@ -5,6 +5,7 @@
 #include <VK/Enums.hpp>
 #include <VK/ShaderModule.hpp>
 #include <VK/Structs.hpp>
+#include <VK/ToVk.hpp>
 
 #include <vulkan/vulkan_raii.hpp>
 
@@ -37,12 +38,7 @@ struct IntermediateShaderStage {
     {
         std::transform(
             a_Stage.specializationInfo.mapEntries.begin(), a_Stage.specializationInfo.mapEntries.end(),
-            mapEntries.begin(), [](auto& mapEntry) {
-                return vk::SpecializationMapEntry(
-                    mapEntry.constantID,
-                    mapEntry.offset,
-                    mapEntry.size);
-            });
+            mapEntries.begin(), ToVk {});
     }
     IntermediateShaderStage& operator=(const IntermediateShaderStage& a_Other)
     {
@@ -94,21 +90,10 @@ struct IntermediateVertexInputState {
     {
         std::transform(
             a_State.bindingDescriptions.begin(), a_State.bindingDescriptions.end(),
-            bindings.begin(), [](const VertexBindingDescription& binding) {
-                return vk::VertexInputBindingDescription(
-                    binding.binding,
-                    binding.stride,
-                    ConvertToVk(binding.inputRate));
-            });
+            bindings.begin(), ToVk {});
         std::transform(
             a_State.attributeDescriptions.begin(), a_State.attributeDescriptions.end(),
-            attributes.begin(), [](const VertexAttributeDescription& attrib) {
-                return vk::VertexInputAttributeDescription(
-                    attrib.location,
-                    attrib.binding,
-                    ConvertToVk(attrib.format),
-                    attrib.offset);
-            });
+            attributes.begin(), ToVk {});
     }
     inline auto data() const
     {
@@ -126,14 +111,10 @@ struct IntermediateViewportState {
     {
         std::transform(
             a_State.viewPorts.begin(), a_State.viewPorts.end(),
-            viewports.begin(), [](const ViewPort& a_Viewport) {
-                return ConvertToVk(a_Viewport);
-            });
+            viewports.begin(), ToVk {});
         std::transform(
             a_State.scissors.begin(), a_State.scissors.end(),
-            scissors.begin(), [](const Rect2D& a_Rect) {
-                return ConvertToVk(a_Rect);
-            });
+            scissors.begin(), ToVk {});
     }
     inline auto data() const
     {
@@ -151,9 +132,7 @@ struct IntermediateColorBlendState {
     {
         std::transform(
             a_State.attachments.begin(), a_State.attachments.end(),
-            attachments.begin(), [](const PipelineColorBlendAttachmentState& a_State) {
-                return ConvertToVk(a_State);
-            });
+            attachments.begin(), ToVk {});
     }
     inline auto data() const
     {
@@ -170,9 +149,7 @@ struct IntermediateDynamicState {
     {
         std::transform(
             a_State.dynamicStates.begin(), a_State.dynamicStates.end(),
-            states.begin(), [](const DynamicState& a_State) {
-                return ConvertToVk(a_State);
-            });
+            states.begin(), ToVk {});
     }
     inline auto data() const
     {

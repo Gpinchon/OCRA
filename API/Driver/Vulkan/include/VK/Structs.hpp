@@ -118,6 +118,14 @@ static inline auto ConvertToVk(const PushConstantRange& a_Range)
         ConvertToVk(a_Range.stage),
         a_Range.offset, a_Range.size);
 }
+constexpr static inline vk::SpecializationMapEntry ConvertToVk(const ShaderSpecializationMapEntry& a_Entry)
+{
+    return {
+        a_Entry.constantID,
+        a_Entry.offset,
+        a_Entry.size
+    };
+}
 template <VertexType Type>
 constexpr static inline vk::Format ConvertToVk(const uint8_t&, const bool&);
 template <>
@@ -261,5 +269,22 @@ constexpr static inline vk::Format ConvertToVk(const VertexAttributeFormat& a_Fo
         return ConvertToVk<VertexType::Uint8>(a_Format.size, a_Format.normalized);
     }
     return vk::Format(-1);
+}
+constexpr static inline vk::VertexInputAttributeDescription ConvertToVk(const VertexAttributeDescription& a_Desc)
+{
+    return {
+        a_Desc.location,
+        a_Desc.binding,
+        ConvertToVk(a_Desc.format),
+        a_Desc.offset
+    };
+}
+constexpr static inline vk::VertexInputBindingDescription ConvertToVk(const VertexBindingDescription& a_Desc)
+{
+    return {
+        a_Desc.binding,
+        a_Desc.stride,
+        ConvertToVk(a_Desc.inputRate)
+    };
 }
 }
