@@ -80,6 +80,12 @@ enum class DescriptorType {
     MutableValve,
     MaxValue
 };
+enum class DescriptorUpdate {
+    Unknown = -1,
+    Bind, // descriptor's updates will be performed through BindDescriptorSet
+    Push,   // descriptor's updates will be performed through PushDescriptorSet
+    MaxValue
+};
 enum class FenceStatus {
     Signaled,
     Unsignaled

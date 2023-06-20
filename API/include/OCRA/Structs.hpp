@@ -688,6 +688,7 @@ struct CreateImageViewInfo {
     ImageSubresourceRange subRange {};
 };
 struct CreatePipelineGraphicsInfo { // describes a graphics pipeline with each stage
+    DescriptorUpdate descriptorUpdate { DescriptorUpdate::Unknown }; //how will the descriptor set be updated for this pipeline ?
     PipelineColorBlendState colorBlendState {};
     PipelineDepthStencilState depthStencilState {};
     PipelineInputAssemblyState inputAssemblyState {};

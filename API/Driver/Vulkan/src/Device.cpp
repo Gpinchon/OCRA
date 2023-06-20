@@ -220,7 +220,13 @@ Pipeline::Handle CreatePipelineGraphics(
         bindings.begin(), [](const auto& a_Binding) { return ConvertToVk(a_Binding); });
     std::transform(a_Info.pushConstants.begin(), a_Info.pushConstants.end(),
         pushConstantRanges.begin(), [](const auto& a_Range) { return ConvertToVk(a_Range); });
-    auto descriptorSetLayout = device.GetOrCreatePushDescriptorSetLayout(bindings);
+    vk::DescriptorSetLayout descriptorSetLayout;
+    if (a_Info.descriptorUpdate == DescriptorUpdate::Push) {
+        descriptorSetLayout = device.GetOrCreateDescriptorSetLayout(vk::DescriptorSetLayoutCreateFlagBits::ePushDescriptorKHR, bindings);
+    } else if (a_Info.descriptorUpdate == DescriptorUpdate::Bind) {
+        descriptorSetLayout = device.GetOrCreateDescriptorSetLayout(vk::DescriptorSetLayoutCreateFlagBits::eUpdateAfterBindPool, bindings);
+    } else throw std::runtime_error("Unknown Descriptor update mode");
+
     auto pipelineLayout = device.GetOrCreatePipelineLayout(descriptorSetLayout, pushConstantRanges);
 
     vk::GraphicsPipelineCreateInfo info({},

@@ -19,7 +19,8 @@ Descriptor::Set::Handle AllocateDescriptorSet(
         bindings.begin(), [](const DescriptorSetBinding& binding) { return ConvertToVk(binding); });
     auto& pool                = *a_Pool;
     auto& device              = pool.device;
-    auto& descriptorSetLayout = device.GetOrCreateUpdatableDescriptorSetLayout(bindings);
+    auto descriptorSetLayout = device.GetOrCreateDescriptorSetLayout(
+        vk::DescriptorSetLayoutCreateFlagBits::eUpdateAfterBindPool, bindings);
     vk::DescriptorSetAllocateInfo info;
     info.descriptorPool     = *pool;
     info.descriptorSetCount = 1;

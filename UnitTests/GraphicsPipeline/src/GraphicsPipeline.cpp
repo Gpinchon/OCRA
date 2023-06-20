@@ -175,6 +175,8 @@ struct GraphicsPipelineTestApp : TestApp {
         scissor.offset = { 0, 0 };
         scissor.extent = InnerSize;
         CreatePipelineGraphicsInfo graphicsPipelineInfo;
+        graphicsPipelineInfo.descriptorUpdate = DescriptorUpdate::Push;
+
         graphicsPipelineInfo.viewPortState.viewPorts     = { viewport };
         graphicsPipelineInfo.viewPortState.scissors      = { scissor };
         graphicsPipelineInfo.colorBlendState.attachments = { PipelineColorBlendAttachmentState {} };

@@ -11,8 +11,6 @@
 
 namespace OCRA::Device {
 struct Impl : vk::raii::Device {
-    using PushDescriptorSetLayoutCache = DescriptorSetLayoutCache<vk::DescriptorSetLayoutCreateFlagBits::ePushDescriptorKHR>;
-    using UpdatableDescriptorSetLayoutCache = DescriptorSetLayoutCache<vk::DescriptorSetLayoutCreateFlagBits::eUpdateAfterBindPool>;
     Impl(PhysicalDevice::Impl& a_PhysicalDevice, const vk::DeviceCreateInfo& a_Info, const bool a_NeedsTransferQueue)
         : vk::raii::Device(a_PhysicalDevice, a_Info)
         , physicalDevice(a_PhysicalDevice)
@@ -27,15 +25,11 @@ struct Impl : vk::raii::Device {
         transferQueue                    = getQueue(queueFamilyIndex, 0);
         transferCommandPool              = createCommandPool(commandPoolInfo);
     }
-    auto GetOrCreatePushDescriptorSetLayout(
+    auto GetOrCreateDescriptorSetLayout(
+        const vk::DescriptorSetLayoutCreateFlags& a_Flags,
         const std::vector<vk::DescriptorSetLayoutBinding>& a_Bindings)
     {
-        return pushDescriptorSetLayoutCache.GetOrCreate(*this, a_Bindings);
-    }
-    auto GetOrCreateUpdatableDescriptorSetLayout(
-        const std::vector<vk::DescriptorSetLayoutBinding>& a_Bindings)
-    {
-        return updatableDescriptorSetLayoutCache.GetOrCreate(*this, a_Bindings);
+        return descriptorLayoutCache.GetOrCreate(*this, a_Flags, a_Bindings);
     }
     auto GetOrCreatePipelineLayout(
         const vk::DescriptorSetLayout& a_Layout,
@@ -44,9 +38,8 @@ struct Impl : vk::raii::Device {
         return pipelineLayoutCache.GetOrCreate(*this, a_Layout, a_PushConstants);
     }
     void ClearCache() {
-        pipelineLayoutCache.storage.clear();
-        pushDescriptorSetLayoutCache.storage.clear();
-        updatableDescriptorSetLayoutCache.storage.clear();
+        pipelineLayoutCache.clear();
+        descriptorLayoutCache.clear();
         pipelineCache = createPipelineCache({});
     }
     const PhysicalDevice::Impl& physicalDevice;
@@ -54,7 +47,6 @@ struct Impl : vk::raii::Device {
     vk::raii::CommandPool transferCommandPool { nullptr };
     vk::raii::PipelineCache pipelineCache;
     PipelineLayoutCache pipelineLayoutCache;
-    PushDescriptorSetLayoutCache pushDescriptorSetLayoutCache;
-    UpdatableDescriptorSetLayoutCache updatableDescriptorSetLayoutCache;
+    DescriptorSetLayoutCache descriptorLayoutCache;
 };
 }
