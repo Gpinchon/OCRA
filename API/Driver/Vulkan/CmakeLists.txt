@@ -61,11 +61,9 @@ set(OCRA_IMPL_SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Commands.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/DescriptorPool.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/DescriptorSet.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/DescriptorSetLayout.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Device.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Fence.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Image.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/ImageView.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Instance.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/Memory.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/PhysicalDevice.cpp
