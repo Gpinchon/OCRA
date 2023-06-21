@@ -5,7 +5,6 @@
 #include <VK/VkObjectCache.hpp>
 
 #include <vulkan/vulkan_raii.hpp>
-#include <vulkan/vulkan_hash.hpp>
 
 #include <vector>
 
@@ -36,10 +35,9 @@ struct PipelineLayoutCache : VkObjectCache<PipelineLayoutCacheKey, vk::raii::Pip
                 &a_Layout,
                 &a_PushConstants
             ] () {
-                vk::PipelineLayoutCreateInfo info({}, a_Layout, a_PushConstants);
-                return std::move(a_Device.createPipelineLayout(info));
+                return std::move(a_Device.createPipelineLayout({ {}, a_Layout, a_PushConstants }));
             });
-        return VkObjectCache::GetOrCreate(a_Device, { a_Layout, a_PushConstants }, lazyConstructor);
+        return VkObjectCache::GetOrCreate(a_Layout, a_PushConstants, lazyConstructor);
     }
 };
 }

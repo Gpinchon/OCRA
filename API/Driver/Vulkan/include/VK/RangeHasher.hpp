@@ -21,7 +21,7 @@ struct RangeHasher {
     using type = It;
     size_t operator()(It a_First, It const& a_Last) const noexcept
     {
-        return HashRange(a_Fiste, a_Last);
+        return HashRange(a_First, a_Last);
     }
 };
 }

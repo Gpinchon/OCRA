@@ -15,8 +15,7 @@ struct TupleHasher {
         std::apply(
             [&seed](auto&&... a_Args) {
                 ((VULKAN_HPP_HASH_COMBINE(seed, a_Args)), ...);
-            },
-            a_Tuple);
+            }, a_Tuple);
         return seed;
     }
 };
@@ -29,24 +28,13 @@ template<typename, typename>
 struct VkObjectCache;
 
 template <typename... Keys, typename Type>
-class VkObjectCache<VkObjectCacheKey<Keys...>, Type> {
-public:
-    using type     = Type;
-    using key_type = std::tuple<Keys...>;
-    using hasher   = TupleHasher<Keys...>;
+struct VkObjectCache<VkObjectCacheKey<Keys...>, Type> : std::unordered_map<std::tuple<Keys...>, Type, TupleHasher<Keys...>> {
     template <typename Factory>
     constexpr inline auto GetOrCreate(
-        const vk::raii::Device& a_Device,
-        const key_type& a_Key,
+        const Keys&... a_Keys,
         const Factory& a_Factory)
     {
-        return *m_storage.try_emplace(a_Key, a_Factory).first->second;
+        return *try_emplace({ a_Keys... }, a_Factory).first->second;
     }
-    void clear() {
-        m_storage.clear();
-    }
-
-private:
-    std::unordered_map<key_type, type, hasher> m_storage;
 };
 }

@@ -5,7 +5,6 @@
 #include <VK/VkObjectCache.hpp>
 
 #include <vulkan/vulkan_raii.hpp>
-#include <vulkan/vulkan_hash.hpp>
 
 #include <vector>
 
@@ -36,10 +35,9 @@ struct DescriptorSetLayoutCache : VkObjectCache<DescriptorSetLayoutCacheKey, vk:
                 &a_Flags,
                 &a_Bindings
             ] () {
-                vk::DescriptorSetLayoutCreateInfo info(a_Flags, a_Bindings);
-                return std::move(a_Device.createDescriptorSetLayout(info));
+                return std::move(a_Device.createDescriptorSetLayout({ a_Flags, a_Bindings }));
             });
-        return VkObjectCache::GetOrCreate(a_Device, { a_Flags, a_Bindings }, lazyConstructor);
+        return VkObjectCache::GetOrCreate(a_Flags, a_Bindings, lazyConstructor);
     }
 };
 }
