@@ -51,18 +51,12 @@ int MultiInstanceTest()
     return 0;
 }
 
-TEST(PhysicalDeviceTests, MultiInstance)
+TEST(PhysicalDevice, MultiInstance)
 {
     ASSERT_EQ(MultiInstanceTest(), 0);
 }
 
-TEST(PhysicalDeviceTests, PhysicalDeviceCreation)
+TEST(PhysicalDevice, PhysicalDeviceCreation)
 {
     ASSERT_EQ(PhysicalDeviceTest(), 0);
-}
-
-int main(int argc, char** argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
 }

@@ -1,0 +1,43 @@
+cmake_minimum_required(VERSION 3.19)
+cmake_policy(SET CMP0074 NEW)
+
+Fetch_GoogleTest()
+
+set(OCRA_TEST_SOURCE
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/CommandBuffer.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/DescriptorSets.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/PhysicalDevice.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Queue.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/ShaderCompiler.cpp)
+
+add_executable(OCRA-UnitTests
+  ${OCRA_TEST_SOURCE})
+target_include_directories(OCRA-UnitTests PRIVATE
+  "${CMAKE_CURRENT_SOURCE_DIR}/include")
+
+if(MSVC_IDE)
+  set_property(TARGET OCRA-UnitTests PROPERTY
+    VS_DEBUGGER_ENVIRONMENT "${OCRA_DEBUGGER_ENV}")
+endif()
+
+target_link_libraries(
+  OCRA-UnitTests PRIVATE
+    GTest::GTest
+    OCRA-UnitTests-Lib-Common
+    OCRA::API::Interface
+    OCRA::API::Implementation
+    OCRA::ShaderCompiler::API)
+
+add_test(Functionalities OCRA-UnitTests)
+
+set_target_properties(
+  OCRA-UnitTests
+  PROPERTIES FOLDER "Functionalities"
+)
+
+if(MSVC_IDE)
+  # Run macro
+  GroupSources(src)
+  GroupSources(include)
+endif()

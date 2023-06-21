@@ -19,7 +19,7 @@ static inline void ListQueues(const PhysicalDevice::Handle& a_PhysicalDevice, co
     }
 }
 
-TEST(QueueTests, ListQueues)
+TEST(Queue, ListQueues)
 {
     const auto instance = CreateInstance("Test_Queue");
     ASSERT_NE(instance, nullptr);
@@ -30,10 +30,4 @@ TEST(QueueTests, ListQueues)
         ASSERT_NE(physicalDevice, nullptr);
         ListQueues(physicalDevice, CreateDevice(physicalDevice));
     }
-}
-
-int main(int argc, char** argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
 }

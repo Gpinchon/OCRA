@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <random>
 
+#include <gtest/gtest.h>
+
 using namespace OCRA;
 
 constexpr auto TEST_COUNT = 100;
@@ -112,20 +114,12 @@ int DescriptorSetTest(bool a_Sequential)
     return 0;
 }
 
-#include <gtest/gtest.h>
-
-TEST(DescriptorSetTests, SequentialTest)
+TEST(DescriptorSet, SequentialTest)
 {
     ASSERT_EQ(DescriptorSetTest(true), 0);
 }
 
-TEST(DescriptorSetTests, RandomTest)
+TEST(DescriptorSet, RandomTest)
 {
     ASSERT_EQ(DescriptorSetTest(false), 0);
-}
-
-int main(int argc, char** argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
 }

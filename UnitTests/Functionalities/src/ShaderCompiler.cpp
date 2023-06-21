@@ -233,13 +233,8 @@ TEST(ShaderCompiler, MultipleSet)
 {
     ASSERT_NE(MultipleSet(), 0);
 }
+
 TEST(ShaderCompiler, UniformLocation)
 {
     ASSERT_EQ(UniformLocation(), 0);
-}
-
-int main(int argc, char** argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
 }

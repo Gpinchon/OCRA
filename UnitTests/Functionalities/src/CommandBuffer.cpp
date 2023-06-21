@@ -139,7 +139,7 @@ int TestBufferSwap(bool useFence)
     //create test buffers
     CreateBufferInfo bufferInfo;
     bufferInfo.size = CHUNK_SIZE;
-    bufferInfo.usage = BufferUsageFlagBits::TransferDst | BufferUsageFlagBits::TransferSrc;
+    bufferInfo.usage = BufferUsageFlagBits::Transfer;
     const auto buffer0 = CreateBuffer(device, bufferInfo);
     const auto buffer1 = CreateBuffer(device, bufferInfo);
     const auto bufferT = CreateBuffer(device, bufferInfo);
@@ -195,18 +195,32 @@ int TestBufferSwap(bool useFence)
     return success;
 }
 
-TEST(SwapBufferTests, SwapWithFence)
+TEST(CommandBuffer, Creation)
+{
+    CreateInstanceInfo instanceInfo;
+    instanceInfo.name = "Test_CommandBuffer";
+    instanceInfo.applicationVersion = 1;
+    const auto instance = CreateInstance(instanceInfo);
+    ASSERT_NE(instance, nullptr);
+    const auto physicalDevice = Instance::EnumeratePhysicalDevices(instance).front();
+    ASSERT_NE(physicalDevice, nullptr);
+    const auto device = CreateDevice(physicalDevice);
+    ASSERT_NE(device, nullptr);
+    const auto queueFamily = PhysicalDevice::FindQueueFamily(physicalDevice, QueueFlagBits::None);
+    const auto queue = Device::GetQueue(device, queueFamily, 0); //Get first available queue
+    ASSERT_NE(queue, nullptr);
+    const auto commandPool = CreateCommandPool(device, queueFamily);
+    ASSERT_NE(commandPool, nullptr);
+    const auto commandBuffer = CreateCommandBuffer(commandPool, CommandBufferLevel::Primary);
+    ASSERT_NE(commandBuffer, nullptr);
+}
+
+TEST(CommandBuffer, SwapWithFence)
 {
     ASSERT_EQ(TestBufferSwap(true), 0);
 }
 
-TEST(SwapBufferTests, SwapWithSemaphore)
+TEST(CommandBuffer, SwapWithSemaphore)
 {
     ASSERT_EQ(TestBufferSwap(false), 0);
-}
-
-int main(int argc, char** argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
 }
