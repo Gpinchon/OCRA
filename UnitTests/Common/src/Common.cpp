@@ -14,14 +14,6 @@ Instance::Handle CreateInstance(const std::string& a_Name)
     instanceInfo.name               = a_Name;
     instanceInfo.applicationVersion = 1;
     instance                        = CreateInstance(instanceInfo);
-    std::cout << "==== Instance ====\n";
-    std::cout << "  Type           : " << Instance::GetType(instance) << "\n";
-    std::cout << "  App Name       : " << instanceInfo.name << "\n";
-    std::cout << "  App Version    : " << instanceInfo.applicationVersion << "\n";
-    std::cout << "  Engine Name    : " << instanceInfo.engineName << "\n";
-    std::cout << "  Engine Version : " << instanceInfo.engineVersion << "\n";
-    std::cout << "==================\n";
-    std::cout << "\n";
     return instance;
 }
 
