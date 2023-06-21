@@ -37,6 +37,7 @@ namespace BufferUsageFlagBits {
     static BufferUsageFlags None                = 0b0000000000;
     static BufferUsageFlags TransferSrc         = 0b1000000000;
     static BufferUsageFlags TransferDst         = 0b0100000000;
+    static BufferUsageFlags Transfer            = TransferSrc | TransferDst; //TransferSrc | TransferDst
     static BufferUsageFlags UniformTexelBuffer  = 0b0010000000;
     static BufferUsageFlags StorageTexelBuffer  = 0b0001000000;
     static BufferUsageFlags UniformBuffer       = 0b0000100000;
