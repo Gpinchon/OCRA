@@ -1,6 +1,6 @@
 include(FetchContent)
-include(cmake-tools/Fetch_SPIRVHeaders.cmake)
-include(cmake-tools/Fetch_GoogleTest.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake-tools/Fetch_SPIRVHeaders.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake-tools/Fetch_GoogleTest.cmake)
 
 #Fetch SPV-Tools
 macro(Fetch_SPIRVTools)

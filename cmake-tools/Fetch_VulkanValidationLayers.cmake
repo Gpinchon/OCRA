@@ -1,7 +1,7 @@
 include(FetchContent)
-include(cmake-tools/Fetch_VulkanHeaders.cmake)
-include(cmake-tools/Fetch_SPIRVHeaders.cmake)
-include(cmake-tools/Fetch_SPIRVTools.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake-tools/Fetch_VulkanHeaders.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake-tools/Fetch_SPIRVHeaders.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake-tools/Fetch_SPIRVTools.cmake)
 
 #Fetch Vulkan-ValidationLayers
 macro(Fetch_VulkanValidationLayers)

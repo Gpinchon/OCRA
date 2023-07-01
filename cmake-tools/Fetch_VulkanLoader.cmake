@@ -1,7 +1,7 @@
 include(FetchContent)
-include(cmake-tools/Fetch_GoogleTest.cmake)
-include(cmake-tools/Fetch_VulkanHeaders.cmake)
-include(cmake-tools/Fetch_SPIRVTools.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake-tools/Fetch_GoogleTest.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake-tools/Fetch_VulkanHeaders.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake-tools/Fetch_SPIRVTools.cmake)
 
 #Fetch Vulkan-Loader
 macro(Fetch_VulkanLoader)
