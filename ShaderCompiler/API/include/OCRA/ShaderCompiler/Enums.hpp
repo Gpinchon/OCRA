@@ -18,4 +18,27 @@ enum class ShaderType {
     TessEval,
     MaxValue
 };
+enum class ShaderResourceBaseType {
+    Unknown = -1,
+    Void,
+    Boolean,
+    SByte,
+    UByte,
+    Short,
+    UShort,
+    Int,
+    UInt,
+    Int64,
+    UInt64,
+    AtomicCounter,
+    Half,
+    Float,
+    Double,
+    Struct,
+    Image,
+    SampledImage,
+    Sampler,
+    AccelerationStructure,
+    RayQuery
+};
 }

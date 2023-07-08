@@ -14,8 +14,8 @@ std::vector<uint32_t> OCRA::ShaderCompiler::Impl::CompileVulkan(const ShaderInfo
     shader.setEnvInput(glslang::EShSourceGlsl, eshLang, glslang::EShClientVulkan, 100);
     shader.setEnvClient(glslang::EShClientVulkan, glslang::EShTargetVulkan_1_0);
     shader.setEnvTarget(glslang::EshTargetSpv, glslang::EShTargetSpv_1_0);
-    // shader.setEntryPoint(name.c_str());
-    // shader.setSourceEntryPoint(name.c_str());
+    shader.setEntryPoint(a_Info.entryPoint.c_str());
+    shader.setSourceEntryPoint(a_Info.entryPoint.c_str());
     if (!shader.parse(GetDefaultResources(), 100, false, EShMsgDefault))
         std::cerr << shader.getInfoLog() << std::endl;
     glslang::TProgram program;

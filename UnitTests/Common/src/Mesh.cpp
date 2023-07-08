@@ -32,7 +32,7 @@ auto DefaultVertexShader(const Device::Handle& a_Device)
             "}                                                                  \n"
     };
     CreateShaderModuleInfo shaderModuleInfo;
-    shaderModuleInfo.code   = ShaderCompiler::Compile(compiler, shaderInfo);
+    shaderModuleInfo.code   = ShaderCompiler::Compile(compiler, shaderInfo).SPIRVBinary;
     const auto shaderModule = CreateShaderModule(a_Device, shaderModuleInfo);
     PipelineShaderStage shaderStageInfo;
     shaderStageInfo.entryPoint = "main";
