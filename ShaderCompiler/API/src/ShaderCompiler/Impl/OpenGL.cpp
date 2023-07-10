@@ -1,7 +1,7 @@
 #include <OCRA/ShaderCompiler/Impl/Compiler.hpp>
+#include <OCRA/ShaderCompiler/Impl/Enums.hpp>
 
 #include <SPIRV/GlslangToSpv.h>
-#include <SPIRV/Logger.h>
 #include <SPIRV/SpvTools.h>
 #include <glslang\Public\ResourceLimits.h>
 #include <spirv_glsl.hpp>
@@ -11,7 +11,7 @@
 
 std::vector<uint32_t> OCRA::ShaderCompiler::Impl::CompileOpenGL(const ShaderInfo& a_Info)
 {
-    const auto eshLang = GetEshLang(a_Info.type);
+    const auto eshLang = ToGLSLang(a_Info.type);
     // Do some reflection
     std::string glslCode;
     {

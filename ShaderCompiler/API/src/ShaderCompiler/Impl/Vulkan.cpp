@@ -1,13 +1,15 @@
 #include <OCRA/ShaderCompiler/Impl/Compiler.hpp>
+#include <OCRA/ShaderCompiler/Impl/Enums.hpp>
 
 #include <SPIRV/GlslangToSpv.h>
 #include <glslang/Public/ResourceLimits.h>
 
 #include <iostream>
+#include <stdexcept>
 
 std::vector<uint32_t> OCRA::ShaderCompiler::Impl::CompileVulkan(const ShaderInfo& a_Info)
 {
-    const auto eshLang = GetEshLang(a_Info.type);
+    const auto eshLang = ToGLSLang(a_Info.type);
     glslang::TShader shader(eshLang);
     const auto code = a_Info.source.data();
     shader.setStrings(&code, 1);
