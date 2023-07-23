@@ -12,7 +12,7 @@ macro(Fetch_SPIRVTools)
     FetchContent_Declare(
       SPIRV_TOOLS
       GIT_REPOSITORY  https://github.com/KhronosGroup/SPIRV-Tools.git
-      GIT_TAG         v2023.1)
+      GIT_TAG         sdk-1.3.250.1)
     FetchContent_GetProperties(SPIRV_TOOLS)
     if (NOT spirv_tools_POPULATED)
       FetchContent_Populate(SPIRV_TOOLS)    

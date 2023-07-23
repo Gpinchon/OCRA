@@ -5,7 +5,7 @@ macro(Fetch_SPIRVCross)
   FetchContent_Declare(
     SPIRV_CROSS
     GIT_REPOSITORY  https://github.com/KhronosGroup/SPIRV-Cross.git
-    GIT_TAG         sdk-1.3.239.0
+    GIT_TAG         sdk-1.3.250.1
   )
   option(SPIRV_CROSS_SKIP_INSTALL "Skip SPIRV-Cross Installation" ON)
   option(SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS "Instead of throwing exceptions assert" OFF)

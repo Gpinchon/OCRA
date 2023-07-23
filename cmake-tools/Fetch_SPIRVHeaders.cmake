@@ -5,7 +5,7 @@ macro(Fetch_SPIRVHeaders)
     FetchContent_Declare(
       SPIRV_HEADERS
       GIT_REPOSITORY  https://github.com/KhronosGroup/SPIRV-Headers.git
-      GIT_TAG         main)
+      GIT_TAG         sdk-1.3.250.1)
     FetchContent_GetProperties(SPIRV_HEADERS)
     if (NOT spirv_headers_POPULATED)
       FetchContent_Populate(SPIRV_HEADERS)
