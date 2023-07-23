@@ -60,7 +60,7 @@ void BeginRendering(
     vkDepthAttachment   = GetVkRenderingAttachmentInfo(a_Info.depthAttachment, resolveMode);
     vkStencilAttachment = GetVkRenderingAttachmentInfo(a_Info.stencilAttachment, resolveMode);
     vk::RenderingInfo vkInfo(
-        {}, //RenderingFlags is empty
+        {}, // RenderingFlags is empty
         ConvertToVk(a_Info.area),
         a_Info.layerCount,
         0, // TODO figure out ViewMask
@@ -73,6 +73,20 @@ void BeginRendering(
 void BindDescriptorSet(
     const Command::Buffer::Handle& a_CommandBuffer,
     const Pipeline::Handle& a_Pipeline,
+    const Descriptor::Set::Handle& a_Descriptor)
+{
+    auto& bindPoint = a_Pipeline->bindPoint;
+    a_CommandBuffer->bindDescriptorSets(
+        a_Pipeline->bindPoint,
+        a_Pipeline->layout,
+        0, // firstSet is always zero
+        { **a_Descriptor },
+        {});
+}
+
+void BindDescriptorSet(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const Pipeline::Handle& a_Pipeline,
     const Descriptor::Set::Handle& a_Descriptor,
     const uint32_t a_DynamicOffset)
 {
@@ -80,7 +94,7 @@ void BindDescriptorSet(
     a_CommandBuffer->bindDescriptorSets(
         a_Pipeline->bindPoint,
         a_Pipeline->layout,
-        0, //firstSet is always zero
+        0, // firstSet is always zero
         { **a_Descriptor },
         { a_DynamicOffset });
 }
@@ -105,6 +119,18 @@ void BindVertexBuffers(
             return **buffer;
         });
     a_CommandBuffer->bindVertexBuffers(a_FirstBinding, buffers, a_Offsets);
+}
+
+void BindIndexBuffer(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const OCRA::Buffer::Handle& a_IndexBuffer,
+    const uint64_t a_Offset,
+    const IndexType a_IndexType)
+{
+    a_CommandBuffer->bindIndexBuffer(
+        **a_IndexBuffer,
+        a_Offset,
+        ConvertToVk(a_IndexType));
 }
 
 void ClearColorImage(
@@ -244,6 +270,20 @@ void Draw(
     a_CommandBuffer->draw(
         a_VertexCount, a_InstanceCount,
         a_FirstVertex, a_FirstInstance);
+}
+
+void DrawIndexed(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const uint32_t a_IndexCount,
+    const uint32_t a_InstanceCount,
+    const uint32_t a_FirstIndex,
+    const uint32_t a_VertexOffset,
+    const uint32_t a_FirstInstance)
+{
+    a_CommandBuffer->drawIndexed(
+        a_IndexCount, a_InstanceCount,
+        a_FirstIndex, a_VertexOffset,
+        a_FirstInstance);
 }
 
 void EndRendering(const Command::Buffer::Handle& a_CommandBuffer)

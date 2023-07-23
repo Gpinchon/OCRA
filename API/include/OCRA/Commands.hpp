@@ -23,6 +23,11 @@ void BindDescriptorSet(
     const Descriptor::Set::Handle& a_Descriptor,
     const uint32_t a_DynamicOffset);
 
+void BindDescriptorSet(
+    const Command::Buffer::Handle& a_CommandBuffer,
+    const Pipeline::Handle& a_Pipeline,
+    const Descriptor::Set::Handle& a_Descriptor);
+
 void CopyBufferToImage(
     const Command::Buffer::Handle& a_CommandBuffer,
     const OCRA::Buffer::Handle& a_SrcBuffer,
