@@ -71,49 +71,49 @@ struct CompiledShader : ShaderInfo {
     {
         return {
             resources.begin() + pushConstants.front(),
-            resources.begin() + pushConstants.back()
+            resources.begin() + pushConstants.back() + 1
         };
     }
     ResourceRange GetSampledImages()
     {
         return {
             resources.begin() + sampledImages.front(),
-            resources.begin() + sampledImages.back()
+            resources.begin() + sampledImages.back() + 1
         };
     }
     ResourceRange GetSeparateImages()
     {
         return {
             resources.begin() + separateImages.front(),
-            resources.begin() + separateImages.back()
+            resources.begin() + separateImages.back() + 1
         };
     }
     ResourceRange GetStageInputs()
     {
         return {
             resources.begin() + stageInputs.front(),
-            resources.begin() + stageInputs.back()
+            resources.begin() + stageInputs.back() + 1
         };
     }
     ResourceRange GetStageOutputs()
     {
         return {
             resources.begin() + stageOutputs.front(),
-            resources.begin() + stageOutputs.back()
+            resources.begin() + stageOutputs.back() + 1
         };
     }
     ResourceRange GetStorageImages()
     {
         return {
             resources.begin() + storageImages.front(),
-            resources.begin() + storageImages.back()
+            resources.begin() + storageImages.back() + 1
         };
     }
     ResourceRange GetUniformBuffers()
     {
         return {
             resources.begin() + uniformBuffers.front(),
-            resources.begin() + uniformBuffers.back()
+            resources.begin() + uniformBuffers.back() + 1
         };
     }
     std::vector<uint32_t> SPIRVBinary; // SPIRV code blob to use with specified API
