@@ -31,8 +31,9 @@ struct ShaderStructureMember {
     ShaderStructureMember(const std::string& a_Name, const ResourceType& a_Type)
         : name(a_Name)
         , type(a_Type)
-    {}
-    std::string  name;
+    {
+    }
+    std::string name;
     ResourceType type;
 };
 
@@ -50,7 +51,7 @@ struct ShaderResourceType {
     uint32_t rows      = 0; // 1 for float, 2 for vec2, 3 for vec3...
     uint32_t columns   = 0; // 1 for float, vec; 4 for mat4
     uint32_t byteWidth = 0; // byte size of the components 8 for double, 4 for float, 2 for short
-    std::vector<uint32_t> arraySize; //arraySize.size is array dimension, 0 for non array types, array.at(0) will be array size, 0 for SSBO
+    std::vector<uint32_t> arraySize; // arraySize.size is array dimension, 0 for non array types, array.at(0) will be array size, 0 for SSBO
     std::optional<ShaderStructure<ShaderResourceType>> structure; // only applicable to structs
 };
 
@@ -69,52 +70,31 @@ struct CompiledShader : ShaderInfo {
     }
     ResourceRange GetPushConstants()
     {
-        return {
-            resources.begin() + pushConstants.front(),
-            resources.begin() + pushConstants.back() + 1
-        };
+        return GetResourceRange(pushConstants);
     }
     ResourceRange GetSampledImages()
     {
-        return {
-            resources.begin() + sampledImages.front(),
-            resources.begin() + sampledImages.back() + 1
-        };
+        return GetResourceRange(sampledImages);
     }
     ResourceRange GetSeparateImages()
     {
-        return {
-            resources.begin() + separateImages.front(),
-            resources.begin() + separateImages.back() + 1
-        };
+        return GetResourceRange(separateImages);
     }
     ResourceRange GetStageInputs()
     {
-        return {
-            resources.begin() + stageInputs.front(),
-            resources.begin() + stageInputs.back() + 1
-        };
+        return GetResourceRange(stageInputs);
     }
     ResourceRange GetStageOutputs()
     {
-        return {
-            resources.begin() + stageOutputs.front(),
-            resources.begin() + stageOutputs.back() + 1
-        };
+        return GetResourceRange(stageOutputs);
     }
     ResourceRange GetStorageImages()
     {
-        return {
-            resources.begin() + storageImages.front(),
-            resources.begin() + storageImages.back() + 1
-        };
+        return GetResourceRange(storageImages);
     }
     ResourceRange GetUniformBuffers()
     {
-        return {
-            resources.begin() + uniformBuffers.front(),
-            resources.begin() + uniformBuffers.back() + 1
-        };
+        return GetResourceRange(uniformBuffers);
     }
     std::vector<uint32_t> SPIRVBinary; // SPIRV code blob to use with specified API
     std::vector<uint32_t> pushConstants;
@@ -126,5 +106,16 @@ struct CompiledShader : ShaderInfo {
     std::vector<uint32_t> storageImages;
     std::vector<uint32_t> uniformBuffers;
     std::vector<ShaderResource> resources;
+
+private:
+    ResourceRange GetResourceRange(std::vector<uint32_t>& a_ResourceIndice)
+    {
+        if (a_ResourceIndice.empty())
+            return {};
+        return {
+            resources.begin() + a_ResourceIndice.front(),
+            resources.begin() + a_ResourceIndice.back() + 1
+        };
+    }
 };
 }
