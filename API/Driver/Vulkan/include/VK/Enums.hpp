@@ -327,6 +327,20 @@ static inline auto ConvertToVk(const Filter& a_Filter)
     }
     return vk::Filter(-1);
 }
+static inline auto ConvertToVk(const IndexType& a_Type)
+{
+    switch (a_Type) {
+    case OCRA::IndexType::None:
+        return vk::IndexType::eNoneKHR;
+    case OCRA::IndexType::Uint8:
+        return vk::IndexType::eUint8EXT;
+    case OCRA::IndexType::Uint16:
+        return vk::IndexType::eUint16;
+    case OCRA::IndexType::Uint32:
+        return vk::IndexType::eUint32;
+    }
+    return vk::IndexType(-1);
+}
 static inline auto ConvertToVk(const LoadOp& a_LoadOp)
 {
     switch (a_LoadOp) {
